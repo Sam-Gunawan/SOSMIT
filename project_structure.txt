@@ -1,0 +1,34 @@
+SOSMIT/
+│
+├── backend/                  <-- All your Golang code lives here
+│   ├── cmd/
+│   │   └── api/
+│   │       └── main.go       <-- The main entry point of your application
+│   ├── internal/             <-- All your private application logic
+│   │   ├── auth/             <-- Logic for JWTs, password hashing
+│   │   ├── handler/          <-- HTTP handlers that receive API requests
+│   │   ├── model/            <-- Your data structures (User, Asset, etc.)
+│   │   └── store/            <-- Logic for database interactions (queries, etc.)
+│   ├── go.mod                <-- Defines your Go project and its dependencies
+│   └── go.sum                <-- Tracks exact versions of dependencies
+│
+├── frontend/                 <-- All your Angular code lives here
+│   ├── src/
+│   │   ├── app/
+│   │   │   ├── components/   <-- Reusable components (e.g., buttons, modals)
+│   │   │   ├── guards/       <-- Route guards (e.g., AuthGuard)
+│   │   │   ├── models/       <-- TypeScript interfaces (e.g., Asset, User)
+│   │   │   ├── pages/        <-- Page components (e.g., LoginPage, DashboardPage)
+│   │   │   └── services/     <-- Services for API calls (e.g., AuthService)
+│   │   ├── assets/           <-- Images, fonts, etc.
+│   │   └── environments/     <-- Environment configs (dev vs. prod)
+│   ├── angular.json          <-- Angular project configuration
+│   └── package.json          <-- Defines your JS dependencies
+│
+├── .dockerignore             <-- Tells Docker which files/folders to ignore
+│
+├── .gitignore                <-- Tells Git which files/folders to ignore
+│
+├── docker-compose.yml        <-- Our Docker setup for the PostgreSQL database
+│
+└── README.md                 <-- The main documentation for our project
