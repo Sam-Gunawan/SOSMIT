@@ -1,0 +1,443 @@
+@use "../../styles.scss" as styles;
+
+* {
+  @include styles.default-styles;
+}
+
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  width: 100%;
+  background-color: rgb(222, 241, 249);
+}
+
+.login-page {
+  display: flex;
+  flex-direction: row;
+  background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-width: 1000px;
+  width: 90%;
+  min-height: 500px;
+  height: 75vh;
+}
+
+.login-form-panel {
+  flex: 0 0 45%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  color: #000000;
+  padding: 3rem;
+  box-sizing: border-box;
+  border-radius: 20px 0 0 20px;
+  text-align: center;
+}
+
+.panel-content-wrapper {
+  flex-grow: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 350px;
+}
+
+.form-area-simple {
+  width: 100%;
+}
+
+h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: styles.$primary-text-color;
+  margin-bottom: 2.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+
+  label {
+    font-size: 0.9rem;
+    color: styles.$primary-text-color;
+    margin-bottom: 0.3rem;
+  }
+
+  input {
+    padding: 0.9rem 1.2rem;
+    font-size: 1rem;
+    border: 1px styles.$primary-text-color solid;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: styles.$primary-text-color;
+
+    &::placeholder {
+      color: #999;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: styles.$secondary-color;
+    }
+  }
+}
+
+.login-btn {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background-color: styles.$button-color;
+  color: darken(styles.$button-color, 70%);
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 2.5rem;
+
+  &:hover {
+    background-color: darken(styles.$button-color, 50%);
+    color: #ffffff;
+  }
+}
+
+.login-decoration-panel {
+  flex: 0 0 55%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f0f0;
+  border-radius: 0 20px 20px 0;
+  overflow: hidden;
+
+  .decoration-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+// --- Responsive Adjustments ---
+
+// Hide image and make form full width on screens up to 768px (common breakpoint for tablets/phones)
+@media (max-width: 768px) {
+  .login-page {
+    flex-direction: column; // No longer needed as image is hidden, but good for clarity
+    height: auto; // Allow height to adjust to content
+    max-width: 450px; // Adjusted max-width for a single form on mobile
+    width: 95%; // Take more width on smaller screens
+    min-height: unset; // No min-height for mobile
+    height: auto; // Remove fixed height for mobile
+    border-radius: 15px; // Slightly smaller border-radius for mobile
+  }
+
+  .login-form-panel {
+    flex: 1 1 100%; // Make the form panel take full width
+    width: 100%;
+    border-radius: 15px; // All corners rounded for the single panel
+    padding: 2rem 1.5rem; // Adjusted padding for mobile
+  }
+
+  .panel-content-wrapper {
+    max-width: 100%; // Allow form content to take full width on smaller screens
+  }
+
+  .login-decoration-panel {
+    display: none; // Hide the decoration panel completely
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.8rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+    input {
+      padding: 0.8rem 1rem;
+      font-size: 0.95rem;
+    }
+  }
+
+  .login-btn {
+    padding: 0.9rem 1.2rem;
+    font-size: 1rem;
+    margin-top: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-form-panel {
+    padding: 1.5rem 1rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-group {
+    input {
+      padding: 0.7rem 0.9rem;
+      font-size: 0.9rem;
+    }
+  }
+
+  .login-btn {
+    padding: 0.8rem 1rem;
+    font-size: 0.95rem;
+    margin-top: 1.5rem;
+  }
+}
+
+
+
+// @use "../../styles.scss" as styles;
+
+// * {
+//     @include styles.default-styles;
+// }
+
+// .login-page {
+//     flex-grow: 1;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+//     padding: 20px;
+//     gap: 40px;
+//     flex-direction: row;
+//     min-height: 100vh;
+// }
+
+// .login-image {
+//     flex: 1;
+//     display: flex;
+//     justify-content: center;
+//     align-items: center;
+//     max-width: 50%;
+// }
+
+// .login-form {
+//     flex: 0 0 auto;
+//     display: flex;
+//     justify-content: center;
+//     align-items: center;
+//     max-width: 650px;
+//     width: 100%;
+//     min-width: unset;
+//     // margin-right: 5%;
+// }
+
+// .login-container {
+//     background-color: styles.$background-color;
+//     padding: 3.5rem 3.5rem;
+//     border-radius: 1rem;
+//     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+//     width: 100%;
+//     max-width: 600px;
+//     min-width: unset;
+//     min-height: 500px;
+//     // max-height: 90vh;
+//     text-align: center;
+//     // display: flex;
+//     // flex-direction: column;
+//     // justify-content: center;
+//     align-items: center;
+//     // margin-left: auto;
+//     // margin-right: auto;
+
+//     h2 {
+//         font-size: 2.5rem;
+//         font-weight: 700;
+//         color: #333;
+//         margin-bottom: 2.5rem;
+//     }
+
+//     .form-group {
+//         margin-bottom: 1.8rem;
+//         text-align: left;
+//         display: flex;
+//         flex-direction: column;
+//         gap: 0.8rem;
+//     }
+
+//     label {
+//         font-size: 1.1rem;
+//     }
+
+//     input {
+//         padding: 1.2rem 1rem;
+//         font-size: 1.1rem;
+//         border: 1px solid #ddd;
+//         border-radius: 0.5rem;
+//     }
+
+//     button {
+//     padding: 1.2rem 2.5rem;
+//     border: none;
+//     border-radius: 0.5rem;
+//     background-color: styles.$secondary-color;
+//     color: #fff;
+//     font-size: 1.2rem;
+//     font-weight: 600;
+//     cursor: pointer;
+//     transition: background-color 0.3s ease;
+//     margin-top: 2rem;
+
+//     &:hover {
+//       background-color: darken(styles.$secondary-color, 10%); // Example hover effect
+//     }
+//   }
+// }
+
+// .login-decoration {
+//     background-color: styles.$background-color;
+//     padding: 3.5rem 3.5rem;
+//     border-radius: 1rem;
+//     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+//     width: 100%;
+//     max-width: 600px;
+//     min-width: unset;
+//     min-height: 500px;
+//     text-align: center;
+//     align-items: center;
+// }
+
+// main {
+//     display: flex;
+//     flex-direction: column;
+//     // min-height: 100vh;
+//     width: 100%;
+//     background-color:transparent;
+//     justify-content: center;
+//     align-items: center;
+//     min-height: 100vh;
+// }
+
+
+
+
+// @use "../../styles.scss" as styles;
+
+// * {
+//     @include styles.default-styles;
+// }
+
+// .login-page {
+//     flex-grow: 1;
+//     display: flex;
+//     align-items: center;
+//     justify-content: flex-end;
+//     padding: 20px;
+//     gap: 40px;
+//     flex-direction: row;
+//     background-image: url("https://img.freepik.com/free-vector/warehouse-interior-with-cardboard-boxes-racks_107791-1633.jpg");
+//     background-size: cover;
+//     background-position: center;
+//     min-height: 100vh;
+// }
+
+// // .login-image {
+// //     flex: 1;
+// //     display: flex;
+// //     justify-content: center;
+// //     align-items: center;
+// //     max-width: 50%;
+// // }
+
+// .login-form {
+//     flex: 0 0 auto;
+//     display: flex;
+//     justify-content: center;
+//     align-items: center;
+//     max-width: 650px;
+//     width: 100%;
+//     min-width: unset;
+//     // margin-right: 5%;
+// }
+
+// .login-container {
+//     background-color: styles.$background-color;
+//     padding: 3.5rem 3.5rem;
+//     border-radius: 1rem;
+//     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+//     width: 100%;
+//     max-width: 600px;
+//     min-width: unset;
+//     min-height: 500px;
+//     // max-height: 90vh;
+//     text-align: center;
+//     // display: flex;
+//     // flex-direction: column;
+//     // justify-content: center;
+//     align-items: center;
+//     // margin-left: auto;
+//     // margin-right: auto;
+
+//     h2 {
+//         font-size: 2.5rem;
+//         font-weight: 700;
+//         color: #333;
+//         margin-bottom: 2.5rem;
+//     }
+
+//     .form-group {
+//         margin-bottom: 1.8rem;
+//         text-align: left;
+//         display: flex;
+//         flex-direction: column;
+//         gap: 0.8rem;
+//     }
+
+//     label {
+//         font-size: 1.1rem;
+//     }
+
+//     input {
+//         padding: 1.2rem 1rem;
+//         font-size: 1.1rem;
+//         border: 1px solid #ddd;
+//         border-radius: 0.5rem;
+//     }
+
+//     button {
+//     padding: 1.2rem 2.5rem;
+//     border: none;
+//     border-radius: 0.5rem;
+//     background-color: styles.$secondary-color;
+//     color: #fff;
+//     font-size: 1.2rem;
+//     font-weight: 600;
+//     cursor: pointer;
+//     transition: background-color 0.3s ease;
+//     margin-top: 2rem;
+
+//     &:hover {
+//       background-color: darken(styles.$secondary-color, 10%); // Example hover effect
+//     }
+//   }
+// }
+
+// main {
+//     display: flex;
+//     flex-direction: column;
+//     // min-height: 100vh;
+//     width: 100%;
+//     background-color:transparent;
+//     justify-content: center;
+//     align-items: center;
+//     min-height: 100vh;
+// }

@@ -1,1 +1,28 @@
 /* You can add global styles to this file, and also import other style files */
+$font-family: "Rubik", sans-serif;
+$primary-color: #022c58c7;
+$secondary-color: #ef6b6b;
+$background-color: #ffffff;
+
+$button-color: #8cc0e8;
+
+$primary-text-color: #0b2c41;
+$secondary-text-color: #ffffff;
+$tertiary-text-color: #000000;
+
+@mixin default-styles {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    font-family: $font-family;
+    background-color: $background-color;
+    width: 100vw;
+    min-height: 100vh;
+    background-color: white;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
