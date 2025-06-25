@@ -1,0 +1,82 @@
+id;region_id;site_group_name
+1;1;RO Denpasar
+2;2;RO Bandung
+3;2;RO Jakarta
+4;3;RO Lampung
+5;4;RO Semarang
+6;5;RO Semarang
+7;6;Pusat
+8;6;RO Jakarta
+9;8;RO Manado
+10;10;RO Palembang
+11;10;RO Pekanbaru
+12;11;Pusat
+13;11;RO Bandung
+14;11;RO Jakarta
+15;12;Pusat
+16;12;RO Manado
+17;12;RO Semarang
+18;12;RO Surabaya
+19;13;Gempol
+20;13;Kediri
+21;13;Pusat
+22;13;RO Semarang
+23;13;RO Surabaya
+24;13;Waru
+25;14;Operation RO Banjarmasin 
+26;14;RO Banjarmasin
+27;15;Pusat
+28;15;RO Banjarmasin
+29;16;RO Banjarmasin
+30;17;RO Banjarmasin
+31;18;RO Banjarmasin
+32;19;RO Palembang
+33;20;RO Pekanbaru
+34;21;Pusat
+35;21;RO Lampung
+36;22;RO Makassar
+37;22;RO Manado
+38;24;RO Manado
+39;25;Operation RO Medan
+40;25;RO Medan
+41;26;RO Denpasar
+42;27;RO Denpasar
+43;28;RO Makassar
+44;28;RO Manado
+45;29;RO Makassar
+46;29;RO Manado
+47;30;Pusat
+48;30;RO Pekanbaru
+49;31;RO Makassar
+50;32;RO Banjarmasin
+51;32;RO Makassar
+52;33;RO Makassar
+53;33;RO Manado
+54;34;RO Makassar
+55;35;Operation RO Manado
+56;35;RO Manado
+57;36;RO Pekanbaru
+58;37;Pusat
+59;37;RO Lampung
+60;37;RO Palembang
+61;38;Pusat
+62;38;RO Medan
+63;39;RO Sumatera Bagian Utara
+64;44;Gudang
+65;48;Jakarta
+66;49;RO Sumatera Bagian Tengah
+67;52;Gempol
+68;52;Kediri
+69;52;Pusat
+70;52;Surabaya
+71;58;RO Sumatera Bagian Tengah
+72;61;RO Indonesia Bagian Timur
+73;62;RO Indonesia Bagian Timur
+74;65;RO Indonesia Bagian Timur
+75;66;RO Indonesia Bagian Timur
+76;67;RO Sumatera Bagian Tengah
+77;68;RO Indonesia Bagian Timur
+78;70;RO Indonesia Bagian Timur
+79;71;Operation RO Manado
+80;71;RO Indonesia Bagian Timur
+81;78;Pusat
