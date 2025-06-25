@@ -17,7 +17,7 @@ DROP TABLE IF EXISTS "Region" CASCADE;
 CREATE TABLE "Region" (
     "id" SERIAL PRIMARY KEY,
     "region_name" VARCHAR(100) UNIQUE NOT NULL
-)
+);
 
 -- Site group (Middle level)
 CREATE TABLE "SiteGroup" (
@@ -26,7 +26,7 @@ CREATE TABLE "SiteGroup" (
 
     -- Foreign key to Region. On delete cascade means if a Region is deleted, all SiteGroups in that Region are also deleted.
     "region_id" INT NOT NULL REFERENCES "Region"("id") ON DELETE CASCADE
-)
+);
 
 -- Site / OU (Most granular level, lowest level)
 CREATE TABLE "Site" (
@@ -36,14 +36,14 @@ CREATE TABLE "Site" (
 
     -- Foreign key to SiteGroup.
     "site_group_id" INT NOT NULL REFERENCES "SiteGroup"("id") ON DELETE CASCADE
-)
+);
 
 -- == ENTITY TABLES ==
 -- Cost Center
 CREATE TABLE "CostCenter" (
     "cost_center_id" INT PRIMARY KEY,
     "cost_center_name" VARCHAR(100) UNIQUE NOT NULL
-)
+);
 
 -- User/Employee
 CREATE TABLE "User" (
@@ -57,7 +57,7 @@ CREATE TABLE "User" (
     -- Foreign key to Site and Cost Center
     "site_id" INT NOT NULL REFERENCES "Site"("id") ON DELETE CASCADE,
     "cost_center_id" INT NOT NULL REFERENCES "CostCenter"("cost_center_id") ON DELETE CASCADE
-)
+);
 
 -- Asset 
 CREATE TABLE "Asset" (
@@ -75,7 +75,7 @@ CREATE TABLE "Asset" (
 
     -- Foreign key to Site (where the asset is located).
     "site_id" INT NOT NULL REFERENCES "Site"("id") ON DELETE CASCADE
-)
+);
 
 
 -- == TRANSCATIONAL TABLES ==
@@ -95,7 +95,7 @@ CREATE TABLE "OpnameSession" (
     
     -- Foreign key to Site (the site where the opname session is performed).
     "site_id" INT NOT NULL REFERENCES "Site"("id")
-)
+);
 
 -- Asset Changes
 CREATE TABLE "AssetChanges" (
@@ -103,7 +103,7 @@ CREATE TABLE "AssetChanges" (
     "changes" JSONB, -- Storing changes as a JSON object
     "session_id" INT NOT NULL REFERENCES "OpnameSession"("id"),
     "asset_tag" VARCHAR(12) NOT NULL REFERENCES "Asset"("asset_tag") ON DELETE CASCADE
-)
+);
 
 -- == COMMENTS ==
 -- Add some comments to explain some design choices.
