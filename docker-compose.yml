@@ -1,0 +1,40 @@
+# Specifies the version of the Docker Compose file format. NOTE: This command is obsolete in newer versions of Docker Compose.
+version: '3.8'
+
+# Declares the project name for the Docker Compose application.
+name: SOSMIT
+
+# Defines the services that will be part of the Docker Compose application.
+services:
+    # The name of the PostgreSQL database service. We can call it anything we like.
+    db:
+        # Tells Docker to use the official PostgreSQL image from Docker Hub.
+        # We're using version 16 of PostgreSQL, based on Alpine Linux (which is lightweight).
+        image: postgres:16-alpine
+    
+        # This ensures that the database service is always restarted if it stops unexpectedly.
+        restart: always
+
+        # The initial configuration for the PostgreSQL  database.
+        # IMPORTANT: In a real porduction, passwords should be managed with Docker secrets or other secure methods, NOT hardcoded at all.
+        environment:
+            POSTGRES_USER: sosmit_admin
+            POSTGRES_PASSWORD: admin123
+            POSTGRES_DB: sosmit_db
+        
+        # This maps the PostgreSQL port 5432 on the host machine to the same port in the container.
+        # This allows us to connect to the database from outside the container, specifically the Go app (for this specific project).
+        ports:
+            - '5433:5432'
+
+        # To ensure data persistence, we mount a volume to the container.
+        # This means that the data stored in the database will be saved in a directory on the host machine.
+        # This tells Docker to create a named volume called 'db_data' and mount it to the PostgreSQL data directory (/var/lib/postgresql/data).
+        volumes:
+            - db_data:/var/lib/postgresql/data
+    
+# This top-level key defines the volumes that will be used by the services.
+# It allows Docker to manage persistent data storage.
+# The data in this volume will persist on your hard drive even if the container is removed or downed.
+volumes:
+    db_data:
