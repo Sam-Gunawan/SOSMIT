@@ -1,0 +1,43 @@
+@use "../styles.scss" as styles;
+
+* {
+    @include styles.default-styles;
+}
+
+// @mixin main-header {
+//     background-color: $primary-color;
+//     color: white;
+//     padding: 1rem;
+//     text-align: center;
+//     display: flex;
+//     align-items: center;
+//     justify-content: center;
+//     flex-wrap: wrap;
+// }
+
+.main-header {
+    background-color: styles.$primary-color;
+    color: white;
+    padding: 1rem 1.5rem; 
+    text-align: center;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+}
+
+.brand-logo {
+    width: 30px;
+    height: auto;
+    margin-right: 15px;
+    object-fit: cover;
+    box-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+}
+
+.brand-title {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+    white-space: nowrap;
+}
