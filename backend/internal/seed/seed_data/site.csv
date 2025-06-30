@@ -19,27 +19,27 @@ id;site_name;site_group_id
 21;Stock Point Retail Malingping;3
 22;Area Marketing Office Bengkulu;4
 23;Area Sales Office Bengkulu;4
-25;Area Marketing Office Yogyakarta;6
-26;Area Retail Office Yogyakarta;6
-27;Area Sub Agen Office Yogyakarta;6
-29;Stock Point Retail Wonosari;6
+25;Area Marketing Office Yogyakarta;7
+26;Area Retail Office Yogyakarta;7
+27;Area Sub Agen Office Yogyakarta;7
+29;Stock Point Retail Wonosari;7
 30;Head Office Jakarta;7
-32;Area Marketing Office Jakarta Cempaka Putih;8
-33;Area Marketing Office Jakarta Cempaka Putih Consumer;8
-34;Area Marketing Office Jakarta Cempaka Putih Trade;8
-35;Area Marketing Office Jakarta Cengkareng;8
-36;Area Marketing Office Jakarta Simatupang;8
-37;Area Retail Office Jakarta Cempaka Putih;8
-38;Area Retail Office Jakarta Cempaka Putih 1;8
-39;Area Retail Office Jakarta Cempaka Putih 2;8
-40;Area Retail Office Jakarta Cengkareng;8
-41;Area Retail Office Jakarta Simatupang;8
-42;Area Sub Agen Office Jakarta Cempaka Putih;8
-43;Area Sub Agen Office Jakarta Cempaka Putih 1;8
-44;Area Sub Agen Office Jakarta Cengkareng;8
-45;Area Sub Agen Office Jakarta Simatupang;8
-46;Pos Sub Agen Jakarta Cengkareng;8
-47;Regional Office Jakarta;8
+32;Area Marketing Office Jakarta Cempaka Putih;3
+33;Area Marketing Office Jakarta Cempaka Putih Consumer;3
+34;Area Marketing Office Jakarta Cempaka Putih Trade;3
+35;Area Marketing Office Jakarta Cengkareng;3
+36;Area Marketing Office Jakarta Simatupang;3
+37;Area Retail Office Jakarta Cempaka Putih;3
+38;Area Retail Office Jakarta Cempaka Putih 1;3
+39;Area Retail Office Jakarta Cempaka Putih 2;3
+40;Area Retail Office Jakarta Cengkareng;3
+41;Area Retail Office Jakarta Simatupang;3
+42;Area Sub Agen Office Jakarta Cempaka Putih;3
+43;Area Sub Agen Office Jakarta Cempaka Putih 1;3
+44;Area Sub Agen Office Jakarta Cengkareng;3
+45;Area Sub Agen Office Jakarta Simatupang;3
+46;Pos Sub Agen Jakarta Cengkareng;3
+47;Regional Office Jakarta;3
 48;Area Marketing Office Gorontalo;9
 49;Area Sales Office Gorontalo;9
 50;Area Marketing Office Jambi;10
@@ -47,5 +47,5 @@ id;site_name;site_group_id
 52;Area Sales Office Muara Bungo;10
 53;Area Sub Agen Office Jambi;10
 54;Pos Marketing Muara Bungo;10
-55;Area Marketing Office Bandung City;13
-56;Area Marketing Office Bandung Up Country;13
+55;Area Marketing Office Bandung City;2
+56;Area Marketing Office Bandung Up Country;2
