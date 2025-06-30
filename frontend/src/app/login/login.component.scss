@@ -1,4 +1,5 @@
 @use "../../styles.scss" as styles;
+@use "sass:color";
 
 * {
   @include styles.default-styles;
@@ -10,13 +11,13 @@
   align-items: center;
   min-height: 100vh;
   width: 100%;
-  background-color: rgb(222, 241, 249);
+  background-color: styles.$secondary-background-color;
 }
 
 .login-page {
   display: flex;
   flex-direction: row;
-  background-color: #fff;
+  background-color: styles.$background-color;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -32,7 +33,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: #ffffff;
+  background-color: styles.$background-color;
   color: #000000;
   padding: 3rem;
   box-sizing: border-box;
@@ -78,9 +79,10 @@ h2 {
   input {
     padding: 0.9rem 1.2rem;
     font-size: 1rem;
-    border: 1px styles.$primary-text-color solid;
+    border: 1px solid rgba(styles.$primary-text-color, 0.2);
     border-radius: 8px;
-    background-color: #ffffff;
+    transition: 0.5s ease;
+    background-color: styles.$background-color;
     color: styles.$primary-text-color;
 
     &::placeholder {
@@ -89,7 +91,7 @@ h2 {
 
     &:focus {
       outline: none;
-      border-color: styles.$secondary-color;
+      border-color: styles.$primary-color;
     }
   }
 }
@@ -100,7 +102,7 @@ h2 {
   border: none;
   border-radius: 8px;
   background-color: styles.$button-color;
-  color: darken(styles.$button-color, 70%);
+  color: color.adjust(styles.$button-color, $lightness: -70%);
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
@@ -108,8 +110,8 @@ h2 {
   margin-top: 2.5rem;
 
   &:hover {
-    background-color: darken(styles.$button-color, 50%);
-    color: #ffffff;
+    background-color: color.adjust(styles.$button-color, $lightness: -50%);
+    color: styles.$secondary-text-color;
   }
 }
 
@@ -118,7 +120,7 @@ h2 {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: #f0f0f0;
+  background-color: styles.$background-color;
   border-radius: 0 20px 20px 0;
   overflow: hidden;
 
@@ -298,7 +300,7 @@ h2 {
 //     margin-top: 2rem;
 
 //     &:hover {
-//       background-color: darken(styles.$secondary-color, 10%); // Example hover effect
+//       background-color: color.adjust(styles.$secondary-color, 10%); // Example hover effect
 //     }
 //   }
 // }
@@ -426,7 +428,7 @@ h2 {
 //     margin-top: 2rem;
 
 //     &:hover {
-//       background-color: darken(styles.$secondary-color, 10%); // Example hover effect
+//       background-color: color.adjust(styles.$secondary-color, 10%); // Example hover effect
 //     }
 //   }
 // }

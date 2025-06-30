@@ -2,7 +2,9 @@
 $font-family: "Rubik", sans-serif;
 $primary-color: #022c58c7;
 $secondary-color: #ef6b6b;
+
 $background-color: #ffffff;
+$secondary-background-color: rgb(222, 241, 249);
 
 $button-color: #8cc0e8;
 
@@ -10,10 +12,31 @@ $primary-text-color: #0b2c41;
 $secondary-text-color: #ffffff;
 $tertiary-text-color: #000000;
 
+@use "bootstrap/scss/bootstrap" as bs;
+
 @mixin default-styles {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+@mixin main-header {
+    background-color: $primary-color;
+    color: white;
+    padding: 1rem; 
+    text-align: center;
+    align-items: center;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+
+    .brand-logo {
+        width: 30px;
+        height: auto;
+        margin-right: 15px;
+        object-fit: cover;
+        box-shadow: 2px 2px 4px rgba(0, 0, 0, 1);
+    }
 }
 
 html, body {
