@@ -1,0 +1,80 @@
+// == Handles the main entry point for the application ==
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/auth"
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+
+	_ "github.com/lib/pq" // PostgreSQL driver
+)
+
+// Database connection details.
+const (
+	host     = "localhost"
+	port     = 5433
+	username = "sosmit_admin"
+	password = "admin123"
+	db_name  = "sosmit_db"
+)
+
+func main() {
+	// Setup the database connection.
+	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, username, password, db_name))
+	if err != nil {
+		log.Fatalln("Error connecting to the database:", err)
+	}
+
+	// Make sure the database is closed when the function returns.
+	defer db.Close()
+
+	// Test the connection to the database with ping.
+	if err := db.Ping(); err != nil {
+		log.Fatalln("Error pinging the database:", err)
+	} else {
+		log.Println("✅ Successfully connected to the database!")
+	}
+
+	// Initialize the Gin router which is a web framework for Go.
+	// This will be used to handle HTTP requests and define routes for the API.
+	router := gin.Default()
+
+	// Initialize the user repository with the database connection.
+	userRepo := user.NewRepository(db)
+
+	// Initialize the auth service with the user repository.
+	authService := auth.NewService(userRepo)
+
+	// Initialize the auth handler with the auth service.
+	authHandler := auth.NewHandler(authService)
+
+	// Setup CORS (Cross-Origin Resource Sharing) middleware.
+	// This allows us to handle requests from the Angular frontend.
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"http://localhost:4200"}
+	config.AllowMethods = []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}
+	router.Use(cors.New(config))
+
+	// Define the routes for the API.
+	// In simple terms, a route is a URL path that the server listens to and responds to.
+	// E.g. when a user visits /login, the server will respond with the login page or handle the login request.
+	api := router.Group("/api")
+	{
+		authRoutes := api.Group("/auth")
+		{
+			// POST /api/auth/login
+			authRoutes.POST("/login", authHandler.LoginHandler)
+		}
+	}
+
+	// Start the server on port 8080.
+	log.Println("Starting server on port 8080...")
+	if err := router.Run(":8080"); err != nil {
+		log.Fatalf("Failed to start API server: %v\n", err)
+	}
+}
