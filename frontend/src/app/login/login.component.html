@@ -1,22 +1,21 @@
 <main class="login-wrapper">
   <div class="login-page">
-    <section class="login-form-panel">
+    <form class="login-form-panel" (ngSubmit)="login()">
       <div class="panel-content-wrapper">
         <div class="form-area-simple">
           <h2>Login</h2>
           <div class="form-group">
             <label for="username">Username</label>
-            <input id="username" type="text" name="username" required placeholder="Enter your username" />
+            <input id="username" type="text" name="username" [(ngModel)]="credentials.username" required placeholder="Enter your username" />
           </div>
           <div class="form-group">
             <label for="password">Password</label>
-            <input id="password" type="password" name="password" required placeholder="Enter your password" />
+            <input id="password" type="password" name="password" [(ngModel)]="credentials.password" required placeholder="Enter your password" />
           </div>
-
           <button type="submit" class="login-btn">Login</button>
         </div>
       </div>
-    </section>
+    </form>
 
     <section class="login-decoration-panel">
       <img src="https://i.pinimg.com/736x/8f/37/0b/8f370b7ff8dea107b69df68c3fd4cb68.jpg" alt="PT Surya Madistrindo" class="login-image" />
