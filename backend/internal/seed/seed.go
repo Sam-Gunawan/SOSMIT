@@ -23,8 +23,6 @@ const (
 	db_name  = "sosmit_db"
 )
 
-//
-
 func main() {
 	// Connect to the PostgreSQL database
 	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, username, password, db_name))
@@ -39,11 +37,11 @@ func main() {
 	if err := db.Ping(); err != nil {
 		log.Fatalln("Error pinging the database:", err)
 	} else {
-		fmt.Println("Successfully connected to the database!")
+		log.Println("✅ Successfully connected to the database!")
 	}
 
 	// Seeding the database with initial data
-	fmt.Println("Seeding the database with initial data...")
+	log.Println("Seeding the database with initial data...")
 	seedTable(db, "Region", "internal/seed/seed_data/region.csv", seedRegion)
 	seedTable(db, "SiteGroup", "internal/seed/seed_data/site_group.csv", seedSiteGroup)
 	seedTable(db, "Site", "internal/seed/seed_data/site.csv", seedSite)
@@ -86,7 +84,7 @@ func seedTable(db *sql.DB, tableName string, filePath string, seedFunc func(*sql
 		seedFunc(db, record)
 	}
 
-	fmt.Printf("✅ Successfully seeded table %s with data from %s\n", tableName, filePath)
+	log.Printf("✅ Successfully seeded table %s with data from %s\n", tableName, filePath)
 	return nil
 }
 
@@ -125,7 +123,7 @@ func seedSiteGroup(db *sql.DB, record []string) error {
 	// }
 	// if !exists {
 	// 	log.Fatalf("Region with id %d does not exist. Cannot insert SiteGroup '%s'.\n", region_id, site_group_name)
-	// 	return fmt.Errorf("region_id %d does not exist", region_id)
+	// 	return log.Errorf("region_id %d does not exist", region_id)
 	// }
 
 	query := `INSERT INTO "SiteGroup" (site_group_name, region_id) VALUES ($1, $2) ON CONFLICT (site_group_name) DO NOTHING`
