@@ -47,11 +47,12 @@ func main() {
 	// Initialize the user repository with the database connection.
 	userRepo := user.NewRepository(db)
 
-	// Initialize the auth service with the user repository.
+	// Initialize the services
 	authService := auth.NewService(userRepo)
 
-	// Initialize the auth handler with the auth service.
+	// Initialize the handlers
 	authHandler := auth.NewHandler(authService)
+	userHandler := user.NewHandler(userRepo)
 
 	// Setup CORS (Cross-Origin Resource Sharing) middleware.
 	// This allows us to handle requests from the Angular frontend.
@@ -70,6 +71,15 @@ func main() {
 		{
 			// POST /api/auth/login
 			authRoutes.POST("/login", authHandler.LoginHandler)
+		}
+
+		userRoutes := api.Group("/user")
+
+		// This route group is protected by the AuthMiddleware, which checks for a valid JWT token.
+		userRoutes.Use(auth.AuthMiddleware())
+		{
+			// GET /api/user/me
+			userRoutes.GET("/me", userHandler.GetMeHandler)
 		}
 	}
 
