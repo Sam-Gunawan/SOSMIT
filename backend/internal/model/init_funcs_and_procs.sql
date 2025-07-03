@@ -23,19 +23,23 @@ CREATE OR REPLACE FUNCTION public.get_user_by_username(_username VARCHAR(255))
 	RETURNS table (
 		user_id INT,
 		username VARCHAR(255),
-		"password" VARCHAR(255),
 		first_name VARCHAR(255),
 		last_name VARCHAR(255),
 		"position" VARCHAR(100),
-		site_id INT,
+		site_name VARCHAR(100),
+		site_group_name VARCHAR(100),
+		region_name VARCHAR(100),
 		cost_center_id INT
 	)
 	LANGUAGE plpgsql
 AS $$
-	BEGIN
+	BEGIN 
 		RETURN QUERY
-		SELECT u.user_id, u.username, u.password, u.first_name, u.last_name, u.position, u.site_id, u.cost_center_id
+		SELECT u.user_id, u.username, u.first_name, u.last_name, u."position", s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
 		FROM "User" AS u
+		INNER JOIN "Site" AS s ON u.site_id = s.id
+		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+		INNER JOIN "Region" AS r ON sg.region_id = r.id
 		WHERE LOWER(u.username) = LOWER(_username); 
 	END;
 $$;

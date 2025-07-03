@@ -6,11 +6,24 @@ import (
 	"log"
 )
 
-// User struct represents a user in the system.
-type User struct {
+// Credentials struct represents a user's login credentials.
+type Credentials struct {
 	Username string
 	Password string
 	Position string
+}
+
+// User struct represents a user in the system.
+type User struct {
+	UserID        int64
+	Username      string
+	FirstName     string
+	LastName      string
+	Position      string
+	SiteName      string
+	SiteGroupName string
+	RegionName    string
+	CostCenterID  int64
 }
 
 // Repository struct holds the database connection
@@ -29,27 +42,53 @@ func NewRepository(db *sql.DB) *Repository {
 
 // GetUserCredentials retrieves a user's credentials by their username from the database.
 // It is a method of the Repository struct, which holds the database connection.
-func (repo *Repository) GetUserCredentials(username string) (*User, error) {
-	var user User
+// It returns a User struct containing the username, password, and position.
+func (repo *Repository) GetUserCredentials(username string) (*Credentials, error) {
+	var credentials Credentials
 
 	// get_credentials returns username, password, position
 	// It takes in a username with VARCHAR(255) type
 	query := `SELECT * FROM get_credentials($1)`
 
-	err := repo.db.QueryRow(query, username).Scan(&user.Username, &user.Password, &user.Position)
+	err := repo.db.QueryRow(query, username).Scan(&credentials.Username, &credentials.Password, &credentials.Position)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// If no user is found, return nil
 			// It is a valid case where the user does not exist
+			log.Printf("⚠ No credentials found with username: %s\n", username)
+			return nil, nil // No user found
+		}
+
+		// Any other error is unexpected
+		log.Printf("❌ Error retrieving credentials for username: %s, error: %v\n", username, err)
+		return nil, err // Return the error for unexpected cases
+	}
+
+	// Return the user credentials
+	log.Printf("✅ Successfully retrieved credentials for username: %s\n", username)
+	return &credentials, nil
+}
+
+// GetUserByUsername retrieves a user's details by their username from the database.
+func (repo *Repository) GetUserByUsername(username string) (*User, error) {
+	var user User
+
+	// TODO: call get_user_by_username(_username) function w/ error handling !!!
+	query := `SELECT * FROM get_user_by_username($1)`
+
+	err := repo.db.QueryRow(query, username).Scan(&user.UserID, &user.Username, &user.FirstName, &user.LastName, &user.Position, &user.SiteName, &user.SiteGroupName, &user.RegionName, &user.CostCenterID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// If no user is found, return nil
 			log.Printf("⚠ No user found with username: %s\n", username)
 			return nil, nil // No user found
 		}
 
 		// Any other error is unexpected
-		log.Printf("❌ Error retrieving user credentials for username: %s, error: %v\n", username, err)
+		log.Printf("❌ Error retrieving user by username: %s, error: %v\n", username, err)
+		return nil, err // Return the error for unexpected cases
 	}
 
-	// Return the user credentials
-	log.Printf("✅ Successfully retrieved user credentials for username: %s\n", username)
+	log.Printf("✅ Successfully retrieved user by username: %s\n", username)
 	return &user, nil
 }

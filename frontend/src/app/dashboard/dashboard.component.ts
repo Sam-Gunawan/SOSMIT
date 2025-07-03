@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ApiService } from '../api.service';
 import { CommonModule } from '@angular/common';
 import { SiteCardComponent } from '../site-card/site-card.component';
 import { Siteinfo } from '../siteinfo';
@@ -59,5 +60,12 @@ export class DashboardComponent {
       opnameStatus: 'outdated',
       opnameDate: '2023-10-25'
     }
-  ];
+  ];  
+  
+  constructor(private apiService: ApiService) {}
+
+  logout(): void {
+    // Call the logout method from ApiService
+    this.apiService.logout();
+  }
 }

@@ -97,7 +97,7 @@ CREATE TABLE "OpnameSession" (
     "id" SERIAL PRIMARY KEY,
     "start_date" TIMESTAMP NOT NULL DEFAULT NOW(),
     "end_date" TIMESTAMP,
-    "status" VARCHAR(20) NOT NULL CHECK ("status" IN ('Active', 'Completed', 'Verified', 'Rejected')),
+    "status" VARCHAR(20) NOT NULL CHECK ("status" IN ('Outdated', 'Active', 'Completed', 'Pending', 'Verified', 'Rejected')),
 
     -- Foreign key to User (the user who created the opname session).
     "user_id" INT NOT NULL REFERENCES "User"("user_id"),
