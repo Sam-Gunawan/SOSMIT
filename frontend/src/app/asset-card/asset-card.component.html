@@ -1,1 +1,8 @@
-<p>asset-card works!</p>
+<section class="asset-card">
+    <div class="card-body">
+        <div *ngFor="let asset of assetCardList">
+            <img [src]="asset.assetIcon" [alt]="asset.assetName" class="asset-image">
+            <div>{{ asset.assetName }}</div>
+        </div>
+    </div>
+</section>
