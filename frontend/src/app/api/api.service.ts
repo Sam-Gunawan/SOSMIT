@@ -10,6 +10,7 @@ import { tap } from 'rxjs/operators';
 export class ApiService {
   // This service will handle API calls, such as login, fetching data, etc.
   private authApiUrl = 'http://localhost:8080/api/auth'
+  private userApiUrl = 'http://localhost:8080/api/user'
 
   constructor(private http: HttpClient, private router: Router) {}
   login(credentials: {username: string, password: string}): Observable<any> {
@@ -34,5 +35,11 @@ export class ApiService {
     
     // Then, redirect to login page.
     this.router.navigate(['/login']);
+  }
+
+  getUserProfile(username: string): Observable<any> {
+    // This method will fetch the user profile data.
+    // Authorization header is already handled by AuthInterceptor at ../services/auth.interceptor.ts
+    return this.http.get(`${this.userApiUrl}/${username}`);
   }
 }
