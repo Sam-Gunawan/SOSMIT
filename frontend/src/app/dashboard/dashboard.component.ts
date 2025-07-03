@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { SiteCardComponent } from '../site-card/site-card.component';
 import { Siteinfo } from '../model/siteinfo.model';
 import { User } from '../model/user.model';
-import { titleCase } from '../reusable_functions'; // Import the titleCase function
+import { titleCase, formatDate } from '../reusable_functions'; // Import the titleCase function
 
 @Component({
   selector: 'app-dashboard',
@@ -56,6 +56,19 @@ export class DashboardComponent {
         this.isLoading = false; // Set loading state to false after data is fetched
         console.log('[Dashboard] Site cards fetched successfully:', this.siteCardList);
         console.log('[Dashboard] Site cards type:', typeof this.siteCardList);
+
+        // // Modify the date format for each site card using custom function.
+        // this.siteCardList.forEach(siteCard => {
+        //   // siteCard.opnameDate is already a Date object from the API response.
+        //   if (siteCard.opnameDate) {
+        //     // Format the date to a more readable format, e.g., 'dd MMM yyyy'
+        //     siteCard.opnameDate = formatDate(siteCard.opnameDate);
+        //   } else {
+        //     console.warn('[Dashboard] Opname date is undefined for site:', siteCard.siteName);
+        //     siteCard.opnameDate = new Date(1945, 7, 17); // Months are 0-indexed: 7 = August
+        //   }
+        // });
+
       },
 
       error: (error) => {

@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { Siteinfo } from '../model/siteinfo.model';
+import { formatDate } from '../reusable_functions';
 
 @Injectable({
   providedIn: 'root'
@@ -56,7 +57,7 @@ export class ApiService {
           siteGA: site.SiteGaID,
           opnameSessionID: site.OpnameSessionID,
           opnameStatus: site.OpnameStatus,
-          opnameDate: site.OpnameDate
+          opnameDate: formatDate(new Date(site.OpnameDate))
         }))
       }), // Extract site cards from the response
       tap((siteCards: Siteinfo[]) => {
