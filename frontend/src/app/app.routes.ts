@@ -1,7 +1,9 @@
 import { Routes, CanActivateFn, Router } from '@angular/router';
 import { LoginComponent } from './login/login.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
+import { ContainerComponent } from './container/container.component';
 import { inject } from '@angular/core';
+import { routes as containerRoutes} from './container/container.routes';
 
 const authGuard: CanActivateFn = () => {
     const token = localStorage.getItem('auth_token');
@@ -19,4 +21,6 @@ export const routes: Routes = [
     { path: 'dashboard', redirectTo: '', component: DashboardComponent },
     { path: 'login', component: LoginComponent },
     { path: '**', redirectTo: ''} // TODO: redirect to a 404 page or similar
+    { path: 'container', component: ContainerComponent},
+    ...containerRoutes,
 ];

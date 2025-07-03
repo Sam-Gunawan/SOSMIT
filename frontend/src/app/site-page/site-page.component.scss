@@ -1,0 +1,48 @@
+@use "../../styles.scss" as styles;
+@use "sass:color";
+
+* {
+    @include styles.default-styles;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: styles.$font-family;
+    color: styles.$primary-text-color;
+    margin: 0;
+}
+
+p {
+    font-size: 12px;
+    margin: 0px;
+    color: styles.$quaternary-text-color;
+}
+
+.site-wrapper {
+    padding: 20px 30px;
+}
+
+.site-information {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.opname-info {
+    align-self: center;
+    justify-items: right;
+}
+
+.site-status {
+    font-size: 12px;
+    background-color: styles.$button-color;
+    border-radius: 15px;
+    padding: 5px 10px;
+}
+
+.opname-date {
+    margin: 8px 0px 0px 0px;   
+
+}
+
+
+
