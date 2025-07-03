@@ -1,8 +1,20 @@
 <section class="asset-card">
     <div class="card-body">
-        <div *ngFor="let asset of assetCardList">
-            <img [src]="asset.assetIcon" [alt]="asset.assetName" class="asset-image">
-            <div>{{ asset.assetName }}</div>
+        <div class="main-info">
+            <img [src]="assetCard().assetIcon" [alt]="assetCard().assetName"/>
+            <p class="asset-name">{{ assetCard().assetTag }}</p>
+        </div>
+        <div class="additional-info">
+            <span 
+                class="asset-status"
+                [ngClass]="{
+                    'status-deployed': assetCard().assetStatus === 'Deployed',
+                    'status-onLoan': assetCard().assetStatus === 'On Loan',
+                }">
+                {{ assetCard().assetStatus }}
+            </span>
+            <p>{{ assetCard().assetName }}</p>
+            <p>{{ assetCard().assetOwner }}</p>
         </div>
     </div>
 </section>

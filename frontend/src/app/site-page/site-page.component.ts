@@ -1,14 +1,15 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Siteinfo } from '../siteinfo';
-import { DashboardComponent } from '../dashboard/dashboard.component';
-import { ActivatedRoute } from '@angular/router';
-import { Assetinfo } from '../assetinfo';
 import { ApiService } from '../api/api.service';
+import { ActivatedRoute } from '@angular/router';
+import { DashboardComponent } from '../dashboard/dashboard.component';
+import { Siteinfo } from '../siteinfo';
+import { Assetinfo } from '../assetinfo';
+import { AssetCardComponent } from '../asset-card/asset-card.component';
 
 @Component({
   selector: 'app-site-page',
-  imports: [CommonModule],
+  imports: [CommonModule, AssetCardComponent],
   templateUrl: './site-page.component.html',
   styleUrl: './site-page.component.scss'
 })
