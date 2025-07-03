@@ -22,6 +22,8 @@ p {
     background-color: styles.$tertiary-color;
     color: styles.$primary-text-color;
     height: 8rem; //temporary
+    display: flex;
+    align-items: center;
 }
 
 .card-body {
@@ -30,9 +32,33 @@ p {
     justify-content: space-between;
 }
 
-.asset-name {
+.main-info {
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    flex-direction: column;
+}
+
+.asset-icon {
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.asset-tag {
     font-size: 15px;
     font-weight: bold;
+    margin: 0px;
+}
+
+.asset-name {
+    font-size: 12px;
+    margin: 10px 5px 5px 5px;
+    max-width: 110px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
 }
 
 .additional-info {

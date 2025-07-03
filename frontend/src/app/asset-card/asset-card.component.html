@@ -1,19 +1,21 @@
 <section class="asset-card">
     <div class="card-body">
         <div class="main-info">
-            <img [src]="assetCard().assetIcon" [alt]="assetCard().assetName"/>
-            <p class="asset-name">{{ assetCard().assetTag }}</p>
+            <img class="asset-icon" [src]="assetCard().assetIcon" [alt]="assetCard().assetName"/>
+            <p class="asset-tag">{{ assetCard().assetTag }}</p>
         </div>
         <div class="additional-info">
             <span 
                 class="asset-status"
                 [ngClass]="{
-                    'status-deployed': assetCard().assetStatus === 'Deployed',
-                    'status-onLoan': assetCard().assetStatus === 'On Loan',
+                    'status-deployed': assetCard().assetStatus === 'deployed',
+                    'status-onLoan': assetCard().assetStatus === 'on loan',
                 }">
                 {{ assetCard().assetStatus }}
             </span>
-            <p>{{ assetCard().assetName }}</p>
+            <div class="asset-name">
+                {{ assetCard().assetName }}
+            </div>
             <p>{{ assetCard().assetOwner }}</p>
         </div>
     </div>
