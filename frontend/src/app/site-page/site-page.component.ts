@@ -1,10 +1,10 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ApiService } from '../api/api.service';
+import { ApiService } from '../services/api.service';
 import { ActivatedRoute } from '@angular/router';
 import { DashboardComponent } from '../dashboard/dashboard.component';
-import { Siteinfo } from '../siteinfo';
-import { Assetinfo } from '../assetinfo';
+import { Siteinfo } from '../model/siteinfo.model';
+import { Assetinfo } from '../model/assetinfo.model';
 import { AssetCardComponent } from '../asset-card/asset-card.component';
 
 @Component({

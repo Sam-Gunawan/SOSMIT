@@ -2,7 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { tap, map } from 'rxjs/operators';
+import { Siteinfo } from '../model/siteinfo.model';
 
 @Injectable({
   providedIn: 'root'
@@ -41,5 +42,27 @@ export class ApiService {
     // This method will fetch the user profile data.
     // Authorization header is already handled by AuthInterceptor at ../services/auth.interceptor.ts
     return this.http.get(`${this.userApiUrl}/${username}`);
+  }
+
+  getUserSiteCards(): Observable<Siteinfo[]> {
+    // This method will fetch the site cards that the user has access to.
+    return this.http.get<Siteinfo[]>(`${this.userApiUrl}/site-cards`).pipe(
+      map((response: any) => {
+        return response.site_cards.map((site: any) => ({
+          siteID: site.SiteID,
+          siteName: site.SiteName,
+          siteGroup: site.SiteGroupName,
+          siteRegion: site.RegionName,
+          siteGA: site.SiteGaID,
+          opnameSessionID: site.OpnameSessionID,
+          opnameStatus: site.OpnameStatus,
+          opnameDate: site.OpnameDate
+        }))
+      }), // Extract site cards from the response
+      tap((siteCards: Siteinfo[]) => {
+        // Log the fetched site cards for debugging purposes.
+        console.log('[ApiService] Fetched site cards:', siteCards);
+      })
+    );
   }
 }

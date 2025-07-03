@@ -1,8 +1,10 @@
 export interface Siteinfo {
     siteID: number;
     siteName: string;
-    siteLocation: string; //site group, region
-    siteGA: string;
+    siteGroup: string;
+    siteRegion: string;
+    siteGA: number;
+    opnameSessionID: number;
     opnameStatus: string;
     opnameDate: string;
 }

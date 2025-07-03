@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Siteinfo } from '../siteinfo';
+import { Siteinfo } from '../model/siteinfo.model';
 
 @Component({
   selector: 'app-site-card',
