@@ -8,6 +8,7 @@ import (
 
 // Credentials struct represents a user's login credentials.
 type Credentials struct {
+	UserID   int64
 	Username string
 	Password string
 	Position string
@@ -24,6 +25,17 @@ type User struct {
 	SiteGroupName string
 	RegionName    string
 	CostCenterID  int64
+}
+
+type UserSiteCard struct {
+	SiteID          int64
+	SiteName        string
+	SiteGroupName   string
+	RegionName      string
+	SiteGaID        int64
+	OpnameSessionID int64
+	OpnameStatus    string
+	OpnameDate      string
 }
 
 // Repository struct holds the database connection
@@ -50,7 +62,7 @@ func (repo *Repository) GetUserCredentials(username string) (*Credentials, error
 	// It takes in a username with VARCHAR(255) type
 	query := `SELECT * FROM get_credentials($1)`
 
-	err := repo.db.QueryRow(query, username).Scan(&credentials.Username, &credentials.Password, &credentials.Position)
+	err := repo.db.QueryRow(query, username).Scan(&credentials.UserID, &credentials.Username, &credentials.Password, &credentials.Position)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// If no user is found, return nil
@@ -73,7 +85,6 @@ func (repo *Repository) GetUserCredentials(username string) (*Credentials, error
 func (repo *Repository) GetUserByUsername(username string) (*User, error) {
 	var user User
 
-	// TODO: call get_user_by_username(_username) function w/ error handling !!!
 	query := `SELECT * FROM get_user_by_username($1)`
 
 	err := repo.db.QueryRow(query, username).Scan(&user.UserID, &user.Username, &user.FirstName, &user.LastName, &user.Position, &user.SiteName, &user.SiteGroupName, &user.RegionName, &user.CostCenterID)
@@ -91,4 +102,49 @@ func (repo *Repository) GetUserByUsername(username string) (*User, error) {
 
 	log.Printf("✅ Successfully retrieved user by username: %s\n", username)
 	return &user, nil
+}
+
+// GetUserSiteCards retrieves all the sites a user has access to using their user_id.
+func (repo *Repository) GetUserSiteCards(userID int64) ([]*UserSiteCard, error) {
+	var userSiteCards []*UserSiteCard
+
+	query := `SELECT * FROM get_user_site_cards($1)`
+
+	rows, err := repo.db.Query(query, userID)
+	if err != nil {
+		log.Printf("❌ Error retrieving user site cards for user_id: %d, error: %v\n", userID, err)
+		return nil, err // Return the error for unexpected cases
+	}
+
+	// Ensure rows are closed after processing
+	defer rows.Close()
+
+	// Iterate through the result set and populate userSiteCards
+	for rows.Next() {
+		var card UserSiteCard
+		err := rows.Scan(
+			&card.SiteID,
+			&card.SiteName,
+			&card.SiteGroupName,
+			&card.RegionName,
+			&card.SiteGaID,
+			&card.OpnameSessionID,
+			&card.OpnameStatus,
+			&card.OpnameDate,
+		)
+		if err != nil {
+			log.Printf("❌ Error scanning user site card for user_id: %d, error: %v\n", userID, err)
+			return nil, err // Return the error for unexpected cases
+		}
+
+		userSiteCards = append(userSiteCards, &card)
+	}
+
+	// Check for any error encountered during iteration
+	if err = rows.Err(); err != nil {
+		log.Printf("❌ Error encountered while iterating user site cards for user_id: %d, error: %v\n", userID, err)
+		return nil, err
+	}
+
+	return userSiteCards, nil
 }

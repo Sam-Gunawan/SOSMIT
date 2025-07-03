@@ -84,6 +84,19 @@ func AuthMiddleware() gin.HandlerFunc {
 			// Set the username in Gin context for the next handler to use.
 			context.Set("username", username)
 
+			// Extract the user's ID from claims
+			userID, ok := claims["user_id"]
+			if !ok {
+				context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"error": "invalid user_id in token",
+				})
+				fmt.Println("Invalid user_id in token:", userID, "\nError:", ok)
+				return
+			}
+
+			// Set the user_id in Gin context for the next handler to use.
+			context.Set("user_id", int64(userID.(float64)))
+
 			// Continue to next handler
 			context.Next()
 		} else {

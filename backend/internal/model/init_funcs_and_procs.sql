@@ -5,6 +5,7 @@
 -- get_credentials retrieves user credentials by username (for login auth)
 CREATE OR REPLACE FUNCTION public.get_credentials(_username VARCHAR(255))
     RETURNS table (
+		user_id INT,
         username VARCHAR(255),
         "password" VARCHAR(255),
         "position" VARCHAR(100)
@@ -13,7 +14,7 @@ CREATE OR REPLACE FUNCTION public.get_credentials(_username VARCHAR(255))
 AS $$
     BEGIN
         RETURN QUERY
-        SELECT u.username, u.password, u.position
+        SELECT u.user_id, u.username, u.password, u.position
         FROM "User" AS u
         WHERE LOWER(u.username) = LOWER(_username);
     END;
@@ -57,18 +58,17 @@ CREATE OR REPLACE FUNCTION public.get_user_site_cards(_user_id INT)
 		site_ga_id INT,
 		opname_session_id INT,
 		opname_status VARCHAR(20),
-		last_opname_date TIMESTAMP
+		last_opname_date TIMESTAMP WITH TIME ZONE
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
 			SELECT s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, 
-				u_ga.username AS site_ga,
-				os.id AS opname_session_id,
+				s.site_ga_id,
+				COALESCE(os.id, -1) AS opname_session_id,
 				COALESCE(os.status, 'Pending') AS opname_status,
-				s.last_opname_date
-				LEFT JOIN "User" AS u_ga ON u_ga.site_id = s.id
+				s.last_opname_date AS last_opname_date
 			FROM "User" AS u
 			-- For "l1 support", join all sites; for others, restrict to user's region
 			CROSS JOIN "Site" AS s

@@ -32,7 +32,7 @@ CREATE TABLE "SiteGroup" (
 CREATE TABLE "Site" (
     "id" SERIAL PRIMARY KEY,
     "site_name" VARCHAR(100) NOT NULL,
-    "last_opname_date" TIMESTAMP, 
+    "last_opname_date" TIMESTAMP WITH TIME ZONE DEFAULT '2025-06-01 00:00:00+07', 
 
     -- Foreign key to SiteGroup.
     "site_group_id" INT NOT NULL REFERENCES "SiteGroup"("id") ON DELETE CASCADE,
