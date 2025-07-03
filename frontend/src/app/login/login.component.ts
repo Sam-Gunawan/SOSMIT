@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { ApiService } from '../api.service';
+import { ApiService } from '../api/api.service';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -37,7 +37,7 @@ export class LoginComponent {
         next: (response) => {
           console.log('Login successful:', response);
           // Redirect to the dashboard if successful
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/']);
         },
         
         // Handle errors gracefully (HTTP 400-599)

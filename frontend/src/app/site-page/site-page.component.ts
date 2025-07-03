@@ -4,7 +4,7 @@ import { Siteinfo } from '../siteinfo';
 import { DashboardComponent } from '../dashboard/dashboard.component';
 import { ActivatedRoute } from '@angular/router';
 import { Assetinfo } from '../assetinfo';
-import { ApiService } from '../api.service';
+import { ApiService } from '../api/api.service';
 
 @Component({
   selector: 'app-site-page',
