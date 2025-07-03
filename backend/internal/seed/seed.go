@@ -142,7 +142,8 @@ func seedSiteGroup(db *sql.DB, record []string) error {
 func seedSite(db *sql.DB, record []string) error {
 	site_name := record[1]
 	site_group_id := record[2]
-	query := `INSERT INTO "Site" (site_name, site_group_id) VALUES ($1, $2)`
+	site_ga_id := record[3]
+	query := `INSERT INTO "Site" (site_name, site_group_id, site_ga_id) VALUES ($1, $2, $3)`
 
 	// Check if the referenced site_group_id exists
 	var exists bool
@@ -157,7 +158,7 @@ func seedSite(db *sql.DB, record []string) error {
 		return fmt.Errorf("site_group_id %v does not exist", site_group_id)
 	}
 
-	_, err = db.Exec(query, site_name, site_group_id)
+	_, err = db.Exec(query, site_name, site_group_id, site_ga_id)
 	if err != nil {
 		log.Fatalf("Error inserting record into Site table: %v\n", err)
 		return err

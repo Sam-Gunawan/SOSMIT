@@ -31,11 +31,14 @@ CREATE TABLE "SiteGroup" (
 -- Site / OU (Most granular level, lowest level)
 CREATE TABLE "Site" (
     "id" SERIAL PRIMARY KEY,
-    "site_name" VARCHAR(100) UNIQUE NOT NULL,
+    "site_name" VARCHAR(100) NOT NULL,
     "last_opname_date" TIMESTAMP, 
 
     -- Foreign key to SiteGroup.
-    "site_group_id" INT NOT NULL REFERENCES "SiteGroup"("id") ON DELETE CASCADE
+    "site_group_id" INT NOT NULL REFERENCES "SiteGroup"("id") ON DELETE CASCADE,
+
+    -- Foreign key to User (General Affairs staff for the site). Set after the "User" table is created.
+    "site_ga_id" INT NOT NULL
 );
 
 -- == ENTITY TABLES ==
@@ -97,7 +100,7 @@ CREATE TABLE "OpnameSession" (
     "id" SERIAL PRIMARY KEY,
     "start_date" TIMESTAMP NOT NULL DEFAULT NOW(),
     "end_date" TIMESTAMP,
-    "status" VARCHAR(20) NOT NULL CHECK ("status" IN ('Outdated', 'Active', 'Completed', 'Pending', 'Verified', 'Rejected')),
+    "status" VARCHAR(20) NOT NULL CHECK ("status" IN ('Outdated', 'Active', 'Completed', 'Pending', 'Verified', 'Rejected')) DEFAULT 'Pending',
 
     -- Foreign key to User (the user who created the opname session).
     "user_id" INT NOT NULL REFERENCES "User"("user_id"),
@@ -124,5 +127,5 @@ CREATE TABLE "AssetChanges" (
 
 -- == COMMENTS ==
 -- Add some comments to explain some design choices.
-COMMENT ON COLUMN "User"."password" IS 'Stores the hashed password using bcrypt, never plain text.';
+COMMENT ON COLUMN "User"."password" IS 'For demo purposes, store in plain text for now.';
 COMMENT ON COLUMN "AssetChanges"."changes" IS 'Stores the changes made to the asset in JSON format, e.g. {"status" : "Deployed", "owner_id" : 1234}';
