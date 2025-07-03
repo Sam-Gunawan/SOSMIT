@@ -9,13 +9,13 @@ import (
 
 // Handler holds the user repo.
 type Handler struct {
-	repo *Repository
+	service *Service
 }
 
 // NewHandler creates a new user handler with the provided user service.
-func NewHandler(repo *Repository) *Handler {
+func NewHandler(service *Service) *Handler {
 	return &Handler{
-		repo: repo,
+		service: service,
 	}
 }
 
@@ -30,8 +30,8 @@ func (handler *Handler) GetMeHandler(context *gin.Context) {
 		return
 	}
 
-	// Call the repo to get user details
-	user, err := handler.repo.GetUserByUsername(username.(string))
+	// Call the service to get user details
+	user, err := handler.service.GetUserByUsername(username.(string))
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error": "failed to fetch user details: " + err.Error(),
@@ -58,5 +58,42 @@ func (handler *Handler) GetMeHandler(context *gin.Context) {
 		"site_group":     user.SiteGroupName,
 		"region_name":    user.RegionName,
 		"cost_center_id": user.CostCenterID,
+	})
+}
+
+// GetUserSiteCardsHandler retrieves all the sites a user has access to.
+func (handler *Handler) GetUserSiteCardsHandler(context *gin.Context) {
+	// Get the user ID from context (placed by auth middleware)
+	userID, exists := context.Get("user_id")
+	if !exists {
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"error": "user_id not found in context",
+		})
+		return
+	}
+
+	if userID == nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "user_id is nil",
+		})
+		return
+	}
+
+	// Call the service to get user site cards
+	userSiteCards, err := handler.service.GetUserSiteCards(userID.(int64))
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to fetch user site cards: " + err.Error(),
+		})
+		return
+	}
+
+	if userSiteCards == nil {
+		// No site cards found, send an empty array
+		userSiteCards = make([]*UserSiteCard, 0)
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"site_cards": userSiteCards,
 	})
 }

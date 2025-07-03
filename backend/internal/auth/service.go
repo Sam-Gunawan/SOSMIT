@@ -56,6 +56,7 @@ func (service *Service) Login(username, password string) (string, error) {
 	// Create the claims for the token.
 	// Claims are the data that will be encoded in the JWT token.
 	claims := jwt.MapClaims{
+		"user_id":  userCredentials.UserID,
 		"username": userCredentials.Username,
 		"position": userCredentials.Position,
 		"exp":      time.Now().Add(time.Hour * 72).Unix(), // Token expires in 72 hours

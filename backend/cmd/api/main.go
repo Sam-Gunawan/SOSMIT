@@ -49,10 +49,11 @@ func main() {
 
 	// Initialize the services
 	authService := auth.NewService(userRepo)
+	userService := user.NewService(userRepo)
 
 	// Initialize the handlers
 	authHandler := auth.NewHandler(authService)
-	userHandler := user.NewHandler(userRepo)
+	userHandler := user.NewHandler(userService)
 
 	// Setup CORS (Cross-Origin Resource Sharing) middleware.
 	// This allows us to handle requests from the Angular frontend.
@@ -80,6 +81,9 @@ func main() {
 		{
 			// GET /api/user/me
 			userRoutes.GET("/me", userHandler.GetMeHandler)
+
+			// GET /api/user/site-cards
+			userRoutes.GET("/site-cards", userHandler.GetUserSiteCardsHandler)
 		}
 	}
 
