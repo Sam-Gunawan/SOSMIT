@@ -1,0 +1,26 @@
+<section class="site-card">
+    <div class="card-header">
+        <h6 class="site-name">{{ siteCard().siteName }}</h6>
+        <span 
+            class="site-status"
+            [ngClass]="{
+                'status-active': siteCard().opnameStatus === 'active',
+                'status-completed': siteCard().opnameStatus === 'inactive',
+                'status-pending': siteCard().opnameStatus === 'pending',
+                'status-verified': siteCard().opnameStatus === 'maintenance',
+                'status-rejected': siteCard().opnameStatus === 'rejected',
+                'status-outdated': siteCard().opnameStatus === 'outdated'
+            }">
+            {{ siteCard().opnameStatus }}
+        </span>
+    </div>
+
+    <hr class="card-divider">
+
+    <div class="card-body">
+        <p class="site-location">{{ siteCard().siteLocation }}</p>
+        <div class="last-opname">
+            <p>Last Opname on </p><p class="opname-date">{{ siteCard().opnameDate }}</p>
+        </div>
+    </div>
+</section>

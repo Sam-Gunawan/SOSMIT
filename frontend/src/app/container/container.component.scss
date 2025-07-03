@@ -1,0 +1,13 @@
+@use "../../styles.scss" as styles;
+@use "sass:color";
+
+* {
+  @include styles.default-styles;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: styles.$background-color;
+}
