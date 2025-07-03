@@ -31,7 +31,8 @@
                 </div>
 
                 <section class="site-asset-list">
-                    
+                    <app-asset-card *ngFor="let assetCard of assetCardList" [assetCard]="assetCard">
+                    </app-asset-card>
                 </section>
             </div>
         </section>

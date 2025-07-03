@@ -1,0 +1,47 @@
+@use "../../styles.scss" as styles;
+@use "sass:color";
+
+* {
+  @include styles.default-styles;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: styles.$font-family;
+    color: styles.$primary-text-color;
+    margin: 0;
+}
+
+p {
+    font-size: 12px;
+    margin: 5px;
+}
+
+.asset-card {
+    border-radius: 20px;
+    padding: 20px;
+    background-color: styles.$tertiary-color;
+    color: styles.$primary-text-color;
+    height: 8rem; //temporary
+}
+
+.card-body {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.asset-name {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.additional-info {
+    justify-items: right;
+}
+
+.asset-status {
+    font-size: 12px;
+    background-color: styles.$button-color;
+    border-radius: 15px;
+    padding: 5px 10px;
+}

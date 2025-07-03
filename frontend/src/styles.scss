@@ -1,7 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 $font-family: "Rubik", sans-serif;
 $primary-color: #022c58c7;
-$secondary-color: #ef6b6b;
+$secondary-color: #ffaeae;
+$tertiary-color: rgb(249, 242, 242);
 
 $background-color: #ffffff;
 $secondary-background-color: rgb(222, 241, 249);
@@ -11,7 +12,7 @@ $button-color: #8cc0e8;
 $primary-text-color: #0b2c41;
 $secondary-text-color: #ffffff;
 $tertiary-text-color: #000000;
-$quaternary-text-color: grey;
+$quaternary-text-color: gray;
 
 @use "bootstrap/scss/bootstrap" as bs;
 
