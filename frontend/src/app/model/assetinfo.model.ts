@@ -1,14 +1,17 @@
 export interface Assetinfo {
-    assetID: number;
-    assetIcon: string;
     assetTag: string;
+    assetIcon: string;
     serialNumber: string;
     assetStatus: string;
+    statusReason?: string; // Optional field for status reason
     category: string;
     subCategory: string;
     productVariety: string;
     assetBrand: string;
     assetName: string;
-    assetOwner: string;
-    siteName: string;
+    condition: boolean;
+    conditionPhotoURL?: string; // Optional field for condition photo URL
+    assetOwner: number;
+    assetOwnerName: string;
+    siteID: number;
 }

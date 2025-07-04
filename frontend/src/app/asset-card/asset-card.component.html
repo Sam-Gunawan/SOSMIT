@@ -1,22 +1,22 @@
-<section class="asset-card">
+<section class="asset-card" *ngFor="let assetCard of assetsOnSite">
     <div class="card-body">
         <div class="main-info">
-            <img class="asset-icon" [src]="assetCard().assetIcon" [alt]="assetCard().assetName"/>
+            <img class="asset-icon" [src]="assetCard.assetIcon" [alt]="assetCard.assetName"/>
             <span 
                 class="asset-status"
                 [ngClass]="{
-                    'status-deployed': assetCard().assetStatus === 'deployed',
-                    'status-onLoan': assetCard().assetStatus === 'on loan',
+                    'status-deployed': assetCard.assetStatus === 'deployed',
+                    'status-onLoan': assetCard.assetStatus === 'on loan',
                 }">
-                {{ assetCard().assetStatus }}
+                {{ assetCard.assetStatus }}
             </span>
         </div>
         <div class="additional-info">
-            <p class="asset-tag">{{ assetCard().assetTag }}</p>
+            <p class="asset-tag">{{ assetCard.assetTag }}</p>
             <div class="asset-name">
-                {{ assetCard().assetName }}
+                {{ assetCard.assetName }}
             </div>
-            <p>{{ assetCard().assetOwner }}</p>
+            <p>{{ assetCard.assetOwnerName }}</p>
         </div>
     </div>
 </section>

@@ -112,21 +112,25 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_tag(_asset_tag VARCHAR(12))
 		condition BOOLEAN,
 		condition_photo_url TEXT,
 		owner_id INT,
+		owner_name VARCHAR(510),
 		site_id INT
 	)
 	LANGUAGE plpgsql
-AS $$
-	BEGIN
-		RETURN QUERY
-			SELECT a.asset_tag, a.serial_number, a.status, a.status_reason,
-				a.product_category, a.product_subcategory, a.product_variety,
-				a.brand_name, a.product_name, 
-				a.condition, a.condition_photo_url::TEXT,
-				a.owner_id, a.site_id
-			FROM "Asset" AS a
-			WHERE a.asset_tag = _asset_tag;
-	END;
-$$;
+	AS $$
+		BEGIN
+			RETURN QUERY
+				SELECT a.asset_tag, a.serial_number, a.status, a.status_reason,
+					a.product_category, a.product_subcategory, a.product_variety,
+					a.brand_name, a.product_name, 
+					a.condition, a.condition_photo_url::TEXT,
+					a.owner_id,
+					(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
+					a.site_id
+				FROM "Asset" AS a
+				LEFT JOIN "User" AS u ON a.owner_id = u.user_id
+				WHERE a.asset_tag = _asset_tag;
+		END;
+	$$;
 
 -- get_assets_by_site retrieves all assets for a given site
 CREATE OR REPLACE FUNCTION public.get_assets_by_site(_site_id INT)

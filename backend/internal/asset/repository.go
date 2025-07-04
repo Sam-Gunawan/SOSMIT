@@ -19,6 +19,7 @@ type Asset struct {
 	Condition          bool
 	ConditionPhotoURL  string
 	OwnerID            int64
+	OwnerName          string // Owner's full name, can be a combination of first and last name
 	SiteID             int64
 }
 
@@ -51,6 +52,7 @@ func (repo *Repository) GetAssetByTag(assetTag string) (*Asset, error) {
 		&asset.Condition,
 		&asset.ConditionPhotoURL,
 		&asset.OwnerID,
+		&asset.OwnerName,
 		&asset.SiteID,
 	)
 

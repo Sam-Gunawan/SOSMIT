@@ -3,6 +3,7 @@ import { ContainerComponent } from './container.component';
 import { DashboardComponent } from '../dashboard/dashboard.component';
 import { SitePageComponent } from '../site-page/site-page.component';
 import { inject } from '@angular/core';
+import { AssetCardComponent } from '../asset-card/asset-card.component';
 
 const authGuard: CanActivateFn = () => {
     const token = localStorage.getItem('auth_token');
@@ -20,7 +21,7 @@ export const routes: Routes = [
         path: '', component: ContainerComponent,
         children: [
             { path: '', canActivate: [authGuard], component: DashboardComponent, pathMatch: 'full' },
-            { path: 'site/:id', component: SitePageComponent }
+            { path: 'site/:id', component: SitePageComponent, canActivate: [authGuard] }
         ]
     }
 ];
