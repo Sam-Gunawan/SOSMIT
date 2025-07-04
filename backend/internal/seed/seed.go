@@ -233,25 +233,19 @@ func seedAsset(db *sql.DB, record []string) error {
 		return err
 	}
 
-	// Convert empty string to nil for nullable fields
-	var status_reasonPtr interface{}
+	// Convert empty string to default value for fields with defaults
 	if status_reason == "" {
-		status_reasonPtr = nil
-	} else {
-		status_reasonPtr = record[3]
+		status_reason = "-1"
 	}
 
-	var conditionPhotoURLPtr interface{}
 	if condition_photo_url == "" {
-		conditionPhotoURLPtr = nil
-	} else {
-		conditionPhotoURLPtr = condition_photo_url
+		condition_photo_url = "-1"
 	}
 
 	query := `INSERT INTO "Asset" (asset_tag, serial_number, status, status_reason, product_category, product_subcategory, product_variety, brand_name, product_name, condition, condition_photo_url, owner_id, site_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) ON CONFLICT (asset_tag) DO NOTHING`
 
-	_, err = db.Exec(query, asset_tag, serial_number, status, status_reasonPtr, product_category, product_subcategory,
-		product_variety, brand_name, product_name, condition, conditionPhotoURLPtr, owner_id, site_id)
+	_, err = db.Exec(query, asset_tag, serial_number, status, status_reason, product_category, product_subcategory,
+		product_variety, brand_name, product_name, condition, condition_photo_url, owner_id, site_id)
 	if err != nil {
 		log.Fatalf("Error inserting record into Asset table: %v\n", err)
 
