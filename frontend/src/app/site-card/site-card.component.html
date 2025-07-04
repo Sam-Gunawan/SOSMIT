@@ -1,26 +1,26 @@
-<section class="site-card">
+<section class="site-card" *ngFor="let siteCard of siteCardList" (click) = "goToSite(siteCard.siteID)">
     <div class="card-header">
-        <h6 class="site-name">{{ siteCard().siteName }}</h6>
+        <h6 class="site-name">{{ siteCard.siteName }}</h6>
         <span 
             class="site-status"
             [ngClass]="{
-                'status-active': siteCard().opnameStatus === 'Active',
-                'status-completed': siteCard().opnameStatus === 'Inactive',
-                'status-pending': siteCard().opnameStatus === 'Pending',
-                'status-verified': siteCard().opnameStatus === 'Maintenance',
-                'status-rejected': siteCard().opnameStatus === 'Rejected',
-                'status-outdated': siteCard().opnameStatus === 'Outdated'
+                'status-active': siteCard.opnameStatus === 'Active',
+                'status-completed': siteCard.opnameStatus === 'Inactive',
+                'status-pending': siteCard.opnameStatus === 'Pending',
+                'status-verified': siteCard.opnameStatus === 'Maintenance',
+                'status-rejected': siteCard.opnameStatus === 'Rejected',
+                'status-outdated': siteCard.opnameStatus === 'Outdated'
             }">
-            {{ siteCard().opnameStatus }}
+            {{ siteCard.opnameStatus }}
         </span>
     </div>
 
     <hr class="card-divider">
 
     <div class="card-body">
-        <p class="site-location">{{ siteCard().siteGroup }}, {{ siteCard().siteRegion }}</p>
+        <p class="site-location">{{ siteCard.siteGroup }}, {{ siteCard.siteRegion }}</p>
         <div class="last-opname">
-            <p>Last Opname on {{ siteCard().opnameDate }}</p>
+            <p>Last Opname on {{ siteCard.opnameDate }}</p>
         </div>
     </div>
 </section>

@@ -14,7 +14,6 @@ import { titleCase, formatDate } from '../reusable_functions'; // Import the tit
   styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent {
-  siteCardList: Siteinfo[] = [];  
   isLoading: boolean = true;
   errorMessage: string = '';
   loggedInUser: User = new User(); // Initialize with a new User instance
@@ -28,7 +27,6 @@ export class DashboardComponent {
     // Fetch the logged-in user's profile when the component initializes
     console.log('[Dashboard] Initializing DashboardComponent...');
     this.fetchMyProfile();
-    this.fetchMySiteCards();
   }
 
   fetchMyProfile(): void {
@@ -47,24 +45,6 @@ export class DashboardComponent {
         console.error('[Dashboard] Failed to fetch user profile:', error);
       }
     });
-  }
-
-  fetchMySiteCards(): void {
-    this.isLoading = true; // Set loading state to true
-    this.apiService.getUserSiteCards().subscribe({
-      next: (siteCardsList) => {
-        this.siteCardList = siteCardsList; // Update the siteCardList with the fetched data
-        this.isLoading = false; // Set loading state to false after data is fetched
-        console.log('[Dashboard] Site cards fetched successfully:', this.siteCardList);
-        console.log('[Dashboard] Site cards type:', typeof this.siteCardList);
-      },
-
-      error: (error) => {
-        this.errorMessage = 'Failed to fetch site cards. Please try again later.';
-        this.isLoading = false;
-        console.log('[Dashboard] Error fetching site cards:', error);
-      }
-    })
   }
 
   logout(): void {

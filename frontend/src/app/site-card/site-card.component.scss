@@ -21,8 +21,13 @@ p {
     padding: 20px;
     background-color: styles.$secondary-background-color;
     color: styles.$primary-text-color;
-}
 
+    // kiw kiw. change hover style here!!
+    &:hover {
+        background-color: color.scale(styles.$secondary-background-color, $lightness: -5%);
+        cursor: pointer;
+    }
+}
 .card-header {
     display: flex;
     flex-direction: row;
@@ -49,4 +54,3 @@ p {
     display: flex;
     flex-direction: row;
 }
-
