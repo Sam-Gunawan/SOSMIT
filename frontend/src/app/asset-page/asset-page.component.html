@@ -1,1 +1,95 @@
-<p>asset-page works!</p>
+<div class="modal-content">
+    <div class="modal-header">
+        <section class="asset-header">
+            <h2 class="modal-title fs-5 asset-tag">{{ assetPage?.assetTag }}</h2>
+            <p class="serial-numer">{{ assetPage?.serialNumber }}</p>
+        </section>
+
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+
+    <hr class="divider">
+
+    <div class="modal-body">
+        <div class="asset-user">
+            <div class="icon">
+                <img class="asset-icon" [src]="assetPage?.assetIcon" [alt]="assetPage?.assetName"/>
+            </div>
+
+            <div class="user-info">
+                <h5 class="asset-owner">{{ assetPage?.assetOwner }}</h5>
+                <p class="user-position">[user position]</p>
+                <p class="cost-center">Cost Center: [cost center]</p>
+            </div>
+        </div>
+
+        <div class="asset-information">
+            <div class="status">
+                <p>{{ assetPage?.assetName }}</p>
+                <span 
+                    class="asset-status"
+                    [ngClass]="{
+                        'status-deployed': assetPage?.assetStatus === 'deployed',
+                        'status-onLoan': assetPage?.assetStatus === 'on loan',
+                        'status-disposed': assetPage?.assetStatus === 'disposed'
+                    }">
+                    {{ assetPage?.assetStatus }}
+                </span>
+                <p>[reason status if disposed, if status okay its blank]</p>
+
+                <hr class="divider">
+
+                <div class="asset-condition">
+                    <p>Condition</p>
+                    <div class="rating">
+                        <!-- Thumbs up -->
+                        <span class="like grow" [class.active]="isLiked" (click)="setLike()">
+                            <i class="fa fa-thumbs-up fa-3x like" aria-hidden="true"></i>
+                        </span>
+                        <!-- Thumbs down -->
+                        <span class="dislike grow" [class.active]="isDisliked" (click)="setDislike()">
+                            <i class="fa fa-thumbs-down fa-3x like" aria-hidden="true"></i>
+                        </span>
+                    </div>
+
+                    <p class="condition-reason">-</p>
+                </div>
+            </div>
+
+            <div class="asset-location">
+                <p>Location</p>
+                <p>[room]</p>
+                <p>[location]</p>
+                <p>[OU]</p>
+                <p>[RO]</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Understood</button>
+    </div>
+</div>
+
+<!-- <main class="asset-wrapper">
+    <div class="asset-page">
+        <section class="asset-header">
+            <h2 class="asset-tag">{{ assetPage?.assetTag }}</h2>
+            <p class="serial-numer">{{ assetPage?.serialNumber }}</p>
+        </section>
+
+        <hr class="divider">
+
+        <div class="asset-user">
+            <div class="icon">
+                <img class="asset-icon" [src]="assetPage?.assetIcon" [alt]="assetPage?.assetName"/>
+            </div>
+            <div class="user-info">
+                <h5 class="asset-owner">{{ assetPage?.assetOwner }}</h5>
+                <p class="user-position">[user position]</p>
+            </div>
+        </div>
+
+    </div>
+</main> -->
