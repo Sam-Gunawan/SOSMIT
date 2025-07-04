@@ -6,6 +6,7 @@ import { tap, map } from 'rxjs/operators';
 import { Siteinfo } from '../model/siteinfo.model';
 import { Assetinfo } from '../model/assetinfo.model';
 import { formatDate } from '../reusable_functions';
+import { titleCase } from '../reusable_functions';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,7 @@ export class ApiService {
   private authApiUrl = 'http://localhost:8080/api/auth'
   private userApiUrl = 'http://localhost:8080/api/user'
   private siteApiUrl = 'http://localhost:8080/api/site'
+  private assetApiUrl = 'http://localhost:8080/api/asset'
 
   constructor(private http: HttpClient, private router: Router) {}
   login(credentials: {username: string, password: string}): Observable<any> {
@@ -69,6 +71,37 @@ export class ApiService {
     );
   }
 
+  getAssetDetails(assetTag: string): Observable<any> {
+    // This method will fetch the details of a specific asset by its tag.
+    return this.http.get<Assetinfo>(`${this.assetApiUrl}/${assetTag}`).pipe(
+      map((response: any) => {
+        // Map the response to the desired format.
+        return {
+          assetTag: response.asset_tag,
+          assetIcon: this.getAssetIcon(response.product_variety), // Generate icon path based on product variety
+          serialNumber: response.serial_number,
+          assetStatus: response.status,
+          statusReason: response.status_reason || '-1', // Default to '-1' if status reason is not provided
+          category: response.product_category,
+          subCategory: response.product_subcategory,
+          productVariety: response.product_variety,
+          assetBrand: response.brand_name,
+          assetName: response.product_name,
+          condition: response.condition,
+          conditionPhotoURL: response.condition_photo_url || '', // Default to empty string if condition photo
+          assetOwner: response.owner_id,
+          assetOwnerName: titleCase(response.owner_name) || '', // Default to empty string if owner name is not provided
+          siteID: response.site_id
+        };
+      }),
+      tap((assetDetails: Assetinfo) => {
+        // Log the fetched asset details for debugging purposes.
+        console.log('[ApiService] Fetched asset details:', assetDetails);
+      })
+    );
+  }
+
+
   getAssetsOnSite(siteID: number): Observable<any> {
     // This method will fetch all assets on a specific site.
     return this.http.get<Assetinfo[]>(`${this.siteApiUrl}/${siteID}/assets`).pipe(
@@ -88,7 +121,7 @@ export class ApiService {
           condition: asset.Condition,
           conditionPhotoURL: asset.ConditionPhotoURL || '', // Default to empty string if condition photo
           assetOwner: asset.OwnerID,
-          assetOwnerName: asset.OwnerName || '', // Default to empty string if owner name is not provided
+          assetOwnerName: titleCase(asset.OwnerName) || '', // Default to empty string if owner name is not provided
           siteName: asset.SiteID
         }));
       }),

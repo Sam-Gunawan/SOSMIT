@@ -57,6 +57,9 @@ func (handler *Handler) GetAssetByTagHandler(context *gin.Context) {
 		"product_name":        asset.ProductName,
 		"condition":           asset.Condition,
 		"condition_photo_url": asset.ConditionPhotoURL,
+		"owner_id":            asset.OwnerID,
+		"owner_name":          asset.OwnerName,
+		"site_id":             asset.SiteID,
 	})
 }
 

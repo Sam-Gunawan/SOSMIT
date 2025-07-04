@@ -1,5 +1,5 @@
-<section class="asset-card" *ngFor="let assetCard of assetsOnSite" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-    <div class="card-body">
+<section class="asset-card" *ngFor="let assetCard of assetsOnSite">
+    <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
         <div class="main-info">
             <img class="asset-icon" [src]="assetCard.assetIcon" [alt]="assetCard.assetName"/>
             <span 
@@ -21,15 +21,9 @@
         </div>
     </div>
 
-    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal fade" [id]="'modal-' + assetCard.assetTag" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" [attr.aria-labelledby]="'modal-' + assetCard.assetTag + '-label'" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <app-asset-page></app-asset-page>
-        </div>
-    </div>
-
-    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <app-asset-page></app-asset-page>
+            <app-asset-page [assetTag]="assetCard.assetTag"></app-asset-page>
         </div>
     </div>
 </section>

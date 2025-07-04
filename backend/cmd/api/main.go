@@ -96,6 +96,13 @@ func main() {
 			// GET /api/site/:site-id/assets
 			siteRoutes.GET("/:site-id/assets", assetHandler.GetAssetsBySiteHandler)
 		}
+
+		assetRoutes := api.Group("/asset")
+		assetRoutes.Use(auth.AuthMiddleware())
+		{
+			// GET /api/asset/:asset_tag
+			assetRoutes.GET("/:asset_tag", assetHandler.GetAssetByTagHandler)
+		}
 	}
 
 	// Start the server on port 8080.
