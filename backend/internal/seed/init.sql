@@ -69,10 +69,10 @@ CREATE TABLE "Asset" (
     "status" VARCHAR(20) NOT NULL CHECK ("status" IN ('Deployed', 'In Inventory', 'In Repair', 'Disposed', 'Down', 'On Loan')),
     "status_reason" VARCHAR(20)
     CHECK (
-        ("status" = 'Disposed' AND "status_reason" IS NOT NULL AND "status_reason" IN ('Lost', 'Obsolete'))
+        ("status" = 'Disposed' AND "status_reason" IN ('Lost', 'Obsolete'))
         OR
-        ("status" <> 'Disposed' AND "status_reason" IS NULL)
-    ),
+        ("status" != 'Disposed' AND "status_reason" = '-1')
+    ) DEFAULT '-1',
     "product_category" VARCHAR(50) NOT NULL CHECK ("product_category" IN ('Hardware', 'Software')),
     "product_subcategory" VARCHAR(50) NOT NULL CHECK ("product_subcategory" IN ('Processing Unit', 'Peripheral', 'Power Supply')),
     "product_variety" VARCHAR(50) NOT NULL CHECK ("product_variety" IN ('Laptop', 'Desktop', 'Monitor', 'Uninterrupted Power Supply', 'Personal Digital Assistant', 'Printer/Multifunction')),
@@ -81,10 +81,10 @@ CREATE TABLE "Asset" (
     "condition" BOOLEAN NOT NULL DEFAULT TRUE, -- TRUE means the asset is in good condition, FALSE means it is not.
     "condition_photo_url" TEXT
     CHECK (
-        ("condition_photo_url" IS NULL AND "condition" = TRUE) -- If condition is good, no photo is required
+        ("condition" = TRUE AND ("condition_photo_url" = '-1' OR "condition_photo_url" IS NOT NULL))
         OR
-        ("condition_photo_url" IS NOT NULL AND "condition" = FALSE) -- If condition is not good, a photo is required
-    ),
+        ("condition" = FALSE AND "condition_photo_url" != '-1' AND "condition_photo_url" IS NOT NULL)
+    ) DEFAULT '-1',
     -- Foreign key to User (owner of the asset). On delete set null means if the User is deleted, the owner_id in Asset will be set to NULL.
     "owner_id" INT NOT NULL REFERENCES "User"("user_id") ON DELETE SET NULL,
 

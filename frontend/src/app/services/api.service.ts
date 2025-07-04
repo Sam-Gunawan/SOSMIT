@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { Siteinfo } from '../model/siteinfo.model';
+import { Assetinfo } from '../model/assetinfo.model';
 import { formatDate } from '../reusable_functions';
 
 @Injectable({
@@ -13,6 +14,7 @@ export class ApiService {
   // This service will handle API calls, such as login, fetching data, etc.
   private authApiUrl = 'http://localhost:8080/api/auth'
   private userApiUrl = 'http://localhost:8080/api/user'
+  private siteApiUrl = 'http://localhost:8080/api/site'
 
   constructor(private http: HttpClient, private router: Router) {}
   login(credentials: {username: string, password: string}): Observable<any> {
@@ -65,5 +67,49 @@ export class ApiService {
         console.log('[ApiService] Fetched site cards:', siteCards);
       })
     );
+  }
+
+  getAssetsOnSite(siteID: number): Observable<any> {
+    // This method will fetch all assets on a specific site.
+    return this.http.get<Assetinfo[]>(`${this.siteApiUrl}/${siteID}/assets`).pipe(
+      map((response: any) => {
+        // Map the response to the desired format.
+        return response.assets_on_site.map((asset: any) => ({
+          assetTag: asset.AssetTag,
+          assetIcon: this.getAssetIcon(asset.ProductVariety), // Generate icon path based on product variety
+          serialNumber: asset.SerialNumber,
+          assetStatus: asset.Status,
+          statusReason: asset.StatusReason || '-1', // Default to '-1' if status reason is not provided
+          category: asset.ProductCategory,
+          subCategory: asset.ProductSubCategory,
+          productVariety: asset.ProductVariety,
+          assetBrand: asset.BrandName,
+          assetName: asset.ProductName,
+          condition: asset.Condition,
+          conditionPhotoURL: asset.ConditionPhotoURL || '', // Default to empty string if condition photo
+          assetOwner: asset.OwnerID,
+          assetOwnerName: asset.OwnerName || '', // Default to empty string if owner name is not provided
+          siteName: asset.SiteID
+        }));
+      }),
+      tap((response: any) => {
+        // Log the fetched assets for debugging purposes.
+        console.log(`[ApiService] Fetched assets for site ${siteID}:`, response);
+      })
+    );
+  }
+
+  // Helper method to get icon path based on product variety
+  private getAssetIcon(productVariety: string): string {
+    const varietyMap: { [key: string]: string } = {
+      'Laptop': 'assets/laptop.svg',
+      'Desktop': 'assets/desktop.svg',
+      'Monitor': 'assets/monitor.svg',
+      'Uninterrupted Power Supply': 'assets/ups.svg',
+      'Personal Digital Assistant': 'assets/handheld.svg',
+      'Printer/Multifunction': 'assets/printer.svg'
+    };
+    
+    return varietyMap[productVariety] || 'assets/desktop.svg'; // Default to desktop icon if variety not found
   }
 }

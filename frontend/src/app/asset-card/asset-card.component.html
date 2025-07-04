@@ -1,23 +1,29 @@
-<section class="asset-card" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+<section class="asset-card" *ngFor="let assetCard of assetsOnSite" type="button" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
     <div class="card-body">
         <div class="main-info">
-            <img class="asset-icon" [src]="assetCard().assetIcon" [alt]="assetCard().assetName"/>
+            <img class="asset-icon" [src]="assetCard.assetIcon" [alt]="assetCard.assetName"/>
             <span 
                 class="asset-status"
                 [ngClass]="{
-                    'status-deployed': assetCard().assetStatus === 'deployed',
-                    'status-onLoan': assetCard().assetStatus === 'on loan',
-                    'status-disposed': assetCard().assetStatus === 'disposed'
+                    'status-deployed': assetCard.assetStatus === 'deployed',
+                    'status-onLoan': assetCard.assetStatus === 'on loan',
+                    'status-disposed': assetCard.assetStatus === 'disposed'
                 }">
-                {{ assetCard().assetStatus }}
+                {{ assetCard.assetStatus }}
             </span>
         </div>
         <div class="additional-info">
-            <p class="asset-tag">{{ assetCard().assetTag }}</p>
+            <p class="asset-tag">{{ assetCard.assetTag }}</p>
             <div class="asset-name">
-                {{ assetCard().assetName }}
+                {{ assetCard.assetName }}
             </div>
-            <p>{{ assetCard().assetOwner }}</p>
+            <p>{{ assetCard.assetOwnerName }}</p>
+        </div>
+    </div>
+
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <app-asset-page></app-asset-page>
         </div>
     </div>
 

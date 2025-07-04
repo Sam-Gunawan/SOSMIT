@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/asset"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/auth"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
 	"github.com/gin-contrib/cors"
@@ -46,14 +47,17 @@ func main() {
 
 	// Initialize the user repository with the database connection.
 	userRepo := user.NewRepository(db)
+	assetRepo := asset.NewRepository(db)
 
 	// Initialize the services
 	authService := auth.NewService(userRepo)
 	userService := user.NewService(userRepo)
+	assetService := asset.NewService(assetRepo)
 
 	// Initialize the handlers
 	authHandler := auth.NewHandler(authService)
 	userHandler := user.NewHandler(userService)
+	assetHandler := asset.NewHandler(assetService)
 
 	// Setup CORS (Cross-Origin Resource Sharing) middleware.
 	// This allows us to handle requests from the Angular frontend.
@@ -84,6 +88,13 @@ func main() {
 
 			// GET /api/user/site-cards
 			userRoutes.GET("/site-cards", userHandler.GetUserSiteCardsHandler)
+		}
+
+		siteRoutes := api.Group("/site")
+		siteRoutes.Use(auth.AuthMiddleware())
+		{
+			// GET /api/site/:site-id/assets
+			siteRoutes.GET("/:site-id/assets", assetHandler.GetAssetsBySiteHandler)
 		}
 	}
 
