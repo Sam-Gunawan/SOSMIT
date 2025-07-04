@@ -3,29 +3,29 @@
         <section class="site-content">
             <div class="site-information">
                 <div class="basic-info">
-                    <h2 class="site-name">{{ sitePage?.siteName }}</h2>
-                    <p class="site-location">{{ sitePage?.siteGroup }}, {{ sitePage?.siteRegion }}</p>
+                    <h2 class="site-name">{{ sitePage.siteName }}</h2>
+                    <p class="site-location">{{ sitePage.siteGroup }}, {{ sitePage.siteRegion }}</p>
                 </div>
                 <div class="opname-info">
                     <span 
                         class="site-status"
                         [ngClass]="{
-                            'status-active': sitePage?.opnameStatus === 'active',
-                            'status-completed': sitePage?.opnameStatus === 'inactive',
-                            'status-pending': sitePage?.opnameStatus === 'pending',
-                            'status-verified': sitePage?.opnameStatus === 'maintenance',
-                            'status-rejected': sitePage?.opnameStatus === 'rejected',
-                            'status-outdated': sitePage?.opnameStatus === 'outdated'
+                            'status-active': sitePage.opnameStatus === 'active',
+                            'status-completed': sitePage.opnameStatus === 'inactive',
+                            'status-pending': sitePage.opnameStatus === 'pending',
+                            'status-verified': sitePage.opnameStatus === 'maintenance',
+                            'status-rejected': sitePage.opnameStatus === 'rejected',
+                            'status-outdated': sitePage.opnameStatus === 'outdated'
                         }">
-                        {{ sitePage?.opnameStatus }}
+                        {{ sitePage.opnameStatus }}
                     </span>
-                    <p class="opname-date">Last Opname on {{ sitePage?.opnameDate }}</p>
+                    <p class="opname-date">Last Opname on {{ sitePage.opnameDate }}</p>
                 </div>
             </div>
 
-            <hr class="divider">
-
+            
             <div class="site-assets">
+                <hr class="divider">
                 <div class="assets-info-header">
                     <h5>Asset Info:</h5>
                 </div>

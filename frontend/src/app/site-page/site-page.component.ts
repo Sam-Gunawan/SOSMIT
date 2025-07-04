@@ -14,13 +14,27 @@ import { AssetCardComponent } from '../asset-card/asset-card.component';
   styleUrl: './site-page.component.scss'
 })
 export class SitePageComponent {
-  sitePage? : Siteinfo;
+  sitePage: Siteinfo;
+  siteList?: Siteinfo[] = []; // Initialize siteList as an empty array
+  isLoading: boolean = true; // Loading state to show a spinner or loading indicator
+  errorMessage: string = '';
 
   constructor(private route: ActivatedRoute, private apiService: ApiService) {
-    const siteList: Siteinfo[] = new DashboardComponent(this.apiService).siteCardList;
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    this.sitePage = siteList.find (site => site.siteID === id);
+    this.sitePage = {
+      siteID: -1,
+      siteName: '',
+      siteGroup: '',
+      siteRegion: '',
+      siteGA: -1,
+      opnameSessionID: -1,
+      opnameStatus: '',
+      opnameDate: ''
+    };
   }
+
+  ngOnInit(): void {
+    this.fetchSitePage(); // Fetch site page data when the component initializes
+  } 
 
   assetCardList: Assetinfo[] = [
     {
@@ -304,4 +318,30 @@ export class SitePageComponent {
       siteName: 'Area Marketing Office Denpasar'
     }
   ]
+
+  fetchSitePage(): void {
+    this.apiService.getUserSiteCards().subscribe({
+      next: (siteCardsList) => {
+        this.siteList = siteCardsList; // Update the siteList with the fetched data
+        console.log('[SitePage] Site cards fetched successfully:', this.siteList);
+        const id = Number(this.route.snapshot.paramMap.get('id'));
+        const fetchedSite = this.siteList?.find((site: Siteinfo) => site.siteID === id);
+        this.isLoading = false; // Set loading state to false after data is fetched
+        if (fetchedSite) {
+          this.sitePage = fetchedSite; // Set the sitePage to the fetched site
+        } else {
+          this.errorMessage = 'Site not found.';
+          console.error('[SitePage] Site not found for ID:', id);
+          return
+        }
+        console.log('sitePage', this.sitePage);
+      },
+      error: (error) => {
+        // Handle the error appropriately, e.g., show a message to the user
+        console.error('[SitePage] Failed to fetch site cards:', error);
+        this.isLoading = false; // Set loading state to false even if there's an error
+        this.errorMessage = 'Failed to load site cards. Please try again later.';
+      }
+    });
+  }
 }
