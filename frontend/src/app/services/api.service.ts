@@ -76,7 +76,7 @@ export class ApiService {
         // Map the response to the desired format.
         return response.assets_on_site.map((asset: any) => ({
           assetTag: asset.AssetTag,
-          assetIcon: asset.AssetIcon,
+          assetIcon: this.getAssetIcon(asset.ProductVariety), // Generate icon path based on product variety
           serialNumber: asset.SerialNumber,
           assetStatus: asset.Status,
           statusReason: asset.StatusReason || '-1', // Default to '-1' if status reason is not provided
@@ -97,5 +97,19 @@ export class ApiService {
         console.log(`[ApiService] Fetched assets for site ${siteID}:`, response);
       })
     );
+  }
+
+  // Helper method to get icon path based on product variety
+  private getAssetIcon(productVariety: string): string {
+    const varietyMap: { [key: string]: string } = {
+      'Laptop': 'assets/laptop.svg',
+      'Desktop': 'assets/desktop.svg',
+      'Monitor': 'assets/monitor.svg',
+      'Uninterrupted Power Supply': 'assets/ups.svg',
+      'Personal Digital Assistant': 'assets/handheld.svg',
+      'Printer/Multifunction': 'assets/printer.svg'
+    };
+    
+    return varietyMap[productVariety] || 'assets/desktop.svg'; // Default to desktop icon if variety not found
   }
 }
