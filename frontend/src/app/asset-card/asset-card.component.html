@@ -2,9 +2,6 @@
     <div class="card-body">
         <div class="main-info">
             <img class="asset-icon" [src]="assetCard().assetIcon" [alt]="assetCard().assetName"/>
-            <p class="asset-tag">{{ assetCard().assetTag }}</p>
-        </div>
-        <div class="additional-info">
             <span 
                 class="asset-status"
                 [ngClass]="{
@@ -13,6 +10,9 @@
                 }">
                 {{ assetCard().assetStatus }}
             </span>
+        </div>
+        <div class="additional-info">
+            <p class="asset-tag">{{ assetCard().assetTag }}</p>
             <div class="asset-name">
                 {{ assetCard().assetName }}
             </div>

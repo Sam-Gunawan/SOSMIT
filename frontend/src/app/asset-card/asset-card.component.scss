@@ -18,7 +18,7 @@ p {
 
 .asset-card {
     border-radius: 20px;
-    padding: 20px;
+    padding: 10px;
     background-color: styles.$tertiary-color;
     color: styles.$primary-text-color;
     height: 8rem; //temporary
@@ -35,25 +35,38 @@ p {
 .main-info {
     display: flex;
     justify-content: center;
-    align-items: start;
+    align-items: center;
     flex-direction: column;
+    margin: 0px 5px;
 }
 
 .asset-icon {
     height: 100%;
     object-fit: cover;
     display: block;
+    // padding: 5px 0px;
+}
+
+.asset-status {
+    font-size: 10px;
+    background-color: styles.$button-color;
+    border-radius: 15px;
+    padding: 5px 10px;
+}
+
+.additional-info {
+    justify-items: right;
 }
 
 .asset-tag {
     font-size: 15px;
     font-weight: bold;
-    margin: 0px;
+    margin: 0px 5px;
 }
 
 .asset-name {
     font-size: 12px;
-    margin: 10px 5px 5px 5px;
+    margin: 5px;
     max-width: 110px;
     white-space: nowrap;
     overflow: hidden;
@@ -61,13 +74,5 @@ p {
     display: block;
 }
 
-.additional-info {
-    justify-items: right;
-}
 
-.asset-status {
-    font-size: 12px;
-    background-color: styles.$button-color;
-    border-radius: 15px;
-    padding: 5px 10px;
-}
+
