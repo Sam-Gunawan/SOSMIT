@@ -2,10 +2,11 @@ import { Component } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
+  imports: [FormsModule, CommonModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
@@ -42,7 +43,7 @@ export class LoginComponent {
         
         // Handle errors gracefully (HTTP 400-599)
         error: (error) => {
-          this.errorMessage = 'Login failed. Please check your credentials.';
+          this.errorMessage = 'Login failed. Incorrect username or password.';
           console.error('Login error:', error);
         }
 

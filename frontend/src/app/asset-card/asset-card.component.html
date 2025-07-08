@@ -27,3 +27,13 @@
         </div>
     </div>
 </section>
+
+<!-- NO ASSETS FOUND MESSAGE -->
+<section *ngIf="assetsOnSite && assetsOnSite.length === 0">
+    <p class="no-assets-message">No assets found for this site</p>
+</section>
+
+<!-- LOADING ASSETS -->
+<section class="loading" *ngIf="isLoading">
+    <p>Loading assets...</p>
+</section>

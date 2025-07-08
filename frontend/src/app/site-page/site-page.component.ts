@@ -37,6 +37,7 @@ export class SitePageComponent {
   } 
 
   fetchSitePage(): void {
+    this.isLoading = true; // Set loading state to true before fetching data
     this.apiService.getUserSiteCards().subscribe({
       next: (siteCardsList) => {
         this.siteList = siteCardsList; // Update the siteList with the fetched data

@@ -1,4 +1,4 @@
-<section class="site-card" *ngFor="let siteCard of siteCardList" (click) = "goToSite(siteCard.siteID)">
+<section class="site-card" *ngFor="let siteCard of siteCardList" (click)="goToSite(siteCard.siteID)">
     <div class="card-header">
         <h6 class="site-name">{{ siteCard.siteName }}</h6>
         <span 
@@ -23,4 +23,8 @@
             <p>Last Opname on {{ siteCard.opnameDate }}</p>
         </div>
     </div>
+</section>
+
+<section *ngIf="errorMessage">
+    <h1 class="error-message">{{ errorMessage }}</h1>
 </section>

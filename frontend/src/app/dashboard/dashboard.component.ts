@@ -32,16 +32,20 @@ export class DashboardComponent {
   fetchMyProfile(): void {
     // Call the getUserProfile method from ApiService
     // Only calls for the logged-in user's profile which is at `/api/user/me`
+    this.isLoading = true; // Set loading state to true
+    this.errorMessage = ''; // Reset error message
     this.apiService.getUserProfile('me').subscribe({
       next: (user) => {
         // Update the logged-in user with the fetched profile.
         this.loggedInUser.firstName = titleCase(user["first_name"]);
+        this.isLoading = false; // Set loading state to false
         // TODO: Fetch and store more necessary data later on...
       },
 
       // Handle errors gracefully (HTTP 400-599)
       error: (error) => {
         this.errorMessage = "User's profile not found.";
+        this.isLoading = false; // Set loading state to false
         console.error('[Dashboard] Failed to fetch user profile:', error);
       }
     });

@@ -32,7 +32,7 @@ export class SiteCardComponent {
       },
 
       error: (error) => {
-        this.errorMessage = 'Failed to fetch site cards. Please try again later.';
+        this.errorMessage = 'Failed to fetch your sites. Please try again later.';
         this.isLoading = false;
         console.log('[SiteCard] Error fetching site cards:', error);
       }

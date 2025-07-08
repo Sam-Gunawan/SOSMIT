@@ -12,6 +12,11 @@
             <label for="password">Password</label>
             <input id="password" type="password" name="password" [(ngModel)]="credentials.password" required placeholder="Enter your password" />
           </div>
+
+          <!-- LOGIN ERROR MESSAGE -->
+          <div class="form-error" *ngIf="errorMessage">
+            <p id="error-message" class="mb-0">{{ errorMessage }}</p>
+          </div>
           <button type="submit" class="login-btn">Login</button>
         </div>
       </div>

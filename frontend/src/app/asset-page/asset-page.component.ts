@@ -19,6 +19,7 @@ export class AssetPageComponent {
   errorMessage: string = '';
 
   constructor(private apiService: ApiService) {
+    // TODO: separate assetPage and assetCard sql function. make one for each and fetch only the displayed info.
     this.assetPage = {
       assetTag: 'N/A',
       assetIcon: '',
@@ -55,6 +56,7 @@ export class AssetPageComponent {
   }
 
   fetchAssetPage(): void {
+    this.isLoading = true; // Set loading state to true before fetching data
     this.apiService.getAssetDetails(this.assetTag()).subscribe({
       next: (asset) => {
         this.assetPage = asset; // Update the assetPage with the fetched data

@@ -1,5 +1,5 @@
 <main class="site-wrapper">
-    <div class="site-page">
+    <div class="site-page" *ngIf="errorMessage === '' && !isLoading">
         <section class="site-content">
             <div class="site-information">
                 <div class="basic-info">
@@ -53,5 +53,15 @@
 
         <div class="bottom-fade"></div>
     </div>
-</main>
 
+    <!-- ERROR MESSAGE -->
+    <div class="error-message" *ngIf="errorMessage">
+        <h1>{{ errorMessage }}</h1>
+        <p>Please try again later.</p>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loading" *ngIf="isLoading">
+        <p>Loading site data...</p>
+    </div>
+</main>

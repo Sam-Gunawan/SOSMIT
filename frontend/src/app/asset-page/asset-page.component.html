@@ -1,4 +1,4 @@
-<div class="modal-content">
+<div class="modal-content" *ngIf="errorMessage === '' && !isLoading">
     <div class="modal-header">
         <section class="asset-header">
             <h2 class="modal-title fs-5 asset-tag">{{ assetPage?.assetTag }}</h2>
@@ -72,24 +72,34 @@
     </div>
 </div>
 
-<!-- <main class="asset-wrapper">
-    <div class="asset-page">
-        <section class="asset-header">
-            <h2 class="asset-tag">{{ assetPage?.assetTag }}</h2>
-            <p class="serial-numer">{{ assetPage?.serialNumber }}</p>
-        </section>
-
-        <hr class="divider">
-
-        <div class="asset-user">
-            <div class="icon">
-                <img class="asset-icon" [src]="assetPage?.assetIcon" [alt]="assetPage?.assetName"/>
-            </div>
-            <div class="user-info">
-                <h5 class="asset-owner">{{ assetPage?.assetOwner }}</h5>
-                <p class="user-position">[user position]</p>
-            </div>
-        </div>
-
+<div class="modal-content" *ngIf="errorMessage">
+    <div class="modal-header">
+        <h5 class="modal-title">Error</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
     </div>
-</main> -->
+
+    <div class="modal-body">
+        <p>{{ errorMessage }}</p>
+        <p>Please try again later.</p>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+</div>
+
+<div class="modal-content" *ngIf="isLoading">
+    <div class="modal-header">
+        <h5 class="modal-title">Loading</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+
+    <div class="modal-body">
+        <p>Loading asset data...</p>
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    </div>
+
+</div>

@@ -1,6 +1,6 @@
 <main class="dashboard-wrapper">
     <div class="dashboard-page">
-        <section class="dashboard-content">
+        <section class="dashboard-content" *ngIf="errorMessage === '' && !isLoading">
             <div class="greeting-card">
                 <h2>Selamat Pagi, {{ loggedInUser.firstName }}!</h2>
             </div>
@@ -28,11 +28,27 @@
                     <app-site-card></app-site-card>
                 </section>
             </div>
+
+            <!-- THIS IS JUST A PLACEHOLDER FOR LOGOUT BUTTON, WILL DELETE -->
+            <br>
+            <footer>
+                <button class="logout-btn btn rounded btn-danger" (click)="logout()">Logout</button>
+            </footer>
+        </section>
+
+        <!-- ERROR MESSAGE -->
+        <section class="dashboard-content" *ngIf="errorMessage">
+            <div class="error-message">
+                <h2>Error: {{ errorMessage }}</h2>
+                <p>Please try again later or contact support.</p>
+            </div>
+        </section>
+
+        <!-- LOADING -->
+        <section class="dashboard-content" *ngIf="isLoading">
+            <div class="loading-spinner">
+                <p>Loading...</p>
+            </div>
         </section>
     </div>
-
-    <!-- THIS IS JUST A PLACEHOLDER FOR LOGOUT BUTTON, WILL DELETE -->
-    <footer>
-        <button class="logout-btn btn rounded btn-danger" (click)="logout()">Logout</button>
-    </footer>
 </main>
