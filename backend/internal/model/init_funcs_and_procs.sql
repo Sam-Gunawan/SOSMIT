@@ -111,9 +111,15 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_tag(_asset_tag VARCHAR(12))
 		product_name VARCHAR(50),
 		condition BOOLEAN,
 		condition_photo_url TEXT,
+		"location" VARCHAR(255),
+		room VARCHAR(255),
 		owner_id INT,
 		owner_name VARCHAR(510),
-		site_id INT
+		owner_position VARCHAR(100),
+		owner_cost_center INT,
+		site_id INT,
+		site_group_name VARCHAR(100),
+		region_name VARCHAR(100)
 	)
 	LANGUAGE plpgsql
 	AS $$
@@ -123,11 +129,19 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_tag(_asset_tag VARCHAR(12))
 					a.product_category, a.product_subcategory, a.product_variety,
 					a.brand_name, a.product_name, 
 					a.condition, a.condition_photo_url::TEXT,
+					a.location, a.room,
 					a.owner_id,
 					(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
-					a.site_id
+					u.position AS owner_position,
+					u.cost_center_id AS owner_cost_center,
+					a.site_id,
+					sg.site_group_name AS site_group_name,
+					r.region_name AS region_name
 				FROM "Asset" AS a
 				LEFT JOIN "User" AS u ON a.owner_id = u.user_id
+				LEFT JOIN "Site" AS s ON a.site_id = s.id
+				LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+				LEFT JOIN "Region" AS r ON sg.region_id = r.id
 				WHERE a.asset_tag = _asset_tag;
 		END;
 	$$;

@@ -5,8 +5,7 @@ import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { Siteinfo } from '../model/siteinfo.model';
 import { Assetinfo } from '../model/assetinfo.model';
-import { formatDate } from '../reusable_functions';
-import { titleCase } from '../reusable_functions';
+import { formatDate, titleCase } from '../reusable_functions';
 
 @Injectable({
   providedIn: 'root'
@@ -89,9 +88,15 @@ export class ApiService {
           assetName: response.product_name,
           condition: response.condition,
           conditionPhotoURL: response.condition_photo_url || '', // Default to empty string if condition photo
+          location: response.location,
+          room: response.room,
           assetOwner: response.owner_id,
           assetOwnerName: titleCase(response.owner_name) || '', // Default to empty string if owner name is not provided
-          siteID: response.site_id
+          assetOwnerPosition: titleCase(response.owner_position),
+          assetOwnerCostCenter: response.owner_cost_center,
+          siteID: response.site_id,
+          siteGroupName: response.site_group_name,
+          regionName: response.region_name
         };
       }),
       tap((assetDetails: Assetinfo) => {

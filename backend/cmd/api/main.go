@@ -94,7 +94,7 @@ func main() {
 		siteRoutes.Use(auth.AuthMiddleware())
 		{
 			// GET /api/site/:site-id/assets
-			siteRoutes.GET("/:site-id/assets", assetHandler.GetAssetsBySiteHandler)
+			siteRoutes.GET("/:site-id/assets", assetHandler.GetAssetsOnSiteHandler)
 		}
 
 		assetRoutes := api.Group("/asset")

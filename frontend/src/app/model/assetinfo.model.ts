@@ -11,7 +11,13 @@ export interface Assetinfo {
     assetName: string;
     condition: boolean;
     conditionPhotoURL?: string; // Optional field for condition photo URL
+    location?: string; // Optional field for location
+    room?: string; // Optional field for room
     assetOwner: number;
     assetOwnerName: string;
+    assetOwnerPosition: string;
+    assetOwnerCostCenter: number;
     siteID: number;
+    siteGroupName: string;
+    regionName: string;
 }

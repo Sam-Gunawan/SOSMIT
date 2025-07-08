@@ -57,14 +57,20 @@ func (handler *Handler) GetAssetByTagHandler(context *gin.Context) {
 		"product_name":        asset.ProductName,
 		"condition":           asset.Condition,
 		"condition_photo_url": asset.ConditionPhotoURL,
+		"location":            asset.Location,
+		"room":                asset.Room,
 		"owner_id":            asset.OwnerID,
 		"owner_name":          asset.OwnerName,
+		"owner_position":      asset.OwnerPosition,
+		"owner_cost_center":   asset.OwnerCostCenter,
 		"site_id":             asset.SiteID,
+		"site_group_name":     asset.SiteGroupName,
+		"region_name":         asset.RegionName,
 	})
 }
 
 // GetAssetsBySiteHandler retrieves all assets for a given site.
-func (handler *Handler) GetAssetsBySiteHandler(context *gin.Context) {
+func (handler *Handler) GetAssetsOnSiteHandler(context *gin.Context) {
 	siteID := context.Param("site-id")
 	if siteID == "" {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "site-id is required"})
@@ -80,7 +86,7 @@ func (handler *Handler) GetAssetsBySiteHandler(context *gin.Context) {
 		return
 	}
 
-	assetsOnSite, err := handler.service.GetAssetsBySite(int64(siteIDInt))
+	assetsOnSite, err := handler.service.GetAssetsOnSite(int64(siteIDInt))
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch assets for site: " + err.Error()})
 		log.Printf("❌ Error fetching assets for site-id %s: %v", siteID, err)

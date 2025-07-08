@@ -1,8 +1,17 @@
 export function titleCase(str: string): string {
-    return str
-        .split(' ')
-        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-        .join(' ');
+    var result: string[] = [];
+    for (var word of str.split(' ')) {
+        if (word.toUpperCase() === 'TMC') {
+            // Special case for "TMC" to keep it in uppercase
+            result.push('TMC');
+        } else if (word.toUpperCase() === 'SALESMAN-TMC') {
+            result.push('Salesman-TMC');
+        } else {
+            // Capitalize the first letter of each word
+            result.push(word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+        }
+    }
+    return result.join(' ');
 }
 
 export function formatDate(date: Date): string {

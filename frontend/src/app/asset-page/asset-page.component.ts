@@ -32,9 +32,15 @@ export class AssetPageComponent {
       assetName: 'N/A',
       condition: true,
       conditionPhotoURL: '',
+      location: '',
+      room: '',
       assetOwner: -1,
       assetOwnerName: 'N/A',
-      siteID: -1
+      assetOwnerPosition: 'N/A',
+      assetOwnerCostCenter: -1,
+      siteID: -1,
+      siteGroupName: 'N/A',
+      regionName: 'N/A',
     };
   }
   

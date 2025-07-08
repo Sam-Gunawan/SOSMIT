@@ -17,8 +17,8 @@
 
                 <div class="user-info">
                     <h5 class="asset-owner">{{ assetPage?.assetOwnerName }}</h5>
-                    <p class="user-position">[user position]</p>
-                    <p class="cost-center">Cost Center: [cost center]</p>
+                    <p class="user-position">{{ assetPage?.assetOwnerPosition }}</p>
+                    <p class="cost-center">Cost Center: {{ assetPage?.assetOwnerCostCenter }}</p>
                 </div>
 
                 <div class="left-top">
@@ -26,13 +26,13 @@
                     <span 
                         class="asset-status"
                         [ngClass]="{
-                            'status-deployed': assetPage?.assetStatus === 'deployed',
-                            'status-onLoan': assetPage?.assetStatus === 'on loan',
-                            'status-disposed': assetPage?.assetStatus === 'disposed'
+                            'status-deployed': assetPage?.assetStatus === 'Deployed',
+                            'status-onLoan': assetPage?.assetStatus === 'On Loan',
+                            'status-disposed': assetPage?.assetStatus === 'Disposed'
                         }">
                         {{ assetPage?.assetStatus }}
                     </span>
-                    <p>[reason status if disposed, if status okay its blank]</p>
+                    <p *ngIf="assetPage?.assetStatus === 'Disposed'">{{ assetPage?.statusReason }}</p>
                     
                     <hr>
                 </div>
@@ -49,7 +49,8 @@
                             </span>
                         </div>
 
-                        <p class="condition-reason">[reason for the condition]</p>
+                        <!-- TODO: CHANGE THIS TO IMAGE -->
+                        <p class="condition-photo" *ngIf="isDisliked">{{ assetPage?.conditionPhotoURL }}</p>
                     </div>
                 </div>
 
@@ -57,10 +58,10 @@
                     <!-- <hr class="vertical"> -->
                     <div class="asset-location">
                         <p>Location</p>
-                        <p>[room]</p>
-                        <p>[location]</p>
-                        <p>[OU]</p>
-                        <p>[RO]</p>
+                        <p>{{ assetPage?.location }}</p>
+                        <p>{{ assetPage?.room }}</p>
+                        <p>{{ assetPage?.siteGroupName }}</p>
+                        <p>{{ assetPage?.regionName }}</p>
                     </div>
                 </div>
             </div>

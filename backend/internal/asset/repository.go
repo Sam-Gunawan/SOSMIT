@@ -18,9 +18,15 @@ type Asset struct {
 	ProductName        string
 	Condition          bool
 	ConditionPhotoURL  string
+	Location           string
+	Room               string
 	OwnerID            int64
 	OwnerName          string // Owner's full name, can be a combination of first and last name
+	OwnerPosition      string
+	OwnerCostCenter    int64
 	SiteID             int64
+	SiteGroupName      string
+	RegionName         string
 }
 
 type Repository struct {
@@ -51,9 +57,15 @@ func (repo *Repository) GetAssetByTag(assetTag string) (*Asset, error) {
 		&asset.ProductName,
 		&asset.Condition,
 		&asset.ConditionPhotoURL,
+		&asset.Location,
+		&asset.Room,
 		&asset.OwnerID,
 		&asset.OwnerName,
+		&asset.OwnerPosition,
+		&asset.OwnerCostCenter,
 		&asset.SiteID,
+		&asset.SiteGroupName,
+		&asset.RegionName,
 	)
 
 	if err != nil {
@@ -71,7 +83,7 @@ func (repo *Repository) GetAssetByTag(assetTag string) (*Asset, error) {
 }
 
 // GetAssetsBySite retrieves all assets for a given site.
-func (repo *Repository) GetAssetsBySite(siteID int64) ([]*string, error) {
+func (repo *Repository) GetAssetsOnSite(siteID int64) ([]*string, error) {
 	var assets []*string
 
 	query := `SELECT * FROM get_assets_by_site($1)`

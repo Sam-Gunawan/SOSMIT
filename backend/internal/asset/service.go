@@ -33,9 +33,9 @@ func (service *Service) GetAssetByTag(assetTag string) (*Asset, error) {
 }
 
 // GetAssetBySite retrieves all assets for a given site.
-func (service *Service) GetAssetsBySite(siteID int64) ([]*Asset, error) {
+func (service *Service) GetAssetsOnSite(siteID int64) ([]*Asset, error) {
 	var assetsOnSite []*Asset
-	assetTags, err := service.repo.GetAssetsBySite(siteID)
+	assetTags, err := service.repo.GetAssetsOnSite(siteID)
 	if err != nil {
 		// Log the error and return it
 		log.Printf("Error fetching assets for site_id %d: %v", siteID, err)

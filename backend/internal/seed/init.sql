@@ -85,6 +85,8 @@ CREATE TABLE "Asset" (
         OR
         ("condition" = FALSE AND "condition_photo_url" != '-1' AND "condition_photo_url" IS NOT NULL)
     ) DEFAULT '-1',
+    "location" VARCHAR(255),
+    "room" VARCHAR(255),
     -- Foreign key to User (owner of the asset). On delete set null means if the User is deleted, the owner_id in Asset will be set to NULL.
     "owner_id" INT NOT NULL REFERENCES "User"("user_id") ON DELETE SET NULL,
 
