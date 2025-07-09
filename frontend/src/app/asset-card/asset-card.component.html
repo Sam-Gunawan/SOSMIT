@@ -1,4 +1,4 @@
-<section class="asset-card" *ngFor="let assetCard of assetsOnSite">
+<section class="asset-card" [ngClass]="variant" *ngFor="let assetCard of assetsOnSite">
     <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
         <div class="main-info">
             <img class="asset-icon" [src]="assetCard.assetIcon" [alt]="assetCard.assetName"/>
@@ -12,12 +12,19 @@
                 {{ assetCard.assetStatus }}
             </span>
         </div>
+
         <div class="additional-info">
             <p class="asset-tag">{{ assetCard.assetTag }}</p>
             <div class="asset-name">
                 {{ assetCard.assetName }}
             </div>
             <p>{{ assetCard.assetOwnerName }}</p>
+        </div>
+
+        <div class="opname-card" *ngIf="actualShowLocation">
+            <p class="asset-location">{{ assetCard.location }}</p>
+            <p class="asset-room">{{ assetCard.room }}</p>
+            <p class="asset-site">{{ assetCard.siteGroupName}}</p>
         </div>
     </div>
 

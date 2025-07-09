@@ -16,7 +16,7 @@ p {
     margin: 5px;
 }
 
-.asset-card {
+.asset-card.default {
     border-radius: 20px;
     padding: 10px;
     background-color: styles.$tertiary-color;
@@ -24,6 +24,37 @@ p {
     height: 8rem; //temporary
     display: flex;
     align-items: center;
+
+    .additional-info {
+        justify-items: right;
+    }
+}
+
+.asset-card.compact {
+    border-radius: 20px;
+    padding: 10px;
+    background-color: styles.$tertiary-color;
+    color: styles.$primary-text-color;
+    height: 8rem; //temporary
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+
+    .additional-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+    }
+}
+
+.opname-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    margin: 0px 5px;
+    border-left: 1px solid styles.$primary-text-color;
+    padding-left: 50px;
 }
 
 .card-body {
@@ -54,10 +85,6 @@ p {
     padding: 5px 10px;
 }
 
-.additional-info {
-    justify-items: right;
-}
-
 .asset-tag {
     font-size: 15px;
     font-weight: bold;
@@ -74,5 +101,17 @@ p {
     display: block;
 }
 
-
+@media (max-width: 768px) {
+    .asset-card {
+        font-size: 0.85rem;
+        
+        .asset-tag {
+            font-size: 0.8rem;
+        }
+        
+        .asset-name {
+            font-size: 0.8rem;
+        }
+    }
+}
 

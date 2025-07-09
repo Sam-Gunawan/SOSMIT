@@ -1,0 +1,61 @@
+@use "../../styles.scss" as styles;
+@use "sass:color";
+
+* {
+  @include styles.default-styles;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: styles.$font-family;
+  color: styles.$primary-text-color;
+  margin: 0;
+}
+
+p {
+  font-size: 12px;
+  margin: 0px;
+  color: styles.$quaternary-text-color;
+}
+
+.opname-wrapper {
+  padding: 20px 30px;
+}
+
+.opname-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}   
+
+.search-bar {
+  margin-bottom: 10px;
+}
+
+.by-tag, .by-SN {
+  font-size: 12px;
+  color: styles.$primary-text-color;
+  padding: 5px 10px;
+  border-radius: 15px;
+  background-color: styles.$secondary-background-color;
+  margin-right: 5px;
+}
+
+.opname-asset-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 15px 0px;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-1 {
+  border-right: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 30%);
+}

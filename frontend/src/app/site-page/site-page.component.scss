@@ -46,22 +46,39 @@ p {
 
 .opname-date {
     margin: 8px 0px 0px 0px;   
-
 }
 
 // .site-asset-list {
-// 	   display: grid;
-//     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+// 	display: grid;
+//     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 //     gap: 10px;
 //     margin-top: 20px;
 // }
 
 app-asset-card {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
     gap: 10px;
     margin-top: 20px;
     transition: transform 0.2s ease-in-out;
+}
+
+@media (max-width: 1200px) {
+    app-asset-card {
+        grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+}
+
+@media (max-width: 1000px) {
+    app-asset-card {
+        grid-template-columns: 1fr 1fr 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    app-asset-card {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 .btn {

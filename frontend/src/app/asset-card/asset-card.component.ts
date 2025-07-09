@@ -1,4 +1,4 @@
-import { Component} from '@angular/core';
+import { Component, Input, OnInit, HostListener} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Assetinfo } from '../model/assetinfo.model';
 import { ApiService } from '../services/api.service';
@@ -12,6 +12,12 @@ import { AssetPageComponent } from '../asset-page/asset-page.component';
   styleUrl: './asset-card.component.scss'
 })
 export class AssetCardComponent {
+  @Input() variant: 'default' | 'compact' = 'default';
+  @Input() showLocation: boolean = false;
+
+  actualVariant: 'default' | 'compact' = 'default';
+  actualShowLocation: boolean = false;
+
   assetsOnSite?: Assetinfo[] = [];
   isLoading: boolean = true;
   errorMessage: string = '';
@@ -20,6 +26,7 @@ export class AssetCardComponent {
 
   ngOnInit(): void {
     this.fetchAssetsOnSite(); // Fetch assets when the component initializes
+    this.updateResponsiveSettings();
   }
 
   fetchAssetsOnSite(): void {
@@ -37,5 +44,22 @@ export class AssetCardComponent {
         console.error('[AssetCard] Error fetching assets:', error);
       }
     });
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.updateResponsiveSettings();
+  }
+
+  private updateResponsiveSettings() {
+    if (window.innerWidth >= 1000) {
+      // Large screens: use the passed variant and showLocation
+      this.actualVariant = this.variant;
+      this.actualShowLocation = this.showLocation;
+    } else {
+      // Small screens: force default variant and hide location
+      this.actualVariant = 'default';
+      this.actualShowLocation = false;
+    }
   }
 }

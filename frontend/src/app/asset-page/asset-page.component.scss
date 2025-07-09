@@ -55,6 +55,23 @@ p {
 
 .left-top { 
   grid-area: left-top; 
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.asset-status{
+  background-color: styles.$button-color;
+  border-radius: 15px;
+  padding: 5px 10px;
+}
+
+.status-reason{
+  background-color: styles.$button-color; //change color based on the reason
+  border-radius: 15px;
+  padding: 5px 10px;
 }
 
 .left-bottom { 

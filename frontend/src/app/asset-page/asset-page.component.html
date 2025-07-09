@@ -1,7 +1,7 @@
 <div class="modal-content" *ngIf="errorMessage === '' && !isLoading">
     <div class="modal-header">
         <section class="asset-header">
-            <h2 class="modal-title fs-5 asset-tag">{{ assetPage?.assetTag }}</h2>
+            <h2 class="modal-title fs-5 asset-tag">{{ assetPage?.assetTag }} - {{ assetPage?.assetName }}</h2>
             <p class="serial-number">{{ assetPage?.serialNumber }}</p>
         </section>
 
@@ -22,7 +22,7 @@
                 </div>
 
                 <div class="left-top">
-                    <p>{{ assetPage?.assetName }}</p>
+                    <!-- <p>{{ assetPage?.assetName }}</p> -->
                     <span 
                         class="asset-status"
                         [ngClass]="{

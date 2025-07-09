@@ -1,0 +1,45 @@
+<main class="opname-wrapper">
+    <div class="opname-page">
+        <section class="opname-content">
+            <div class="opname-header">
+                <div class="opname-details">
+                    <h2>Opname in progress...</h2>
+                    <p>[date]</p>
+                </div>
+                <div class="close-button">
+                    <button class="btn btn-danger">Cancel Opname</button>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="opname-body">
+                <div class="search-bar">
+                    <form class="d-flex" role="search">
+                        <input class="form-control me-2" type="search" placeholder="Scan / search here!" aria-label="Search"/>
+                        <button class="btn btn-outline-success" type="submit">Search</button>
+                    </form>
+                </div>
+
+                <div class="search-filter">
+                    <span class="by-tag">Asset Tag</span>
+                    <span class="by-SN">Serial Number</span>
+                </div>
+
+                <div class="opname-asset-info">
+                    <div class="container">
+                        <div class="row row-cols-2">
+                            <div class="col card-1">
+                                <app-asset-card [showLocation]="true" [variant]="'compact'"></app-asset-card>
+                            </div>
+                            <div class="col">
+                                <app-asset-card [showLocation]="true" [variant]="'compact'"></app-asset-card>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+

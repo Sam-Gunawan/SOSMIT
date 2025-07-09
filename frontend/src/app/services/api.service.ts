@@ -125,9 +125,15 @@ export class ApiService {
           assetName: asset.ProductName,
           condition: asset.Condition,
           conditionPhotoURL: asset.ConditionPhotoURL || '', // Default to empty string if condition photo
+          location: asset.Location,
+          room: asset.Room,
           assetOwner: asset.OwnerID,
           assetOwnerName: titleCase(asset.OwnerName) || '', // Default to empty string if owner name is not provided
-          siteName: asset.SiteID
+          assetOwnerPosition: titleCase(asset.OwnerPosition),
+          assetOwnerCostCenter: asset.OwnerCostCenter,
+          siteID: asset.SiteID,
+          siteGroupName: asset.SiteGroupName,
+          regionName: asset.RegionName
         }));
       }),
       tap((response: any) => {
