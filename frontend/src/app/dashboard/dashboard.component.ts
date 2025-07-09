@@ -18,10 +18,7 @@ export class DashboardComponent {
   errorMessage: string = '';
   loggedInUser: User = new User(); // Initialize with a new User instance
   
-  constructor(private apiService: ApiService) {
-    // Default value for firstName
-    this.loggedInUser.firstName = 'John Doe'; // TODO: get the user's name from API
-  }
+  constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
     // Fetch the logged-in user's profile when the component initializes

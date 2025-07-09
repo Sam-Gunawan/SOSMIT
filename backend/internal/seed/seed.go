@@ -143,7 +143,7 @@ func seedSite(db *sql.DB, record []string) error {
 	site_name := record[1]
 	site_group_id := record[2]
 	site_ga_id := record[3]
-	query := `INSERT INTO "Site" (site_name, site_group_id, site_ga_id) VALUES ($1, $2, $3)`
+	query := `INSERT INTO "Site" (site_name, site_group_id, site_ga_id) VALUES ($1, $2, $3) ON CONFLICT (id) DO NOTHING`
 
 	// Check if the referenced site_group_id exists
 	var exists bool

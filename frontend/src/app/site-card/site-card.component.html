@@ -1,26 +1,52 @@
-<section class="site-card" *ngFor="let siteCard of siteCardList" (click)="goToSite(siteCard.siteID)">
-    <div class="card-header">
-        <h6 class="site-name">{{ siteCard.siteName }}</h6>
-        <span 
-            class="site-status"
-            [ngClass]="{
-                'status-active': siteCard.opnameStatus === 'Active',
-                'status-completed': siteCard.opnameStatus === 'Inactive',
-                'status-pending': siteCard.opnameStatus === 'Pending',
-                'status-verified': siteCard.opnameStatus === 'Maintenance',
-                'status-rejected': siteCard.opnameStatus === 'Rejected',
-                'status-outdated': siteCard.opnameStatus === 'Outdated'
-            }">
-            {{ siteCard.opnameStatus }}
-        </span>
+ 
+<div class="user-site-header">
+    <div class="your-site">
+        <h5>Your Sites:</h5>
     </div>
 
-    <hr class="card-divider">
+    <div class="filter-badges">
+        <span class="badge badge-active" (click)="filterSiteCards('Active')">Active</span>
+        <span class="badge badge-completed" (click)="filterSiteCards('Inactive')">Completed</span>
+        <span class="badge badge-pending" (click)="filterSiteCards('Pending')">Pending</span>
+        <span class="badge badge-verified" (click)="filterSiteCards('Verified')">Verified</span>
+        <span class="badge badge-rejected" (click)="filterSiteCards('Rejected')">Rejected</span>
+        <span class="badge badge-outdated" (click)="filterSiteCards('Outdated')">Outdated</span>
+    </div>
+    
+    <div class="search-bar">
+        <div class="cntr">
+            <div class="cntr-innr">
+            <label class="search" for="inpt_search">
+                <input id="inpt_search" type="text" #filter (input)="filterSiteCards(filter.value)"/>
+            </label>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <div class="card-body">
-        <p class="site-location">{{ siteCard.siteGroup }}, {{ siteCard.siteRegion }}</p>
-        <div class="last-opname">
-            <p>Last Opname on {{ siteCard.opnameDate }}</p>
+<section class="site-card-layout" *ngIf="filteredSiteCardList && filteredSiteCardList.length > 0">
+    <div class="site-card" *ngFor="let siteCard of filteredSiteCardList" (click)="goToSite(siteCard.siteID)">
+        <div class="card-header">
+            <h6 class="site-name">{{ siteCard.siteName }}</h6>
+            <span
+                class="site-status"
+                [ngClass]="{
+                    'status-active': siteCard.opnameStatus === 'Active',
+                    'status-completed': siteCard.opnameStatus === 'Inactive',
+                    'status-pending': siteCard.opnameStatus === 'Pending',
+                    'status-verified': siteCard.opnameStatus === 'Maintenance',
+                    'status-rejected': siteCard.opnameStatus === 'Rejected',
+                    'status-outdated': siteCard.opnameStatus === 'Outdated'
+                }">
+                {{ siteCard.opnameStatus }}
+            </span>
+        </div>
+        <hr class="card-divider">
+        <div class="card-body">
+            <p class="site-location">{{ siteCard.siteGroup }}, {{ siteCard.siteRegion }}</p>
+            <div class="last-opname">
+                <p>Last Opname on {{ siteCard.opnameDate }}</p>
+            </div>
         </div>
     </div>
 </section>
