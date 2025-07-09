@@ -33,8 +33,10 @@ p {
 }
 
 .opname-info {
+    display: flex;
+    flex-direction: column;
     align-self: center;
-    justify-items: right;
+    align-items: flex-end;
 }
 
 .site-status {
