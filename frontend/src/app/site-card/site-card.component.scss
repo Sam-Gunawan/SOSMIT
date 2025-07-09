@@ -119,3 +119,40 @@ p {
     display: flex;
     flex-direction: row;
 }
+
+.filter-pills {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+	
+	span {
+		cursor: pointer;
+		transition: all 0.1s ease;
+		
+		&:hover {
+			background-color: color.adjust($color: styles.$button-color, $lightness: -10%);
+		}
+		
+		&:active {
+			background-color: darken($color: styles.$button-color, $amount: 20%);
+		}
+		
+		&.selected {
+			background-color: styles.$primary-color !important;
+			color: white;
+			transform: scale(1.05);
+		}
+	}
+	
+	.clear-filter {
+		background-color: #dc3545;
+		color: white;
+		font-size: 12px;
+		border-radius: 15px;
+		padding: 5px 10px;
+		
+		&:hover {
+			background-color: darken(#dc3545, 10%);
+		}
+	}
+}
