@@ -23,7 +23,7 @@ export const routes: Routes = [
         children: [
             { path: '', canActivate: [authGuard], component: DashboardComponent, pathMatch: 'full' },
             { path: 'site/:id', component: SitePageComponent, canActivate: [authGuard] },
-            { path: 'site/:id/opname', component: OpnamePageComponent} //temporary, just to see UI
+            { path: 'site/:id/opname/:sessionId', component: OpnamePageComponent}
         ]
     }
 ];

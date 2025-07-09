@@ -1,8 +1,9 @@
--- DROP FUNCTION IF EXISTS public.get_credentials(VARCHAR);
--- DROP FUNCTION IF EXISTS public.get_user_by_username(VARCHAR);
--- DROP FUNCTION IF EXISTS public.get_user_site_cards(INT);
--- DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
--- DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
+DROP FUNCTION IF EXISTS public.get_credentials(VARCHAR);
+DROP FUNCTION IF EXISTS public.get_user_by_username(VARCHAR);
+DROP FUNCTION IF EXISTS public.get_user_site_cards(INT);
+DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
+DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
+DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT);
 
 -- get_credentials retrieves user credentials by username (for login auth)
 CREATE OR REPLACE FUNCTION public.get_credentials(_username VARCHAR(255))
@@ -69,7 +70,7 @@ AS $$
 			SELECT s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, 
 				s.site_ga_id,
 				COALESCE(os.id, -1) AS opname_session_id,
-				COALESCE(os.status, 'Pending') AS opname_status,
+				COALESCE(os.status, 'Outdated') AS opname_status,
 				s.last_opname_date AS last_opname_date
 			FROM "User" AS u
 			-- For "l1 support", join all sites; for others, restrict to user's region
@@ -159,4 +160,45 @@ AS $$
 			FROM "Asset" AS a
 			WHERE a.site_id = _site_id;
 	END;
+$$;
+
+
+-- create_new_opname_session creates a new opname session for a site
+CREATE OR REPLACE FUNCTION public.create_new_opname_session(
+	-- The ID of the user creating the session (from JWT).
+	_user_id INT,
+	-- The ID of the site for which the session is being created (from request body).
+	_site_id INT
+) RETURNS INT -- Returns the new session ID, or 0 if it fails.
+LANGUAGE plpgsql
+AS $$
+DECLARE
+	-- Local variable to count existing active sessions for the site.
+	_active_session_count INT;
+	_new_session_id INT := 0; -- Initialize to 0, will be set if a new session is created.
+BEGIN
+	-- Check if there are any active opname sessions for the site.
+	-- Count how many rows in "OpnameSession" have the same site_id and status 'Active' or 'Pending'.
+	SELECT COUNT(*)
+	INTO _active_session_count
+	FROM "OpnameSession"
+	WHERE site_id = _site_id AND "status" IN ('Active', 'Pending');
+
+	-- If there are no active sessions, proceed to create a new one.
+	IF _active_session_count = 0 THEN
+		-- Insert a new opname session into the OpnameSession table.
+		INSERT INTO "OpnameSession" (user_id, site_id, "status", start_date)
+		VALUES (_user_id, _site_id, 'Active', NOW())
+		-- Get the ID of the newly created session.
+		-- The 'RETURNING' clause allows us to capture the new session ID.
+		RETURNING id INTO _new_session_id;
+
+		RAISE NOTICE 'New opname session created with ID: %', _new_session_id;
+	ELSE
+		-- If there is already an active session, do nothing. _new_session_id will remain 0.
+		RAISE NOTICE 'An active opname session already exists for site ID: %, cannot create a new one.', _site_id;
+	END IF;
+
+	RETURN _new_session_id;
+END;
 $$;

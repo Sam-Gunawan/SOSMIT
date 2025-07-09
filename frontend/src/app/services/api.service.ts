@@ -18,6 +18,7 @@ export class ApiService {
   private assetApiUrl = 'http://localhost:8080/api/asset'
 
   constructor(private http: HttpClient, private router: Router) {}
+
   login(credentials: {username: string, password: string}): Observable<any> {
     return this.http.post(`${this.authApiUrl}/login`, credentials).pipe(
       // Handle the response here if needed.
@@ -106,7 +107,6 @@ export class ApiService {
     );
   }
 
-
   getAssetsOnSite(siteID: number): Observable<any> {
     // This method will fetch all assets on a specific site.
     return this.http.get<Assetinfo[]>(`${this.siteApiUrl}/${siteID}/assets`).pipe(
@@ -141,6 +141,22 @@ export class ApiService {
         console.log(`[ApiService] Fetched assets for site ${siteID}:`, response);
       })
     );
+  }
+
+  startNewOpname(siteID: number): Observable<any> {
+    // This method will start a new stock opname session for the specified site.
+    return this.http.post(`${this.siteApiUrl}/${siteID}/opname/start`, {}).pipe(
+      map((response: any) => {
+        return {
+          opnameSessionID: response.session_id,
+        }
+      }),
+
+      tap((response: any) => {
+        // Log the response for debugging purposes.
+        console.log('[ApiService] Started new opname session:', response);
+      })
+    )
   }
 
   // Helper method to get icon path based on product variety

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, HostListener } from '@angular/core';
 import { AssetCardComponent } from '../asset-card/asset-card.component';
+import { ApiService } from '../services/api.service';
 
 @Component({
   selector: 'app-opname-page',
@@ -11,6 +12,8 @@ import { AssetCardComponent } from '../asset-card/asset-card.component';
 export class OpnamePageComponent implements OnInit {
   cardVariant: 'default' | 'compact' = 'compact';
   showLocation: boolean = true;
+
+  constructor(private apiService: ApiService) {}
 
   ngOnInit() {
     this.checkScreenSize();

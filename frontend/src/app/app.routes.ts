@@ -4,6 +4,6 @@ import { routes as containerRoutes} from './container/container.routes';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
-    // { path: '**', redirectTo: ''}, // TODO: redirect to a 404 page or similar
     ...containerRoutes,
+    // { path: '**', redirectTo: ''}, // TODO: redirect to a 404 page or similar
 ];
