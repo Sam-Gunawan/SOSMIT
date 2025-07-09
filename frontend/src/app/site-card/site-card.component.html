@@ -4,13 +4,34 @@
         <h5>Your Sites:</h5>
     </div>
 
-    <div class="filter-badges">
-        <span class="badge badge-active" (click)="filterSiteCards('Active')">Active</span>
-        <span class="badge badge-completed" (click)="filterSiteCards('Inactive')">Completed</span>
-        <span class="badge badge-pending" (click)="filterSiteCards('Pending')">Pending</span>
-        <span class="badge badge-verified" (click)="filterSiteCards('Verified')">Verified</span>
-        <span class="badge badge-rejected" (click)="filterSiteCards('Rejected')">Rejected</span>
-        <span class="badge badge-outdated" (click)="filterSiteCards('Outdated')">Outdated</span>
+    <div class="filter-pills">
+        <span 
+            class="site-status filter-active" 
+            [class.selected]="selectedFilter === 'Active'"
+            (click)="filterByStatus('Active')">Active</span>
+        <span 
+            class="site-status filter-inactive" 
+            [class.selected]="selectedFilter === 'Inactive'"
+            (click)="filterByStatus('Inactive')">Completed</span>
+        <span 
+            class="site-status filter-pending" 
+            [class.selected]="selectedFilter === 'Pending'"
+            (click)="filterByStatus('Pending')">Pending</span>
+        <span 
+            class="site-status filter-verified" 
+            [class.selected]="selectedFilter === 'Verified'"
+            (click)="filterByStatus('Verified')">Verified</span>
+        <span 
+            class="site-status filter-rejected" 
+            [class.selected]="selectedFilter === 'Rejected'"
+            (click)="filterByStatus('Rejected')">Rejected</span>
+        <span 
+            class="site-status filter-outdated" 
+            [class.selected]="selectedFilter === 'Outdated'"
+            (click)="filterByStatus('Outdated')">Outdated</span>
+        <span 
+            class="clear-filter" 
+            (click)="clearAllFilters()">Clear All</span>
     </div>
     
     <div class="search-bar">
