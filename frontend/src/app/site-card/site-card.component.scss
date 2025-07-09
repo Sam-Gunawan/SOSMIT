@@ -135,7 +135,7 @@ p {
 		}
 		
 		&:active {
-			background-color: darken($color: styles.$button-color, $amount: 20%);
+			background-color: color.adjust(styles.$button-color, $lightness: -20%);
 		}
 		
 		&.selected {
@@ -153,7 +153,7 @@ p {
 		padding: 5px 10px;
 		
 		&:hover {
-			background-color: darken(#dc3545, 10%);
+			background-color: color.adjust(#dc3545, $lightness: -10%);
 		}
 	}
 }
