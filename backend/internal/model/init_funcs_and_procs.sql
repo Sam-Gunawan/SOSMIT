@@ -73,7 +73,7 @@ AS $$
 				s.site_ga_id,
 				COALESCE(os.id, -1) AS opname_session_id,
 				COALESCE(os.status, 'Outdated') AS opname_status,
-				s.last_opname_date AS last_opname_date
+				COALESCE(os.end_date, s.last_opname_date) AS last_opname_date
 			FROM "User" AS u
 			-- For "l1 support", join all sites; for others, restrict to user's region
 			CROSS JOIN "Site" AS s
@@ -113,6 +113,7 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_tag(_asset_tag VARCHAR(12))
 		brand_name VARCHAR(25),
 		product_name VARCHAR(50),
 		condition BOOLEAN,
+		condition_notes TEXT,
 		condition_photo_url TEXT,
 		"location" VARCHAR(255),
 		room VARCHAR(255),
@@ -131,7 +132,7 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_tag(_asset_tag VARCHAR(12))
 				SELECT a.asset_tag, a.serial_number, a.status, a.status_reason,
 					a.product_category, a.product_subcategory, a.product_variety,
 					a.brand_name, a.product_name, 
-					a.condition, a.condition_photo_url::TEXT,
+					a.condition, a.condition_notes, a.condition_photo_url::TEXT,
 					a.location, a.room,
 					a.owner_id,
 					(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
@@ -235,5 +236,74 @@ AS $$
 		DELETE FROM "OpnameSession"
 		WHERE id = _session_id;
 		RAISE NOTICE 'Opname session with ID: % has been deleted.', _session_id;
+	END;
+$$;
+
+
+CREATE OR REPLACE FUNCTION public.record_asset_change(
+	_session_id INT,
+	_asset_tag VARCHAR(12),
+	_new_status VARCHAR(20),
+	_new_status_reason VARCHAR(20),
+	_new_condition BOOLEAN,
+	_new_condition_notes TEXT,
+	_new_condition_photo_url TEXT,
+	_new_location VARCHAR(255),
+	_new_room VARCHAR(255),
+	_new_owner_id INT,
+	_new_site_id INT,
+	_change_reason TEXT
+) RETURNS JSONB
+	LANGUAGE plpgsql
+AS $$
+	DECLARE
+		_old_data RECORD;
+		_changes JSONB := '{}'::JSONB; -- Initialize an empty JSONB object to store changes
+	BEGIN
+		-- Fetch the current state of the asset before making changes
+		SELECT * INTO _old_data
+		FROM "Asset"
+		WHERE asset_tag = _asset_tag;
+		-- If no asset is found, raise an exception
+		IF NOT FOUND THEN
+			RAISE EXCEPTION 'Asset with tag % not found', _asset_tag;
+		END IF;
+
+		-- Compare the old and new values, and build the changes JSONB object
+		IF _new_status IS DISTINCT FROM _old_data.status THEN
+			_changes := jsonb_set(_changes, '{status}', to_jsonb(_new_status));
+		END IF;
+		IF _new_status_reason IS DISTINCT FROM _old_data.status_reason THEN
+			_changes := jsonb_set(_changes, '{status_reason}', to_jsonb(_new_status_reason));
+		END IF;
+		IF _new_condition IS DISTINCT FROM _old_data.condition THEN
+			_changes := jsonb_set(_changes, '{condition}', to_jsonb(_new_condition));
+		END IF;
+		IF _new_condition_notes IS DISTINCT FROM _old_data.condition_notes THEN
+			_changes := jsonb_set(_changes, '{condition_notes}', to_jsonb(_new_condition_notes));
+		END IF;
+		IF _new_condition_photo_url IS DISTINCT FROM _old_data.condition_photo_url THEN
+			_changes := jsonb_set(_changes, '{condition_photo_url}', to_jsonb(_new_condition_photo_url));
+		END IF;
+		IF _new_location IS DISTINCT FROM _old_data.location THEN
+			_changes := jsonb_set(_changes, '{location}', to_jsonb(_new_location));
+		END IF;
+		IF _new_room IS DISTINCT FROM _old_data.room THEN
+			_changes := jsonb_set(_changes, '{room}', to_jsonb(_new_room));
+		END IF;
+		IF _new_owner_id IS DISTINCT FROM _old_data.owner_id THEN
+			_changes := jsonb_set(_changes, '{owner_id}', to_jsonb(_new_owner_id));
+		END IF;
+		IF _new_site_id IS DISTINCT FROM _old_data.site_id THEN
+			_changes := jsonb_set(_changes, '{site_id}', to_jsonb(_new_site_id));
+		END IF;
+
+		-- If any changes were made, insert a new record into AssetChanges
+		IF (SELECT count(*) FROM jsonb_object_keys(_changes)) > 0 THEN
+			INSERT INTO "AssetChanges" (session_id, asset_tag, "changes", change_reason)
+			VALUES (_session_id, _asset_tag, _changes, _change_reason);
+		END IF;
+
+		RETURN _changes;
 	END;
 $$;

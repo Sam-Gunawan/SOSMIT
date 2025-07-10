@@ -31,6 +31,7 @@ export class AssetPageComponent {
       assetBrand: 'N/A',
       assetName: 'N/A',
       condition: true,
+      conditionNotes: 'N/A',
       conditionPhotoURL: '',
       location: '',
       room: '',

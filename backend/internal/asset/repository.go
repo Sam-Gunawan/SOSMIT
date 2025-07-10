@@ -17,6 +17,7 @@ type Asset struct {
 	BrandName          string
 	ProductName        string
 	Condition          bool
+	ConditionNotes     string
 	ConditionPhotoURL  string
 	Location           string
 	Room               string
@@ -56,6 +57,7 @@ func (repo *Repository) GetAssetByTag(assetTag string) (*Asset, error) {
 		&asset.BrandName,
 		&asset.ProductName,
 		&asset.Condition,
+		&asset.ConditionNotes,
 		&asset.ConditionPhotoURL,
 		&asset.Location,
 		&asset.Room,

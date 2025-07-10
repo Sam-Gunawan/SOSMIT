@@ -10,6 +10,7 @@ export interface Assetinfo {
     assetBrand: string;
     assetName: string;
     condition: boolean;
+    conditionNotes: string;
     conditionPhotoURL?: string; // Optional field for condition photo URL
     location?: string; // Optional field for location
     room?: string; // Optional field for room

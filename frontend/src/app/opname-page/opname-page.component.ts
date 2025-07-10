@@ -64,6 +64,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
 
     // If no session ID found, show error
     console.error('[OpnamePage] No session ID found in any source');
+    this.router.navigate(['/site', this.route.snapshot.paramMap.get('id')]); // Navigate to site page if no session ID
     this.errorMessage = 'No opname session found. Please start a new session.';
     this.isLoading = false;
   }
