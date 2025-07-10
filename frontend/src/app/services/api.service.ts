@@ -89,6 +89,7 @@ export class ApiService {
           assetBrand: response.brand_name,
           assetName: response.product_name,
           condition: response.condition,
+          conditionNotes: response.condition_notes,
           conditionPhotoURL: response.condition_photo_url || '', // Default to empty string if condition photo
           location: response.location,
           room: response.room,
@@ -125,6 +126,7 @@ export class ApiService {
           assetBrand: asset.BrandName,
           assetName: asset.ProductName,
           condition: asset.Condition,
+          conditionNotes: asset.ConditionNotes,
           conditionPhotoURL: asset.ConditionPhotoURL || '', // Default to empty string if condition photo
           location: asset.Location,
           room: asset.Room,

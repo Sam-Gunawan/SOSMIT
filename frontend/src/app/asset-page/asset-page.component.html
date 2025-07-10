@@ -52,7 +52,10 @@
                                 </div>
         
                                 <!-- TODO: CHANGE THIS TO IMAGE -->
-                                <p class="condition-photo" *ngIf="isDisliked">{{ assetPage?.conditionPhotoURL }}</p>
+                                <div *ngIf="isDisliked">
+                                    <p class="condition-notes">{{ assetPage?.conditionNotes }}</p>
+                                    <p class="condition-photo">{{ assetPage?.conditionPhotoURL }}</p>
+                                </div>
                             </div>
                         </div>
         
