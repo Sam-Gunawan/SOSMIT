@@ -7,7 +7,7 @@
     </div>
 </div>
 
-<section class="asset-card-layout" *ngIf="currentView === 'card'">
+<section class="asset-card-layout" [ngClass]="variant" *ngIf="currentView === 'card'">
     <div class="asset-card" [ngClass]="variant" *ngFor="let assetCard of assetsOnSite">
         <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
             <div class="main-info">
