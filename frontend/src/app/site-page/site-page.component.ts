@@ -8,7 +8,7 @@ import { Component, input } from '@angular/core';
 import { OpnameSession } from '../model/opname-session.model';
 
   @Component({
-    selector: 'app-site-page',
+    selector: 'app- site-page',
     imports: [CommonModule, AssetCardComponent],
     templateUrl: './site-page.component.html',
     styleUrl: './site-page.component.scss'

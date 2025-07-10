@@ -13,6 +13,8 @@ import { Subscription } from 'rxjs';
   styleUrl: './opname-page.component.scss'
 })
 export class OpnamePageComponent implements OnInit, OnDestroy {
+  currentView: 'large' | 'small' = 'large';
+  isMobile: boolean = false;
   
   constructor(private apiService: ApiService, private route: ActivatedRoute, private router: Router, private opnameSessionService: OpnameSessionService) {}
   
@@ -69,6 +71,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
     this.checkScreenSize();
+    this.updateResponsiveSettings();
   }
 
   cancelOpnameSession() {
@@ -106,6 +109,16 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   }
 
   private checkScreenSize() {
+    this.isMobile = window.innerWidth < 768; // Define mobile breakpoint
+    
+    if (this.isMobile) {
+      this.currentView = 'small'; // Force list view on mobile
+    } else {
+      this.currentView = 'large'; // Default to card view on desktop
+    }
+  }
+
+  private updateResponsiveSettings() {
     if (window.innerWidth >= 768) {
       // Large screens: use compact variant with location
       this.cardVariant = 'compact';

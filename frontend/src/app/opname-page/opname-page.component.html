@@ -27,14 +27,20 @@
                 </div>
 
                 <div class="opname-asset-info">
-                    <div class="container">
+                    <div class="container" *ngIf="currentView === 'large'">
                         <div class="row row-cols-2">
                             <div class="col card-1">
-                                <app-asset-card [showLocation]="true" [variant]="'compact'"></app-asset-card>
+                                <app-asset-card [showLocation]="true" [variant]="'compact'" [showHeader]="false"></app-asset-card>
                             </div>
                             <div class="col">
-                                <app-asset-card [showLocation]="true" [variant]="'compact'"></app-asset-card>
+                                <app-asset-card [showLocation]="true" [variant]="'compact'" [showHeader]="false"></app-asset-card>
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="container" *ngIf="currentView === 'small'">
+                        <div class="col">
+                            <app-asset-card [showLocation]="true" [variant]="'compact'" [showHeader]="false"></app-asset-card>
                         </div>
                     </div>
                 </div>

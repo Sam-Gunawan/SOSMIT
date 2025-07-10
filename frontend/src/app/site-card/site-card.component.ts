@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Siteinfo } from '../model/siteinfo.model';
 import { ApiService } from '../services/api.service';
@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
 })
 export class SiteCardComponent {
   currentView: 'card' | 'list' = 'card';
+  isMobile: boolean = false;
 
   siteCardList: Siteinfo[] = [];
   filteredSiteCardList: Siteinfo[] = []; 
@@ -24,15 +25,34 @@ export class SiteCardComponent {
 
   constructor(private apiService: ApiService, private route: Router) {}
 
-  toggleView(view: 'card' | 'list') {
-    this.currentView = view;
-  }
-  
   ngOnInit(): void {
+    this.checkScreenSize();
+
     // console.log('[SiteCard] ngOnInit called');
     this.fetchMySiteCards();
     console.log('[SiteCard] Initial siteCardList:', this.siteCardList);
     console.log('[SiteCard] Initial filteredSiteCardList:', this.filteredSiteCardList);
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize() {
+    this.isMobile = window.innerWidth < 768; // Define mobile breakpoint
+    
+    if (this.isMobile) {
+      this.currentView = 'list'; // Force list view on mobile
+    } else {
+      this.currentView = 'card'; // Default to card view on desktop
+    }
+  }
+
+  toggleView(view: 'card' | 'list') {
+    if (!this.isMobile) { // Only allow toggle on desktop
+      this.currentView = view;
+    }
   }
 
   fetchMySiteCards(): void {

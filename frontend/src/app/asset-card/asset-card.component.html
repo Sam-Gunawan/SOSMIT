@@ -1,34 +1,45 @@
-<section class="asset-card" [ngClass]="variant" *ngFor="let assetCard of assetsOnSite">
-    <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
-        <div class="main-info">
-            <img class="asset-icon" [src]="assetCard.assetIcon" [alt]="assetCard.assetName"/>
-            <span 
-                class="asset-status"
-                [ngClass]="{
-                    'status-deployed': assetCard.assetStatus === 'deployed',
-                    'status-onLoan': assetCard.assetStatus === 'on loan',
-                    'status-disposed': assetCard.assetStatus === 'disposed'
-                }">
-                {{ assetCard.assetStatus }}
-            </span>
-        </div>
+<div class="assets-info-header" *ngIf="showHeader">
+    <h5>Asset Info:</h5>
 
-        <div class="additional-info">
-            <p class="asset-tag">{{ assetCard.assetTag }}</p>
-            <div class="asset-name">
-                {{ assetCard.assetName }}
-            </div>
-            <p>{{ assetCard.assetOwnerName }}</p>
-        </div>
-
-        <div class="opname-card" *ngIf="actualShowLocation">
-            <p class="asset-location">{{ assetCard.location }}</p>
-            <p class="asset-room">{{ assetCard.room }}</p>
-            <p class="asset-site">{{ assetCard.siteGroupName}}</p>
-        </div>
+    <div class="view-icon" *ngIf="!isMobile">
+        <img class="card-view" [class.active]="currentView === 'card'" src="assets/card.svg" alt="Card View" (click)="toggleView('card')"/>
+        <img class="list-view" [class.active]="currentView === 'list'" src="assets/list.svg" alt="List View" (click)="toggleView('list')"/>
     </div>
+</div>
 
-    <app-asset-page [assetTag]="assetCard.assetTag"></app-asset-page>
+<section class="asset-card-layout" *ngIf="currentView === 'card'">
+    <div class="asset-card" [ngClass]="variant" *ngFor="let assetCard of assetsOnSite">
+        <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
+            <div class="main-info">
+                <img class="asset-icon" [src]="assetCard.assetIcon" [alt]="assetCard.assetName"/>
+                <span 
+                    class="asset-status"
+                    [ngClass]="{
+                        'status-deployed': assetCard.assetStatus === 'deployed',
+                        'status-onLoan': assetCard.assetStatus === 'on loan',
+                        'status-disposed': assetCard.assetStatus === 'disposed'
+                    }">
+                    {{ assetCard.assetStatus }}
+                </span>
+            </div>
+    
+            <div class="additional-info">
+                <p class="asset-tag">{{ assetCard.assetTag }}</p>
+                <div class="asset-name">
+                    {{ assetCard.assetName }}
+                </div>
+                <p>{{ assetCard.assetOwnerName }}</p>
+            </div>
+    
+            <div class="opname-card" *ngIf="actualShowLocation">
+                <p class="asset-location">{{ assetCard.location }}</p>
+                <p class="asset-room">{{ assetCard.room }}</p>
+                <p class="asset-site">{{ assetCard.siteGroupName}}</p>
+            </div>
+        </div>
+    
+        <app-asset-page [assetTag]="assetCard.assetTag"></app-asset-page>
+    </div>
 </section>
 
 <!-- NO ASSETS FOUND MESSAGE -->
@@ -39,4 +50,33 @@
 <!-- LOADING ASSETS -->
 <section class="loading" *ngIf="isLoading">
     <p>Loading assets...</p>
+</section>
+
+<section class="asset-list-layout" *ngIf="currentView === 'list'">
+    <div class="asset-list" [ngClass]="variant" *ngFor="let assetCard of assetsOnSite">
+        <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
+            <div class="first-column">
+                <img class="asset-icon" [src]="assetCard.assetIcon" [alt]="assetCard.assetName"/>
+            </div>
+    
+            <div class="second-column">
+                <p class="asset-tag">{{ assetCard.assetTag }}</p>
+                <p>{{ assetCard.assetOwnerName }}</p>
+            </div>
+    
+            <div class="third-column">
+                <span 
+                    class="asset-status"
+                    [ngClass]="{
+                        'status-deployed': assetCard.assetStatus === 'deployed',
+                        'status-onLoan': assetCard.assetStatus === 'on loan',
+                        'status-disposed': assetCard.assetStatus === 'disposed'
+                    }">
+                    {{ assetCard.assetStatus }}
+                </span>
+            </div>
+        </div>
+    
+        <app-asset-page [assetTag]="assetCard.assetTag"></app-asset-page>
+    </div>
 </section>

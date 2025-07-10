@@ -1,5 +1,4 @@
- 
-<div class="user-site-header">
+ <div class="user-site-header">
     <div class="site-search">
         <div class="your-site">
             <h5>Your Sites:</h5>
@@ -44,7 +43,7 @@
             </form>
         </div>
 
-        <div class="view-icon">
+        <div class="view-icon" *ngIf="!isMobile">
             <img class="card-view" [class.active]="currentView === 'card'" src="assets/card.svg" alt="Card View" (click)="toggleView('card')"/>
             <img class="list-view" [class.active]="currentView === 'list'" src="assets/list.svg" alt="List View" (click)="toggleView('list')"/>
         </div>
