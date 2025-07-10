@@ -18,58 +18,15 @@ p {
 
 .user-site-header {
 	display: flex;
+	flex-direction: column;
+}
+
+.site-search {
+	display: flex;
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
-}
-
-.search {
-	display: inline-block;
-	position: relative;
-	height: 35px;
-	width: 35px;
-	box-sizing: border-box;
-	margin: 0px 8px 7px 0px;
-	padding: 7px 9px 0px 9px;
-	border: 3px styles.$primary-text-color solid;
-	border-radius: 25px;
-	transition: all 200ms ease;
-	cursor: text;
-	
-	&:after {
-		content: "";
-		position: absolute;
-		width: 3px;
-		height: 20px;
-		right: -5px;
-		top: 21px;
-		background: styles.$primary-text-color;
-		border-radius: 3px;
-		transform: rotate(-45deg);
-		transition: all 200ms ease;
-	}
-	
-	&:active,
-	&:hover,
-	&:focus-within {
-		width: 200px;
-		margin-right: 0px;
-		
-		&:after {
-			height: 0px;	
-		}
-	}
-	
-	input {
-		width: 100%;
-		border: none;
-		box-sizing: border-box;
-		font-family: styles.$font-family;
-		font-size: 15px;
-		color: inherit;
-		background: transparent;
-		outline-width: 0px;
-	}
+	margin-bottom: 10px;
 }
 
 .site-card-layout {
@@ -121,10 +78,23 @@ p {
     flex-direction: row;
 }
 
+.search-view {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 20px;
+}
+
+.search-bar{
+	align-items: center;
+	flex-grow: 1;
+}
+
 .filter-pills {
 	display: flex;
 	gap: 8px;
 	flex-wrap: wrap;
+	justify-content: end;
 	
 	span {
 		cursor: pointer;
@@ -155,5 +125,51 @@ p {
 		&:hover {
 			background-color: color.adjust(#dc3545, $lightness: -10%);
 		}
+	}
+}
+
+.view-icon {
+	flex-shrink: 0;
+	
+	img {
+		width: 35px;
+		height: 35px;
+	}
+	
+	.card-view, .list-view {
+		cursor: pointer;
+		opacity: 0.6;
+		transition: opacity 0.2s;
+		
+		&.active {
+		opacity: 1;
+		}
+		
+		&:hover {
+		opacity: 0.8;
+		}
+  	}
+}
+
+.site-list-layout {
+	padding-top: 10px;
+}
+
+.site-list {
+	padding: 10px 0px;
+	border-bottom: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 40%);
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.first-column, .second-column {
+	display: flex;
+	flex-direction: column;
+	align-items: start;
+
+	p {
+		margin: 5px 0px;
 	}
 }

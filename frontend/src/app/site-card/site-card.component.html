@@ -1,51 +1,57 @@
  
 <div class="user-site-header">
-    <div class="your-site">
-        <h5>Your Sites:</h5>
-    </div>
+    <div class="site-search">
+        <div class="your-site">
+            <h5>Your Sites:</h5>
+        </div>
 
-    <div class="filter-pills">
-        <span 
-            class="site-status filter-active" 
-            [class.selected]="selectedFilter === 'Active'"
-            (click)="filterByStatus('Active')">Active</span>
-        <span 
-            class="site-status filter-inactive" 
-            [class.selected]="selectedFilter === 'Inactive'"
-            (click)="filterByStatus('Inactive')">Completed</span>
-        <span 
-            class="site-status filter-pending" 
-            [class.selected]="selectedFilter === 'Pending'"
-            (click)="filterByStatus('Pending')">Pending</span>
-        <span 
-            class="site-status filter-verified" 
-            [class.selected]="selectedFilter === 'Verified'"
-            (click)="filterByStatus('Verified')">Verified</span>
-        <span 
-            class="site-status filter-rejected" 
-            [class.selected]="selectedFilter === 'Rejected'"
-            (click)="filterByStatus('Rejected')">Rejected</span>
-        <span 
-            class="site-status filter-outdated" 
-            [class.selected]="selectedFilter === 'Outdated'"
-            (click)="filterByStatus('Outdated')">Outdated</span>
-        <span 
-            class="clear-filter" 
-            (click)="clearAllFilters()">Clear All</span>
-    </div>
-    
-    <div class="search-bar">
-        <div class="cntr">
-            <div class="cntr-innr">
-            <label class="search" for="inpt_search">
-                <input id="inpt_search" type="text" #filter (input)="filterSiteCards(filter.value)"/>
-            </label>
-            </div>
+        <div class="filter-pills">
+            <span 
+                class="site-status filter-active" 
+                [class.selected]="selectedFilter === 'Active'"
+                (click)="filterByStatus('Active')">Active</span>
+            <span 
+                class="site-status filter-inactive" 
+                [class.selected]="selectedFilter === 'Inactive'"
+                (click)="filterByStatus('Inactive')">Completed</span>
+            <span 
+                class="site-status filter-pending" 
+                [class.selected]="selectedFilter === 'Pending'"
+                (click)="filterByStatus('Pending')">Pending</span>
+            <span 
+                class="site-status filter-verified" 
+                [class.selected]="selectedFilter === 'Verified'"
+                (click)="filterByStatus('Verified')">Verified</span>
+            <span 
+                class="site-status filter-rejected" 
+                [class.selected]="selectedFilter === 'Rejected'"
+                (click)="filterByStatus('Rejected')">Rejected</span>
+            <span 
+                class="site-status filter-outdated" 
+                [class.selected]="selectedFilter === 'Outdated'"
+                (click)="filterByStatus('Outdated')">Outdated</span>
+            <span 
+                class="clear-filter" 
+                (click)="clearAllFilters()">Clear All</span>
         </div>
     </div>
+
+    <div class="search-view">
+        <div class="search-bar">
+            <form class="d-flex" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search"  #filter (input)="filterSiteCards(filter.value)"/>
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+        </div>
+
+        <div class="view-icon">
+            <img class="card-view" [class.active]="currentView === 'card'" src="assets/card.svg" alt="Card View" (click)="toggleView('card')"/>
+            <img class="list-view" [class.active]="currentView === 'list'" src="assets/list.svg" alt="List View" (click)="toggleView('list')"/>
+        </div>
+    </div>  
 </div>
 
-<section class="site-card-layout" *ngIf="filteredSiteCardList && filteredSiteCardList.length > 0">
+<section class="site-card-layout" *ngIf="filteredSiteCardList && filteredSiteCardList.length > 0 && currentView === 'card'">
     <div class="site-card" *ngFor="let siteCard of filteredSiteCardList" (click)="goToSite(siteCard.siteID)">
         <div class="card-header">
             <h6 class="site-name">{{ siteCard.siteName }}</h6>
@@ -68,6 +74,30 @@
             <div class="last-opname">
                 <p>Last Opname on {{ siteCard.opnameDate }}</p>
             </div>
+        </div>
+    </div>
+</section>
+
+<section class="site-list-layout" *ngIf="filteredSiteCardList && filteredSiteCardList.length > 0 && currentView === 'list'">
+    <div class="site-list" *ngFor="let siteCard of filteredSiteCardList" (click)="goToSite(siteCard.siteID)">
+        <div class="first-column">
+            <h6 class="site-name">{{ siteCard.siteName }}</h6>
+            <p>Last Opname on {{ siteCard.opnameDate }}</p>
+        </div>
+
+        <div class="second-column">
+            <span
+                class="site-status"
+                [ngClass]="{
+                    'status-active': siteCard.opnameStatus === 'Active',
+                    'status-completed': siteCard.opnameStatus === 'Inactive',
+                    'status-pending': siteCard.opnameStatus === 'Pending',
+                    'status-verified': siteCard.opnameStatus === 'Maintenance',
+                    'status-rejected': siteCard.opnameStatus === 'Rejected',
+                    'status-outdated': siteCard.opnameStatus === 'Outdated'
+                }">
+                {{ siteCard.opnameStatus }}
+            </span>
         </div>
     </div>
 </section>

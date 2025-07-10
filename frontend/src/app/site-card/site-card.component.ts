@@ -11,6 +11,8 @@ import { Router } from '@angular/router';
   styleUrl: './site-card.component.scss'
 })
 export class SiteCardComponent {
+  currentView: 'card' | 'list' = 'card';
+
   siteCardList: Siteinfo[] = [];
   filteredSiteCardList: Siteinfo[] = []; 
   originalSiteCardList: Siteinfo[] = []; // Keep original data
@@ -22,6 +24,10 @@ export class SiteCardComponent {
 
   constructor(private apiService: ApiService, private route: Router) {}
 
+  toggleView(view: 'card' | 'list') {
+    this.currentView = view;
+  }
+  
   ngOnInit(): void {
     // console.log('[SiteCard] ngOnInit called');
     this.fetchMySiteCards();

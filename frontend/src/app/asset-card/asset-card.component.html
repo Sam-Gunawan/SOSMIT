@@ -28,11 +28,7 @@
         </div>
     </div>
 
-    <div class="modal fade" [id]="'modal-' + assetCard.assetTag" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" [attr.aria-labelledby]="'modal-' + assetCard.assetTag + '-label'" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <app-asset-page [assetTag]="assetCard.assetTag"></app-asset-page>
-        </div>
-    </div>
+    <app-asset-page [assetTag]="assetCard.assetTag"></app-asset-page>
 </section>
 
 <!-- NO ASSETS FOUND MESSAGE -->
