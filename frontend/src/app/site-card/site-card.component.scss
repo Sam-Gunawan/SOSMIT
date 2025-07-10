@@ -149,6 +149,10 @@ p {
 		opacity: 0.8;
 		}
   	}
+
+	@media (max-width: 767px) {
+        display: none !important; // Force hide on mobile
+    }
 }
 
 .site-list-layout {
