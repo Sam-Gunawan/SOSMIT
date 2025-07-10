@@ -41,6 +41,14 @@ p {
   gap: 10px;
 }
 
+.asset-main-info {
+  grid-area: icon;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 .asset-icon {
   height: 100%;
   object-fit: contain;
@@ -57,9 +65,10 @@ p {
   grid-area: left-top; 
   display: flex;
   flex-direction: column;
-  justify-content: space-around;
+  justify-content: center;
   gap: 10px;
   align-items: flex-start;
+  border-bottom: 1px solid styles.$quaternary-text-color;
 }
 
 .asset-status{
@@ -84,15 +93,8 @@ p {
   flex-direction: column;
   justify-content: center;
   padding: 10px;
+  border-left: 1px solid styles.$quaternary-text-color;
 }
-
-// .vertical {
-//   display:inline;
-//   height:100%;
-//   width:1px;
-//   border:1px inset;
-//   margin:5px
-// }
 
 .user-info {
   align-self: center;
@@ -141,4 +143,14 @@ hr {
   color: #d12e2e;
   transition: all .2s ease-in-out;
   transform: scale(1.1);
+}
+
+.pick-status-reason {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.form-floating {
+  font-size: 15px;
 }
