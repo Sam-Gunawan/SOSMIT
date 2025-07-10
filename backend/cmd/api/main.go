@@ -94,25 +94,30 @@ func main() {
 			userRoutes.GET("/site-cards", userHandler.GetUserSiteCardsHandler)
 		}
 
-		siteRoutes := api.Group("/site")
-		siteRoutes.Use(auth.AuthMiddleware())
+		siteRoutes := api.Group("/site").Use(auth.AuthMiddleware())
 		{
 			// GET /api/site/:site-id/assets
 			siteRoutes.GET("/:site-id/assets", assetHandler.GetAssetsOnSiteHandler)
-
-			opnameRoutes := siteRoutes.Group("/:site-id/opname")
-			{
-				// POST /api/site/:site-id/opname/start
-				opnameRoutes.POST("/start", opnameHandler.StartNewSessionHandler)
-			}
 		}
 
-		assetRoutes := api.Group("/asset")
-		assetRoutes.Use(auth.AuthMiddleware())
+		assetRoutes := api.Group("/asset").Use(auth.AuthMiddleware())
 		{
 			// GET /api/asset/:asset_tag
 			assetRoutes.GET("/:asset_tag", assetHandler.GetAssetByTagHandler)
 		}
+
+		opnameRoutes := api.Group("/opname").Use(auth.AuthMiddleware())
+		{
+			// GET /api/opname/:session-id
+			opnameRoutes.GET("/:session-id", opnameHandler.GetSessionByIDHandler)
+
+			// POST /api/opname/:site-id/start
+			opnameRoutes.POST("/:site-id/start", opnameHandler.StartNewSessionHandler)
+
+			// DELETE /api/opname/:session-id/cancel
+			opnameRoutes.DELETE("/:session-id/cancel", opnameHandler.DeleteSessionHandler)
+		}
+
 	}
 
 	// Start the server on port 8080.

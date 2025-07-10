@@ -87,7 +87,7 @@ CREATE TABLE "Asset" (
     ) DEFAULT '-1',
     "location" VARCHAR(255),
     "room" VARCHAR(255),
-    -- Foreign key to User (owner of the asset). On delete set null means if the User is deleted, the owner_id in Asset will be set to NULL.
+    -- Foreign key to User (owner of the asset).
     "owner_id" INT NOT NULL REFERENCES "User"("user_id") ON DELETE SET NULL,
 
     -- Foreign key to Site (where the asset is located).
@@ -100,9 +100,9 @@ CREATE TABLE "Asset" (
 -- OpnameSession. Created when a new opname is performed.
 CREATE TABLE "OpnameSession" (
     "id" SERIAL PRIMARY KEY,
-    "start_date" TIMESTAMP NOT NULL DEFAULT NOW(),
-    "end_date" TIMESTAMP,
-    "status" VARCHAR(20) NOT NULL CHECK ("status" IN ('Outdated', 'Active', 'Completed', 'Pending', 'Verified', 'Rejected')) DEFAULT 'Pending',
+    "start_date" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "end_date" TIMESTAMP WITH TIME ZONE,
+    "status" VARCHAR(20) NOT NULL CHECK ("status" IN ('Outdated', 'Active', 'Completed', 'Verified', 'Rejected')) DEFAULT 'Outdated',
 
     -- Foreign key to User (the user who created the opname session).
     "user_id" INT NOT NULL REFERENCES "User"("user_id"),
@@ -121,7 +121,7 @@ CREATE TABLE "AssetChanges" (
     "change_reason" TEXT NOT NULL, -- Reason for the change. It's required to provide context for the change.
 
     -- Foreign key to OpnameSession (the opname session in which the changes were made).
-    "session_id" INT NOT NULL REFERENCES "OpnameSession"("id"),
+    "session_id" INT NOT NULL REFERENCES "OpnameSession"("id") ON DELETE CASCADE,
     
     -- Foreign key to Asset (the asset that was changed).
     "asset_tag" VARCHAR(12) NOT NULL REFERENCES "Asset"("asset_tag") ON DELETE CASCADE

@@ -4,6 +4,8 @@ DROP FUNCTION IF EXISTS public.get_user_site_cards(INT);
 DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
 DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT);
+DROP FUNCTION IF EXISTS public.get_opname_session_by_id(INT);
+DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
 
 -- get_credentials retrieves user credentials by username (for login auth)
 CREATE OR REPLACE FUNCTION public.get_credentials(_username VARCHAR(255))
@@ -172,33 +174,66 @@ CREATE OR REPLACE FUNCTION public.create_new_opname_session(
 ) RETURNS INT -- Returns the new session ID, or 0 if it fails.
 LANGUAGE plpgsql
 AS $$
-DECLARE
-	-- Local variable to count existing active sessions for the site.
-	_active_session_count INT;
-	_new_session_id INT := 0; -- Initialize to 0, will be set if a new session is created.
-BEGIN
-	-- Check if there are any active opname sessions for the site.
-	-- Count how many rows in "OpnameSession" have the same site_id and status 'Active' or 'Pending'.
-	SELECT COUNT(*)
-	INTO _active_session_count
-	FROM "OpnameSession"
-	WHERE site_id = _site_id AND "status" IN ('Active', 'Pending');
+	DECLARE
+		-- Local variable to count existing active sessions for the site.
+		_active_session_count INT;
+		_new_session_id INT := 0; -- Initialize to 0, will be set if a new session is created.
+	BEGIN
+		-- Check if there are any active opname sessions for the site.
+		-- Count how many rows in "OpnameSession" have the same site_id and status 'Active' or 'Pending'.
+		SELECT COUNT(*)
+		INTO _active_session_count
+		FROM "OpnameSession"
+		WHERE site_id = _site_id AND "status" IN ('Active', 'Pending');
 
-	-- If there are no active sessions, proceed to create a new one.
-	IF _active_session_count = 0 THEN
-		-- Insert a new opname session into the OpnameSession table.
-		INSERT INTO "OpnameSession" (user_id, site_id, "status", start_date)
-		VALUES (_user_id, _site_id, 'Active', NOW())
-		-- Get the ID of the newly created session.
-		-- The 'RETURNING' clause allows us to capture the new session ID.
-		RETURNING id INTO _new_session_id;
+		-- If there are no active sessions, proceed to create a new one.
+		IF _active_session_count = 0 THEN
+			-- Insert a new opname session into the OpnameSession table.
+			INSERT INTO "OpnameSession" (user_id, site_id, "status", start_date)
+			VALUES (_user_id, _site_id, 'Active', NOW())
+			-- Get the ID of the newly created session.
+			-- The 'RETURNING' clause allows us to capture the new session ID.
+			RETURNING id INTO _new_session_id;
 
-		RAISE NOTICE 'New opname session created with ID: %', _new_session_id;
-	ELSE
-		-- If there is already an active session, do nothing. _new_session_id will remain 0.
-		RAISE NOTICE 'An active opname session already exists for site ID: %, cannot create a new one.', _site_id;
-	END IF;
+			RAISE NOTICE 'New opname session created with ID: %', _new_session_id;
+		ELSE
+			-- If there is already an active session, do nothing. _new_session_id will remain 0.
+			RAISE NOTICE 'An active opname session already exists for site ID: %, cannot create a new one.', _site_id;
+		END IF;
 
-	RETURN _new_session_id;
-END;
+		RETURN _new_session_id;
+	END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.get_opname_session_by_id(_session_id INT)
+	RETURNS TABLE (
+		id INT,
+		"start_date" TIMESTAMP WITH TIME ZONE,
+		end_date TIMESTAMP WITH TIME ZONE,
+		"status" VARCHAR(20),
+		user_id INT,
+		approver_id INT,
+		site_id INT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT os.id, os."start_date", os.end_date, os."status", os.user_id, os.approver_id, os.site_id
+		FROM "OpnameSession" AS os
+		WHERE os.id = _session_id;
+	END;
+$$;
+
+-- delete_opname_session deletes an opname session by session ID
+CREATE OR REPLACE PROCEDURE public.delete_opname_session(_session_id INT)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		-- Delete the opname session with the given session ID.
+		-- Note: This procedure deletes the session and all associated asset changes thanks to 'ON DELETE CASCADE' clause when defining "AssetChanges" table.
+		DELETE FROM "OpnameSession"
+		WHERE id = _session_id;
+		RAISE NOTICE 'Opname session with ID: % has been deleted.', _session_id;
+	END;
 $$;

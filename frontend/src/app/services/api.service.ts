@@ -16,6 +16,7 @@ export class ApiService {
   private userApiUrl = 'http://localhost:8080/api/user'
   private siteApiUrl = 'http://localhost:8080/api/site'
   private assetApiUrl = 'http://localhost:8080/api/asset'
+  private opnameApiUrl = 'http://localhost:8080/api/opname'
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -141,22 +142,6 @@ export class ApiService {
         console.log(`[ApiService] Fetched assets for site ${siteID}:`, response);
       })
     );
-  }
-
-  startNewOpname(siteID: number): Observable<any> {
-    // This method will start a new stock opname session for the specified site.
-    return this.http.post(`${this.siteApiUrl}/${siteID}/opname/start`, {}).pipe(
-      map((response: any) => {
-        return {
-          opnameSessionID: response.session_id,
-        }
-      }),
-
-      tap((response: any) => {
-        // Log the response for debugging purposes.
-        console.log('[ApiService] Started new opname session:', response);
-      })
-    )
   }
 
   // Helper method to get icon path based on product variety

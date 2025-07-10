@@ -97,6 +97,20 @@ func AuthMiddleware() gin.HandlerFunc {
 			// Set the user_id in Gin context for the next handler to use.
 			context.Set("user_id", int64(userID.(float64)))
 
+			// Extract the user's position from claims
+			position, ok := claims["position"]
+			if !ok {
+				context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+					"error": "invalid position in token",
+				})
+
+				fmt.Println("Invalid position in token:", position, "\nError:", ok)
+				return
+			}
+
+			// Set the position in Gin context for the next handler to use.
+			context.Set("position", position)
+
 			// Continue to next handler
 			context.Next()
 		} else {

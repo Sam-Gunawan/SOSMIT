@@ -4,6 +4,7 @@ package opname
 import (
 	"errors"
 	"log"
+	"strings"
 )
 
 type Service struct {
@@ -41,4 +42,61 @@ func (service *Service) StartNewSession(userID int, siteID int) (int, error) {
 
 	// If session creation is successful, return the new session ID
 	return newSessionID, nil
+}
+
+// GetSessionByID retrieves an opname session by its ID.
+func (service *Service) GetSessionByID(sessionID int) (*OpnameSession, error) {
+	// Validate sessionID
+	if sessionID <= 0 {
+		log.Printf("⚠ Invalid sessionID: %d", sessionID)
+		return nil, errors.New("invalid sessionID")
+	}
+
+	// Call the repository to get the session by ID
+	session, err := service.repo.GetSessionByID(sessionID)
+	if err != nil {
+		log.Printf("❌ Error retrieving opname session by ID %d: %v", sessionID, err)
+		return nil, err
+	}
+
+	// If no session is found, return an error
+	if session == nil {
+		log.Printf("⚠ No opname session found with ID: %d", sessionID)
+		return nil, errors.New("opname session not found")
+	}
+
+	return session, nil
+}
+
+// DeleteSession deletes an opname session by its ID.
+func (service *Service) DeleteSession(sessionID int, requestingUserID int, userPosition string) error {
+	// Validate sessionID and checks if it exists.
+	session, err := service.repo.GetSessionByID(sessionID)
+	if err != nil {
+		log.Printf("❌ Error retrieving opname session by ID %d: %v", sessionID, err)
+		return err
+	}
+
+	if session == nil {
+		log.Printf("⚠ No opname session found with ID: %d", sessionID)
+		return errors.New("opname session not found")
+	}
+
+	// Security check!
+	// Session can only be deleted by the user who created it or any L1 SUPPORT user.
+	if session.UserID != requestingUserID && strings.ToUpper(userPosition) != "L1 SUPPORT" {
+		log.Printf("⚠ Forbidden: User %d is not authorized to delete session %d", requestingUserID, sessionID)
+		return errors.New("you are not authorized to delete this opname session")
+	}
+
+	// Call the repository to delete the session.
+	err = service.repo.DeleteSession(sessionID)
+	if err != nil {
+		log.Printf("❌ Error deleting opname session with ID %d: %v", sessionID, err)
+		return err
+	}
+
+	// If deletion is successful, log the success.
+	log.Printf("✅ Opname session with ID %d deleted successfully", sessionID)
+	return nil
 }
