@@ -111,8 +111,11 @@ func main() {
 			// GET /api/opname/:session-id
 			opnameRoutes.GET("/:session-id", opnameHandler.GetSessionByIDHandler)
 
-			// POST /api/opname/:site-id/start
-			opnameRoutes.POST("/:site-id/start", opnameHandler.StartNewSessionHandler)
+			// POST /api/opname/start
+			opnameRoutes.POST("/start", opnameHandler.StartNewSessionHandler)
+
+			// POST /api/opname/:session-id/process-asset
+			opnameRoutes.POST("/:session-id/process-asset", opnameHandler.ProcessAssetChangesHandler)
 
 			// DELETE /api/opname/:session-id/cancel
 			opnameRoutes.DELETE("/:session-id/cancel", opnameHandler.DeleteSessionHandler)

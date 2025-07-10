@@ -14,6 +14,7 @@ import { AssetPageComponent } from '../asset-page/asset-page.component';
 export class AssetCardComponent {
   @Input() variant: 'default' | 'compact' = 'default';
   @Input() showLocation: boolean = false;
+  @Input() isInOpnameSession: boolean = false; // Flag to check if in an opname session
 
   actualVariant: 'default' | 'compact' = 'default';
   actualShowLocation: boolean = false;

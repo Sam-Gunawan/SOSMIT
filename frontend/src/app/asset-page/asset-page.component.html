@@ -72,9 +72,15 @@
                 </div>
             </div>
         
-            <div class="modal-footer">
+            <!-- Only appears in opname page -->
+            <div class="modal-footer" *ngIf="isInOpnameSession">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">All good</button>
                 <button type="button" class="btn btn-primary" [attr.data-bs-target]="'#edit-modal-' + assetPage?.assetTag" data-bs-toggle="modal">Edit</button>
+            </div>
+
+            <!-- Only appears in viewing asset info -->
+            <div class="modal-footer" *ngIf="!isInOpnameSession">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

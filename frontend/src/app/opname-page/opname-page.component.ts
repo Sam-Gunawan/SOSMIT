@@ -19,13 +19,16 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   cardVariant: 'default' | 'compact' = 'compact';
   showLocation: boolean = true;
   sessionID: number = -1; // Default value, will be set later
+  siteID: number = -1; // Site ID for the current opname session
   isLoading: boolean = true; // Loading state for the opname session
   errorMessage: string = ''; // Error message for the opname session
   private subscription?: Subscription; // Subscription to manage service state
 
   ngOnInit() {
     this.checkScreenSize();
+    this.siteID = Number(this.route.snapshot.paramMap.get('id')); // Get site ID from route parameters
     this.initializeSessionId();
+    this.isLoading = false;
   }
 
   ngOnDestroy() {
@@ -35,20 +38,31 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   }
 
   private initializeSessionId() {
-    // Method 1: Try to get from router state (navigation extras)
+    this.isLoading = true;
+    
+    // Method 1: Try to get from service (which now also checks localStorage)
+    const serviceSessionId = this.opnameSessionService.getSessionId();
+    if (serviceSessionId && serviceSessionId > 0) {
+      this.sessionID = serviceSessionId;
+      console.log('[OpnamePage] Session ID from service/localStorage:', this.sessionID);
+      
+      // If we have a session ID but no site ID from route, try to get it from localStorage
+      if (this.siteID <= 0) {
+        const siteid = this.opnameSessionService.getSiteId();
+        if (siteid && siteid > 0) {
+          this.siteID = siteid;
+          console.log('[OpnamePage] Site ID from localStorage:', this.siteID);
+        }
+      }
+      return;
+    }
+
+    // Method 2: Try to get from router state (navigation extras)
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras?.state?.['sessionId']) {
       this.sessionID = navigation.extras.state['sessionId'];
       console.log('[OpnamePage] Session ID from router state:', this.sessionID);
-      this.opnameSessionService.setSessionId(this.sessionID);
-      return;
-    }
-
-    // Method 2: Try to get from service (if already set)
-    const serviceSessionId = this.opnameSessionService.getSessionId();
-    if (serviceSessionId && serviceSessionId > 0) {
-      this.sessionID = serviceSessionId;
-      console.log('[OpnamePage] Session ID from service:', this.sessionID);
+      this.opnameSessionService.setSessionId(this.sessionID); // Also saves to localStorage
       return;
     }
 
@@ -56,15 +70,22 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     if (history.state?.sessionId) {
       this.sessionID = history.state.sessionId;
       console.log('[OpnamePage] Session ID from history state:', this.sessionID);
-      this.opnameSessionService.setSessionId(this.sessionID);
+      this.opnameSessionService.setSessionId(this.sessionID); // Also saves to localStorage
       return;
     }
 
     // If no session ID found, show error
     console.error('[OpnamePage] No session ID found in any source');
-    this.router.navigate(['/site', this.route.snapshot.paramMap.get('id')]); // Navigate to site page if no session ID
+    
+    // If we have a site ID, navigate back to that site
+    if (this.siteID > 0) {
+      this.router.navigate(['/site', this.siteID]);
+    } else {
+      // If we don't have a site ID either, navigate to dashboard
+      this.router.navigate(['']);
+    }
+    
     this.errorMessage = 'No opname session found. Please start a new session.';
-    this.isLoading = false;
   }
 
   @HostListener('window:resize', ['$event'])
@@ -90,13 +111,12 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
         this.isLoading = false; // Set loading state to false after cancelling
         console.log('[OpnamePage] Opname session cancelled successfully:', response);
         
-        // Clear the session from the service
+        // Clear the session from the service and localStorage
         this.opnameSessionService.clearSession();
         
         // Navigate back to the site page
-        const siteId = this.route.snapshot.paramMap.get('id');
-        console.log('[OpnamePage] Navigating back to site:', siteId);
-        this.router.navigate(['/site', siteId]);
+        console.log('[OpnamePage] Navigating back to site:', this.siteID);
+        this.router.navigate(['/site', this.siteID]);
       },
       error: (error) => {
         this.isLoading = false; // Set loading state to false on error

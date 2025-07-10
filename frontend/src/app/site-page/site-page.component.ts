@@ -87,8 +87,9 @@ import { OpnameSession } from '../model/opname-session.model';
           // Update the sitePage with the new opname session ID.
           this.sitePage.opnameSessionID = response.opnameSessionID;
 
-          // Store the session ID in the service
+          // Store the session ID and site ID in the service
           this.opnameSessionService.setSessionId(response.opnameSessionID);
+          this.opnameSessionService.setSiteId(this.sitePage.siteID);
 
           // Redirect to the opname page using router state
           this.router.navigate(['/site', this.sitePage.siteID, 'opname'], {
@@ -106,27 +107,42 @@ import { OpnameSession } from '../model/opname-session.model';
 
     continueOpname(): void {
       // This method will continue an existing stock opname session for the current site.
-      // TODO: check if opname's status is active or not, only continue if active.
+      // Prevent multiple simultaneous requests
+      if (this.opnameLoading) {
+        console.log('[SitePage] Request already in progress, ignoring duplicate click');
+        return;
+      }
+      
       this.opnameLoading = true;
+      this.actionButtonError = ''; // Clear any previous errors
+      
+      if (this.sitePage.opnameSessionID <= 0) {
+        this.opnameLoading = false;
+        this.actionButtonError = 'No opname session ID available.';
+        console.error('[SitePage] No opname session ID to continue');
+        return;
+      }
+      
       this.opnameSessionService.getOpnameSession(this.sitePage.opnameSessionID).subscribe({
         next: (opnameSession) => {
           this.opnameSession = opnameSession; // Store the current opname session data
           this.opnameLoading = false; // Set loading state to false after fetching session
           console.log('[SitePage] Current opname session:', this.opnameSession);
+          
+          // Only continue if the session is active - MOVED THIS INSIDE THE SUCCESS CALLBACK
+          if (this.opnameSession && this.opnameSession.status === 'Active') {
+            this.opnameSessionService.continueOpname(this.sitePage.opnameSessionID, this.sitePage.siteID, this.router);
+          } else {
+            const status = this.opnameSession ? this.opnameSession.status : 'unknown';
+            console.error('[SitePage] Opname session is not active:', status);
+            this.actionButtonError = `Opname session is not active (current status: ${status}).`;
+          }
         },
         error: (error) => {
           console.error('[SitePage] Error fetching current opname session:', error);
           this.opnameLoading = false; // Set loading state to false on error
           this.actionButtonError = 'Failed to fetch current opname session. Please try again later.';
-          return;
         }
-      })
-
-      if (this.sitePage.opnameSessionID > 0 && this.opnameSession?.status === 'Active') {
-        this.opnameSessionService.continueOpname(this.sitePage.opnameSessionID, this.sitePage.siteID, this.router);
-      } else {
-        console.error('[SitePage] No existing active opname session to continue');
-        this.actionButtonError = 'No existing Active opname session found.';
-      }
+      });
     }
   }

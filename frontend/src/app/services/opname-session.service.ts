@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { tap, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { OpnameSession } from '../model/opname-session.model';
+import { AssetChange } from '../model/asset-changes.model';
 
 @Injectable({ providedIn: 'root' })
 export class OpnameSessionService {
@@ -14,15 +15,49 @@ export class OpnameSessionService {
   constructor(private http: HttpClient) { }
 
   setSessionId(sessionID: number): void {
+    // Set in BehaviorSubject
     this.sessionIDSubject.next(sessionID);
+    // Store in localStorage for persistence
+    localStorage.setItem('opname_session_id', sessionID.toString());
   }
 
   getSessionId(): number | null {
-    return this.sessionIDSubject.value;
+    // First try to get from BehaviorSubject (in-memory)
+    let sessionId = this.sessionIDSubject.value;
+    
+    // If not available, try to get from localStorage
+    if (sessionId === null) {
+      const storedId = localStorage.getItem('opname_session_id');
+      if (storedId) {
+        sessionId = Number(storedId);
+        // Update the BehaviorSubject with the retrieved value
+        this.sessionIDSubject.next(sessionId);
+      }
+    }
+    
+    return sessionId;
   }
 
   clearSession(): void {
+    // Clear from BehaviorSubject
     this.sessionIDSubject.next(null);
+    // Clear from localStorage
+    localStorage.removeItem('opname_session_id');
+    this.clearSiteId(); // Also clear the site ID
+  }
+
+  // Store and retrieve siteID for the current opname session
+  setSiteId(siteId: number): void {
+    localStorage.setItem('opname_site_id', siteId.toString());
+  }
+
+  getSiteId(): number | null {
+    const storedId = localStorage.getItem('opname_site_id');
+    return storedId ? Number(storedId) : null;
+  }
+
+  clearSiteId(): void {
+    localStorage.removeItem('opname_site_id');
   }
 
   getOpnameSession(sessionID: number): Observable<any> {
@@ -48,7 +83,7 @@ export class OpnameSessionService {
 
   startNewOpname(siteID: number): Observable<any> {
     // This method will start a new stock opname session for the specified site.
-    return this.http.post(`${this.opnameApiUrl}/${siteID}/start`, {}).pipe(
+    return this.http.post(`${this.opnameApiUrl}/start`, {site_id: siteID}).pipe(
         map((response: any) => {
             return {
             opnameSessionID: response.session_id,
@@ -76,8 +111,43 @@ export class OpnameSessionService {
     // This method will continue an existing stock opname session.
     console.log('[OpnameService] Continuing opname session:', sessionID);
     this.setSessionId(sessionID); // Ensure the session ID is set in the service
+    this.setSiteId(siteID);       // Also store the site ID
     router.navigate(['/site', siteID, 'opname'], {
         state: { sessionID: sessionID }
       });
+  }
+
+  processScannedAsset(sessionID: number, assetChanges: AssetChange): Observable<any> {
+    // This method will process the newly scanned/searched asset in the opname session.
+    console.log('[OpnameService] Processing scanned asset:', assetChanges);
+
+    // Mapping the request body to match the expected API format, which is using snake_case instead of camelCase.
+    const payload = {
+      asset_tag: assetChanges.assetTag,
+      new_status: assetChanges.newStatus,
+      new_status_reason: assetChanges.newStatusReason,
+      new_condition: assetChanges.newCondition,
+      new_condition_notes: assetChanges.newConditionNotes,
+      new_condition_photo_url: assetChanges.newConditionPhotoURL,
+      new_location: assetChanges.newLocation,
+      new_room: assetChanges.newRoom,
+      new_owner_id: assetChanges.newOwnerID,
+      new_site_id: assetChanges.newSiteID,
+      change_reason: assetChanges.changeReason,
+    }
+
+    return this.http.post<JSON>(`${this.opnameApiUrl}/${sessionID}/process-asset`, payload).pipe(
+      map((response: any) => {
+        // Map the response to a more usable format if needed.
+        return {
+          message: response.message,
+          assetChanges: JSON.parse(response.changes || '{}'),
+        };
+      }),
+      tap((response: any) => {
+        // Log the response for debugging purposes.
+        console.log('[OpnameService] Processed scanned asset:', response);
+      })
+    )
   }
 }

@@ -298,11 +298,9 @@ AS $$
 			_changes := jsonb_set(_changes, '{site_id}', to_jsonb(_new_site_id));
 		END IF;
 
-		-- If any changes were made, insert a new record into AssetChanges
-		IF (SELECT count(*) FROM jsonb_object_keys(_changes)) > 0 THEN
-			INSERT INTO "AssetChanges" (session_id, asset_tag, "changes", change_reason)
-			VALUES (_session_id, _asset_tag, _changes, _change_reason);
-		END IF;
+		-- Regardless of whether changes were made, we will insert a record of the changes.
+		INSERT INTO "AssetChanges" (session_id, asset_tag, "changes", change_reason)
+		VALUES (_session_id, _asset_tag, _changes, _change_reason);
 
 		RETURN _changes;
 	END;
