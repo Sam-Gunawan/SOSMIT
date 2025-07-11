@@ -102,8 +102,11 @@ func main() {
 
 		assetRoutes := api.Group("/asset").Use(auth.AuthMiddleware())
 		{
-			// GET /api/asset/:asset_tag
-			assetRoutes.GET("/:asset_tag", assetHandler.GetAssetByTagHandler)
+			// GET /api/asset/tag/:asset_tag
+			assetRoutes.GET("/tag/:asset_tag", assetHandler.GetAssetByTagHandler)
+
+			// GET /api/asset/serial/:serial_number
+			assetRoutes.GET("/serial/:serial_number", assetHandler.GetAssetBySerialNumberHandler)
 		}
 
 		opnameRoutes := api.Group("/opname").Use(auth.AuthMiddleware())

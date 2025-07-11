@@ -1,11 +1,15 @@
 DROP FUNCTION IF EXISTS public.get_credentials(VARCHAR);
+DROP FUNCTION IF EXISTS public.get_all_users();
 DROP FUNCTION IF EXISTS public.get_user_by_username(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_user_site_cards(INT);
 DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
+DROP FUNCTION IF EXISTS public.get_asset_by_serial_number(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
 DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT);
 DROP FUNCTION IF EXISTS public.get_opname_session_by_id(INT);
 DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
+DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), INT, INT, TEXT);
+DROP FUNCTION IF EXISTS public.update_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), INT, INT, TEXT);
 
 -- get_credentials retrieves user credentials by username (for login auth)
 CREATE OR REPLACE FUNCTION public.get_credentials(_username VARCHAR(255))
@@ -25,9 +29,9 @@ AS $$
     END;
 $$;
 
--- get_user_by_username retrieves user details by username
-CREATE OR REPLACE FUNCTION public.get_user_by_username(_username VARCHAR(255))
-	RETURNS table (
+-- get_all_users retrieves all users with their details
+CREATE OR REPLACE FUNCTION public.get_all_users()
+	RETURNS TABLE (
 		user_id INT,
 		username VARCHAR(255),
 		first_name VARCHAR(255),
@@ -43,6 +47,32 @@ AS $$
 	BEGIN 
 		RETURN QUERY
 		SELECT u.user_id, u.username, u.first_name, u.last_name, u."position", s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
+		FROM "User" AS u
+		INNER JOIN "Site" AS s ON u.site_id = s.id
+		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+		INNER JOIN "Region" AS r ON sg.region_id = r.id;
+	END;
+$$;
+
+-- get_user_by_username retrieves user details by username
+CREATE OR REPLACE FUNCTION public.get_user_by_username(_username VARCHAR(255))
+	RETURNS table (
+		user_id INT,
+		username VARCHAR(255),
+		first_name VARCHAR(255),
+		last_name VARCHAR(255),
+		"position" VARCHAR(100),
+		site_id INT,
+		site_name VARCHAR(100),
+		site_group_name VARCHAR(100),
+		region_name VARCHAR(100),
+		cost_center_id INT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN 
+		RETURN QUERY
+		SELECT u.user_id, u.username, u.first_name, u.last_name, u."position", s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
 		FROM "User" AS u
 		INNER JOIN "Site" AS s ON u.site_id = s.id
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
@@ -122,33 +152,87 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_tag(_asset_tag VARCHAR(12))
 		owner_position VARCHAR(100),
 		owner_cost_center INT,
 		site_id INT,
+		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
 		region_name VARCHAR(100)
 	)
 	LANGUAGE plpgsql
-	AS $$
-		BEGIN
-			RETURN QUERY
-				SELECT a.asset_tag, a.serial_number, a.status, a.status_reason,
-					a.product_category, a.product_subcategory, a.product_variety,
-					a.brand_name, a.product_name, 
-					a.condition, a.condition_notes, a.condition_photo_url::TEXT,
-					a.location, a.room,
-					a.owner_id,
-					(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
-					u.position AS owner_position,
-					u.cost_center_id AS owner_cost_center,
-					a.site_id,
-					sg.site_group_name AS site_group_name,
-					r.region_name AS region_name
-				FROM "Asset" AS a
-				LEFT JOIN "User" AS u ON a.owner_id = u.user_id
-				LEFT JOIN "Site" AS s ON a.site_id = s.id
-				LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-				LEFT JOIN "Region" AS r ON sg.region_id = r.id
-				WHERE a.asset_tag = _asset_tag;
-		END;
-	$$;
+AS $$
+	BEGIN
+		RETURN QUERY
+			SELECT a.asset_tag, a.serial_number, a.status, a.status_reason,
+				a.product_category, a.product_subcategory, a.product_variety,
+				a.brand_name, a.product_name, 
+				a.condition, a.condition_notes, a.condition_photo_url::TEXT,
+				a.location, a.room,
+				a.owner_id,
+				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
+				u.position AS owner_position,
+				u.cost_center_id AS owner_cost_center,
+				a.site_id,
+				s.site_name AS site_name,
+				sg.site_group_name AS site_group_name,
+				r.region_name AS region_name
+			FROM "Asset" AS a
+			LEFT JOIN "User" AS u ON a.owner_id = u.user_id
+			LEFT JOIN "Site" AS s ON a.site_id = s.id
+			LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+			LEFT JOIN "Region" AS r ON sg.region_id = r.id
+			WHERE a.asset_tag = _asset_tag;
+	END;
+$$;
+
+-- get_assets_by_serial_number retrieves asset details by serial number
+CREATE OR REPLACE FUNCTION public.get_asset_by_serial_number(_serial_number VARCHAR(25))
+	RETURNS TABLE (
+		asset_tag VARCHAR(12),
+		serial_number VARCHAR(25),
+		"status" VARCHAR(20),
+		status_reason VARCHAR(20),
+		product_category VARCHAR(50),
+		product_subcategory VARCHAR(50),
+		product_variety VARCHAR(50),
+		brand_name VARCHAR(25),
+		product_name VARCHAR(50),
+		condition BOOLEAN,
+		condition_notes TEXT,
+		condition_photo_url TEXT,
+		"location" VARCHAR(255),
+		room VARCHAR(255),
+		owner_id INT,
+		owner_name VARCHAR(510),
+		owner_position VARCHAR(100),
+		owner_cost_center INT,
+		site_id INT,
+		site_name VARCHAR(100),
+		site_group_name VARCHAR(100),
+		region_name VARCHAR(100)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+			SELECT a.asset_tag, a.serial_number, a.status, a.status_reason,
+				a.product_category, a.product_subcategory, a.product_variety,
+				a.brand_name, a.product_name, 
+				a.condition, a.condition_notes, a.condition_photo_url::TEXT,
+				a.location, a.room,
+				a.owner_id,
+				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
+				u.position AS owner_position,
+				u.cost_center_id AS owner_cost_center,
+				a.site_id,
+				s.site_name AS site_name,
+				sg.site_group_name AS site_group_name,
+				r.region_name AS region_name
+			FROM "Asset" AS a
+			LEFT JOIN "User" AS u ON a.owner_id = u.user_id
+			LEFT JOIN "Site" AS s ON a.site_id = s.id
+			LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+			LEFT JOIN "Region" AS r ON sg.region_id = r.id
+			WHERE a.serial_number = _serial_number;
+	END;
+$$;
 
 -- get_assets_by_site retrieves all assets for a given site
 CREATE OR REPLACE FUNCTION public.get_assets_by_site(_site_id INT)
@@ -185,7 +269,7 @@ AS $$
 		SELECT COUNT(*)
 		INTO _active_session_count
 		FROM "OpnameSession"
-		WHERE site_id = _site_id AND "status" IN ('Active', 'Pending');
+		WHERE site_id = _site_id AND "status" = 'Active';
 
 		-- If there are no active sessions, proceed to create a new one.
 		IF _active_session_count = 0 THEN
@@ -239,7 +323,7 @@ AS $$
 	END;
 $$;
 
-
+-- record_asset_change records changes made to an asset during an opname session
 CREATE OR REPLACE FUNCTION public.record_asset_change(
 	_session_id INT,
 	_asset_tag VARCHAR(12),
@@ -302,6 +386,89 @@ AS $$
 		INSERT INTO "AssetChanges" (session_id, asset_tag, "changes", change_reason)
 		VALUES (_session_id, _asset_tag, _changes, _change_reason);
 
+		RETURN _changes;
+	END;
+$$;
+
+-- update_asset_change updates an asset's changes during an opname session
+-- Only applies to assets that have been changed during the session.
+-- Only available when the session is still 'Active'
+CREATE OR REPLACE FUNCTION public.update_asset_change(
+	_session_id INT,
+	_asset_tag VARCHAR(12),
+	_new_status VARCHAR(20),
+	_new_status_reason VARCHAR(20),
+	_new_condition BOOLEAN,
+	_new_condition_notes TEXT,
+	_new_condition_photo_url TEXT,
+	_new_location VARCHAR(255),
+	_new_room VARCHAR(255),
+	_new_owner_id INT,
+	_new_site_id INT,
+	_change_reason TEXT
+) RETURNS JSONB
+	LANGUAGE plpgsql
+AS $$
+	DECLARE
+		_recorded_change_data RECORD; -- This will hold the existing change record for the asset
+		_changes JSONB := '{}'::JSONB; -- Initialize an empty JSONB object to store changes
+	BEGIN
+		-- Check if the session is still 'Active'
+		IF NOT EXISTS (
+			SELECT 1
+			FROM "OpnameSession"
+			WHERE id = _session_id AND "status" = 'Active'
+		) THEN
+			RAISE EXCEPTION 'Cannot update asset changes: session % is not active', _session_id;
+		END IF;
+
+		-- Check if the asset change record exists for the given session and asset tag
+		SELECT * INTO _recorded_change_data
+		FROM "AssetChanges"
+		WHERE session_id = _session_id AND asset_tag = _asset_tag;
+		-- If no change record is found, raise an exception
+		IF NOT FOUND THEN
+			RAISE EXCEPTION 'No recorded changes found for asset % in session %', _asset_tag, _session_id;
+		END IF;
+
+		-- Compare the saved and new values, and build the changes JSONB object
+		IF _new_status IS DISTINCT FROM _recorded_change_data.status THEN
+			_changes := jsonb_set(_changes, '{status}', to_jsonb(_new_status));
+		END IF;
+		IF _new_status_reason IS DISTINCT FROM _recorded_change_data.status_reason THEN
+			_changes := jsonb_set(_changes, '{status_reason}', to_jsonb(_new_status_reason));
+		END IF;
+		IF _new_condition IS DISTINCT FROM _recorded_change_data.condition THEN
+			_changes := jsonb_set(_changes, '{condition}', to_jsonb(_new_condition));
+		END IF;
+		IF _new_condition_notes IS DISTINCT FROM _recorded_change_data.condition_notes THEN
+			_changes := jsonb_set(_changes, '{condition_notes}', to_jsonb(_new_condition_notes));
+		END IF;
+		IF _new_condition_photo_url IS DISTINCT FROM _recorded_change_data.condition_photo_url THEN
+			_changes := jsonb_set(_changes, '{condition_photo_url}', to_jsonb(_new_condition_photo_url));
+		END IF;
+		IF _new_location IS DISTINCT FROM _recorded_change_data.location THEN
+			_changes := jsonb_set(_changes, '{location}', to_jsonb(_new_location));
+		END IF;
+		IF _new_room IS DISTINCT FROM _recorded_change_data.room THEN
+			_changes := jsonb_set(_changes, '{room}', to_jsonb(_new_room));
+		END IF;
+		IF _new_owner_id IS DISTINCT FROM _recorded_change_data.owner_id THEN
+			_changes := jsonb_set(_changes, '{owner_id}', to_jsonb(_new_owner_id));
+		END IF;
+		IF _new_site_id IS DISTINCT FROM _recorded_change_data.site_id THEN
+			_changes := jsonb_set(_changes, '{site_id}', to_jsonb(_new_site_id));
+		END IF;
+		
+		-- Only update the changes if there are any differences
+		IF jsonb_object_length(_changes) > 0 THEN
+			UPDATE "AssetChanges"
+			SET "changes" = "changes" || _changes, -- Merge the new changes into the existing JSONB object
+				change_reason = _change_reason
+			WHERE session_id = _session_id AND asset_tag = _asset_tag;
+		END IF;
+
+		-- Return the changes made
 		RETURN _changes;
 	END;
 $$;
