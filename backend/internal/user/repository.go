@@ -21,6 +21,7 @@ type User struct {
 	FirstName     string
 	LastName      string
 	Position      string
+	SiteID        int64
 	SiteName      string
 	SiteGroupName string
 	RegionName    string
@@ -81,13 +82,59 @@ func (repo *Repository) GetUserCredentials(username string) (*Credentials, error
 	return &credentials, nil
 }
 
+// GetAllUsers retrieves all users from the database.
+func (repo *Repository) GetAllUsers() ([]*User, error) {
+	var allUsers []*User
+
+	query := `SELECT * FROM get_all_users()`
+	rows, err := repo.db.Query(query)
+	if err != nil {
+		log.Printf("❌ Error retrieving all users, error: %v\n", err)
+		return nil, err // Return the error for unexpected cases
+	}
+	// Ensure rows are closed after processing
+	defer rows.Close()
+
+	// Iterate through the result set and populate allUsers
+	for rows.Next() {
+		var user User
+		err := rows.Scan(
+			&user.UserID,
+			&user.Username,
+			&user.FirstName,
+			&user.LastName,
+			&user.Position,
+			&user.SiteID,
+			&user.SiteName,
+			&user.SiteGroupName,
+			&user.RegionName,
+			&user.CostCenterID,
+		)
+		if err != nil {
+			log.Printf("❌ Error scanning user, error: %v\n", err)
+			return nil, err // Return the error for unexpected cases
+		}
+
+		allUsers = append(allUsers, &user)
+	}
+
+	// Check for any error encountered during iteration
+	if err = rows.Err(); err != nil {
+		log.Printf("❌ Error encountered while iterating users, error: %v\n", err)
+		return nil, err // Return the error for unexpected cases
+	}
+
+	log.Printf("✅ Successfully retrieved %d users from the database\n", len(allUsers))
+	return allUsers, nil // Return the slice of users found
+}
+
 // GetUserByUsername retrieves a user's details by their username from the database.
 func (repo *Repository) GetUserByUsername(username string) (*User, error) {
 	var user User
 
 	query := `SELECT * FROM get_user_by_username($1)`
 
-	err := repo.db.QueryRow(query, username).Scan(&user.UserID, &user.Username, &user.FirstName, &user.LastName, &user.Position, &user.SiteName, &user.SiteGroupName, &user.RegionName, &user.CostCenterID)
+	err := repo.db.QueryRow(query, username).Scan(&user.UserID, &user.Username, &user.FirstName, &user.LastName, &user.Position, &user.SiteID, &user.SiteName, &user.SiteGroupName, &user.RegionName, &user.CostCenterID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// If no user is found, return nil

@@ -54,10 +54,32 @@ func (handler *Handler) GetMeHandler(context *gin.Context) {
 		"first_name":     user.FirstName,
 		"last_name":      user.LastName,
 		"position":       user.Position,
+		"site_id":        user.SiteID,
 		"site_name":      user.SiteName,
 		"site_group":     user.SiteGroupName,
 		"region_name":    user.RegionName,
 		"cost_center_id": user.CostCenterID,
+	})
+}
+
+// GetAllUsersHandler retrieves all users in the system.
+func (handler *Handler) GetAllUsersHandler(context *gin.Context) {
+	// Call the service to get all users
+	allUsers, err := handler.service.GetAllUsers()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to fetch all users: " + err.Error(),
+		})
+		return
+	}
+
+	if allUsers == nil {
+		// No users found, send an empty array
+		allUsers = make([]*User, 0)
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"users": allUsers,
 	})
 }
 

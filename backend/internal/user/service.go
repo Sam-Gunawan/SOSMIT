@@ -32,6 +32,25 @@ func (service *Service) GetUserByUsername(username string) (*User, error) {
 	return user, nil
 }
 
+// GetAllUsers retrieves all users from the repository.
+func (service *Service) GetAllUsers() ([]*User, error) {
+	allUsers, err := service.repo.GetAllUsers()
+	if err != nil {
+		// Log the error and return it
+		log.Printf("Error fetching all users: %v", err)
+		return nil, err
+	}
+
+	if allUsers == nil {
+		// If no users are found, return an empty slice
+		log.Println("No users found in the system")
+		return nil, nil // No users found
+	}
+
+	log.Printf("Successfully retrieved %d users", len(allUsers))
+	return allUsers, nil
+}
+
 // GetUserSiteCards retrieves all site cards for a user by their user ID.
 func (service *Service) GetUserSiteCards(userID int64) ([]*UserSiteCard, error) {
 	userSiteCards, err := service.repo.GetUserSiteCards(userID)
