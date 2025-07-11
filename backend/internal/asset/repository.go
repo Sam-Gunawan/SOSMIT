@@ -26,6 +26,7 @@ type Asset struct {
 	OwnerPosition      string
 	OwnerCostCenter    int64
 	SiteID             int64
+	SiteName           string
 	SiteGroupName      string
 	RegionName         string
 }
@@ -66,6 +67,7 @@ func (repo *Repository) GetAssetByTag(assetTag string) (*Asset, error) {
 		&asset.OwnerPosition,
 		&asset.OwnerCostCenter,
 		&asset.SiteID,
+		&asset.SiteName,
 		&asset.SiteGroupName,
 		&asset.RegionName,
 	)
@@ -81,6 +83,51 @@ func (repo *Repository) GetAssetByTag(assetTag string) (*Asset, error) {
 	}
 
 	log.Printf("✅ Successfully retrieved asset by tag: %s", assetTag)
+	return &asset, nil // Return the found asset
+}
+
+// GetAssetBySerialNumber retrieves an asset by its serial number.
+func (repo *Repository) GetAssetBySerialNumber(serialNumber string) (*Asset, error) {
+	var asset Asset
+
+	query := `SELECT * FROM get_asset_by_serial_number($1)`
+
+	err := repo.db.QueryRow(query, serialNumber).Scan(
+		&asset.AssetTag,
+		&asset.SerialNumber,
+		&asset.Status,
+		&asset.StatusReason,
+		&asset.ProductCategory,
+		&asset.ProductSubcategory,
+		&asset.ProductVariety,
+		&asset.BrandName,
+		&asset.ProductName,
+		&asset.Condition,
+		&asset.ConditionNotes,
+		&asset.ConditionPhotoURL,
+		&asset.Location,
+		&asset.Room,
+		&asset.OwnerID,
+		&asset.OwnerName,
+		&asset.OwnerPosition,
+		&asset.OwnerCostCenter,
+		&asset.SiteID,
+		&asset.SiteName,
+		&asset.SiteGroupName,
+		&asset.RegionName,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("⚠ No asset found with serial number: %s", serialNumber)
+			return nil, nil // No asset found with the given serial number
+		}
+
+		log.Printf("❌ Error retrieving asset by serial number: %s, error: %v", serialNumber, err)
+		return nil, err // Return any other error
+	}
+
+	log.Printf("✅ Successfully retrieved asset by serial number: %s", serialNumber)
 	return &asset, nil // Return the found asset
 }
 

@@ -32,6 +32,24 @@ func (service *Service) GetAssetByTag(assetTag string) (*Asset, error) {
 	return asset, nil
 }
 
+// GetAssetBySerialNumber retrieves an asset by its serial number.
+func (service *Service) GetAssetBySerialNumber(serialNumber string) (*Asset, error) {
+	asset, err := service.repo.GetAssetBySerialNumber(serialNumber)
+	if err != nil {
+		// Log the error and return it
+		log.Printf("Error fetching asset by serial number %s: %v", serialNumber, err)
+		return nil, err
+	}
+	if asset == nil {
+		// If no asset is found, return nil
+		log.Printf("No asset found with serial number: %s", serialNumber)
+		return nil, nil // No asset found
+	}
+
+	log.Printf("Successfully retrieved asset by serial number: %s", serialNumber)
+	return asset, nil
+}
+
 // GetAssetBySite retrieves all assets for a given site.
 func (service *Service) GetAssetsOnSite(siteID int64) ([]*Asset, error) {
 	var assetsOnSite []*Asset

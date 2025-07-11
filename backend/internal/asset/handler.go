@@ -65,6 +65,58 @@ func (handler *Handler) GetAssetByTagHandler(context *gin.Context) {
 		"owner_position":      asset.OwnerPosition,
 		"owner_cost_center":   asset.OwnerCostCenter,
 		"site_id":             asset.SiteID,
+		"site_name":           asset.SiteName,
+		"site_group_name":     asset.SiteGroupName,
+		"region_name":         asset.RegionName,
+	})
+}
+
+// GetAssetBySerialNumberHandler retrieves an asset by its serial number.
+func (handler *Handler) GetAssetBySerialNumberHandler(context *gin.Context) {
+	serialNumber := context.Param("serial_number")
+	if serialNumber == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "serial_number is required"})
+		log.Printf("⚠ serial_number is required but not provided")
+		return
+	}
+
+	// Call the service to get asset details
+	asset, err := handler.service.GetAssetBySerialNumber(serialNumber)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch asset details: " + err.Error()})
+		log.Printf("❌ Error fetching asset by serial number %s: %v", serialNumber, err)
+		return
+	}
+
+	// If asset is nil, it means no asset was found with that serial number
+	if asset == nil {
+		context.JSON(http.StatusNotFound, gin.H{"error": "asset not found with serial number: " + serialNumber})
+		log.Printf("⚠ No asset found with serial number: %s", serialNumber)
+		return
+	}
+
+	// Return the asset details
+	context.JSON(200, gin.H{
+		"asset_tag":           asset.AssetTag,
+		"serial_number":       asset.SerialNumber,
+		"status":              asset.Status,
+		"status_reason":       asset.StatusReason,
+		"product_category":    asset.ProductCategory,
+		"product_subcategory": asset.ProductSubcategory,
+		"product_variety":     asset.ProductVariety,
+		"brand_name":          asset.BrandName,
+		"product_name":        asset.ProductName,
+		"condition":           asset.Condition,
+		"condition_notes":     asset.ConditionNotes,
+		"condition_photo_url": asset.ConditionPhotoURL,
+		"location":            asset.Location,
+		"room":                asset.Room,
+		"owner_id":            asset.OwnerID,
+		"owner_name":          asset.OwnerName,
+		"owner_position":      asset.OwnerPosition,
+		"owner_cost_center":   asset.OwnerCostCenter,
+		"site_id":             asset.SiteID,
+		"site_name":           asset.SiteName,
 		"site_group_name":     asset.SiteGroupName,
 		"region_name":         asset.RegionName,
 	})
