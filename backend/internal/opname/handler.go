@@ -24,6 +24,16 @@ type StartNewSessionRequest struct {
 	SiteID int `json:"site_id" binding:"required"`
 }
 
+// validateSessionID checks if the session ID is valid and returns an error if not.
+func validateSessionID(sessionIDstr string) (int, error) {
+	sessionID, err := strconv.Atoi(sessionIDstr)
+	if err != nil || sessionID <= 0 {
+		log.Printf("⚠ Invalid session ID: %s", sessionIDstr)
+		return -1, err
+	}
+	return sessionID, nil
+}
+
 // StartNewSessionHandler handles the creation of a new opname session.
 func (handler *Handler) StartNewSessionHandler(context *gin.Context) {
 	// Bind the request body to StartNewSessionRequest struct
@@ -64,11 +74,10 @@ func (handler *Handler) StartNewSessionHandler(context *gin.Context) {
 // GetSessionByIDHandler retrieves an opname session by its ID.
 func (handler *Handler) GetSessionByIDHandler(context *gin.Context) {
 	sessionIDstr := context.Param("session-id")
-	sessionID, err := strconv.Atoi(sessionIDstr)
-	if err != nil || sessionID <= 0 {
-		log.Printf("⚠ Invalid session ID: %s", sessionIDstr)
+	sessionID, err := validateSessionID(sessionIDstr)
+	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request, missing or invalid session_id",
+			"error": "invalid session_id, must be a positive integer",
 		})
 		return
 	}
@@ -105,10 +114,10 @@ func (handler *Handler) GetSessionByIDHandler(context *gin.Context) {
 func (handler *Handler) DeleteSessionHandler(context *gin.Context) {
 	// Get the session ID from the URL parameter, api/opname/:session-id/cancel
 	sessionIDstr := context.Param("session-id")
-	sessionID, err := strconv.Atoi(sessionIDstr)
-	if err != nil || sessionID <= 0 {
+	sessionID, err := validateSessionID(sessionIDstr)
+	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request, missing or invalid session_id",
+			"error": "invalid session_id, must be a positive integer",
 		})
 		return
 	}
@@ -178,6 +187,8 @@ func (handler *Handler) ProcessAssetChangesHandler(context *gin.Context) {
 		return
 	}
 
+	// Map the asset change request to an AssetChange struct
+	// NOTE: This should match the database schema for asset changes.
 	changedAsset := AssetChange{
 		SessionID:            sessionID,
 		AssetTag:             assetChangeRequest.AssetTag,
@@ -205,6 +216,60 @@ func (handler *Handler) ProcessAssetChangesHandler(context *gin.Context) {
 	// If successful, return the changes in JSON format.
 	context.JSON(http.StatusOK, gin.H{
 		"message": "Asset changes processed successfully",
+		"changes": string(changesJSON),
+	})
+}
+
+// UpdateAssetChangesHandler handles the update of an existing asset change during an opname session.
+func (handler *Handler) UpdateAssetChangesHandler(context *gin.Context) {
+	// Bind the request body to AssetChangeRequest struct
+	var assetChangeRequest AssetChangeRequest
+	if err := context.ShouldBindJSON(&assetChangeRequest); err != nil {
+		log.Printf("❌ Error binding request body: %v", err)
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid request body: " + err.Error(),
+		})
+		return
+	}
+
+	// Get and validate session ID
+	sessionIDstr := context.Param("session-id")
+	sessionID, err := validateSessionID(sessionIDstr)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid session_id, must be a positive integer",
+		})
+		return
+	}
+
+	// Map the asset change request to an AssetChange struct
+	// NOTE: This should match the database schema for asset changes.
+	changedAsset := AssetChange{
+		SessionID:            sessionID,
+		AssetTag:             assetChangeRequest.AssetTag,
+		NewStatus:            assetChangeRequest.NewStatus,
+		NewStatusReason:      assetChangeRequest.NewStatusReason,
+		NewCondition:         assetChangeRequest.NewCondition,
+		NewConditionNotes:    assetChangeRequest.NewConditionNotes,
+		NewConditionPhotoURL: assetChangeRequest.NewConditionPhotoURL,
+		NewLocation:          assetChangeRequest.NewLocation,
+		NewRoom:              assetChangeRequest.NewRoom,
+		NewOwnerID:           assetChangeRequest.NewOwnerID,
+		NewSiteID:            assetChangeRequest.NewSiteID,
+		ChangeReason:         assetChangeRequest.ChangeReason,
+	}
+
+	changesJSON, err := handler.service.UpdateAssetChanges(changedAsset)
+	if err != nil {
+		log.Printf("❌ Error updating asset changes for session %d, asset %s: %v", sessionID, assetChangeRequest.AssetTag, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to update asset changes: " + err.Error(),
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"message": "Asset changes updated successfully",
 		"changes": string(changesJSON),
 	})
 }

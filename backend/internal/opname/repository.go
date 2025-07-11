@@ -128,3 +128,32 @@ func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, err
 	log.Printf("✅ Asset change for asset %s recorded successfully", changedAsset.AssetTag)
 	return changesJSON, nil
 }
+
+// UpdateAssetChange updates an existing asset change in the database.
+func (repo *Repository) UpdateAssetChange(changedAsset AssetChange) ([]byte, error) {
+	var changesJSON []byte // Use []byte to receive raw JSON data.
+
+	query := `SELECT update_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`
+
+	err := repo.db.QueryRow(query,
+		changedAsset.SessionID,
+		changedAsset.AssetTag,
+		changedAsset.NewStatus,
+		changedAsset.NewStatusReason,
+		changedAsset.NewCondition,
+		changedAsset.NewConditionNotes,
+		changedAsset.NewConditionPhotoURL,
+		changedAsset.NewLocation,
+		changedAsset.NewRoom,
+		changedAsset.NewOwnerID,
+		changedAsset.NewSiteID,
+		changedAsset.ChangeReason,
+	).Scan(&changesJSON)
+	if err != nil {
+		log.Printf("❌ Error updating asset change for asset %s: %v", changedAsset.AssetTag, err)
+		return nil, err
+	}
+
+	log.Printf("✅ Asset change for asset %s updated successfully", changedAsset.AssetTag)
+	return changesJSON, nil
+}
