@@ -125,7 +125,7 @@ CREATE TABLE "AssetChanges" (
     "session_id" INT NOT NULL REFERENCES "OpnameSession"("id") ON DELETE CASCADE,
     
     -- Foreign key to Asset (the asset that was changed).
-    "asset_tag" VARCHAR(12) NOT NULL REFERENCES "Asset"("asset_tag") ON DELETE CASCADE
+    "asset_tag" VARCHAR(12) NOT NULL REFERENCES "Asset"("asset_tag") ON DELETE CASCADE,
 
     CONSTRAINT unique_session_asset UNIQUE (session_id, asset_tag) -- Ensure each asset can only have one change record per session
 );
