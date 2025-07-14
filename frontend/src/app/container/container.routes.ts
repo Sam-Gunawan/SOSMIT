@@ -6,6 +6,7 @@ import { inject } from '@angular/core';
 import { AssetCardComponent } from '../asset-card/asset-card.component';
 import { OpnamePageComponent } from '../opname-page/opname-page.component';
 import { SearchPageComponent } from '../search-page/search-page.component';
+import { ReportComponent } from '../report/report.component';
 
 const authGuard: CanActivateFn = () => {
     const token = localStorage.getItem('auth_token');
@@ -25,7 +26,8 @@ export const routes: Routes = [
             { path: '', canActivate: [authGuard], component: DashboardComponent, pathMatch: 'full' },
             { path: 'search', component: SearchPageComponent},
             { path: 'site/:id', component: SitePageComponent, canActivate: [authGuard] },
-            { path: 'site/:id/opname', component: OpnamePageComponent, canActivate: [authGuard]}
+            { path: 'site/:id/opname', component: OpnamePageComponent, canActivate: [authGuard]},
+            { path: 'report', component: ReportComponent} //temporary to see UI
         ]
     }
 ];

@@ -37,13 +37,20 @@ p {
     flex-direction: column;
     align-self: center;
     align-items: flex-end;
+    text-align: right;
 }
 
 .site-status {
     font-size: 12px;
-    background-color: styles.$button-color;
     border-radius: 15px;
     padding: 5px 10px;
+
+    @each $name, $color in styles.$filter-pill-colors {
+		&.status-#{$name} {
+			background-color: $color;
+            border: 1px solid color.adjust($color, $lightness: -10%);
+		}
+	}
 }
 
 .opname-date {

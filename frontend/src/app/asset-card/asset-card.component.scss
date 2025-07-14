@@ -71,6 +71,12 @@ p {
     .additional-info {
         justify-items: right;
     }
+
+    &:hover {
+        background-color: color.scale(styles.$tertiary-color, $lightness: -3%);
+        cursor: pointer;
+		box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
 }
 
 .asset-card.compact {
@@ -88,6 +94,12 @@ p {
         flex-direction: column;
         justify-content: center;
         align-items: flex-start;
+    }
+
+    &:hover {
+        background-color: color.scale(styles.$tertiary-color, $lightness: -3%);
+        cursor: pointer;
+		box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
     }
 }
 
@@ -123,9 +135,15 @@ p {
 
 .asset-status {
     font-size: 10px;
-    background-color: styles.$button-color;
     border-radius: 15px;
     padding: 5px 10px;
+
+    @each $name, $color in styles.$asset-pill-colors {
+		&.status-#{$name} {
+			background-color: $color;
+            border: 1px solid color.adjust($color, $lightness: -10%);
+		}
+	}
 }
 
 .asset-tag {
@@ -163,12 +181,19 @@ p {
 }
 
 .list-body {
-	padding: 10px 0px;
+	padding: 10px;
 	border-bottom: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 40%);
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
 	align-items: center;
+    border-radius: 20px;
+
+    &:hover {
+        background-color: color.scale(styles.$quaternary-text-color, $lightness: 95%);
+        cursor: pointer;
+		box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
 }
 
 .first-column{

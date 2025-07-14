@@ -10,12 +10,11 @@
                     <span 
                         class="site-status"
                         [ngClass]="{
-                            'status-active': sitePage.opnameStatus === 'active',
-                            'status-completed': sitePage.opnameStatus === 'inactive',
-                            'status-pending': sitePage.opnameStatus === 'pending',
-                            'status-verified': sitePage.opnameStatus === 'maintenance',
-                            'status-rejected': sitePage.opnameStatus === 'rejected',
-                            'status-outdated': sitePage.opnameStatus === 'outdated'
+                            'status-active': sitePage.opnameStatus === 'Active',
+                            'status-completed': sitePage.opnameStatus === 'Completed',
+                            'status-verified': sitePage.opnameStatus === 'Verified',
+                            'status-rejected': sitePage.opnameStatus === 'Rejected',
+                            'status-outdated': sitePage.opnameStatus === 'Outdated'
                         }">
                         {{ sitePage.opnameStatus }}
                     </span>
@@ -25,9 +24,6 @@
 
             <div class="site-assets">
                 <hr class="divider">
-                <!-- <div class="assets-info-header">
-                    <h5>Asset Info:</h5>
-                </div> -->
 
                 <section class="site-asset-list">
                     <app-asset-card [variant]="'default'" [isInOpnameSession]="false"></app-asset-card>

@@ -16,6 +16,17 @@ p {
     margin: 5px;
 }
 
+.sticky-top {
+  padding-top: 30px;
+  padding-bottom: 15px;
+  position: sticky;
+  top: 42px;
+  z-index: 10;
+  background-color: styles.$background-color;
+  align-content: center;
+  justify-content: center;
+}
+
 .user-site-header {
 	display: flex;
 	flex-direction: column;
@@ -48,6 +59,7 @@ p {
     &:hover {
         background-color: color.scale(styles.$secondary-background-color, $lightness: -5%);
         cursor: pointer;
+		box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
     }
 }
 
@@ -64,9 +76,15 @@ p {
 
 .site-status {
     font-size: 12px;
-    background-color: styles.$button-color;
     border-radius: 15px;
     padding: 5px 10px;
+
+	@each $name, $color in styles.$filter-pill-colors {
+		&.status-#{$name} {
+			background-color: $color;
+			border: 1px solid color.adjust($color, $lightness: -20%);
+		}
+	}
 }
 
 .card-divider {
@@ -82,7 +100,7 @@ p {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-	gap: 20px;
+	gap: 10px;
 }
 
 .search-bar{
@@ -90,31 +108,46 @@ p {
 	flex-grow: 1;
 }
 
+@media (max-width: 767px) {
+	.search-bar{
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		flex-grow: 1;
+		gap: 10px;
+	}
+}
+
 .filter-pills {
 	display: flex;
 	gap: 8px;
 	flex-wrap: wrap;
 	justify-content: end;
+
+	@each $name, $color in styles.$filter-pill-colors {
+		.filter-#{$name} {
+			background-color: $color;
+			color: styles.$primary-text-color;
+			cursor: pointer;
+			transition: all 0.1s ease;
+			border: 1px solid color.adjust($color, $lightness: -10%);
 	
-	span {
-		cursor: pointer;
-		transition: all 0.1s ease;
-		
-		&:hover {
-			background-color: color.adjust($color: styles.$button-color, $lightness: -10%);
-		}
-		
-		&:active {
-			background-color: color.adjust(styles.$button-color, $lightness: -20%);
-		}
-		
-		&.selected {
-			background-color: styles.$primary-color !important;
-			color: white;
-			transform: scale(1.05);
+			&:hover {
+				background-color: color.adjust($color, $lightness: -10%);
+			}
+	
+			&:active {
+				background-color: color.adjust($color, $lightness: -20%);
+			}
+	
+			&.selected {
+				background-color: styles.$primary-color !important;
+				color: white;
+				transform: scale(1.05);
+			}
 		}
 	}
-	
+
 	.clear-filter {
 		background-color: #dc3545;
 		color: white;
@@ -160,12 +193,19 @@ p {
 }
 
 .site-list {
-	padding: 10px 0px;
+	padding: 10px;
 	border-bottom: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 40%);
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
 	align-items: center;
+	border-radius: 20px;
+
+	&:hover {
+        background-color: color.scale(styles.$quaternary-text-color, $lightness: 95%);
+        cursor: pointer;
+		box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+    }
 }
 
 .first-column, .second-column {

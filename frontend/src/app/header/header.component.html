@@ -12,10 +12,86 @@
             <span class="menu">
                 <li><a href="">Dashboard</a></li>
                 <li><a href="">Search</a></li>
+                <li>
+                    <button class="btn btn-primary" src="assets/notif.svg" alt="Notification" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">
+                        <img class="notif-logo" src="assets/notif.svg" alt="Notification"/>
+                    </button>
+
+                    <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Notification</h5>
+                        </div>
+                        <div class="offcanvas-body">
+                            <div class="notif-content">
+                                <div class="notif notif-create" *ngFor="let notification of notifications" [ngClass]="{'unread': !notification.isRead}">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>New Opname session created at [site] by [user].</p>
+                                    </div>
+                                </div>
+                                <div class="notif notif-finish">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>[site]'s Opname session by [user] is completed.</p>
+                                    </div>
+                                </div>
+                                <div class="notif notif-review">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>Please review [site]'s Opname session by [user].</p>
+                                    </div>
+                                </div>
+                                <div class="notif notif-verified">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>[site]'s Opname session by [user] is verified.</p>
+                                    </div>
+                                </div>
+                                <div class="notif notif-rejected">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>[site]'s Opname session by [user] is rejected.</p>
+                                    </div>
+                                </div>
+                                <div class="notif notif-rejected">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>[site]'s Opname session by [user] is rejected.</p>
+                                    </div>
+                                </div>
+                                <div class="notif notif-rejected">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>[site]'s Opname session by [user] is rejected.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
                 <li><a href="">
-                    <span id="profile-logo" class="material-symbols-outlined">
-                        face
-                    </span>
+                    <img class="profile-logo" src="assets/profile.svg" alt="Profile"/>
                 </a></li>
                 <label for="check" class="close-menu"><i class="fas fa-times"></i></label>
             </span>

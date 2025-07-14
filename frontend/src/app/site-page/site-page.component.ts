@@ -1,10 +1,10 @@
 import { Component, input } from '@angular/core';
-  import { CommonModule } from '@angular/common';
-  import { ApiService } from '../services/api.service';
-  import { OpnameSessionService } from '../services/opname-session.service';
-  import { ActivatedRoute, Router } from '@angular/router';
-  import { Siteinfo } from '../model/siteinfo.model';
-  import { AssetCardComponent } from '../asset-card/asset-card.component';
+import { CommonModule } from '@angular/common';
+import { ApiService } from '../services/api.service';
+import { OpnameSessionService } from '../services/opname-session.service';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Siteinfo } from '../model/siteinfo.model';
+import { AssetCardComponent } from '../asset-card/asset-card.component';
 import { OpnameSession } from '../model/opname-session.model';
 
   @Component({

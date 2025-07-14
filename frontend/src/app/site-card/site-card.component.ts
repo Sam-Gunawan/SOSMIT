@@ -94,6 +94,11 @@ export class SiteCardComponent {
     this.applyFilters();
   }
 
+  filterByDropdown(status: string): void {
+    this.selectedFilter = status;
+    this.applyFilters();
+  }
+
   applyFilters(): void {
     let filteredList = [...this.originalSiteCardList];
 

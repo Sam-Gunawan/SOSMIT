@@ -1,4 +1,5 @@
-/* You can add global styles to this file, and also import other style files */
+@use "sass:color";
+
 $font-family: "Rubik", sans-serif;
 $primary-color: #022c58c7;
 $secondary-color: #f56262;
@@ -14,6 +15,20 @@ $primary-text-color: #0b2c41;
 $secondary-text-color: #ffffff;
 $tertiary-text-color: #000000;
 $quaternary-text-color: gray;
+
+$filter-pill-colors: (
+    active: #FFEB9C,
+    completed: #BDD7EE,
+    verified: #C6EFCE,
+    rejected: #F8CBAD,
+    outdated: #D9D9D9
+);
+
+$asset-pill-colors: (
+    deployed: #C6EFCE,
+    onloan: #CCCCFF,
+    disposed: #D9D9D9
+);
 
 @use "bootstrap/scss/bootstrap" as bs;
 
@@ -49,4 +64,8 @@ html, body {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+body .offcanvas-backdrop {
+  background-color: transparent !important;
 }

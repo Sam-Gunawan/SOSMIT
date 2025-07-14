@@ -1,0 +1,49 @@
+<main class="report-wrapper">
+    <div class="report-page">
+        <section class="report-content">
+            <div class="report-header">
+                <div class="report-details">
+                    <h2>Opname Report</h2>
+                    <p class="site-location">[site group, site region]</p>
+                </div>
+            </div>
+
+            <hr class="divider">
+
+            <div class="opname-body">
+                <div class="report-cards">
+                    <div class="card card-1">
+                        <p>Asset Changes</p>
+                        <h4>5</h4>
+                    </div>
+                    <div class="card card-2">
+                        <p>Asset Changes</p>
+                        <h4>5</h4>
+                    </div>
+                    <div class="card card-3">
+                        <p>Asset Changes</p>
+                        <h4>5</h4>
+                    </div>
+                    <div class="card card-4">
+                        <p>Asset Changes</p>
+                        <h4>5</h4>
+                    </div>
+                </div>
+
+                <div class="search-view">
+                    <div class="filter-dropdown">
+                        <input type="date" id="date" name="date">
+                    </div>
+                    <form class="d-flex search-bar" role="search">
+                        <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search"/>
+                        <button class="btn btn-outline-success" type="submit">Search</button>
+                    </form>
+                </div>
+
+                <div class="container">
+                    <app-asset-card [showHeader]="false" *ngIf="currentView === 'list'"></app-asset-card>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
