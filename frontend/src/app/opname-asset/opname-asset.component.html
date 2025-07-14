@@ -26,11 +26,20 @@
 <div class="opname-asset-info" *ngIf="!isLoading && searchResults.length > 0">
     <!-- For large device screen, i.e. desktop/tablet -->
     <div class="container" *ngIf="screenSize === 'large'">
-        <div class="row row-cols-2" *ngFor="let result of searchResults; let i = index">
+        <!-- Row for data headers -->
+        <div class="row data-header-r">
+            <div class="col">
+                <h5 class="data-header">Existing Data</h5> 
+            </div>
+            <div class="col">
+                <h5 class="data-header">Scanned Asset</h5>
+            </div>
+        </div>
 
+        <div class="row row-cols-2" *ngFor="let result of searchResults; let i = index">
             <!-- Left column, for user to view the existing asset info -->
             <div class="col card-1">
-                <h5 class="data-header">Existing Data</h5>
+                
                 <section class="asset-card-layout" [ngClass]="variant" *ngIf="currentView === 'card'">
                     <div class="asset-card" [ngClass]="variant"> 
                         <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + result.existingAsset.assetTag">
@@ -69,7 +78,6 @@
 
             <!-- Right column, for user to verify scanned assets. Latest changes will be reflected here. -->
             <div class="col">
-                <h5 class="data-header">Scanned Asset</h5>
                 <!-- Card view for pending user actions -->
                 <section class="asset-card-layout" [ngClass]="variant" *ngIf="currentView === 'card' && !result.assetProcessed && result.processingStatus === 'pending'">
                     <div class="asset-card" [ngClass]="variant"> 
@@ -305,8 +313,8 @@
 
     <!-- For small device screen, i.e. mobile -->
      <div class="container" *ngIf="screenSize === 'small'">
+        <h5 class="data-header">Scanned Asset</h5>
         <div class="col" *ngFor="let result of searchResults; let i = index">
-            <h5 class="data-header">Scanned Asset</h5>
             <section class="asset-list-layout" *ngIf="currentView === 'list'">
                 <div class="asset-list" [ngClass]="variant">
                     <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag">

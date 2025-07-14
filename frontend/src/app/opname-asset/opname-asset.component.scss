@@ -47,6 +47,20 @@ p {
   border-radius: 15px;
   background-color: styles.$secondary-background-color;
   margin-right: 5px;
+
+  &:hover {
+    cursor: pointer;
+    background-color: color.adjust(styles.$secondary-background-color, $lightness: -10%);
+  }
+  
+  &.selected {
+    color: color.adjust(styles.$primary-text-color, $lightness: -15%);
+    background-color: color.adjust(styles.$secondary-background-color, $lightness: -20%);
+  }
+  
+  &:active {
+    background-color: color.adjust(styles.$secondary-background-color, $lightness: -30%);
+  }
 }
 
 .data-header {

@@ -138,6 +138,19 @@ export class OpnameAssetComponent {
 
     console.log('[OpnameAsset] Starting search for:', this.searchQuery, 'by', this.searchType);
 
+    // Check if the seached asset already exists in the search results
+    const alreadyExists = this.searchResults.some(result => (
+      result.existingAsset.assetTag === this.searchQuery.toUpperCase() ||
+      result.existingAsset.serialNumber === this.searchQuery.toUpperCase()
+    ));
+
+    if (alreadyExists) {
+      this.isSearching = false;
+      this.errorMessage = 'Asset already exists in the search results. Please check the list.';
+      console.log('[OpnameAsset] Asset already exists in search results:', this.searchQuery);
+      return;
+    }
+
     // Call the universal search method from API service.
     this.apiService.searchAsset(this.searchQuery, this.searchType).subscribe({
       next: (asset) => {
