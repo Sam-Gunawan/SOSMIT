@@ -32,17 +32,6 @@ p {
   margin-bottom: 0px;
 }
 
-.sticky-top {
-  padding-top: 30px;
-  padding-bottom: 15px;
-  position: sticky;
-  top: 42px;
-  z-index: 10;
-  background-color: styles.$background-color;
-  align-content: center;
-  justify-content: center;
-}
-
 .buttons {
   display: flex;
   flex-direction: row;

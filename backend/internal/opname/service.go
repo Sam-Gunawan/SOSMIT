@@ -119,22 +119,3 @@ func (service *Service) ProcessAssetChanges(changedAsset AssetChange) ([]byte, e
 	// Return the changes to the handler
 	return changesJSON, nil
 }
-
-// UpdateAssetChanges updates the changes made to an asset during an opname session.
-func (service *Service) UpdateAssetChanges(changedAsset AssetChange) ([]byte, error) {
-	changesJSON, err := service.repo.UpdateAssetChange(changedAsset)
-	if err != nil {
-		log.Printf("❌ Error updating asset changes for session %d, asset %s: %v", changedAsset.SessionID, changedAsset.AssetTag, err)
-		return nil, err
-	}
-
-	// Check if changesJSON is empty ('{}')
-	if string(changesJSON) == "{}" {
-		log.Printf("‼ No changes updated for session %d, asset %s", changedAsset.SessionID, changedAsset.AssetTag)
-	} else {
-		log.Printf("✅ Asset changes for session %d, asset %s updated successfully", changedAsset.SessionID, changedAsset.AssetTag)
-	}
-
-	// Return the changes to the handler
-	return changesJSON, nil
-}

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
-import { AssetCardComponent } from '../asset-card/asset-card.component';
+import { FormsModule } from '@angular/forms';
+import { OpnameAssetComponent } from '../opname-asset/opname-asset.component';
 import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -8,7 +9,8 @@ import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-opname-page',
-  imports: [CommonModule, AssetCardComponent],
+  standalone: true,
+  imports: [CommonModule, FormsModule, OpnameAssetComponent],
   templateUrl: './opname-page.component.html',
   styleUrl: './opname-page.component.scss'
 })

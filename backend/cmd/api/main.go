@@ -120,9 +120,6 @@ func main() {
 			// POST /api/opname/:session-id/process-asset
 			opnameRoutes.POST("/:session-id/process-asset", opnameHandler.ProcessAssetChangesHandler)
 
-			// PUT /api/opname/:session-id/update-asset-changes
-			opnameRoutes.PUT("/:session-id/update-asset-changes", opnameHandler.UpdateAssetChangesHandler)
-
 			// DELETE /api/opname/:session-id/cancel
 			opnameRoutes.DELETE("/:session-id/cancel", opnameHandler.DeleteSessionHandler)
 		}

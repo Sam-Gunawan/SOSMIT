@@ -34,7 +34,9 @@
                                 }">
                                 {{ assetPage?.assetStatus }}
                             </span>
-                            <p *ngIf="assetPage?.assetStatus === 'Disposed'">{{ assetPage?.statusReason }}</p>
+                            <p class="status-reason" *ngIf="assetPage?.assetStatus === 'Disposed' && assetPage?.statusReason">
+                                Reason: {{ assetPage?.statusReason }}
+                            </p>
                             
                             <hr>
                         </div>
@@ -72,165 +74,49 @@
                 </div>
             </div>
         
-            <!-- Only appears in opname page -->
-            <div class="modal-footer" *ngIf="isInOpnameSession">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">All good</button>
-                <button type="button" class="btn btn-primary" [attr.data-bs-target]="'#edit-modal-' + assetPage?.assetTag" data-bs-toggle="modal">Edit</button>
-            </div>
-
-            <!-- Only appears in viewing asset info -->
-            <div class="modal-footer" *ngIf="!isInOpnameSession">
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            <div class="modal-footer">
+                <!-- Editable asset in opname session (right column) -->
+                <ng-container *ngIf="isInOpnameSession">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">All good</button>
+                    <button type="button" class="btn btn-primary" [attr.data-bs-target]="'#edit-modal-' + assetPage?.assetTag" data-bs-toggle="modal">Edit</button>
+                </ng-container>
+                
+                <!-- Non-editable asset in opname session (left column) or Regular asset view -->
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" *ngIf="!isInOpnameSession">Close</button>
             </div>
         </div>
     </div>
-</div>
 
+    <!-- Error generating modal for asset view -->
+    <div class="modal-content" *ngIf="errorMessage">
+        <div class="modal-header">
+            <h5 class="modal-title">Error</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
 
-<div class="modal-content" *ngIf="errorMessage">
-    <div class="modal-header">
-        <h5 class="modal-title">Error</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-body">
+            <p>{{ errorMessage }}</p>
+            <p>Please try again later.</p>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
     </div>
 
-    <div class="modal-body">
-        <p>{{ errorMessage }}</p>
-        <p>Please try again later.</p>
-    </div>
+    <!-- Loading modal for asset view -->
+    <div class="modal-content" *ngIf="isLoading">
+        <div class="modal-header">
+            <h5 class="modal-title">Loading</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
 
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-    </div>
-</div>
+        <div class="modal-body">
+            <p>Loading asset data...</p>
+        </div>
 
-<div class="modal-content" *ngIf="isLoading">
-    <div class="modal-header">
-        <h5 class="modal-title">Loading</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-    </div>
-
-    <div class="modal-body">
-        <p>Loading asset data...</p>
-    </div>
-
-    <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-    </div>
-</div>
-
-<div class="modal fade" [id]="'edit-modal-' + assetPage?.assetTag" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header"> 
-                <section class="asset-header">
-                    <h5 class="modal-title">Edit Asset - {{ assetPage?.assetTag }}</h5>
-                    <p class="serial-number">{{ assetPage?.serialNumber }}</p>
-                </section>
-                
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            
-            <div class="modal-body">
-                <div class="asset-information">
-                    <div class="custom-grid">
-                        <div class="asset-main-info">
-                            <img class="asset-icon" [src]="assetPage?.assetIcon" [alt]="assetPage?.assetName"/>
-                            <h5 class="asset-name">{{ assetPage?.assetName }}</h5>
-                        </div>
-        
-                        <div class="user-info">
-                            <div class="form-floating mb-3">
-                                <input type="ownername" class="form-control" id="floatingInput" placeholder="Put the owner name here">
-                                <label for="floatingInput">New User</label>
-                            </div>
-
-                            <p class="user-position">{{ assetPage?.assetOwnerPosition }}</p>
-                            <p class="cost-center">Cost Center: {{ assetPage?.assetOwnerCostCenter }}</p>
-                        </div>
-        
-                        <div class="left-top">
-                            <div class="form-floating">
-                                <select class="form-select" id="floatingSelect" aria-label="Floating label select example">
-                                    <option selected></option>
-                                    <option value="1">Deployed</option>
-                                    <option value="2">On Loan</option>
-                                    <option value="3">Disposed</option>
-                                </select>
-                                <label for="floatingSelect">Asset Status</label>
-                            </div>
-
-                            <div class="pick-status-reason">
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault1">
-                                    <label class="form-check-label" for="radioDefault1">
-                                        Loss
-                                    </label>
-                                </div>
-                                
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="radioDefault" id="radioDefault2" checked>
-                                    <label class="form-check-label" for="radioDefault2">
-                                        Obsolete
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-        
-                        <div class="left-bottom">
-                            <div class="asset-condition">  
-                                <div class="rating">
-                                    <p class="condition">Condition</p>
-                                    <span class="like grow" [class.active]="isLiked" (click)="setLike()">
-                                        <i class="fa fa-thumbs-up like" aria-hidden="true"></i>
-                                    </span>
-                                    <span class="dislike grow" [class.active]="isDisliked" (click)="setDislike()">
-                                        <i class="fa fa-thumbs-down dislike" aria-hidden="true"></i>
-                                    </span>
-                                </div>
-        
-                                <!-- TODO: CHANGE THIS TO IMAGE -->
-                                <div class="form-floating" *ngIf="isDisliked">
-                                    <textarea class="form-control" placeholder="Put the notes here" id="floatingTextarea2" style="height: 100px"></textarea>
-                                    <label for="floatingTextarea2">Notes</label>
-                                </div>
-                                <input *ngIf="isDisliked" type="file" name="file" accept="image/*" capture="camera"/>
-                            </div>
-                        </div>
-        
-                        <div class="right">
-                            <!-- <hr class="vertical"> -->
-                            <div class="asset-location">
-                                <h5>Location</h5>
-
-                                <p>Region - {{ assetPage?.regionName }}</p>
-                                <div class="form-floating mb-2">
-                                    <input type="site-name" class="form-control" id="floatingInput" placeholder="Site Name">
-                                    <label for="floatingInput">Site Name</label>
-                                </div>
-                                <div class="form-floating mb-2">
-                                    <input type="location" class="form-control" id="floatingInput" placeholder="Location">
-                                    <label for="floatingInput">Location</label>
-                                </div>
-                                <div class="form-floating mb-2">
-                                    <input type="room" class="form-control" id="floatingInput" placeholder="Room">
-                                    <label for="floatingInput">Room</label>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-                
-                <div class="form-floating mt-3">
-                    <textarea class="form-control" placeholder="Put the reason here" id="floatingTextarea2" style="height: 100px"></textarea>
-                    <label for="floatingTextarea2">Reason for Changes</label>
-                </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary">Save Changes</button>
-            </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
     </div>
 </div>

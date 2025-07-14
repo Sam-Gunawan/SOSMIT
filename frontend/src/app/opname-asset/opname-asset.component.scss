@@ -1,0 +1,407 @@
+@use "../../styles.scss" as styles;
+@use "sass:color";
+
+* {
+  @include styles.default-styles;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: styles.$font-family;
+  color: styles.$primary-text-color;
+  margin: 0;
+}
+
+p {
+  font-size: 15px;
+  margin: 0px;
+}
+
+.opname-sticky-top {
+  // margin-top: 20px !important;
+  padding-top: 30px;
+  padding-bottom: 15px;
+  position: sticky;
+  top: 42px !important;
+  z-index: 10;
+  background-color: styles.$background-color !important;
+  align-content: center;
+  justify-content: center;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.search-bar {
+  margin-bottom: 10px;
+}
+
+.by-tag, .by-SN {
+  font-size: 12px;
+  color: styles.$primary-text-color;
+  padding: 5px 10px;
+  border-radius: 15px;
+  background-color: styles.$secondary-background-color;
+  margin-right: 5px;
+}
+
+.data-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 5px;
+  border-bottom: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 30%);
+  // border-radius:10px;
+  // background-color: color.adjust(styles.$button-color, $lightness: 10%);
+}
+
+.opname-asset-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 15px 0px;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-1 {
+  border-right: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 30%);
+}
+
+.assets-info-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.view-icon {
+	flex-shrink: 0;
+	
+	img {
+		width: 35px;
+		height: 35px;
+	}
+	
+	.card-view, .list-view {
+		cursor: pointer;
+		opacity: 0.6;
+		transition: opacity 0.2s;
+		
+		&.active {
+		opacity: 1;
+		}
+		
+		&:hover {
+		opacity: 0.8;
+		}
+  	}
+
+	@media (max-width: 767px) {
+        display: none !important; // Force hide on mobile
+    }
+}
+
+.asset-card-layout.default {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 20px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.asset-card.default {
+    border-radius: 20px;
+    padding: 10px;
+    background-color: styles.$tertiary-color;
+    color: styles.$primary-text-color;
+    height: 8rem; //temporary
+    display: flex;
+    align-items: center;
+
+    .additional-info {
+        justify-items: right;
+    }
+}
+
+.asset-card.compact {
+    border-radius: 20px;
+    padding: 10px;
+    background-color: styles.$tertiary-color;
+    color: styles.$primary-text-color;
+    height: 8rem; //temporary
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+
+    .additional-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+    }
+}
+
+.opname-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    margin: 0px 5px;
+    border-left: 1px solid styles.$primary-text-color;
+    padding-left: 50px;
+}
+
+.card-body {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.main-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin: 0px 5px;
+}
+
+.asset-icon {
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    // padding: 5px 0px;
+}
+
+.asset-status {
+    font-size: 10px;
+    background-color: styles.$button-color;
+    border-radius: 15px;
+    padding: 5px 10px;
+}
+
+.asset-tag {
+    font-size: 15px;
+    font-weight: bold;
+    margin: 0px 5px;
+}
+
+.asset-name {
+    font-size: 12px;
+    margin: 5px;
+    max-width: 110px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .asset-card {
+        font-size: 0.85rem;
+        
+        .asset-tag {
+            font-size: 0.8rem;
+        }
+        
+        .asset-name {
+            font-size: 0.8rem;
+        }
+    }
+}
+
+.asset-list-layout {
+	padding-top: 10px;
+}
+
+.list-body {
+	padding: 10px 0px;
+	border-bottom: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 40%);
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.first-column{
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+    justify-content: center;
+
+    img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+    }
+}
+
+.second-column {
+    margin-left: 10px;
+    flex-grow: 1;
+    display: flex;
+	flex-direction: column;
+	align-items: start;
+}
+
+.third-column {
+	display: flex;
+	flex-direction: column;
+	align-items: start;
+
+	p {
+		margin: 5px 0px;
+	}
+}
+
+.modal {
+  .modal-header {
+    padding: 20px;
+  }
+
+  .serial-number {
+    color: styles.$quaternary-text-color;
+  }
+
+  .modal-body {
+    position: relative;
+    padding: 30px;
+    color: styles.$primary-text-color;
+  }
+
+  .custom-grid {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto auto;
+    grid-template-areas: 
+      "icon user-info"
+      "left-top right"
+      "left-bottom right";
+    gap: 10px;
+  }
+
+  .asset-main-info {
+    grid-area: icon;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .asset-icon {
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+  }
+
+  .user-info { 
+    grid-area: user-info;
+    padding: 10px;
+  }
+
+  .left-top { 
+    grid-area: left-top; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    align-items: flex-start;
+    border-bottom: 1px solid styles.$quaternary-text-color;
+  }
+
+  .asset-status{
+    background-color: styles.$button-color;
+    border-radius: 15px;
+    padding: 5px 10px;
+  }
+
+  .status-reason{
+    background-color: styles.$button-color; //change color based on the reason
+    border-radius: 15px;
+    padding: 5px 10px;
+  }
+
+  .left-bottom { 
+    grid-area: left-bottom; 
+  }
+
+  .right { 
+    grid-area: right;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+    border-left: 1px solid styles.$quaternary-text-color;
+  }
+
+  .user-info {
+    align-self: center;
+    justify-items: left;
+  }
+
+  .user-position {
+    color: styles.$quaternary-text-color;
+  }
+
+  .asset-status {
+    font-size: 15px;
+  }
+
+  hr {
+    margin: 15px 0px 0px 0px;
+  }
+
+  .rating {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    align-items: center;
+  }
+
+  .condition {
+    padding: 0px 5px 0px 0px;
+  }
+
+  .like,
+  .dislike {
+    display: inline-block;
+    cursor: pointer;
+    margin: 0px 5px;
+  }
+
+  .like:hover,
+  .like.active {
+    color: #2EBDD1;
+    transition: all .2s ease-in-out;
+    transform: scale(1.1);
+  }
+
+  .dislike:hover,
+  .dislike.active {
+    color: #d12e2e;
+    transition: all .2s ease-in-out;
+    transform: scale(1.1);
+  }
+
+  .pick-status-reason {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .form-floating {
+    font-size: 15px;
+  }
+}

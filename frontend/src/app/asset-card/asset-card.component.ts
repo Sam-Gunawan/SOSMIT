@@ -18,6 +18,7 @@ export class AssetCardComponent {
   @Input() isInOpnameSession: boolean = false; // Flag to check if in an opname session
 
   currentView: 'card' | 'list' = 'card';
+  screenSize: 'small' | 'large' = 'large';
   isMobile: boolean = false;
 
   actualVariant: 'default' | 'compact' = 'default';
@@ -46,8 +47,10 @@ export class AssetCardComponent {
     
     if (this.isMobile) {
       this.currentView = 'list'; // Force list view on mobile
+      this.screenSize = 'small';
     } else {
       this.currentView = 'card'; // Default to card view on desktop
+      this.screenSize = 'large';
     }
   }
 

@@ -355,19 +355,19 @@ AS $$
 
 		-- Compare the old and new values, and build the changes JSONB object
 		IF _new_status IS DISTINCT FROM _old_data.status THEN
-			_changes := jsonb_set(_changes, '{status}', to_jsonb(_new_status));
+			_changes := jsonb_set(_changes, '{assetStatus}', to_jsonb(_new_status));
 		END IF;
 		IF _new_status_reason IS DISTINCT FROM _old_data.status_reason THEN
-			_changes := jsonb_set(_changes, '{status_reason}', to_jsonb(_new_status_reason));
+			_changes := jsonb_set(_changes, '{statusReason}', to_jsonb(_new_status_reason));
 		END IF;
 		IF _new_condition IS DISTINCT FROM _old_data.condition THEN
 			_changes := jsonb_set(_changes, '{condition}', to_jsonb(_new_condition));
 		END IF;
 		IF _new_condition_notes IS DISTINCT FROM _old_data.condition_notes THEN
-			_changes := jsonb_set(_changes, '{condition_notes}', to_jsonb(_new_condition_notes));
+			_changes := jsonb_set(_changes, '{conditionNotes}', to_jsonb(_new_condition_notes));
 		END IF;
 		IF _new_condition_photo_url IS DISTINCT FROM _old_data.condition_photo_url THEN
-			_changes := jsonb_set(_changes, '{condition_photo_url}', to_jsonb(_new_condition_photo_url));
+			_changes := jsonb_set(_changes, '{conditionPhotoURL}', to_jsonb(_new_condition_photo_url));
 		END IF;
 		IF _new_location IS DISTINCT FROM _old_data.location THEN
 			_changes := jsonb_set(_changes, '{location}', to_jsonb(_new_location));
@@ -376,99 +376,20 @@ AS $$
 			_changes := jsonb_set(_changes, '{room}', to_jsonb(_new_room));
 		END IF;
 		IF _new_owner_id IS DISTINCT FROM _old_data.owner_id THEN
-			_changes := jsonb_set(_changes, '{owner_id}', to_jsonb(_new_owner_id));
+			_changes := jsonb_set(_changes, '{assetOwner}', to_jsonb(_new_owner_id));
 		END IF;
 		IF _new_site_id IS DISTINCT FROM _old_data.site_id THEN
-			_changes := jsonb_set(_changes, '{site_id}', to_jsonb(_new_site_id));
+			_changes := jsonb_set(_changes, '{siteID}', to_jsonb(_new_site_id));
 		END IF;
 
 		-- Regardless of whether changes were made, we will insert a record of the changes.
 		INSERT INTO "AssetChanges" (session_id, asset_tag, "changes", change_reason)
-		VALUES (_session_id, _asset_tag, _changes, _change_reason);
+		VALUES (_session_id, _asset_tag, _changes, _change_reason)
+		ON CONFLICT (session_id, asset_tag) DO UPDATE
+		SET
+			"changes" = _changes, -- Completely replace the existing changes with the new ones
+			change_reason = EXCLUDED.change_reason; -- Update the change reason
 
-		RETURN _changes;
-	END;
-$$;
-
--- update_asset_change updates an asset's changes during an opname session
--- Only applies to assets that have been changed during the session.
--- Only available when the session is still 'Active'
-CREATE OR REPLACE FUNCTION public.update_asset_change(
-	_session_id INT,
-	_asset_tag VARCHAR(12),
-	_new_status VARCHAR(20),
-	_new_status_reason VARCHAR(20),
-	_new_condition BOOLEAN,
-	_new_condition_notes TEXT,
-	_new_condition_photo_url TEXT,
-	_new_location VARCHAR(255),
-	_new_room VARCHAR(255),
-	_new_owner_id INT,
-	_new_site_id INT,
-	_change_reason TEXT
-) RETURNS JSONB
-	LANGUAGE plpgsql
-AS $$
-	DECLARE
-		_recorded_change_data RECORD; -- This will hold the existing change record for the asset
-		_changes JSONB := '{}'::JSONB; -- Initialize an empty JSONB object to store changes
-	BEGIN
-		-- Check if the session is still 'Active'
-		IF NOT EXISTS (
-			SELECT 1
-			FROM "OpnameSession"
-			WHERE id = _session_id AND "status" = 'Active'
-		) THEN
-			RAISE EXCEPTION 'Cannot update asset changes: session % is not active', _session_id;
-		END IF;
-
-		-- Check if the asset change record exists for the given session and asset tag
-		SELECT * INTO _recorded_change_data
-		FROM "AssetChanges"
-		WHERE session_id = _session_id AND asset_tag = _asset_tag;
-		-- If no change record is found, raise an exception
-		IF NOT FOUND THEN
-			RAISE EXCEPTION 'No recorded changes found for asset % in session %', _asset_tag, _session_id;
-		END IF;
-
-		-- Compare the saved and new values, and build the changes JSONB object
-		IF _new_status IS DISTINCT FROM _recorded_change_data.status THEN
-			_changes := jsonb_set(_changes, '{status}', to_jsonb(_new_status));
-		END IF;
-		IF _new_status_reason IS DISTINCT FROM _recorded_change_data.status_reason THEN
-			_changes := jsonb_set(_changes, '{status_reason}', to_jsonb(_new_status_reason));
-		END IF;
-		IF _new_condition IS DISTINCT FROM _recorded_change_data.condition THEN
-			_changes := jsonb_set(_changes, '{condition}', to_jsonb(_new_condition));
-		END IF;
-		IF _new_condition_notes IS DISTINCT FROM _recorded_change_data.condition_notes THEN
-			_changes := jsonb_set(_changes, '{condition_notes}', to_jsonb(_new_condition_notes));
-		END IF;
-		IF _new_condition_photo_url IS DISTINCT FROM _recorded_change_data.condition_photo_url THEN
-			_changes := jsonb_set(_changes, '{condition_photo_url}', to_jsonb(_new_condition_photo_url));
-		END IF;
-		IF _new_location IS DISTINCT FROM _recorded_change_data.location THEN
-			_changes := jsonb_set(_changes, '{location}', to_jsonb(_new_location));
-		END IF;
-		IF _new_room IS DISTINCT FROM _recorded_change_data.room THEN
-			_changes := jsonb_set(_changes, '{room}', to_jsonb(_new_room));
-		END IF;
-		IF _new_owner_id IS DISTINCT FROM _recorded_change_data.owner_id THEN
-			_changes := jsonb_set(_changes, '{owner_id}', to_jsonb(_new_owner_id));
-		END IF;
-		IF _new_site_id IS DISTINCT FROM _recorded_change_data.site_id THEN
-			_changes := jsonb_set(_changes, '{site_id}', to_jsonb(_new_site_id));
-		END IF;
-		
-		-- Only update the changes if there are any differences
-		IF jsonb_object_length(_changes) > 0 THEN
-			UPDATE "AssetChanges"
-			SET "changes" = "changes" || _changes, -- Merge the new changes into the existing JSONB object
-				change_reason = _change_reason
-			WHERE session_id = _session_id AND asset_tag = _asset_tag;
-		END IF;
-
-		-- Return the changes made
 		RETURN _changes;
 	END;
 $$;

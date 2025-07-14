@@ -16,9 +16,22 @@ import { titleCase, formatDate } from '../reusable_functions'; // Import the tit
 export class DashboardComponent {
   isLoading: boolean = true;
   errorMessage: string = '';
-  loggedInUser: User = new User(); // Initialize with a new User instance
+  loggedInUser: User;
   
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService) {
+    this.loggedInUser = {
+      userID: -1,
+      username: 'N/A',
+      firstName: 'N/A',
+      lastName: 'N/A',
+      position: 'N/A',
+      siteID: -1,
+      siteName: 'N/A',
+      siteGroupName: 'N/A',
+      regionName: 'N/A',
+      costCenterID: -1
+    };
+  }
 
   ngOnInit(): void {
     // Fetch the logged-in user's profile when the component initializes

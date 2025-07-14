@@ -19,6 +19,7 @@ export interface Assetinfo {
     assetOwnerPosition: string;
     assetOwnerCostCenter: number;
     siteID: number;
+    siteName: string;
     siteGroupName: string;
     regionName: string;
 }

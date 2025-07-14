@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
 import { Siteinfo } from '../model/siteinfo.model';
 import { Assetinfo } from '../model/assetinfo.model';
+import { User } from '../model/user.model';
 import { formatDate, titleCase } from '../reusable_functions';
 
 @Injectable({
@@ -16,7 +17,6 @@ export class ApiService {
   private userApiUrl = 'http://localhost:8080/api/user'
   private siteApiUrl = 'http://localhost:8080/api/site'
   private assetApiUrl = 'http://localhost:8080/api/asset'
-  private opnameApiUrl = 'http://localhost:8080/api/opname'
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -50,6 +50,31 @@ export class ApiService {
     return this.http.get(`${this.userApiUrl}/${username}`);
   }
 
+  getAllUsers(): Observable<User[]> {
+    // This method will fetch all users from the backend.
+    return this.http.get<User[]>(`${this.userApiUrl}/all`).pipe(
+      map((response: any) => {
+        // Map the response to the desired format.
+        return response.users.map((user: any) => ({
+          userID: user.UserID,
+          username: user.Username,
+          firstName: titleCase(user.FirstName),
+          lastName: titleCase(user.LastName),
+          position: user.Position,
+          siteID: user.SiteID,
+          siteName: user.SiteName,
+          siteGroupName: user.SiteGroupName,
+          regionName: user.RegionName,
+          costCenterID: user.CostCenterID
+        }));
+      }),
+      tap((users: User[]) => {
+        // Log the fetched users for debugging purposes.
+        console.log('[ApiService] Fetched users:', users);
+      })
+    );
+  }
+
   getUserSiteCards(): Observable<Siteinfo[]> {
     // This method will fetch the site cards that the user has access to.
     return this.http.get<Siteinfo[]>(`${this.userApiUrl}/site-cards`).pipe(
@@ -72,9 +97,9 @@ export class ApiService {
     );
   }
 
-  getAssetDetails(assetTag: string): Observable<any> {
+  getAssetByAssetTag(assetTag: string): Observable<any> {
     // This method will fetch the details of a specific asset by its tag.
-    return this.http.get<Assetinfo>(`${this.assetApiUrl}/${assetTag}`).pipe(
+    return this.http.get<Assetinfo>(`${this.assetApiUrl}/tag/${assetTag}`).pipe(
       map((response: any) => {
         // Map the response to the desired format.
         return {
@@ -98,6 +123,7 @@ export class ApiService {
           assetOwnerPosition: titleCase(response.owner_position),
           assetOwnerCostCenter: response.owner_cost_center,
           siteID: response.site_id,
+          siteName: response.site_name,
           siteGroupName: response.site_group_name,
           regionName: response.region_name
         };
@@ -135,6 +161,7 @@ export class ApiService {
           assetOwnerPosition: titleCase(asset.OwnerPosition),
           assetOwnerCostCenter: asset.OwnerCostCenter,
           siteID: asset.SiteID,
+          siteName: asset.SiteName,
           siteGroupName: asset.SiteGroupName,
           regionName: asset.RegionName
         }));
@@ -144,6 +171,54 @@ export class ApiService {
         console.log(`[ApiService] Fetched assets for site ${siteID}:`, response);
       })
     );
+  }
+
+  // Search for an asset by serial number
+  getAssetBySerialNumber(serialNumber: string): Observable<any> {
+    // This method will search for an asset using its serial number
+    return this.http.get<Assetinfo>(`${this.assetApiUrl}/serial/${serialNumber}`).pipe(
+      map((response: any) => {
+        // Map the response to the desired format for consistency with getAssetDetails
+        return {
+          assetTag: response.asset_tag,
+          serialNumber: response.serial_number,
+          assetStatus: response.status,
+          statusReason: response.status_reason,
+          category: response.product_category,
+          subCategory: response.product_subcategory,
+          productVariety: response.product_variety,
+          assetBrand: response.brand_name,
+          assetName: response.product_name,
+          condition: response.condition,
+          conditionNotes: response.condition_notes,
+          conditionPhotoURL: response.condition_photo_url,
+          location: response.location,
+          room: response.room,
+          assetOwner: response.owner_id,
+          assetOwnerName: response.owner_name,
+          assetOwnerPosition: response.owner_position,
+          assetOwnerCostCenter: response.owner_cost_center,
+          siteID: response.site_id,
+          siteName: response.site_name,
+          siteGroupName: response.site_group_name,
+          regionName: response.region_name,
+          assetIcon: this.getAssetIcon(response.product_variety)
+        };
+      }),
+      tap((assetDetails: Assetinfo) => {
+        console.log('[ApiService] Asset found by serial number:', assetDetails);
+      })
+    );
+  }
+
+  // Universal search for assets (by tag or serial number)
+  searchAsset(searchTerm: string, searchType: 'asset_tag' | 'serial_number'): Observable<any> {
+    // This is a wrapper that calls the appropriate search method based on the search type
+    if (searchType === 'asset_tag') {
+      return this.getAssetByAssetTag(searchTerm);
+    } else {
+      return this.getAssetBySerialNumber(searchTerm);
+    }
   }
 
   // Helper method to get icon path based on product variety

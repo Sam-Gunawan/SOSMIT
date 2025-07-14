@@ -19,41 +19,7 @@
             <hr class="divider">
 
             <div class="opname-body">
-                <div class="sticky-top">
-                    <div class="search-bar">
-                        <form class="d-flex" role="search">
-                            <input class="form-control me-2" type="search" placeholder="Scan / search here!" aria-label="Search"/>
-                            <button class="btn btn-outline-success" type="submit">Search</button>
-                        </form>
-                    </div>
-    
-                    <div class="search-filter">
-                        <span class="by-tag">Asset Tag</span>
-                        <span class="by-SN">Serial Number</span>
-                    </div>
-                </div>
-
-                <div class="opname-asset-info" *ngIf="!isLoading">
-                    <div class="container" *ngIf="currentView === 'large'">
-                        <div class="row row-cols-2">
-                            <div class="col card-1">
-                                <h5 class="data-header">Existing Data</h5>
-                                <app-asset-card [showLocation]="true" [variant]="'compact'" [showHeader]="false" [isInOpnameSession]="true"></app-asset-card>
-                            </div>
-                            <div class="col">
-                                <h5 class="data-header">Scanned Asset</h5>
-                                <app-asset-card [showLocation]="true" [variant]="'compact'" [showHeader]="false" [isInOpnameSession]="true"></app-asset-card>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="container" *ngIf="currentView === 'small'">
-                        <div class="col">
-                            <h5 class="data-header">Scanned Asset</h5>
-                            <app-asset-card [showLocation]="true" [variant]="'compact'" [showHeader]="false"></app-asset-card>
-                        </div>
-                    </div>
-                </div>
+                <app-opname-asset [variant]="cardVariant" [showLocation]="showLocation" [sessionID]="sessionID" [siteID]="siteID"></app-opname-asset>
             </div>
         </section>
     </div>

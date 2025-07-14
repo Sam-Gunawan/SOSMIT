@@ -138,7 +138,6 @@ export class OpnameSessionService {
 
     return this.http.post<JSON>(`${this.opnameApiUrl}/${sessionID}/process-asset`, payload).pipe(
       map((response: any) => {
-        // Map the response to a more usable format if needed.
         return {
           message: response.message,
           assetChanges: JSON.parse(response.changes || '{}'),
