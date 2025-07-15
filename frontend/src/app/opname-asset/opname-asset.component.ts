@@ -136,7 +136,8 @@ export class OpnameAssetComponent {
   // Initialize form data for a newly searched asset
   initFormData(index: number): void {
     const result = this.searchResults[index];
-    const asset = result.existingAsset;
+    // Create a deep copy to avoid reference issues
+    const asset = JSON.parse(JSON.stringify(result.existingAsset));
     this.formData = {
       assetTag: asset.assetTag,
       newStatus: asset.assetStatus,
@@ -196,10 +197,10 @@ export class OpnameAssetComponent {
       next: (asset) => {
         console.log('[OpnameAsset] Asset found from search:', asset);
 
-        // Add the found asset to the search results.
+        // Add the found asset to the search results, using deep copies to avoid reference issues
         this.searchResults.push({
-          existingAsset: asset,
-          pendingAsset: asset, // Initially, the pending asset is the same as the existing asset
+          existingAsset: JSON.parse(JSON.stringify(asset)), // Deep copy to preserve original
+          pendingAsset: JSON.parse(JSON.stringify(asset)), // Deep copy for modifications
           assetProcessed: false,
           processingStatus: 'pending' // Initial processing status
         });
@@ -255,15 +256,18 @@ export class OpnameAssetComponent {
       this.formData.newSiteID = matchedUser.siteID;
       this.formData.newSiteName = matchedUser.siteName;
 
-      // Update the pending asset with the owner biodata
-      result.pendingAsset.assetOwnerName = this.formData.newOwnerName;
-      result.pendingAsset.assetOwner = matchedUser.userID;
-      result.pendingAsset.assetOwnerPosition = matchedUser.position;
-      result.pendingAsset.assetOwnerCostCenter = matchedUser.costCenterID;
-      result.pendingAsset.siteID = matchedUser.siteID;
-      result.pendingAsset.siteName = matchedUser.siteName;
-      result.pendingAsset.siteGroupName = matchedUser.siteGroupName;
-      result.pendingAsset.regionName = matchedUser.regionName;
+      // Create a new pendingAsset object with updated properties instead of modifying it directly
+      result.pendingAsset = {
+        ...JSON.parse(JSON.stringify(result.pendingAsset)), // Deep copy current pendingAsset
+        assetOwnerName: this.formData.newOwnerName,
+        assetOwner: matchedUser.userID,
+        assetOwnerPosition: matchedUser.position,
+        assetOwnerCostCenter: matchedUser.costCenterID,
+        siteID: matchedUser.siteID,
+        siteName: matchedUser.siteName,
+        siteGroupName: matchedUser.siteGroupName,
+        regionName: matchedUser.regionName
+      };
 
       // Force change detection to update the view
       this.cdr.detectChanges();
@@ -287,11 +291,14 @@ export class OpnameAssetComponent {
       this.formData.newSiteID = matchedSite.siteID;
       this.formData.newSiteName = matchedSite.siteName;
 
-      // Update the pending asset with the site information
-      result.pendingAsset.siteID = matchedSite.siteID;
-      result.pendingAsset.siteName = matchedSite.siteName;
-      result.pendingAsset.siteGroupName = matchedSite.siteGroupName;
-      result.pendingAsset.regionName = matchedSite.regionName;
+      // Create a new pendingAsset object with updated site information
+      result.pendingAsset = {
+        ...JSON.parse(JSON.stringify(result.pendingAsset)), // Deep copy current pendingAsset
+        siteID: matchedSite.siteID,
+        siteName: matchedSite.siteName,
+        siteGroupName: matchedSite.siteGroupName,
+        regionName: matchedSite.regionName
+      };
 
       // Force change detection to update the view
       this.cdr.detectChanges();
@@ -371,15 +378,17 @@ export class OpnameAssetComponent {
           result.processingStatus = 'edited';
           console.log('[OpnameAsset] Changes detected, updating pending asset:', response.assetChanges);  
 
-          // Update the existing asset with the new changes
+          // Create a new pendingAsset with deep copied properties and apply changes
+          const pendingAssetCopy = JSON.parse(JSON.stringify(result.pendingAsset));
           result.pendingAsset = {
-            ...result.pendingAsset,
+            ...pendingAssetCopy,
             ...response.assetChanges
           } as AssetInfo; // Ensure the pending asset is of type AssetInfo
 
         } else { // No changes to apply
           result.processingStatus = 'all_good';
-          result.pendingAsset = { ...result.existingAsset };
+          // Create a deep copy of existingAsset to avoid reference issues
+          result.pendingAsset = JSON.parse(JSON.stringify(result.existingAsset));
         }
 
         console.log('[OpnameAsset] Updated asset:', result.pendingAsset);
@@ -418,9 +427,10 @@ export class OpnameAssetComponent {
     this.isLoading = true;
     this.opnameSessionService.processScannedAsset(this.sessionID, assetChanges).subscribe({
       next: () => {
-        result.pendingAsset = { ...result.existingAsset } // No changes, so pending is same as existing
-        result.assetProcessed = true
-        result.processingStatus = 'all_good'
+        // Deep copy the existingAsset to ensure no shared references
+        result.pendingAsset = JSON.parse(JSON.stringify(result.existingAsset));
+        result.assetProcessed = true;
+        result.processingStatus = 'all_good';
 
         this.initFormData(index); // Reinitialize form data for the asset
         
@@ -455,12 +465,6 @@ export class OpnameAssetComponent {
   // This could be done by periodically saving the search results to the OpnameSessionService
   // or by implementing a 'save' button that triggers a save action.
   // We can also consider auto-saving the session when processing assets.
-
-  // TODO: Implement a method to find owner's ID based on their full name from the forms
-
-  // TODO: Implement a method to find the site ID based on the site name from the forms
-
-  // TODO: Implement a search recommendation feature that suggests user's names and site names based on the search query as they type per letter.
   
   private checkScreenSize() {
     this.isMobile = window.innerWidth < 768; // Define mobile breakpoint
@@ -495,6 +499,9 @@ export class OpnameAssetComponent {
   private closeBootstrapModal(result: any): void {
     // Close the modal after a short delay to show the success message
     setTimeout(() => {
+      // Clear success message
+      this.successMessage = '';
+
       // Use vanilla JS to close the Bootstrap modal
       const modalElement = document.getElementById(`edit-modal-${result.existingAsset.assetTag}`);
       if (modalElement) {
