@@ -119,3 +119,22 @@ func (service *Service) ProcessAssetChanges(changedAsset AssetChange) ([]byte, e
 	// Return the changes to the handler
 	return changesJSON, nil
 }
+
+// RemoveAssetChange removes an asset change from an opname session.
+func (service *Service) RemoveAssetChange(sessionID int, assetTag string) error {
+	// Validate sessionID and assetTag
+	if sessionID <= 0 || assetTag == "" {
+		log.Printf("⚠ Invalid sessionID or assetTag: sessionID=%d, assetTag=%s", sessionID, assetTag)
+		return errors.New("invalid sessionID or assetTag")
+	}
+
+	// Call the repository to delete the asset change
+	err := service.repo.DeleteAssetChange(sessionID, assetTag)
+	if err != nil {
+		log.Printf("❌ Error deleting asset change for session %d, asset %s: %v", sessionID, assetTag, err)
+		return err
+	}
+
+	log.Printf("✅ Asset change for session %d, asset %s deleted successfully", sessionID, assetTag)
+	return nil
+}

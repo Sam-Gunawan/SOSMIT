@@ -2,6 +2,7 @@
 package opname
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -218,4 +219,54 @@ func (handler *Handler) ProcessAssetChangesHandler(context *gin.Context) {
 		"message": "Asset changes processed successfully",
 		"changes": string(changesJSON),
 	})
+}
+
+type RemoveAssetChangeRequest struct {
+	AssetTag string `json:"asset_tag" binding:"required"`
+}
+
+// RemoveAssetChangeHandler removes an asset change from an opname session.
+func (handler *Handler) RemoveAssetChangeHandler(context *gin.Context) {
+	// Bind the request body to RemoveAssetChangeRequest struct
+	var request RemoveAssetChangeRequest
+	if err := context.ShouldBindJSON(&request); err != nil {
+		log.Printf("❌ Error binding request body: %v", err)
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid request body: " + err.Error(),
+		})
+		return
+	}
+
+	// Get the session ID from URL parameter
+	sessionIDstr := context.Param("session-id")
+	sessionID, err := validateSessionID(sessionIDstr)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid session_id, must be a positive integer",
+		})
+		return
+	}
+	if sessionID < -1 {
+		log.Printf("⚠ Invalid session ID: %d", sessionID)
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid session_id, must be greater than -1",
+		})
+		return
+	}
+
+	// Call the service to remove the asset change
+	err = handler.service.RemoveAssetChange(sessionID, request.AssetTag)
+	if err != nil {
+		log.Printf("❌ Error removing asset change for session %d, asset %s: %v", sessionID, request.AssetTag, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to remove asset change: " + err.Error(),
+		})
+		return
+	}
+
+	// If successful, return a success message
+	context.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Asset change for %s removed successfully", request.AssetTag),
+	})
+
 }

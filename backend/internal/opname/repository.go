@@ -128,3 +128,18 @@ func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, err
 	log.Printf("✅ Asset change for asset %s recorded successfully", changedAsset.AssetTag)
 	return changesJSON, nil
 }
+
+// DeleteAssetChange deletes an asset change by its session ID and asset tag.
+func (repo *Repository) DeleteAssetChange(sessionID int, assetTag string) error {
+	query := `CALL delete_asset_change($1, $2)`
+
+	_, err := repo.db.Exec(query, sessionID, assetTag)
+	if err != nil {
+		log.Printf("❌ Error deleting asset change for asset %s in session %d: %v", assetTag, sessionID, err)
+		return err // Deletion failed for some error.
+	}
+
+	// If successful, log the deletion.
+	log.Printf("✅ Asset change for asset %s in session %d deleted successfully", assetTag, sessionID)
+	return nil
+}

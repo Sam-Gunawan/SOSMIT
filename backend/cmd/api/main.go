@@ -136,6 +136,9 @@ func main() {
 
 			// DELETE /api/opname/:session-id/cancel
 			opnameRoutes.DELETE("/:session-id/cancel", opnameHandler.DeleteSessionHandler)
+
+			// DELETE /api/opname/:session-id/asset
+			opnameRoutes.DELETE("/:session-id/asset", opnameHandler.RemoveAssetChangeHandler)
 		}
 
 	}

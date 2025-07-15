@@ -400,6 +400,28 @@ AS $$
 	END;
 $$;
 
+-- delete_asset_change deletes an asset change record by session ID and asset tag
+CREATE OR REPLACE PROCEDURE public.delete_asset_change(_session_id INT, _asset_tag VARCHAR(12))
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		-- Check if the asset change record exists before attempting to delete
+		IF NOT EXISTS (
+			SELECT 1
+			FROM "AssetChanges"
+			WHERE session_id = _session_id AND asset_tag = _asset_tag
+		) THEN
+			RAISE EXCEPTION 'No asset change record found for session ID: %, asset tag: %', _session_id, _asset_tag;
+		END IF;
+		
+		-- Delete the asset change record for the given session ID and asset tag.
+		DELETE FROM "AssetChanges"
+		WHERE session_id = _session_id AND asset_tag = _asset_tag;
+
+		RAISE NOTICE 'Asset change record for session ID: %, asset tag: % has been deleted.', _session_id, _asset_tag;
+	END;
+$$;
+
 -- get_all_sites retrieves all sites with their details
 CREATE OR REPLACE FUNCTION public.get_all_sites()
 	RETURNS TABLE (
