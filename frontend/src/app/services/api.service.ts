@@ -58,9 +58,10 @@ export class ApiService {
         return response.users.map((user: any) => ({
           userID: user.UserID,
           username: user.Username,
+          email: user.Email,
           firstName: titleCase(user.FirstName),
           lastName: titleCase(user.LastName),
-          position: user.Position,
+          position: titleCase(user.Position),
           siteID: user.SiteID,
           siteName: user.SiteName,
           siteGroupName: user.SiteGroupName,

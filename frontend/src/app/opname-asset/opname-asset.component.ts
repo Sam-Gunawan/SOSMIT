@@ -1,4 +1,4 @@
-import { Component, HostListener, Input } from '@angular/core';
+import { Component, HostListener, Input, ChangeDetectorRef } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { Assetinfo } from '../model/assetinfo.model';
@@ -7,6 +7,7 @@ import { OpnameSession } from '../model/opname-session.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AssetPageComponent } from '../asset-page/asset-page.component';
+import { User } from '../model/user.model';
 
 @Component({
   selector: 'app-opname-asset',
@@ -34,7 +35,7 @@ export class OpnameAssetComponent {
   }> = [];
 
   // Form data object for editing assets
-  formData: AssetChange & {newOwnerName?: string, newSiteName?: string} = {
+  formData: AssetChange & {newOwnerName: string, newSiteName: string} = {
     assetTag: '',
     newStatus: '',
     newStatusReason: '',
@@ -51,13 +52,15 @@ export class OpnameAssetComponent {
     newSiteName: ''
   };
 
-  // Form state flags
+  // Form variables
   isLiked: boolean = true;
   isDisliked: boolean = false;
   selectedStatusReason: 'Loss' | 'Obsolete' = 'Obsolete';
+  selectedNewUserID: number = -1; // This will be set when a user is selected from the datalist
   successMessage: string = '';
 
   // File to upload for condition photo
+  // TODO: Implement actual file upload functionality
   conditionPhoto?: File;
 
   // Flags for responsive design
@@ -67,18 +70,42 @@ export class OpnameAssetComponent {
   actualVariant: 'default' | 'compact' = 'default';
   actualShowLocation: boolean = false;
 
+  // Other properties
   opnameSession?: OpnameSession;
-
+  allUsers: User[] = []; // List of all users in the company
   isLoading: boolean = false; // Loading state for fetching assets
   errorMessage: string = ''; // Error message for fetching assets
 
-  constructor(private apiService: ApiService, private opnameSessionService: OpnameSessionService) {
-  }
+  constructor(
+    private apiService: ApiService,
+    private opnameSessionService: OpnameSessionService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
+    this.isLoading = true;
     this.checkScreenSize();
     this.updateResponsiveSettings();
+    this.initOpnameData();
+    this.getAllUsers();
+    this.isLoading = false;
+    this.errorMessage = '';
+  }
+  
+  getAllUsers(): void {
+    this.apiService.getAllUsers().subscribe({
+      next: (userList) => {
+        this.allUsers = [...userList];
+        console.log('[OpnameAsset] All users fetched successfully:', this.allUsers);
+      },
+      error: (error) => {
+        console.error('[OpnameAsset] Error fetching all users:', error);
+        this.errorMessage = 'Failed to fetch user list. Please try again later.';
+      }
+    })
+  }
 
+  initOpnameData(): void {
     this.opnameSessionService.getOpnameSession(this.sessionID).subscribe({
       next: (session: OpnameSession) => {
         this.opnameSession = session;
@@ -198,6 +225,37 @@ export class OpnameAssetComponent {
     this.isLiked = false;
     this.isDisliked = true;
     this.formData.newCondition = false;
+  }
+
+  // Handle owner name input change
+  onOwnerInputChange(index: number): void {
+    const result = this.searchResults[index];
+    const input = this.formData.newOwnerName.trim().toLowerCase() || '';
+    const matchedUser = this.allUsers.find(user => (
+      `${user.firstName} ${user.lastName}`.toLowerCase() === input ||
+      (user.email.toLowerCase() === input)
+    ));
+
+    if (matchedUser) {
+      this.formData.newOwnerID = matchedUser.userID;
+      this.formData.newOwnerName = `${matchedUser.firstName} ${matchedUser.lastName}`;
+
+      // Update the pending asset with the owner biodata
+      result.pendingAsset.assetOwnerName = this.formData.newOwnerName;
+      result.pendingAsset.assetOwner = matchedUser.userID;
+      result.pendingAsset.assetOwnerPosition = matchedUser.position;
+      result.pendingAsset.assetOwnerCostCenter = matchedUser.costCenterID;
+      result.pendingAsset.siteID = matchedUser.siteID;
+      result.pendingAsset.siteName = matchedUser.siteName;
+      result.pendingAsset.siteGroupName = matchedUser.siteGroupName;
+      result.pendingAsset.regionName = matchedUser.regionName;
+
+      // Force change detection to update the view
+      this.cdr.detectChanges();
+    } else {
+      console.error('[OpnameAsset] No matching user found for input:', input);
+      this.formData.newOwnerID = undefined;
+    }
   }
 
   // Handle status changes

@@ -22,6 +22,7 @@ export class DashboardComponent {
     this.loggedInUser = {
       userID: -1,
       username: 'N/A',
+      email: 'N/A',
       firstName: 'N/A',
       lastName: 'N/A',
       position: 'N/A',

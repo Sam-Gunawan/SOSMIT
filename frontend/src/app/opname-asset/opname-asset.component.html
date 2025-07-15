@@ -167,8 +167,16 @@
                                                     <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
                                                         [(ngModel)]="formData.newOwnerName" name="newOwnerName" 
                                                         [placeholder]="result.pendingAsset.assetOwnerName || 'Asset Owner'"
+                                                        list="all-users" (input)="onOwnerInputChange(i)"
+                                                        [class.is-invalid]="(!formData.newOwnerID && !formData.newOwnerName)"
                                                         required>
                                                     <label [for]="'owner-name-' + result.pendingAsset.assetTag">User</label>
+                                                    <datalist id="all-users">
+                                                        <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
+                                                    </datalist>
+                                                    <div *ngIf="(!formData.newOwnerID && !formData.newOwnerName)" class="invalid-feedback">
+                                                        Please enter a valid user.
+                                                    </div>
                                                 </div>
                     
                                                 <p class="user-position">{{ result.pendingAsset.assetOwnerPosition }}</p>
@@ -261,7 +269,7 @@
                                                         <input type="text" class="form-control" 
                                                             [id]="'site-name-' + result.pendingAsset.assetTag" 
                                                             [(ngModel)]="formData.newSiteName" name="siteName"
-                                                            [placeholder]="result.pendingAsset.siteName || 'Site Name'">
+                                                            [attr.placeholder]="result.pendingAsset.siteName || 'Site Name'">
                                                         <label [for]="'site-name-' + result.pendingAsset.assetTag">Site Name</label>
                                                     </div>
                                                     <div class="form-floating mb-2">
@@ -376,8 +384,12 @@
                                                         <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
                                                             [(ngModel)]="formData.newOwnerName" name="newOwnerName" 
                                                             [placeholder]="result.pendingAsset.assetOwnerName || 'Asset Owner'"
-                                                            required>
+                                                            required
+                                                            list="all-users">
                                                         <label [for]="'owner-name-' + result.pendingAsset.assetTag">User</label>
+                                                        <datalist id="all-users" *ngFor="let user of allUsers">
+                                                            <option [value]="user.firstName + ' ' + user.lastName">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
+                                                        </datalist>
                                                     </div>
                         
                                                     <p class="user-position">{{ result.pendingAsset.assetOwnerPosition }}</p>
