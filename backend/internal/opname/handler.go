@@ -270,3 +270,52 @@ func (handler *Handler) RemoveAssetChangeHandler(context *gin.Context) {
 	})
 
 }
+
+// LoadOpnameProgressHandler retrieves the progress of an opname session.
+func (handler *Handler) LoadOpnameProgressHandler(context *gin.Context) {
+	// Get the session ID from the URL parameter
+	sessionIDstr := context.Param("session-id")
+	sessionID, err := validateSessionID(sessionIDstr)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid session_id, must be a positive integer",
+		})
+		return
+	}
+
+	// Call the service to load the opname progress
+	progressList, err := handler.service.LoadOpnameProgress(sessionID)
+	if err != nil {
+		log.Printf("❌ Error loading opname progress for session %d: %v", sessionID, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to load opname progress: " + err.Error(),
+		})
+		return
+	}
+
+	if len(progressList) == 0 {
+		log.Printf("⚠ No changes found for opname session %d", sessionID)
+		context.JSON(http.StatusOK, gin.H{
+			"message":  "No changes found for this opname session",
+			"progress": []map[string]any{},
+		})
+		return
+	}
+
+	// Transform the progress list into a more structured response
+	var responseProgress []map[string]any
+	for _, progress := range progressList {
+		progressItem := map[string]any{
+			"asset_tag":     progress.AssetTag,
+			"changes":       string(progress.Changes),
+			"change_reason": progress.ChangeReason,
+		}
+		responseProgress = append(responseProgress, progressItem)
+	}
+
+	log.Printf("✅ Opname progress for session %d loaded successfully", sessionID)
+	context.JSON(http.StatusOK, gin.H{
+		"message":  "Opname progress loaded successfully",
+		"progress": responseProgress,
+	})
+}

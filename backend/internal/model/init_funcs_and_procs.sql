@@ -12,6 +12,7 @@ DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(20)
 DROP FUNCTION IF EXISTS public.update_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), INT, INT, TEXT);
 DROP FUNCTION IF EXISTS public.get_all_sites();
 DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
+DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
 
 -- get_credentials retrieves user credentials by username (for login auth)
 -- NOTES: email not implemented yet!!
@@ -442,8 +443,8 @@ AS $$
 			u.email AS site_ga_email
 		FROM "Site" AS s
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-		INNER JOIN "Region" AS r ON sg.region_id = r.id;
-		INNER JOIN "User" AS u ON s.site_ga_id = u.user_id
+		INNER JOIN "Region" AS r ON sg.region_id = r.id
+		INNER JOIN "User" AS u ON s.site_ga_id = u.user_id;
 	END;
 $$;
 
@@ -470,5 +471,22 @@ AS $$
 		INNER JOIN "Region" AS r ON sg.region_id = r.id
 		INNER JOIN "User" AS u ON s.site_ga_id = u.user_id
 		WHERE s.id = _site_id;
+	END;
+$$;
+
+-- load_opname_progress loads the latest scan progress for a given opname session
+CREATE OR REPLACE FUNCTION public.load_opname_progress(_session_id INT)
+	RETURNS TABLE (
+		"changes" JSONB,
+		change_reason TEXT,
+		asset_tag VARCHAR(12)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT ac."changes", ac.change_reason, ac.asset_tag
+		FROM "AssetChanges" as ac
+		WHERE session_id = _session_id;
 	END;
 $$;

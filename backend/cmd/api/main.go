@@ -128,6 +128,9 @@ func main() {
 			// GET /api/opname/:session-id
 			opnameRoutes.GET("/:session-id", opnameHandler.GetSessionByIDHandler)
 
+			// GET /api/opname/:session-id/load-progress
+			opnameRoutes.GET("/:session-id/load-progress", opnameHandler.LoadOpnameProgressHandler)
+
 			// POST /api/opname/start
 			opnameRoutes.POST("/start", opnameHandler.StartNewSessionHandler)
 

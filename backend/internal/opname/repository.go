@@ -32,6 +32,12 @@ type AssetChange struct {
 	ChangeReason         string `json:"change_reason"`
 }
 
+type OpnameSessionProgress struct {
+	Changes      []byte `json:"changes"`
+	ChangeReason string `json:"change_reason"`
+	AssetTag     string `json:"asset_tag"`
+}
+
 type Repository struct {
 	db *sql.DB
 }
@@ -142,4 +148,30 @@ func (repo *Repository) DeleteAssetChange(sessionID int, assetTag string) error 
 	// If successful, log the deletion.
 	log.Printf("✅ Asset change for asset %s in session %d deleted successfully", assetTag, sessionID)
 	return nil
+}
+
+// LoadOpnameProgress retrieves the current progress of an opname session in terms of recorded asset changes tied to that session.
+func (repo *Repository) LoadOpnameProgress(sessionID int) ([]OpnameSessionProgress, error) {
+	var progressList []OpnameSessionProgress
+
+	query := `SELECT * FROM load_opname_progress($1)`
+
+	rows, err := repo.db.Query(query, sessionID)
+	if err != nil {
+		log.Printf("❌ Error loading opname progress for session %d: %v", sessionID, err)
+		return nil, err // Query failed for some error.
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var progress OpnameSessionProgress
+		if err := rows.Scan(&progress.Changes, &progress.ChangeReason, &progress.AssetTag); err != nil {
+			log.Printf("❌ Error scanning row for opname progress: %v", err)
+			return nil, err // Row scan failed for some error.
+		}
+		progressList = append(progressList, progress)
+	}
+
+	return progressList, nil
 }

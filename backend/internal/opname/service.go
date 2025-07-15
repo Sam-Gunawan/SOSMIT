@@ -138,3 +138,27 @@ func (service *Service) RemoveAssetChange(sessionID int, assetTag string) error 
 	log.Printf("✅ Asset change for session %d, asset %s deleted successfully", sessionID, assetTag)
 	return nil
 }
+
+// LoadOpnameProgress retrieves the progress of an opname session.
+func (service *Service) LoadOpnameProgress(sessionID int) ([]OpnameSessionProgress, error) {
+	// Validate sessionID
+	if sessionID <= 0 {
+		log.Printf("⚠ Invalid sessionID: %d", sessionID)
+		return nil, errors.New("invalid sessionID")
+	}
+
+	// Call the repository to load the opname progress
+	progress, err := service.repo.LoadOpnameProgress(sessionID)
+	if err != nil {
+		log.Printf("❌ Error loading opname progress for session %d: %v", sessionID, err)
+		return nil, err
+	}
+
+	if len(progress) == 0 {
+		progress = make([]OpnameSessionProgress, 0) // Return an empty slice if no progress is found.
+		log.Printf("⚠ No progress found for opname session %d", sessionID)
+	}
+
+	log.Printf("✅ Opname progress for session %d loaded successfully", sessionID)
+	return progress, nil
+}
