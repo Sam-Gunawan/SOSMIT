@@ -1,9 +1,40 @@
-<div class="assets-info-header" *ngIf="showHeader">
-    <h5>Asset Info:</h5>
+<div class="sticky-top">
+    <div class="assets-info-header" *ngIf="showHeader">
+        <div class="asset-search">
+            <div class="asset-info">
+                <h5>Asset Info:</h5>
+            </div>
+    
+            <div class="filter-pills" *ngIf="currentView ==='card'">
+                <span class="asset-filter filter-pill filter-deployed">Deployed</span>
+                <span class="asset-filter filter-pill filter-onloan">On Loan</span>
+                <span class="asset-filter filter-pill filter-disposed">Disposed</span>
+                <span class="clear-filter">Clear All</span>
+            </div>
 
-    <div class="view-icon" *ngIf="!isMobile">
-        <img class="card-view" [class.active]="currentView === 'card'" src="assets/card.svg" alt="Card View" (click)="toggleView('card')"/>
-        <img class="list-view" [class.active]="currentView === 'list'" src="assets/list.svg" alt="List View" (click)="toggleView('list')"/>
+            <div class="filter-pills" *ngIf="currentView === 'list'">
+                <span class="clear-filter">Clear All</span>
+            </div>
+        </div>
+    
+        <div class="search-view">
+            <div class="filter-dropdown" *ngIf="currentView === 'list'">
+                <select class="form-select" aria-label="Small select example">
+                    <option value="">All Status</option>
+                    <option value="Deployed">Deployed</option>
+                    <option value="On Loan">On Loan</option>
+                    <option value="Disposed">Disposed</option>
+                </select>
+            </div>
+            <form class="d-flex search-bar" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search"/>
+                <button class="btn btn-outline-success" type="submit">Search</button>
+            </form>
+            <div class="view-icon" *ngIf="!isMobile">
+                <img class="card-view" [class.active]="currentView === 'card'" src="assets/card.svg" alt="Card View" (click)="toggleView('card')"/>
+                <img class="list-view" [class.active]="currentView === 'list'" src="assets/list.svg" alt="List View" (click)="toggleView('list')"/>
+            </div>
+        </div>
     </div>
 </div>
 

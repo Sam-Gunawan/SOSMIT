@@ -199,10 +199,16 @@ p {
 }
 
 .asset-status {
-    font-size: 10px;
-    background-color: styles.$button-color;
+    font-size: 10px !important;
     border-radius: 15px;
     padding: 5px 10px;
+
+    @each $name, $color in styles.$asset-pill-colors {
+		&.status-#{$name} {
+			background-color: $color;
+            border: 1px solid color.adjust($color, $lightness: -10%);
+		}
+	}
 }
 
 .asset-tag {
