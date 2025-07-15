@@ -138,7 +138,7 @@ func seedSiteGroup(db *sql.DB, record []string) error {
 }
 
 // Expected CSV format for site.csv:
-// id [PK], site_name, site_group_id [FK]
+// id [PK], site_name, site_group_id [FK], site_ga_id [FK]
 func seedSite(db *sql.DB, record []string) error {
 	site_name := record[1]
 	site_group_id := record[2]
@@ -184,22 +184,23 @@ func seedCostCenter(db *sql.DB, record []string) error {
 }
 
 // Expected CSV format for user.csv:
-// user_id [PK], username, first_name, last_name, position, site_id [FK], cost_center_id [FK]
+// user_id [PK], username, email, first_name, last_name, position, site_id [FK], cost_center_id [FK]
 // Table format for User:
-// user_id [PK], username, password, first_name, last_name, position, site_id [FK], cost_center_id [FK]
+// user_id [PK], username, password, email, first_name, last_name, position, site_id [FK], cost_center_id [FK]
 func seedUser(db *sql.DB, record []string) error {
 	user_id := record[0]
 	password := "sosmit" // Default password
 	username := record[1]
-	first_name := record[2]
-	last_name := record[3]
-	position := record[4]
-	site_id := record[5]
-	cost_center_id := record[6]
+	email := record[2]
+	first_name := record[3]
+	last_name := record[4]
+	position := record[5]
+	site_id := record[6]
+	cost_center_id := record[7]
 
-	query := `INSERT INTO "User" (user_id, username, password, first_name, last_name, position, site_id, cost_center_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (user_id) DO NOTHING`
+	query := `INSERT INTO "User" (user_id, username, email, password, first_name, last_name, position, site_id, cost_center_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (user_id) DO NOTHING`
 
-	_, err := db.Exec(query, user_id, username, password, first_name, last_name, position, site_id, cost_center_id)
+	_, err := db.Exec(query, user_id, username, email, password, first_name, last_name, position, site_id, cost_center_id)
 	if err != nil {
 		log.Fatalf("Error inserting record into User table: %v\n", err)
 		return err

@@ -92,6 +92,9 @@ func main() {
 
 			// GET /api/user/site-cards
 			userRoutes.GET("/site-cards", userHandler.GetUserSiteCardsHandler)
+
+			// GET /api/user/all
+			userRoutes.GET("/all", userHandler.GetAllUsersHandler)
 		}
 
 		siteRoutes := api.Group("/site").Use(auth.AuthMiddleware())

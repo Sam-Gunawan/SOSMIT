@@ -18,6 +18,7 @@ type Credentials struct {
 type User struct {
 	UserID        int64
 	Username      string
+	Email         string
 	FirstName     string
 	LastName      string
 	Position      string
@@ -101,6 +102,7 @@ func (repo *Repository) GetAllUsers() ([]*User, error) {
 		err := rows.Scan(
 			&user.UserID,
 			&user.Username,
+			&user.Email,
 			&user.FirstName,
 			&user.LastName,
 			&user.Position,
@@ -134,7 +136,7 @@ func (repo *Repository) GetUserByUsername(username string) (*User, error) {
 
 	query := `SELECT * FROM get_user_by_username($1)`
 
-	err := repo.db.QueryRow(query, username).Scan(&user.UserID, &user.Username, &user.FirstName, &user.LastName, &user.Position, &user.SiteID, &user.SiteName, &user.SiteGroupName, &user.RegionName, &user.CostCenterID)
+	err := repo.db.QueryRow(query, username).Scan(&user.UserID, &user.Username, &user.Email, &user.FirstName, &user.LastName, &user.Position, &user.SiteID, &user.SiteName, &user.SiteGroupName, &user.RegionName, &user.CostCenterID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// If no user is found, return nil

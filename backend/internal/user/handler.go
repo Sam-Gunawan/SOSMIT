@@ -51,6 +51,7 @@ func (handler *Handler) GetMeHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"user_id":        user.UserID,
 		"username":       user.Username,
+		"email":          user.Email,
 		"first_name":     user.FirstName,
 		"last_name":      user.LastName,
 		"position":       user.Position,

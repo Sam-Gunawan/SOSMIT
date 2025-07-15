@@ -12,6 +12,7 @@ DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(20)
 DROP FUNCTION IF EXISTS public.update_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), INT, INT, TEXT);
 
 -- get_credentials retrieves user credentials by username (for login auth)
+-- NOTES: email not implemented yet!!
 CREATE OR REPLACE FUNCTION public.get_credentials(_username VARCHAR(255))
     RETURNS table (
 		user_id INT,
@@ -34,31 +35,7 @@ CREATE OR REPLACE FUNCTION public.get_all_users()
 	RETURNS TABLE (
 		user_id INT,
 		username VARCHAR(255),
-		first_name VARCHAR(255),
-		last_name VARCHAR(255),
-		"position" VARCHAR(100),
-		site_name VARCHAR(100),
-		site_group_name VARCHAR(100),
-		region_name VARCHAR(100),
-		cost_center_id INT
-	)
-	LANGUAGE plpgsql
-AS $$
-	BEGIN 
-		RETURN QUERY
-		SELECT u.user_id, u.username, u.first_name, u.last_name, u."position", s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
-		FROM "User" AS u
-		INNER JOIN "Site" AS s ON u.site_id = s.id
-		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-		INNER JOIN "Region" AS r ON sg.region_id = r.id;
-	END;
-$$;
-
--- get_user_by_username retrieves user details by username
-CREATE OR REPLACE FUNCTION public.get_user_by_username(_username VARCHAR(255))
-	RETURNS table (
-		user_id INT,
-		username VARCHAR(255),
+		email VARCHAR(255),
 		first_name VARCHAR(255),
 		last_name VARCHAR(255),
 		"position" VARCHAR(100),
@@ -72,7 +49,34 @@ CREATE OR REPLACE FUNCTION public.get_user_by_username(_username VARCHAR(255))
 AS $$
 	BEGIN 
 		RETURN QUERY
-		SELECT u.user_id, u.username, u.first_name, u.last_name, u."position", s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
+		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", s.id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
+		FROM "User" AS u
+		INNER JOIN "Site" AS s ON u.site_id = s.id
+		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+		INNER JOIN "Region" AS r ON sg.region_id = r.id;
+	END;
+$$;
+
+-- get_user_by_username retrieves user details by username
+CREATE OR REPLACE FUNCTION public.get_user_by_username(_username VARCHAR(255))
+	RETURNS table (
+		user_id INT,
+		username VARCHAR(255),
+		email VARCHAR(255),
+		first_name VARCHAR(255),
+		last_name VARCHAR(255),
+		"position" VARCHAR(100),
+		site_id INT,
+		site_name VARCHAR(100),
+		site_group_name VARCHAR(100),
+		region_name VARCHAR(100),
+		cost_center_id INT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN 
+		RETURN QUERY
+		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
 		FROM "User" AS u
 		INNER JOIN "Site" AS s ON u.site_id = s.id
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
