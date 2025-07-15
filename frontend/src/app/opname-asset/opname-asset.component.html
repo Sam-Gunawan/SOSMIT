@@ -168,14 +168,14 @@
                                                     <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
                                                         [(ngModel)]="formData.newOwnerName" name="newOwnerName" 
                                                         list="all-users" (input)="onOwnerInputChange(i)"
-                                                        [class.is-invalid]="(!formData.newOwnerID && !formData.newOwnerName)"
+                                                        [class.is-invalid]="(formData.newOwnerID === undefined && formData.newOwnerName) || !formData.newOwnerName" 
                                                         required>
                                                     <label [for]="'owner-name-' + result.pendingAsset.assetTag">User</label>
                                                     <datalist id="all-users">
                                                         <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
                                                     </datalist>
-                                                    <div *ngIf="(!formData.newOwnerID && !formData.newOwnerName)" class="invalid-feedback">
-                                                        Please enter a valid user.
+                                                    <div *ngIf="(formData.newOwnerID === undefined && formData.newOwnerName) || !formData.newOwnerName" class="invalid-feedback">
+                                                        Please select a valid user from the list.
                                                     </div>
                                                 </div>
                     
@@ -263,19 +263,21 @@
                                             <div class="right">
                                                 <div class="asset-location">
                                                     <h5>Location</h5>
-                    
-                                                    <!-- [attr.placeholder]="result.pendingAsset.siteName || 'Site Name'"> -->
                                                     <p>Region - {{ result.pendingAsset.regionName }}</p>
                                                     <div class="form-floating mb-2">
                                                         <input type="text" class="form-control" 
                                                             [id]="'sitqe-name-' + result.pendingAsset.assetTag" 
                                                             [(ngModel)]="formData.newSiteName" name="siteName"
                                                             (input)="onSiteInputChange(i)"
-                                                            list="all-sites">
+                                                            list="all-sites"
+                                                            [class.is-invalid]="(formData.newSiteID === undefined && formData.newSiteName) || !formData.newSiteName" >
                                                         <label [for]="'site-name-' + result.pendingAsset.assetTag">Site Name</label>
                                                         <datalist id="all-sites">
                                                             <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
                                                         </datalist>
+                                                        <div *ngIf="(formData.newSiteID === undefined && formData.newSiteName) || !formData.newSiteName" class="invalid-feedback">
+                                                            Please select a valid site from the list.
+                                                        </div>
                                                     </div>
                                                     <div class="form-floating mb-2">
                                                         <input type="text" class="form-control" 

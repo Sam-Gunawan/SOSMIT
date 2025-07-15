@@ -149,4 +149,15 @@ export class OpnameSessionService {
       })
     )
   }
+
+  removeAssetFromSession(sessionID: number, assetTag: string): Observable<any> {
+    // This method will remove an asset from the current opname session.
+    console.log('[OpnameService] Removing asset from session:', assetTag);
+    return this.http.delete(`${this.opnameApiUrl}/${sessionID}/remove-asset`, {body: {asset_tag: assetTag}}).pipe(
+      tap((response: any) => {
+        // Log the response for debugging purposes.
+        console.log('[OpnameService] Removed asset from session:', response);
+      })
+    );
+  }
 }

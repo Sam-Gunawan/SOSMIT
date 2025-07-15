@@ -245,12 +245,20 @@ export class OpnameAssetComponent {
   onOwnerInputChange(index: number): void {
     const result = this.searchResults[index];
     const input = this.formData.newOwnerName.trim().toLowerCase() || '';
+    
+    // If the input is empty, clear the owner ID to trigger validation
+    if (!input) {
+      this.formData.newOwnerID = undefined;
+      return;
+    }
+    
     const matchedUser = this.allUsers.find(user => (
       `${user.firstName} ${user.lastName}`.toLowerCase() === input ||
       (user.email.toLowerCase() === input)
     ));
 
     if (matchedUser) {
+      // Valid user found
       this.formData.newOwnerID = matchedUser.userID;
       this.formData.newOwnerName = `${matchedUser.firstName} ${matchedUser.lastName}`;
       this.formData.newSiteID = matchedUser.siteID;
@@ -272,8 +280,12 @@ export class OpnameAssetComponent {
       // Force change detection to update the view
       this.cdr.detectChanges();
     } else {
+      // Invalid user - explicitly set ID to undefined to trigger validation
       console.error('[OpnameAsset] No matching user found for input:', input);
       this.formData.newOwnerID = undefined;
+      
+      // Force change detection to update validation state
+      this.cdr.detectChanges();
     }
   }
 
@@ -286,6 +298,11 @@ export class OpnameAssetComponent {
       site.siteGroupName.toLowerCase() === input ||
       site.regionName.toLowerCase() === input
     ));
+
+    if (!input) {
+      this.formData.newSiteID = undefined; // Clear site ID if input is empty
+      return;
+    }
 
     if (matchedSite) {
       this.formData.newSiteID = matchedSite.siteID;
@@ -301,6 +318,13 @@ export class OpnameAssetComponent {
       };
 
       // Force change detection to update the view
+      this.cdr.detectChanges();
+    } else {
+      // Invalid site - explicitly set ID to undefined to trigger validation
+      console.error('[OpnameAsset] No matching site found for input:', input);
+      this.formData.newSiteID = undefined;
+
+      // Force change detection to update validation state
       this.cdr.detectChanges();
     }
   }
@@ -334,13 +358,17 @@ export class OpnameAssetComponent {
       this.isLoading = false;
       return;
     }
-    if (!this.formData.newOwnerName) {
-      this.errorMessage = 'Please provide an owner name.';
+
+    // Check for valid owner (must have a valid ID)
+    if (this.formData.newOwnerID === undefined) {
+      this.errorMessage = 'Please select a valid user from the list.';
       this.isLoading = false;
       return;
     }
-    if (!this.formData.newSiteName) {
-      this.errorMessage = 'Please provide a site name.';
+
+    // Check for valid site (must have a valid ID)
+    if (this.formData.newSiteID === undefined) {
+      this.errorMessage = 'Please select a valid site from the list.';
       this.isLoading = false;
       return;
     }
@@ -458,7 +486,21 @@ export class OpnameAssetComponent {
     }
 
     console.log('[OpnameAsset] Removing asset at index:', index);
+    const asset = this.searchResults[index]
     this.searchResults.splice(index, 1); // Remove the asset from the search results
+    if (asset.assetProcessed) {
+      // If the asset was processed, remove it from the session
+      this.opnameSessionService.removeAssetFromSession(this.sessionID, asset.existingAsset.assetTag).subscribe({
+        next: () => {
+          console.log('[OpnameAsset] Asset removed successfully from session:', this.sessionID);
+        },
+        error: (error: any) => {
+          console.error('[OpnameAsset] Error removing asset from session:', error);
+          this.errorMessage = 'Failed to remove asset. Please try again later.';
+        }
+      });
+    }
+    this.successMessage = `Asset ${asset.existingAsset.assetTag} removed successfully.`;
   }
 
   // TODO: Find a way to 'save' progress in the current session
