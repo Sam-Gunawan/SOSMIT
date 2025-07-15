@@ -161,12 +161,12 @@
                                                 <img class="asset-icon" [src]="result.pendingAsset.assetIcon" [alt]="result.pendingAsset.assetName"/>
                                                 <h5 class="asset-name">{{ result.pendingAsset.assetName }}</h5>
                                             </div>
-                            
+                                            
+                                            <!-- [placeholder]="result.pendingAsset.assetOwnerName || 'Asset Owner'" -->
                                             <div class="user-info">
                                                 <div class="form-floating mb-3">
                                                     <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
                                                         [(ngModel)]="formData.newOwnerName" name="newOwnerName" 
-                                                        [placeholder]="result.pendingAsset.assetOwnerName || 'Asset Owner'"
                                                         list="all-users" (input)="onOwnerInputChange(i)"
                                                         [class.is-invalid]="(!formData.newOwnerID && !formData.newOwnerName)"
                                                         required>
@@ -264,12 +264,12 @@
                                                 <div class="asset-location">
                                                     <h5>Location</h5>
                     
+                                                    <!-- [attr.placeholder]="result.pendingAsset.siteName || 'Site Name'"> -->
                                                     <p>Region - {{ result.pendingAsset.regionName }}</p>
                                                     <div class="form-floating mb-2">
                                                         <input type="text" class="form-control" 
-                                                            [id]="'site-name-' + result.pendingAsset.assetTag" 
-                                                            [(ngModel)]="formData.newSiteName" name="siteName"
-                                                            [attr.placeholder]="result.pendingAsset.siteName || 'Site Name'">
+                                                            [id]="'sitqe-name-' + result.pendingAsset.assetTag" 
+                                                            [(ngModel)]="formData.newSiteName" name="siteName">
                                                         <label [for]="'site-name-' + result.pendingAsset.assetTag">Site Name</label>
                                                     </div>
                                                     <div class="form-floating mb-2">

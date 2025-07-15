@@ -56,7 +56,6 @@ export class OpnameAssetComponent {
   isLiked: boolean = true;
   isDisliked: boolean = false;
   selectedStatusReason: 'Loss' | 'Obsolete' = 'Obsolete';
-  selectedNewUserID: number = -1; // This will be set when a user is selected from the datalist
   successMessage: string = '';
 
   // File to upload for condition photo
@@ -239,6 +238,8 @@ export class OpnameAssetComponent {
     if (matchedUser) {
       this.formData.newOwnerID = matchedUser.userID;
       this.formData.newOwnerName = `${matchedUser.firstName} ${matchedUser.lastName}`;
+      this.formData.newSiteID = matchedUser.siteID;
+      this.formData.newSiteName = matchedUser.siteName;
 
       // Update the pending asset with the owner biodata
       result.pendingAsset.assetOwnerName = this.formData.newOwnerName;
@@ -475,12 +476,11 @@ export class OpnameAssetComponent {
       }
       
       // Add this code to remove the modal backdrop
-      const modalBackdrop = document.querySelector('.modal-backdrop');
-      if (modalBackdrop) {
-        modalBackdrop.remove();
-      }
+      const modalBackdrops = document.querySelectorAll('.modal-backdrop');
+      modalBackdrops.forEach((backdrop: any) => backdrop.remove());
       document.body.classList.remove('modal-open');
       document.body.style.removeProperty('padding-right');
-    })
+      document.body.style.overflow = '';
+    }, 300)
   }
 }
