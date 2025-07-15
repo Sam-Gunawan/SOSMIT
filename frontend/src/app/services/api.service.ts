@@ -7,6 +7,7 @@ import { SiteCardInfo } from '../model/site-card-info.model';
 import { AssetInfo } from '../model/asset-info.model';
 import { User } from '../model/user.model';
 import { formatDate, titleCase } from '../reusable_functions';
+import { SiteInfo } from '../model/site-info.model';
 
 @Injectable({
   providedIn: 'root'
@@ -51,7 +52,7 @@ export class ApiService {
   }
 
   getAllUsers(): Observable<User[]> {
-    // This method will fetch all users from the backend.
+    // This method will fetch all users from the database.
     return this.http.get<User[]>(`${this.userApiUrl}/all`).pipe(
       map((response: any) => {
         // Map the response to the desired format.
@@ -76,6 +77,27 @@ export class ApiService {
     );
   }
 
+  getAllSites(): Observable<SiteInfo[]> {
+    // This method will fetch all sites from the database.
+    return this.http.get<SiteInfo[]>(`${this.siteApiUrl}/all`).pipe(
+      map((response: any) => {
+        // Map the response to the desired format.
+        return response.sites.map((site: any) => ({
+          siteID: site.SiteID,
+          siteName: site.SiteName,
+          siteGroupName: site.SiteGroupName,
+          regionName: site.RegionName,
+          siteGaID: site.SiteGaID,
+          siteGaName: titleCase(site.SiteGaName),
+          siteGaEmail: site.SiteGaEmail
+        }));
+      }),
+      tap((sites: SiteInfo[]) => {
+        // Log the fetched sites for debugging purposes.
+        console.log('[ApiService] Fetched sites:', sites);
+      })
+    )
+  }
 
   getUserSiteCards(): Observable<SiteCardInfo[]> {
     // This method will fetch the site cards that the user has access to.

@@ -8,6 +8,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AssetPageComponent } from '../asset-page/asset-page.component';
 import { User } from '../model/user.model';
+import { SiteInfo } from '../model/site-info.model';
 
 @Component({
   selector: 'app-opname-asset',
@@ -72,6 +73,7 @@ export class OpnameAssetComponent {
   // Other properties
   opnameSession?: OpnameSession;
   allUsers: User[] = []; // List of all users in the company
+  allSites: SiteInfo[] = []; // List of all sites in the company
   isLoading: boolean = false; // Loading state for fetching assets
   errorMessage: string = ''; // Error message for fetching assets
 
@@ -87,6 +89,7 @@ export class OpnameAssetComponent {
     this.updateResponsiveSettings();
     this.initOpnameData();
     this.getAllUsers();
+    this.getAllSites();
     this.isLoading = false;
     this.errorMessage = '';
   }
@@ -95,11 +98,22 @@ export class OpnameAssetComponent {
     this.apiService.getAllUsers().subscribe({
       next: (userList) => {
         this.allUsers = [...userList];
-        console.log('[OpnameAsset] All users fetched successfully:', this.allUsers);
       },
       error: (error) => {
         console.error('[OpnameAsset] Error fetching all users:', error);
         this.errorMessage = 'Failed to fetch user list. Please try again later.';
+      }
+    })
+  }
+
+  getAllSites(): void {
+    this.apiService.getAllSites().subscribe({
+      next: (siteList) => {
+        this.allSites = [...siteList];
+      },
+      error: (error) => {
+        console.error('[OpnameAsset] Error fetching all sites:', error);
+        this.errorMessage = 'Failed to fetch site list. Please try again later.';
       }
     })
   }
@@ -256,6 +270,31 @@ export class OpnameAssetComponent {
     } else {
       console.error('[OpnameAsset] No matching user found for input:', input);
       this.formData.newOwnerID = undefined;
+    }
+  }
+
+  // Handle site name input change
+  onSiteInputChange(index: number): void {
+    const result = this.searchResults[index];
+    const input = this.formData.newSiteName.trim().toLowerCase() || '';
+    const matchedSite = this.allSites.find(site => (
+      site.siteName.toLowerCase() === input ||
+      site.siteGroupName.toLowerCase() === input ||
+      site.regionName.toLowerCase() === input
+    ));
+
+    if (matchedSite) {
+      this.formData.newSiteID = matchedSite.siteID;
+      this.formData.newSiteName = matchedSite.siteName;
+
+      // Update the pending asset with the site information
+      result.pendingAsset.siteID = matchedSite.siteID;
+      result.pendingAsset.siteName = matchedSite.siteName;
+      result.pendingAsset.siteGroupName = matchedSite.siteGroupName;
+      result.pendingAsset.regionName = matchedSite.regionName;
+
+      // Force change detection to update the view
+      this.cdr.detectChanges();
     }
   }
 

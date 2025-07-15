@@ -269,8 +269,13 @@
                                                     <div class="form-floating mb-2">
                                                         <input type="text" class="form-control" 
                                                             [id]="'sitqe-name-' + result.pendingAsset.assetTag" 
-                                                            [(ngModel)]="formData.newSiteName" name="siteName">
+                                                            [(ngModel)]="formData.newSiteName" name="siteName"
+                                                            (input)="onSiteInputChange(i)"
+                                                            list="all-sites">
                                                         <label [for]="'site-name-' + result.pendingAsset.assetTag">Site Name</label>
+                                                        <datalist id="all-sites">
+                                                            <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
+                                                        </datalist>
                                                     </div>
                                                     <div class="form-floating mb-2">
                                                         <input type="text" class="form-control" 
