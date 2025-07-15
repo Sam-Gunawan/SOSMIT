@@ -1,6 +1,6 @@
 import { Component, input, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Siteinfo } from '../model/siteinfo.model';
+import { SiteCardInfo } from '../model/site-card-info.model';
 import { ApiService } from '../services/api.service';
 import { Router } from '@angular/router';
 
@@ -14,9 +14,9 @@ export class SiteCardComponent {
   currentView: 'card' | 'list' = 'card';
   isMobile: boolean = false;
 
-  siteCardList: Siteinfo[] = [];
-  filteredSiteCardList: Siteinfo[] = []; 
-  originalSiteCardList: Siteinfo[] = []; // Keep original data
+  siteCardList: SiteCardInfo[] = [];
+  filteredSiteCardList: SiteCardInfo[] = []; 
+  originalSiteCardList: SiteCardInfo[] = []; // Keep original data
   isLoading: boolean = true;
   errorMessage: string = '';
   filter = input<string>(''); // Input property to filter site cards

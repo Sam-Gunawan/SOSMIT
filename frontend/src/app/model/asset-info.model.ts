@@ -1,4 +1,4 @@
-export interface Assetinfo {
+export interface AssetInfo {
     assetTag: string;
     assetIcon: string;
     serialNumber: string;

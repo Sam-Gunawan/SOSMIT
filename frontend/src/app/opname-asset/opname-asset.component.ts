@@ -1,7 +1,7 @@
 import { Component, HostListener, Input, ChangeDetectorRef } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
-import { Assetinfo } from '../model/assetinfo.model';
+import { AssetInfo } from '../model/asset-info.model';
 import { AssetChange } from '../model/asset-changes.model';
 import { OpnameSession } from '../model/opname-session.model';
 import { CommonModule } from '@angular/common';
@@ -28,8 +28,8 @@ export class OpnameAssetComponent {
 
   // Assets - Each search result is stored as an object in this array (it is appended to the array)
   searchResults: Array<{
-    existingAsset: Assetinfo,
-    pendingAsset: Assetinfo,
+    existingAsset: AssetInfo,
+    pendingAsset: AssetInfo,
     assetProcessed: boolean,
     processingStatus: 'pending' | 'all_good' | 'edited'
   }> = [];
@@ -336,7 +336,7 @@ export class OpnameAssetComponent {
           result.pendingAsset = {
             ...result.pendingAsset,
             ...response.assetChanges
-          } as Assetinfo; // Ensure the pending asset is of type Assetinfo
+          } as AssetInfo; // Ensure the pending asset is of type AssetInfo
 
         } else { // No changes to apply
           result.processingStatus = 'all_good';

@@ -1,6 +1,6 @@
 import { Component, Input, OnInit, HostListener} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Assetinfo } from '../model/assetinfo.model';
+import { AssetInfo } from '../model/asset-info.model';
 import { ApiService } from '../services/api.service';
 import { ActivatedRoute, Route, Router } from '@angular/router';
 import { AssetPageComponent } from '../asset-page/asset-page.component';
@@ -12,7 +12,7 @@ import { AssetPageComponent } from '../asset-page/asset-page.component';
   styleUrl: './asset-card.component.scss'
 })
 export class AssetCardComponent {
-  @Input() variant: 'default' | 'compact' = 'default';
+    @Input() variant: 'default' | 'compact' = 'default';
   @Input() showLocation: boolean = false;
   @Input() showHeader: boolean = true;
   @Input() isInOpnameSession: boolean = false; // Flag to check if in an opname session
@@ -24,7 +24,7 @@ export class AssetCardComponent {
   actualVariant: 'default' | 'compact' = 'default';
   actualShowLocation: boolean = false;
 
-  assetsOnSite?: Assetinfo[] = [];
+  assetsOnSite?: AssetInfo[] = [];
   isLoading: boolean = true;
   errorMessage: string = '';
 

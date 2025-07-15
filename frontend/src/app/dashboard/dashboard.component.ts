@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { CommonModule } from '@angular/common';
 import { SiteCardComponent } from '../site-card/site-card.component';
-import { Siteinfo } from '../model/siteinfo.model';
+import { SiteCardInfo } from '../model/site-card-info.model';
 import { User } from '../model/user.model';
 import { titleCase, formatDate } from '../reusable_functions'; // Import the titleCase function
 

@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
-import { Siteinfo } from '../model/siteinfo.model';
-import { Assetinfo } from '../model/assetinfo.model';
+import { SiteCardInfo } from '../model/site-card-info.model';
+import { AssetInfo } from '../model/asset-info.model';
 import { User } from '../model/user.model';
 import { formatDate, titleCase } from '../reusable_functions';
 
@@ -76,9 +76,10 @@ export class ApiService {
     );
   }
 
-  getUserSiteCards(): Observable<Siteinfo[]> {
+
+  getUserSiteCards(): Observable<SiteCardInfo[]> {
     // This method will fetch the site cards that the user has access to.
-    return this.http.get<Siteinfo[]>(`${this.userApiUrl}/site-cards`).pipe(
+    return this.http.get<SiteCardInfo[]>(`${this.userApiUrl}/site-cards`).pipe(
       map((response: any) => {
         return response.site_cards.map((site: any) => ({
           siteID: site.SiteID,
@@ -91,7 +92,7 @@ export class ApiService {
           opnameDate: formatDate(new Date(site.OpnameDate))
         }))
       }), // Extract site cards from the response
-      tap((siteCards: Siteinfo[]) => {
+      tap((siteCards: SiteCardInfo[]) => {
         // Log the fetched site cards for debugging purposes.
         console.log('[ApiService] Fetched site cards:', siteCards);
       })
@@ -100,7 +101,7 @@ export class ApiService {
 
   getAssetByAssetTag(assetTag: string): Observable<any> {
     // This method will fetch the details of a specific asset by its tag.
-    return this.http.get<Assetinfo>(`${this.assetApiUrl}/tag/${assetTag}`).pipe(
+    return this.http.get<AssetInfo>(`${this.assetApiUrl}/tag/${assetTag}`).pipe(
       map((response: any) => {
         // Map the response to the desired format.
         return {
@@ -129,7 +130,7 @@ export class ApiService {
           regionName: response.region_name
         };
       }),
-      tap((assetDetails: Assetinfo) => {
+      tap((assetDetails: AssetInfo) => {
         // Log the fetched asset details for debugging purposes.
         console.log('[ApiService] Fetched asset details:', assetDetails);
       })
@@ -138,7 +139,7 @@ export class ApiService {
 
   getAssetsOnSite(siteID: number): Observable<any> {
     // This method will fetch all assets on a specific site.
-    return this.http.get<Assetinfo[]>(`${this.siteApiUrl}/${siteID}/assets`).pipe(
+    return this.http.get<AssetInfo[]>(`${this.siteApiUrl}/${siteID}/assets`).pipe(
       map((response: any) => {
         // Map the response to the desired format.
         return response.assets_on_site.map((asset: any) => ({
@@ -177,7 +178,7 @@ export class ApiService {
   // Search for an asset by serial number
   getAssetBySerialNumber(serialNumber: string): Observable<any> {
     // This method will search for an asset using its serial number
-    return this.http.get<Assetinfo>(`${this.assetApiUrl}/serial/${serialNumber}`).pipe(
+    return this.http.get<AssetInfo>(`${this.assetApiUrl}/serial/${serialNumber}`).pipe(
       map((response: any) => {
         // Map the response to the desired format for consistency with getAssetDetails
         return {
@@ -206,7 +207,7 @@ export class ApiService {
           assetIcon: this.getAssetIcon(response.product_variety)
         };
       }),
-      tap((assetDetails: Assetinfo) => {
+      tap((assetDetails: AssetInfo) => {
         console.log('[ApiService] Asset found by serial number:', assetDetails);
       })
     );

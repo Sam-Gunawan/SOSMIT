@@ -1,4 +1,4 @@
-export interface Siteinfo {
+export interface SiteCardInfo {
     siteID: number;
     siteName: string;
     siteGroup: string;

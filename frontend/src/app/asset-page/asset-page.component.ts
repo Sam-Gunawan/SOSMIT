@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Assetinfo } from '../model/assetinfo.model';
+import { AssetInfo } from '../model/asset-info.model';
 import { ApiService } from '../services/api.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SitePageComponent } from '../site-page/site-page.component';
@@ -20,7 +20,7 @@ export class AssetPageComponent implements OnInit {
   @Input() isEditable: boolean = false; // Flag to check if the user can edit assets in this opname session
   
   assetTag = input.required<string>();
-  assetPage? : Assetinfo;
+  assetPage? : AssetInfo;
   sessionID: number = -1; // Default value, will be set later
   siteID: number = -1; // Site ID for the current opname session
   isLoading: boolean = true;
