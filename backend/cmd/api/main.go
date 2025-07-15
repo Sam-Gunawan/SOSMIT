@@ -9,6 +9,7 @@ import (
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/asset"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/auth"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/opname"
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/site"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -50,18 +51,21 @@ func main() {
 	userRepo := user.NewRepository(db)
 	assetRepo := asset.NewRepository(db)
 	opnameRepo := opname.NewRepository(db)
+	siteRepo := site.NewRepository(db)
 
 	// Initialize the services
 	authService := auth.NewService(userRepo)
 	userService := user.NewService(userRepo)
 	assetService := asset.NewService(assetRepo)
 	opnameService := opname.NewService(opnameRepo)
+	siteService := site.NewService(siteRepo)
 
 	// Initialize the handlers
 	authHandler := auth.NewHandler(authService)
 	userHandler := user.NewHandler(userService)
 	assetHandler := asset.NewHandler(assetService)
 	opnameHandler := opname.NewHandler(opnameService)
+	siteHandler := site.NewHandler(siteService)
 
 	// Setup CORS (Cross-Origin Resource Sharing) middleware.
 	// This allows us to handle requests from the Angular frontend.
@@ -101,6 +105,13 @@ func main() {
 		{
 			// GET /api/site/:site-id/assets
 			siteRoutes.GET("/:site-id/assets", assetHandler.GetAssetsOnSiteHandler)
+
+			// GET /api/site/all
+			siteRoutes.GET("/all", siteHandler.GetAllSitesHandler)
+
+			// GET /api/site/:site-id
+			siteRoutes.GET("/:site-id", siteHandler.GetSiteByIDHandler)
+
 		}
 
 		assetRoutes := api.Group("/asset").Use(auth.AuthMiddleware())

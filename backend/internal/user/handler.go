@@ -2,6 +2,7 @@
 package user
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -75,6 +76,10 @@ func (handler *Handler) GetAllUsersHandler(context *gin.Context) {
 	}
 
 	if allUsers == nil {
+		log.Println("No users found in the system")
+		context.JSON(http.StatusNotFound, gin.H{
+			"message": "no users found",
+		})
 		// No users found, send an empty array
 		allUsers = make([]*User, 0)
 	}

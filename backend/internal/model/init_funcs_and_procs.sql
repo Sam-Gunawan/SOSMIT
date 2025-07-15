@@ -10,6 +10,8 @@ DROP FUNCTION IF EXISTS public.get_opname_session_by_id(INT);
 DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
 DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), INT, INT, TEXT);
 DROP FUNCTION IF EXISTS public.update_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), INT, INT, TEXT);
+DROP FUNCTION IF EXISTS public.get_all_sites();
+DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
 
 -- get_credentials retrieves user credentials by username (for login auth)
 -- NOTES: email not implemented yet!!
@@ -395,5 +397,56 @@ AS $$
 			change_reason = EXCLUDED.change_reason; -- Update the change reason
 
 		RETURN _changes;
+	END;
+$$;
+
+-- get_all_sites retrieves all sites with their details
+CREATE OR REPLACE FUNCTION public.get_all_sites()
+	RETURNS TABLE (
+		site_id INT,
+		site_name VARCHAR(100),
+		site_group_name VARCHAR(100),
+		region_name VARCHAR(100),
+		site_ga_id INT,
+		site_ga_name VARCHAR(255),
+		site_ga_email VARCHAR(255)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT s.id, s.site_name, sg.site_group_name, r.region_name, s.site_ga_id,
+			(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS site_ga_name,
+			u.email AS site_ga_email
+		FROM "Site" AS s
+		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+		INNER JOIN "Region" AS r ON sg.region_id = r.id;
+		INNER JOIN "User" AS u ON s.site_ga_id = u.user_id
+	END;
+$$;
+
+-- get_site_by_id retrieves site details by site ID
+CREATE OR REPLACE FUNCTION public.get_site_by_id(_site_id INT)
+	RETURNS TABLE (
+		site_id INT,
+		site_name VARCHAR(100),
+		site_group_name VARCHAR(100),
+		region_name VARCHAR(100),
+		site_ga_id INT,
+		site_ga_name VARCHAR(255),
+		site_ga_email VARCHAR(255)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT s.id, s.site_name, sg.site_group_name, r.region_name, s.site_ga_id,
+			(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS site_ga_name,
+			u.email AS site_ga_email
+		FROM "Site" AS s
+		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+		INNER JOIN "Region" AS r ON sg.region_id = r.id
+		INNER JOIN "User" AS u ON s.site_ga_id = u.user_id
+		WHERE s.id = _site_id;
 	END;
 $$;
