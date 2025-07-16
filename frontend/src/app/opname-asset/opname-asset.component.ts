@@ -36,74 +36,22 @@ export class OpnameAssetComponent {
     assetProcessed: boolean,
     processingStatus: 'pending' | 'all_good' | 'edited',
     savedChangeReason: string,
-    formData: AssetChange & {newOwnerName: string, newSiteName: string}
+    changeReason: string // Current editing change reason
   }> = [];
 
   // Currently selected asset index for form editing
-  currentAssetIndex: number = -1;
+  currentActiveIndex: number = -1;
 
-  // Helper method to create empty form data
-  private createEmptyFormData(): AssetChange & {newOwnerName: string, newSiteName: string} {
-    return {
-      assetTag: '',
-      newStatus: '',
-      newStatusReason: '',
-      newCondition: true,
-      newConditionNotes: '',
-      newLocation: '',
-      newRoom: '',
-      newOwnerID: undefined,
-      newSiteID: undefined,
-      changeReason: '',
-      newOwnerName: '',
-      newSiteName: ''
-    };
-  }
-
-  // Get current form data for the active asset
-  get currentFormData(): AssetChange & {newOwnerName: string, newSiteName: string} {
-    if (this.currentAssetIndex >= 0 && this.currentAssetIndex < this.searchResults.length) {
-      return this.searchResults[this.currentAssetIndex].formData;
-    }
-    return this.createEmptyFormData();
-  }
-
-  // Helper method to create form data from an asset
-  private createFormDataFromAsset(asset: AssetInfo, changeReason: string = ''): AssetChange & {newOwnerName: string, newSiteName: string} {
-    return {
-      assetTag: asset.assetTag,
-      newStatus: asset.assetStatus,
-      newStatusReason: asset.statusReason,
-      newCondition: asset.condition,
-      newConditionNotes: asset.conditionNotes,
-      newConditionPhotoURL: asset.conditionPhotoURL,
-      newLocation: asset.location,
-      newRoom: asset.room,
-      newOwnerID: asset.assetOwner,
-      newSiteID: asset.siteID,
-      changeReason: changeReason,
-      newOwnerName: asset.assetOwnerName,
-      newSiteName: asset.siteName
-    };
-  }
-
-  // Unified method to initialize form data for any asset
-  initFormDataForAsset(index: number): void {
+  // Simplified form initialization - just set UI state based on pendingAsset
+  initPendingAssetForEdit(index: number): void {
     if (index < 0 || index >= this.searchResults.length) return;
     
-    this.currentAssetIndex = index;
+    this.currentActiveIndex = index;
     const result = this.searchResults[index];
     
-    // For processed assets, use pending asset data; for new assets, use existing asset data
-    const sourceAsset = result.assetProcessed ? result.pendingAsset : result.existingAsset;
-    const changeReason = result.assetProcessed ? result.savedChangeReason : '';
-    
-    // Update the form data for this specific asset
-    result.formData = this.createFormDataFromAsset(sourceAsset, changeReason);
-    
-    // Update UI state
-    this.isLiked = result.formData.newCondition || false;
-    this.isDisliked = !result.formData.newCondition;
+    // Set UI state based on current pendingAsset condition
+    this.isLiked = result.pendingAsset.condition === true;
+    this.isDisliked = result.pendingAsset.condition === false;
     
     this.cdr.detectChanges();
   }
@@ -111,7 +59,6 @@ export class OpnameAssetComponent {
   // Form variables
   isLiked: boolean = true;
   isDisliked: boolean = false;
-  selectedStatusReason: 'Loss' | 'Obsolete' = 'Obsolete';
   successMessage: string = '';
 
   // File to upload for condition photo
@@ -140,20 +87,33 @@ export class OpnameAssetComponent {
 
   // Check if there are any meaningful changes in the current form
   get hasFormChanges(): boolean {
-    if (this.currentAssetIndex < 0) return false;
-    const result = this.searchResults[this.currentAssetIndex];
-    const form = result.formData;
+    if (this.currentActiveIndex < 0) return false;
+    const result = this.searchResults[this.currentActiveIndex];
+    return this.hasFormChangesForAsset(result);
+  }
+
+  // Check if there are any meaningful changes for a specific asset
+  hasFormChangesForAsset(result: any): boolean {
+    if (!result) return false;
+    const pending = result.pendingAsset;
     const existing = result.existingAsset;
     
-    return form.newStatus !== existing.assetStatus ||
-           form.newStatusReason !== existing.statusReason ||
-           form.newCondition !== existing.condition ||
-           form.newConditionNotes !== existing.conditionNotes ||
-           form.newConditionPhotoURL !== existing.conditionPhotoURL ||
-           form.newLocation !== existing.location ||
-           form.newRoom !== existing.room ||
-           form.newOwnerID !== existing.assetOwner ||
-           form.newSiteID !== existing.siteID;
+    const hasChanges = pending.assetStatus !== existing.assetStatus ||
+           pending.statusReason !== existing.statusReason ||
+           pending.condition !== existing.condition ||
+           pending.conditionNotes !== existing.conditionNotes ||
+           pending.conditionPhotoURL !== existing.conditionPhotoURL ||
+           pending.location !== existing.location ||
+           pending.room !== existing.room ||
+           pending.assetOwner !== existing.assetOwner ||
+           pending.siteID !== existing.siteID;
+
+    // Auto-clear change reason if no changes exist
+    if (!hasChanges && result.changeReason) {
+      result.changeReason = '';
+    }
+
+    return hasChanges;
   }
 
   ngOnInit(): void {
@@ -263,9 +223,6 @@ export class OpnameAssetComponent {
 
           console.log("pending asset loaded: ", pendingAsset);
           
-          // Create form data for this loaded asset based on pending asset (includes saved changes)
-          const formData = this.createFormDataFromAsset(pendingAsset, savedRecord.assetChanges.changeReason || '');
-          
           // Add to search results
           const newIndex = this.searchResults.length;
           this.searchResults.push({
@@ -274,12 +231,12 @@ export class OpnameAssetComponent {
             assetProcessed: true,
             processingStatus: hasChanges ? 'edited' : 'all_good',
             savedChangeReason: savedRecord.assetChanges.changeReason || '',
-            formData: formData
+            changeReason: savedRecord.assetChanges.changeReason || ''
           });
 
           // Set as current asset if it's the first one
           if (newIndex === 0) {
-            this.currentAssetIndex = 0;
+            this.currentActiveIndex = 0;
           }
 
           this.cdr.detectChanges(); // Trigger change detection to update the view
@@ -351,7 +308,6 @@ export class OpnameAssetComponent {
 
         // Add the found asset to the search results, using deep copies to avoid reference issues
         const newAsset = JSON.parse(JSON.stringify(asset));
-        const formData = this.createFormDataFromAsset(newAsset);
         
         this.searchResults.push({
           existingAsset: newAsset,
@@ -359,7 +315,7 @@ export class OpnameAssetComponent {
           assetProcessed: false,
           processingStatus: 'pending', // Initial processing status
           savedChangeReason: '',
-          formData: formData
+          changeReason: ''
         });
 
         this.isSearching = false;
@@ -376,37 +332,47 @@ export class OpnameAssetComponent {
   // Handle file selection for condition photo
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
+    if (input.files && input.files[0] && this.currentActiveIndex >= 0) {
       this.conditionPhoto = input.files[0];
       
       // For now, we're not actually uploading the image, just storing it in memory
       // In a real app, you'd upload this to a server and get a URL back
       // For now, we'll just set a placeholder
-      this.currentFormData.newConditionPhotoURL = 'photo_url_placeholder';
+      const result = this.searchResults[this.currentActiveIndex];
+      result.pendingAsset.conditionPhotoURL = 'photo_url_placeholder';
+      this.cdr.detectChanges();
     }
   }
 
   setLike(): void {
-    this.isLiked = true;
-    this.isDisliked = false;
-    this.currentFormData.newCondition = true;
+    if (this.currentActiveIndex >= 0) {
+      const result = this.searchResults[this.currentActiveIndex];
+      this.isLiked = true;
+      this.isDisliked = false;
+      result.pendingAsset.condition = true;
+      this.cdr.detectChanges();
+    }
   }
 
   setDislike(): void {
-    this.isLiked = false;
-    this.isDisliked = true;
-    this.currentFormData.newCondition = false;
+    if (this.currentActiveIndex >= 0) {
+      const result = this.searchResults[this.currentActiveIndex];
+      this.isLiked = false;
+      this.isDisliked = true;
+      result.pendingAsset.condition = false;
+      this.cdr.detectChanges();
+    }
   }
 
   // Handle owner name input change
   onOwnerInputChange(index: number): void {
     const result = this.searchResults[index];
-    const formData = result.formData;
-    const input = formData.newOwnerName.trim().toLowerCase() || '';
+    const input = result.pendingAsset.assetOwnerName?.trim().toLowerCase() || '';
     
     // If the input is empty, clear the owner ID to trigger validation
     if (!input) {
-      formData.newOwnerID = undefined;
+      result.pendingAsset.assetOwner = 0; // Use 0 to indicate invalid/unset
+      result.pendingAsset.assetOwnerName = '';
       return;
     }
     
@@ -416,17 +382,11 @@ export class OpnameAssetComponent {
     ));
 
     if (matchedUser) {
-      // Valid user found
-      formData.newOwnerID = matchedUser.userID;
-      formData.newOwnerName = `${matchedUser.firstName} ${matchedUser.lastName}`;
-      formData.newSiteID = matchedUser.siteID;
-      formData.newSiteName = matchedUser.siteName;
-
-      // Create a new pendingAsset object with updated properties instead of modifying it directly
+      // Valid user found - update pendingAsset directly
       result.pendingAsset = {
-        ...JSON.parse(JSON.stringify(result.pendingAsset)), // Deep copy current pendingAsset
-        assetOwnerName: formData.newOwnerName,
+        ...result.pendingAsset,
         assetOwner: matchedUser.userID,
+        assetOwnerName: `${matchedUser.firstName} ${matchedUser.lastName}`,
         assetOwnerPosition: matchedUser.position,
         assetOwnerCostCenter: matchedUser.costCenterID,
         siteID: matchedUser.siteID,
@@ -438,9 +398,9 @@ export class OpnameAssetComponent {
       // Force change detection to update the view
       this.cdr.detectChanges();
     } else {
-      // Invalid user - explicitly set ID to undefined to trigger validation
+      // Invalid user - explicitly set ID to 0 to trigger validation
       console.error('[OpnameAsset] No matching user found for input:', input);
-      formData.newOwnerID = undefined;
+      result.pendingAsset.assetOwner = 0;
       
       // Force change detection to update validation state
       this.cdr.detectChanges();
@@ -450,26 +410,24 @@ export class OpnameAssetComponent {
   // Handle site name input change
   onSiteInputChange(index: number): void {
     const result = this.searchResults[index];
-    const formData = result.formData;
-    const input = formData.newSiteName.trim().toLowerCase() || '';
+    const input = result.pendingAsset.siteName?.trim().toLowerCase() || '';
+    
+    if (!input) {
+      result.pendingAsset.siteID = undefined; // Clear site ID if input is empty
+      result.pendingAsset.siteName = '';
+      return;
+    }
+    
     const matchedSite = this.allSites.find(site => (
       site.siteName.toLowerCase() === input ||
       site.siteGroupName.toLowerCase() === input ||
       site.regionName.toLowerCase() === input
     ));
 
-    if (!input) {
-      formData.newSiteID = undefined; // Clear site ID if input is empty
-      return;
-    }
-
     if (matchedSite) {
-      formData.newSiteID = matchedSite.siteID;
-      formData.newSiteName = matchedSite.siteName;
-
-      // Create a new pendingAsset object with updated site information
+      // Update pendingAsset directly with matched site data
       result.pendingAsset = {
-        ...JSON.parse(JSON.stringify(result.pendingAsset)), // Deep copy current pendingAsset
+        ...result.pendingAsset,
         siteID: matchedSite.siteID,
         siteName: matchedSite.siteName,
         siteGroupName: matchedSite.siteGroupName,
@@ -481,7 +439,7 @@ export class OpnameAssetComponent {
     } else {
       // Invalid site - explicitly set ID to undefined to trigger validation
       console.error('[OpnameAsset] No matching site found for input:', input);
-      formData.newSiteID = undefined;
+      result.pendingAsset.siteID = undefined;
 
       // Force change detection to update validation state
       this.cdr.detectChanges();
@@ -490,13 +448,18 @@ export class OpnameAssetComponent {
 
   // Handle status changes
   onStatusChange(): void {
-    // Reset status reason when status changes
-    this.currentFormData.newStatusReason = '';
-  }
+    if (this.currentActiveIndex >= 0) {
+      const result = this.searchResults[this.currentActiveIndex];
+    
+      if (result.pendingAsset.assetStatus === 'Disposed') {
+        result.pendingAsset.statusReason = 'Loss'; // Default to Loss for Disposed status
+      } else {
+        // Clear status reason if not Disposed
+        result.pendingAsset.statusReason = '';
+      }
 
-  // Handle status reason changes so that it updates the formData
-  onStatusReasonChange(): void {
-    this.currentFormData.newStatusReason = this.selectedStatusReason;
+      this.cdr.detectChanges();
+    }
   }
 
   // Process the asset change from the edit modal
@@ -512,43 +475,73 @@ export class OpnameAssetComponent {
     }
 
     const result = this.searchResults[index];
-    const formData = result.formData;
+    const pending = result.pendingAsset;
+    const existing = result.existingAsset;
 
     // Validate the required input fields
-    if (!formData.changeReason) {
+    // Check if any change has been made
+    if (!this.hasFormChanges) {
+      this.errorMessage = 'No changes made to the asset. Please modify at least one field.';
+      return;
+    }
+
+    // Check for change reason (required for any changes made)
+    if (!result.changeReason) {
       this.errorMessage = 'Please provide a reason for the changes.';
       this.isLoading = false;
       return;
     }
 
     // Check for valid owner (must have a valid ID)
-    if (formData.newOwnerID === undefined) {
+    if (pending.assetOwner === undefined || pending.assetOwner === 0) {
       this.errorMessage = 'Please select a valid user from the list.';
       this.isLoading = false;
       return;
     }
 
     // Check for valid site (must have a valid ID)
-    if (formData.newSiteID === undefined) {
+    if (pending.siteID === undefined) {
       this.errorMessage = 'Please select a valid site from the list.';
       this.isLoading = false;
       return;
     }
 
-    // Get the asset from the search results at the specified index
-    const assetChanges: AssetChange = {
-      assetTag: result.existingAsset.assetTag,
-      newStatus: formData.newStatus,
-      newStatusReason: formData.newStatusReason,
-      newCondition: formData.newCondition,
-      newConditionNotes: formData.newConditionNotes,
-      newConditionPhotoURL: formData.newConditionPhotoURL,
-      newLocation: formData.newLocation,
-      newRoom: formData.newRoom,
-      newOwnerID: formData.newOwnerID,
-      newSiteID: formData.newSiteID,
-      changeReason: formData.changeReason,
-    };
+    this.isLoading = true;
+
+    // Build assetChanges object only with actual changes
+    const assetChanges: AssetChange = {} as AssetChange;
+    
+    if (pending.assetStatus !== existing.assetStatus) {
+      assetChanges.newStatus = pending.assetStatus;
+    }
+    if (pending.statusReason !== existing.statusReason) {
+      assetChanges.newStatusReason = pending.statusReason;
+    }
+    if (pending.condition !== existing.condition) {
+      assetChanges.newCondition = pending.condition;
+    }
+    if (pending.conditionNotes !== existing.conditionNotes) {
+      assetChanges.newConditionNotes = pending.conditionNotes;
+    }
+    if (pending.conditionPhotoURL !== existing.conditionPhotoURL) {
+      assetChanges.newConditionPhotoURL = pending.conditionPhotoURL;
+    }
+    if (pending.location !== existing.location) {
+      assetChanges.newLocation = pending.location;
+    }
+    if (pending.room !== existing.room) {
+      assetChanges.newRoom = pending.room;
+    }
+    if (pending.assetOwner !== existing.assetOwner) {
+      assetChanges.newOwnerID = pending.assetOwner;
+    }
+    if (pending.siteID !== existing.siteID) {
+      assetChanges.newSiteID = pending.siteID;
+    }
+
+    // Add required fields
+    assetChanges.assetTag = existing.assetTag;
+    assetChanges.changeReason = result.changeReason || '';
     
     console.log('[OpnameAsset] Processing asset change: ', assetChanges);
 
@@ -561,7 +554,7 @@ export class OpnameAssetComponent {
       next: (response) => {
         console.log('[OpnameAsset] Asset processed successfully:', response);
         result.assetProcessed = true; // Mark the asset as processed
-        result.savedChangeReason = formData.changeReason || ''; // Save the change reason
+        result.savedChangeReason = result.changeReason || ''; // Save the change reason
         
         // Check if there are any changes to apply
         if (response.assetChanges && Object.keys(response.assetChanges).length > 0) {
@@ -608,19 +601,19 @@ export class OpnameAssetComponent {
     }
 
     const result = this.searchResults[index];
-    const formData = result.formData;
+    const existing = result.existingAsset;
     
     const assetChanges: AssetChange = {
-      assetTag: result.existingAsset.assetTag,
-      newStatus: formData.newStatus,
-      newStatusReason: formData.newStatusReason,
-      newCondition: formData.newCondition,
-      newConditionNotes: formData.newConditionNotes,
-      newConditionPhotoURL: formData.newConditionPhotoURL,
-      newLocation: formData.newLocation,
-      newRoom: formData.newRoom,
-      newOwnerID: formData.newOwnerID,
-      newSiteID: formData.newSiteID,
+      assetTag: existing.assetTag,
+      newStatus: existing.assetStatus,
+      newStatusReason: existing.statusReason,
+      newCondition: existing.condition,
+      newConditionNotes: existing.conditionNotes,
+      newConditionPhotoURL: existing.conditionPhotoURL,
+      newLocation: existing.location,
+      newRoom: existing.room,
+      newOwnerID: existing.assetOwner,
+      newSiteID: existing.siteID,
       changeReason: "No changes. Asset verified on " + this.opnameSession?.startDate
     }
 
@@ -632,9 +625,7 @@ export class OpnameAssetComponent {
         result.assetProcessed = true;
         result.processingStatus = 'all_good';
         result.savedChangeReason = assetChanges.changeReason || '';
-
-        // Update form data to reflect the current state
-        result.formData = this.createFormDataFromAsset(result.pendingAsset, assetChanges.changeReason);
+        result.changeReason = ''; // Clear current editing change reason
         
         this.isLoading = false;
         this.successMessage = 'Asset marked as all good. No changes.';
@@ -677,11 +668,21 @@ export class OpnameAssetComponent {
     this.successMessage = `Asset ${asset.existingAsset.assetTag} removed successfully.`;
   }
 
-  // TODO: Find a way to 'save' progress in the current session
-  // This could be done by periodically saving the search results to the OpnameSessionService
-  // or by implementing a 'save' button that triggers a save action.
-  // We can also consider auto-saving the session when processing assets.
-  
+  @HostListener('input', ['$event'])
+  onInput(event?: Event) {
+    // Force change detection to update form validation and visibility
+    this.cdr.detectChanges();
+    
+    // If this is an input from a form field, check if we need to auto-clear change reasons
+    if (event?.target && this.searchResults.length > 0) {
+      // Find the result that corresponds to this input and check for changes
+      this.searchResults.forEach(result => {
+        this.hasFormChangesForAsset(result); // This will auto-clear changeReason if no changes
+      });
+    }
+  }
+
+
   private checkScreenSize() {
     this.isMobile = window.innerWidth < 768; // Define mobile breakpoint
     if (this.isMobile) {

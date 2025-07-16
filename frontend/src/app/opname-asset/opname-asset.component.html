@@ -86,7 +86,7 @@
                                 <p>Pending action</p>
                             </div>
                             <div class="opname-action-buttons">
-                                <button class="verify-asset-btn btn btn-primary" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag" (click)="initFormDataForAsset(i)">
+                                <button class="verify-asset-btn btn btn-primary" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
                                     Verify Asset
                                 </button>
                                 <button class="remove-asset-btn btn btn-danger" (click)="removeAsset(i)">
@@ -100,7 +100,7 @@
                 <!-- Card view for displaying latest changes -->
                  <section class="asset-card-layout" [ngClass]="variant" *ngIf="currentView === 'card' && result.assetProcessed">
                     <div class="asset-card" [ngClass]="variant"> 
-                        <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag" (click)="initFormDataForAsset(i)">
+                        <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
                             <div class="main-info">
                                 <img class="asset-icon" [src]="result.existingAsset.assetIcon" [alt]="result.existingAsset.assetName"/>
                                 <span 
@@ -166,15 +166,15 @@
                                             <div class="user-info">
                                                 <div class="form-floating mb-3">
                                                     <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
-                                                        [(ngModel)]="currentFormData.newOwnerName" name="newOwnerName" 
+                                                        [(ngModel)]="result.pendingAsset.assetOwnerName" name="newOwnerName" 
                                                         list="all-users" (input)="onOwnerInputChange(i)"
-                                                        [class.is-invalid]="(currentFormData.newOwnerID === undefined && currentFormData.newOwnerName) || !currentFormData.newOwnerName" 
+                                                        [class.is-invalid]="result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName" 
                                                         required>
                                                     <label [for]="'owner-name-' + result.pendingAsset.assetTag">User</label>
                                                     <datalist id="all-users">
                                                         <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
                                                     </datalist>
-                                                    <div *ngIf="(currentFormData.newOwnerID === undefined && currentFormData.newOwnerName) || !currentFormData.newOwnerName" class="invalid-feedback">
+                                                    <div *ngIf="result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName" class="invalid-feedback">
                                                         Please select a valid user from the list.
                                                     </div>
                                                 </div>
@@ -186,7 +186,7 @@
                                             <div class="left-top">
                                                 <div class="form-floating">
                                                     <select class="form-select" [id]="'asset-status-' + result.pendingAsset.assetTag" 
-                                                        [(ngModel)]="currentFormData.newStatus" name="newStatus"
+                                                        [(ngModel)]="result.pendingAsset.assetStatus" name="newStatus"
                                                         (change)="onStatusChange()" aria-label="Asset Status">
                                                         <option value="">Select status</option>
                                                         <option value="Deployed">Deployed</option>
@@ -196,14 +196,13 @@
                                                     <label [for]="'asset-status-' + result.pendingAsset.assetTag">Asset Status</label>
                                                 </div>
                     
-                                                <div class="pick-status-reason" *ngIf="currentFormData.newStatus === 'Disposed'">
+                                                <div class="pick-status-reason" *ngIf="result.pendingAsset.assetStatus === 'Disposed'">
                                                     <div class="form-check form-check-inline">
                                                         <input class="form-check-input" type="radio" 
                                                             [id]="'loss-' + result.pendingAsset.assetTag" 
                                                             name="statusReason" 
                                                             [value]="'Loss'" 
-                                                            [(ngModel)]="selectedStatusReason"
-                                                            (change)="onStatusReasonChange()">
+                                                            [(ngModel)]="result.pendingAsset.statusReason">
                                                         <label class="form-check-label" [for]="'loss-' + result.pendingAsset.assetTag">
                                                             Loss
                                                         </label>
@@ -214,8 +213,7 @@
                                                             [id]="'obsolete-' + result.pendingAsset.assetTag" 
                                                             name="statusReason" 
                                                             [value]="'Obsolete'" 
-                                                            [(ngModel)]="selectedStatusReason"
-                                                            (change)="onStatusReasonChange()">
+                                                            [(ngModel)]="result.pendingAsset.statusReason">
                                                         <label class="form-check-label" [for]="'obsolete-' + result.pendingAsset.assetTag">
                                                             Obsolete
                                                         </label>
@@ -238,7 +236,7 @@
                                                     <div *ngIf="isDisliked">                                                            <div class="form-floating mb-3">
                                                                 <textarea class="form-control" 
                                                                     [id]="'condition-notes-' + result.pendingAsset.assetTag" 
-                                                                    [(ngModel)]="currentFormData.newConditionNotes" name="newConditionNotes"
+                                                                    [(ngModel)]="result.pendingAsset.conditionNotes" name="newConditionNotes"
                                                                     [placeholder]="result.pendingAsset.conditionNotes || 'Describe the condition issue'"
                                                                     style="height: 100px"></textarea>
                                                             <label [for]="'condition-notes-' + result.pendingAsset.assetTag">Notes</label>
@@ -266,29 +264,29 @@
                                                     <div class="form-floating mb-2">
                                                         <input type="text" class="form-control" 
                                                             [id]="'sitqe-name-' + result.pendingAsset.assetTag" 
-                                                            [(ngModel)]="currentFormData.newSiteName" name="siteName"
+                                                            [(ngModel)]="result.pendingAsset.siteName" name="siteName"
                                                             (input)="onSiteInputChange(i)"
                                                             list="all-sites"
-                                                            [class.is-invalid]="(currentFormData.newSiteID === undefined && currentFormData.newSiteName) || !currentFormData.newSiteName" >
+                                                            [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName" >
                                                         <label [for]="'site-name-' + result.pendingAsset.assetTag">Site Name</label>
                                                         <datalist id="all-sites">
                                                             <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
                                                         </datalist>
-                                                        <div *ngIf="(currentFormData.newSiteID === undefined && currentFormData.newSiteName) || !currentFormData.newSiteName" class="invalid-feedback">
+                                                        <div *ngIf="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName" class="invalid-feedback">
                                                             Please select a valid site from the list.
                                                         </div>
                                                     </div>
                                                     <div class="form-floating mb-2">
                                                         <input type="text" class="form-control" 
                                                             [id]="'location-' + result.pendingAsset.assetTag" 
-                                                            [(ngModel)]="currentFormData.newLocation" name="newLocation"
+                                                            [(ngModel)]="result.pendingAsset.location" name="newLocation"
                                                             [placeholder]="result.pendingAsset.location || 'Location'">
                                                         <label [for]="'location-' + result.pendingAsset.assetTag">Location</label>
                                                     </div>
                                                     <div class="form-floating mb-2">
                                                         <input type="text" class="form-control" 
                                                             [id]="'room-' + result.pendingAsset.assetTag" 
-                                                            [(ngModel)]="currentFormData.newRoom" name="newRoom"
+                                                            [(ngModel)]="result.pendingAsset.room" name="newRoom"
                                                             [placeholder]="result.pendingAsset.room || 'Room'">
                                                         <label [for]="'room-' + result.pendingAsset.assetTag">Room</label>
                                                     </div>
@@ -297,21 +295,21 @@
                                         </div>
                                     </div>
                                     
-                                    <div class="form-floating mt-3">
+                                    <div class="form-floating mt-3" *ngIf="hasFormChangesForAsset(result)">
                                         <textarea class="form-control" 
                                             [id]="'change-reason-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="currentFormData.changeReason" name="changeReason"
+                                            [(ngModel)]="result.changeReason" name="changeReason"
                                             placeholder="Please provide a reason for these changes"
                                             style="height: 100px" required></textarea>
                                         <label [for]="'change-reason-' + result.pendingAsset.assetTag">Reason for Changes</label>
                                     </div>
                                 
                                     <div class="modal-footer">
-                                        <button type="submit" class="btn btn-primary" [disabled]="isLoading || !currentFormData.changeReason">
+                                        <button type="submit" class="btn btn-primary" [disabled]="isLoading || !result.changeReason || !hasFormChangesForAsset(result)">
                                             <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                             Save Changes
                                         </button>
-                                        <button type="button" class="btn btn-secondary" [disabled]="isLoading || !currentFormData.changeReason" (click)="markAsAllGood(i)">
+                                        <button type="button" class="btn btn-secondary" [disabled]="isLoading" (click)="markAsAllGood(i)">
                                             <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                             All good
                                         </button>
@@ -331,7 +329,7 @@
         <div class="col" *ngFor="let result of searchResults; let i = index">
             <section class="asset-list-layout" *ngIf="currentView === 'list'">
                 <div class="asset-list" [ngClass]="variant">
-                    <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag" (click)="initFormDataForAsset(i)">
+                    <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
                         <div class="first-column">
                             <img class="asset-icon" [src]="result.existingAsset.assetIcon" [alt]="result.existingAsset.assetName"/>
                         </div>
@@ -388,7 +386,7 @@
                                                 <div class="user-info">
                                                     <div class="form-floating mb-3">
                                                         <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
-                                                            [(ngModel)]="currentFormData.newOwnerName" name="newOwnerName" 
+                                                            [(ngModel)]="result.pendingAsset.assetOwnerName" name="newOwnerName" 
                                                             [placeholder]="result.pendingAsset.assetOwnerName || 'Asset Owner'"
                                                             required
                                                             list="all-users">
@@ -405,7 +403,7 @@
                                                 <div class="left-top">
                                                     <div class="form-floating">
                                                         <select class="form-select" [id]="'asset-status-' + result.pendingAsset.assetTag" 
-                                                            [(ngModel)]="currentFormData.newStatus" name="newStatus"
+                                                            [(ngModel)]="result.pendingAsset.assetStatus" name="newStatus"
                                                             (change)="onStatusChange()" aria-label="Asset Status">
                                                             <option value="">Select status</option>
                                                             <option value="Deployed">Deployed</option>
@@ -415,14 +413,13 @@
                                                         <label [for]="'asset-status-' + result.pendingAsset.assetTag">Asset Status</label>
                                                     </div>
                         
-                                                    <div class="pick-status-reason" *ngIf="currentFormData.newStatus === 'Disposed'">
+                                                    <div class="pick-status-reason" *ngIf="result.pendingAsset.assetStatus === 'Disposed'">
                                                         <div class="form-check form-check-inline">
                                                             <input class="form-check-input" type="radio" 
                                                                 [id]="'loss-' + result.pendingAsset.assetTag" 
                                                                 name="statusReason" 
                                                                 [value]="'Loss'" 
-                                                                [(ngModel)]="selectedStatusReason"
-                                                                (change)="onStatusReasonChange()">
+                                                                [(ngModel)]="result.pendingAsset.statusReason">
                                                             <label class="form-check-label" [for]="'loss-' + result.pendingAsset.assetTag">
                                                                 Loss
                                                             </label>
@@ -433,8 +430,7 @@
                                                                 [id]="'obsolete-' + result.pendingAsset.assetTag" 
                                                                 name="statusReason" 
                                                                 [value]="'Obsolete'" 
-                                                                [(ngModel)]="selectedStatusReason"
-                                                                (change)="onStatusReasonChange()">
+                                                                [(ngModel)]="result.pendingAsset.statusReason">
                                                             <label class="form-check-label" [for]="'obsolete-' + result.pendingAsset.assetTag">
                                                                 Obsolete
                                                             </label>
@@ -458,7 +454,7 @@
                                                             <div class="form-floating mb-3">
                                                                 <textarea class="form-control" 
                                                                     [id]="'condition-notes-' + result.pendingAsset.assetTag" 
-                                                                    [(ngModel)]="currentFormData.newConditionNotes" name="newConditionNotes"
+                                                                    [(ngModel)]="result.pendingAsset.conditionNotes" name="newConditionNotes"
                                                                     [placeholder]="result.pendingAsset.conditionNotes || 'Describe the condition issue'"
                                                                     style="height: 100px"></textarea>
                                                                 <label [for]="'condition-notes-' + result.pendingAsset.assetTag">Notes</label>
@@ -487,21 +483,21 @@
                                                         <div class="form-floating mb-2">
                                                             <input type="text" class="form-control" 
                                                                 [id]="'site-name-' + result.pendingAsset.assetTag" 
-                                                                [(ngModel)]="currentFormData.newSiteName" name="siteName"
+                                                                [(ngModel)]="result.pendingAsset.siteName" name="siteName"
                                                                 [placeholder]="result.pendingAsset.siteName || 'Site Name'">
                                                             <label [for]="'site-name-' + result.pendingAsset.assetTag">Site Name</label>
                                                         </div>
                                                         <div class="form-floating mb-2">
                                                             <input type="text" class="form-control" 
                                                                 [id]="'location-' + result.pendingAsset.assetTag" 
-                                                                [(ngModel)]="currentFormData.newLocation" name="newLocation"
+                                                                [(ngModel)]="result.pendingAsset.location" name="newLocation"
                                                                 [placeholder]="result.pendingAsset.location || 'Location'">
                                                             <label [for]="'location-' + result.pendingAsset.assetTag">Location</label>
                                                         </div>
                                                         <div class="form-floating mb-2">
                                                             <input type="text" class="form-control" 
                                                                 [id]="'room-' + result.pendingAsset.assetTag" 
-                                                                [(ngModel)]="currentFormData.newRoom" name="newRoom"
+                                                                [(ngModel)]="result.pendingAsset.room" name="newRoom"
                                                                 [placeholder]="result.pendingAsset.room || 'Room'">
                                                             <label [for]="'room-' + result.pendingAsset.assetTag">Room</label>
                                                         </div>
@@ -510,21 +506,21 @@
                                             </div>
                                         </div>
                                         
-                                        <div class="form-floating mt-3">
+                                        <div class="form-floating mt-3" *ngIf="hasFormChangesForAsset(result)">
                                             <textarea class="form-control" 
                                                 [id]="'change-reason-' + result.pendingAsset.assetTag" 
-                                                [(ngModel)]="currentFormData.changeReason" name="changeReason"
+                                                [(ngModel)]="result.changeReason" name="changeReason"
                                                 placeholder="Please provide a reason for these changes"
                                                 style="height: 100px" required></textarea>
                                             <label [for]="'change-reason-' + result.pendingAsset.assetTag">Reason for Changes</label>
                                         </div>
                                     
                                         <div class="modal-footer">
-                                            <button type="submit" class="btn btn-primary" [disabled]="isLoading || !currentFormData.changeReason">
+                                            <button type="submit" class="btn btn-primary" [disabled]="isLoading || !result.changeReason || !hasFormChangesForAsset(result)">
                                                 <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                                 Save Changes
                                             </button>
-                                            <button type="button" class="btn btn-secondary" [disabled]="isLoading || !currentFormData.changeReason" (click)="markAsAllGood(i)">
+                                            <button type="button" class="btn btn-secondary" [disabled]="isLoading" (click)="markAsAllGood(i)">
                                                 <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                                 All good
                                             </button>

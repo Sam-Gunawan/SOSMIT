@@ -18,18 +18,18 @@ type OpnameSession struct {
 }
 
 type AssetChange struct {
-	SessionID            int    `json:"session_id"`
-	AssetTag             string `json:"asset_tag"`
-	NewStatus            string `json:"new_status"`
-	NewStatusReason      string `json:"new_status_reason"`
-	NewCondition         bool   `json:"new_condition"`
-	NewConditionNotes    string `json:"new_condition_notes"`
-	NewConditionPhotoURL string `json:"new_condition_photo_url"`
-	NewLocation          string `json:"new_location"`
-	NewRoom              string `json:"new_room"`
-	NewOwnerID           int    `json:"new_owner_id"`
-	NewSiteID            int    `json:"new_site_id"`
-	ChangeReason         string `json:"change_reason"`
+	SessionID            int     `json:"session_id"`
+	AssetTag             string  `json:"asset_tag"`
+	NewStatus            *string `json:"new_status"`
+	NewStatusReason      *string `json:"new_status_reason"`
+	NewCondition         *bool   `json:"new_condition"`
+	NewConditionNotes    *string `json:"new_condition_notes"`
+	NewConditionPhotoURL *string `json:"new_condition_photo_url"`
+	NewLocation          *string `json:"new_location"`
+	NewRoom              *string `json:"new_room"`
+	NewOwnerID           *int    `json:"new_owner_id"`
+	NewSiteID            *int    `json:"new_site_id"`
+	ChangeReason         string  `json:"change_reason"`
 }
 
 type OpnameSessionProgress struct {

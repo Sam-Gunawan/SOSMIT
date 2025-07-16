@@ -145,17 +145,17 @@ func (handler *Handler) DeleteSessionHandler(context *gin.Context) {
 // AssetChangeRequest represents a request to change an asset during an opname session.
 // This struct can be extended with fields as needed to capture the changes made to an asset.
 type AssetChangeRequest struct {
-	AssetTag             string `json:"asset_tag" binding:"required"`
-	NewStatus            string `json:"new_status"`
-	NewStatusReason      string `json:"new_status_reason"`
-	NewCondition         bool   `json:"new_condition"`
-	NewConditionNotes    string `json:"new_condition_notes"`
-	NewConditionPhotoURL string `json:"new_condition_photo_url"`
-	NewLocation          string `json:"new_location"`
-	NewRoom              string `json:"new_room"`
-	NewOwnerID           int    `json:"new_owner_id"`
-	NewSiteID            int    `json:"new_site_id"`
-	ChangeReason         string `json:"change_reason"`
+	AssetTag             string  `json:"asset_tag" binding:"required"`
+	NewStatus            *string `json:"new_status"`
+	NewStatusReason      *string `json:"new_status_reason"`
+	NewCondition         *bool   `json:"new_condition"`
+	NewConditionNotes    *string `json:"new_condition_notes"`
+	NewConditionPhotoURL *string `json:"new_condition_photo_url"`
+	NewLocation          *string `json:"new_location"`
+	NewRoom              *string `json:"new_room"`
+	NewOwnerID           *int    `json:"new_owner_id"`
+	NewSiteID            *int    `json:"new_site_id"`
+	ChangeReason         string  `json:"change_reason"`
 }
 
 // ProcessAssetChangesHandler handles the processing of asset changes during an opname session.
