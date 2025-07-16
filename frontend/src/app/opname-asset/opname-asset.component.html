@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=delete" />
+
 <div class="opname-sticky-top">
     <div class="search-bar">
         <form class="d-flex" role="search" (ngSubmit)="onSearch()">
@@ -89,11 +91,10 @@
                                 <button class="verify-asset-btn btn btn-primary" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
                                     Verify Asset
                                 </button>
-                                <button class="remove-asset-btn btn btn-danger" (click)="removeAsset(i)">
-                                    Remove
-                                </button>
                             </div>
                         </div>
+
+                        <span class="delete-icon material-symbols-outlined" (click)="removeAsset(i)">delete</span>
                     </div>
                 </section>
 
@@ -128,6 +129,8 @@
                                 <p class="asset-site">{{ result.pendingAsset.siteGroupName}}</p>
                             </div>
                         </div>
+
+                        <span class="delete-icon material-symbols-outlined" (click)="removeAsset(i)">delete</span>
                     </div>
                 </section>
 
@@ -162,7 +165,6 @@
                                                 <h5 class="asset-name">{{ result.pendingAsset.assetName }}</h5>
                                             </div>
                                             
-                                            <!-- [placeholder]="result.pendingAsset.assetOwnerName || 'Asset Owner'" -->
                                             <div class="user-info">
                                                 <div class="form-floating mb-3">
                                                     <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 

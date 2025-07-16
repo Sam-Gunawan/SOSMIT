@@ -280,6 +280,7 @@ export class OpnameAssetComponent {
       return;
     }
 
+    this.searchQuery = this.searchQuery.trim().toUpperCase(); // Normalize search query
     this.isSearching = true;
     this.errorMessage = ''; // Clear previous error message
 
@@ -287,8 +288,8 @@ export class OpnameAssetComponent {
 
     // Check if the seached asset already exists in the search results
     const alreadyExists = this.searchResults.some(result => (
-      result.existingAsset.assetTag === this.searchQuery.toUpperCase() ||
-      result.existingAsset.serialNumber === this.searchQuery.toUpperCase()
+      result.existingAsset.assetTag === this.searchQuery ||
+      result.existingAsset.serialNumber === this.searchQuery
     ));
 
     if (alreadyExists) {

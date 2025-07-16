@@ -137,6 +137,7 @@ p {
 }
 
 .asset-card.default {
+    position: relative; // Added for absolute positioning of child elements
     border-radius: 20px;
     padding: 10px;
     background-color: styles.$tertiary-color;
@@ -151,6 +152,7 @@ p {
 }
 
 .asset-card.compact {
+    position: relative; // Added for absolute positioning of child elements
     border-radius: 20px;
     padding: 10px;
     background-color: styles.$tertiary-color;
@@ -166,6 +168,24 @@ p {
         justify-content: center;
         align-items: flex-start;
     }
+}
+
+.asset-card {
+  .delete-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    z-index: 99;
+    cursor: pointer;
+    color: rgb(243, 131, 131);
+    transition: 0.05s;
+    
+    &:hover {
+      color: #e72323;
+      transform: scale(1.1);
+    }
+  }
 }
 
 .opname-card {
@@ -246,6 +266,7 @@ p {
 }
 
 .list-body {
+	position: relative; // Added for absolute positioning of child elements
 	padding: 10px 0px;
 	border-bottom: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 40%);
 	display: flex;
