@@ -71,10 +71,17 @@ p {
   border-bottom: 1px solid styles.$quaternary-text-color;
 }
 
-.asset-status{
-  background-color: styles.$button-color;
-  border-radius: 15px;
-  padding: 5px 10px;
+.asset-status {
+    font-size: 12px !important;
+    border-radius: 15px;
+    padding: 5px 10px;
+
+    @each $name, $color in styles.$asset-pill-colors {
+		&.status-#{$name} {
+			background-color: $color;
+            border: 1px solid color.adjust($color, $lightness: -10%);
+		}
+	}
 }
 
 .status-reason{

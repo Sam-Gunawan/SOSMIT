@@ -13,11 +13,11 @@
                 <li><a href="">Dashboard</a></li>
                 <li><a href="">Search</a></li>
                 <li>
-                    <button class="btn btn-primary" src="assets/notif.svg" alt="Notification" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasWithBothOptions" aria-controls="offcanvasWithBothOptions">
+                    <button class="btn btn-primary" *ngIf="currentView === 'large'" src="assets/notif.svg" alt="Notification" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNotifLarge" aria-controls="offcanvasWithBothOptions">
                         <img class="notif-logo" src="assets/notif.svg" alt="Notification"/>
                     </button>
 
-                    <div class="offcanvas offcanvas-end" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1" id="offcanvasWithBothOptions" aria-labelledby="offcanvasWithBothOptionsLabel">
+                    <div class="offcanvas offcanvas-end" *ngIf="currentView === 'large'" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1" id="offcanvasNotifLarge" aria-labelledby="offcanvasWithBothOptionsLabel">
                         <div class="offcanvas-header">
                             <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Notification</h5>
                         </div>
@@ -89,10 +89,173 @@
                             </div>
                         </div>
                     </div>
+
+                    <button class="btn btn-primary" *ngIf="currentView === 'small'" src="assets/notif.svg" alt="Notification" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNotifSmall" aria-controls="offcanvasWithBothOptions">
+                        <img class="notif-logo" src="assets/notif.svg" alt="Notification"/>
+                    </button>
+
+                    <div class="offcanvas offcanvas-top" *ngIf="currentView === 'small'" data-bs-backdrop="static" tabindex="-1" id="offcanvasNotifSmall" aria-labelledby="offcanvasWithBothOptionsLabel">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Notification</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body">
+                            <div class="notif-content">
+                                <div class="notif notif-create" *ngFor="let notification of notifications" [ngClass]="{'unread': !notification.isRead}">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>New Opname session created at [site] by [user].</p>
+                                    </div>
+                                </div>
+                                <div class="notif notif-finish">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>[site]'s Opname session by [user] is completed.</p>
+                                    </div>
+                                </div>
+                                <div class="notif notif-review">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>Please review [site]'s Opname session by [user].</p>
+                                    </div>
+                                </div>
+                                <div class="notif notif-verified">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>[site]'s Opname session by [user] is verified.</p>
+                                    </div>
+                                </div>
+                                <div class="notif notif-rejected">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>[site]'s Opname session by [user] is rejected.</p>
+                                    </div>
+                                </div>
+                                <div class="notif notif-rejected">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>[site]'s Opname session by [user] is rejected.</p>
+                                    </div>
+                                </div>
+                                <div class="notif notif-rejected">
+                                    <div class="time">
+                                        <p>July 14</p>
+                                        <p>16.35</p>
+                                    </div>
+                                    <div class="content">
+                                        <p>[site]'s Opname session by [user] is rejected.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </li>
-                <li><a href="">
-                    <img class="profile-logo" src="assets/profile.svg" alt="Profile"/>
-                </a></li>
+                <li>
+                    <button class="btn btn-primary" *ngIf="currentView === 'large'" src="assets/profile.svg" alt="Profile" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasProfileLarge" aria-controls="offcanvasWithBothOptions">
+                        <img class="profile-logo" src="assets/profile.svg" alt="Profile"/>
+                    </button>
+                    
+                    <div class="offcanvas offcanvas-end" *ngIf="currentView === 'large'" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1" id="offcanvasProfileLarge" aria-labelledby="offcanvasWithBothOptionsLabel">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">[user name]</h5>
+                        </div>
+                        <div class="offcanvas-body">
+                            <div class="reminder-container">
+                                <h6 class="reminder-header">Set Your Reminder</h6>
+                                <div class="every-day">
+                                    <img class="reminder-logo" src="assets/reminder.svg" alt="Reminder"/>
+                                    <p class="text">Every Day</p>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+                                    </div>
+                                </div>
+                                <div class="per-day">
+                                    <div class="select-date form-floating">
+                                        <select class="form-select form-select-sm" id="floatingSelect" aria-label="Floating label select example">
+                                            <option selected></option>
+                                            <option value="1">Three Days</option>
+                                            <option value="2">Week</option>
+                                            <option value="3">Month</option>
+                                            <option value="4">Three Months</option>
+                                            <option value="5">Six Months</option>
+                                            <option value="6">Year</option>
+                                        </select>
+                                        <label for="floatingSelect">Remind me every ...</label>
+                                    </div>
+                                    <form class="select-time max-w-[8rem] mx-auto">
+                                        <input type="time" id="time" class="timer" value="00:00" required />
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="logout-container">
+                                <button class="logout-btn btn rounded btn-danger" (click)="logout()">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary" *ngIf="currentView === 'small'" src="assets/profile.svg" alt="Profile" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasProfileSmall" aria-controls="offcanvasWithBothOptions">
+                        <img class="profile-logo" src="assets/profile.svg" alt="Profile"/>
+                    </button>
+
+                    <div class="offcanvas offcanvas-top" *ngIf="currentView === 'small'" data-bs-backdrop="static" tabindex="-1" id="offcanvasProfileSmall" aria-labelledby="offcanvasWithBothOptionsLabel">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">[user name]</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body">
+                            <div class="reminder-container">
+                                <h6 class="reminder-header">Set Your Reminder</h6>
+                                <div class="every-day">
+                                    <img class="reminder-logo" src="assets/reminder.svg" alt="Reminder"/>
+                                    <p class="text">Every Day</p>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" id="switchCheckDefault">
+                                    </div>
+                                </div>
+                                <div class="per-day">
+                                    <div class="select-date form-floating">
+                                        <select class="form-select form-select-sm" id="floatingSelect" aria-label="Floating label select example">
+                                            <option selected></option>
+                                            <option value="1">Three Days</option>
+                                            <option value="2">Week</option>
+                                            <option value="3">Month</option>
+                                            <option value="4">Three Months</option>
+                                            <option value="5">Six Months</option>
+                                            <option value="6">Year</option>
+                                        </select>
+                                        <label for="floatingSelect">Remind me every ...</label>
+                                    </div>
+                                    <form class="select-time max-w-[8rem] mx-auto">
+                                        <input type="time" id="time" class="timer" value="00:00" required />
+                                    </form>
+                                </div>
+                            </div>
+
+                            <div class="logout-container">
+                                <button class="logout-btn btn rounded btn-danger" (click)="logout()">Logout</button>
+                            </div>
+                        </div>
+                    </div>
+                </li>
                 <label for="check" class="close-menu"><i class="fas fa-times"></i></label>
             </span>
             <label for="check" class="open-menu"><i class="fas fa-bars"></i></label>

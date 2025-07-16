@@ -61,9 +61,4 @@ export class DashboardComponent {
       }
     });
   }
-
-  logout(): void {
-    // Call the logout method from ApiService
-    this.apiService.logout();
-  }
 }

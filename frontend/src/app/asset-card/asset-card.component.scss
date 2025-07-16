@@ -16,12 +16,110 @@ p {
     margin: 5px;
 }
 
+.sticky-top {
+  padding-top: 30px;
+  padding-bottom: 15px;
+  position: sticky;
+  top: 42px;
+  z-index: 10;
+  background-color: styles.$background-color;
+  align-content: center;
+  justify-content: center;
+}
+
 .assets-info-header {
     display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-    justify-content: space-between;
+    flex-direction: column;
+    // flex-direction: row;
+    // align-items: center;
+    // gap: 20px;
+    // justify-content: space-between;
+}
+
+.asset-search {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 10px;
+}
+
+.asset-filter {
+    font-size: 12px;
+    border-radius: 15px;
+    padding: 5px 10px;
+
+	@each $name, $color in styles.$asset-pill-colors {
+		&.filter-#{$name} {
+			background-color: $color;
+			border: 1px solid color.adjust($color, $lightness: -20%);
+		}
+	}
+}
+
+.search-view {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+}
+
+.search-bar{
+	align-items: center;
+	flex-grow: 1;
+}
+
+@media (max-width: 767px) {
+	.search-bar{
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		flex-grow: 1;
+		gap: 10px;
+	}
+}
+
+.filter-pills {
+	display: flex;
+	gap: 8px;
+	flex-wrap: wrap;
+	justify-content: end;
+
+	@each $name, $color in styles.$filter-pill-colors {
+		.filter-#{$name} {
+			background-color: $color;
+			color: styles.$primary-text-color;
+			cursor: pointer;
+			transition: all 0.1s ease;
+			border: 1px solid color.adjust($color, $lightness: -10%);
+	
+			&:hover {
+				background-color: color.adjust($color, $lightness: -10%);
+			}
+	
+			&:active {
+				background-color: color.adjust($color, $lightness: -20%);
+			}
+	
+			&.selected {
+				background-color: styles.$primary-color !important;
+				color: white;
+				transform: scale(1.05);
+			}
+		}
+	}
+
+	.clear-filter {
+		background-color: #dc3545;
+		color: white;
+		font-size: 12px;
+		border-radius: 15px;
+		padding: 5px 10px;
+		
+		&:hover {
+			background-color: color.adjust(#dc3545, $lightness: -10%);
+		}
+	}
 }
 
 .view-icon {
