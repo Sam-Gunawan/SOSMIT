@@ -1,4 +1,5 @@
 export interface OpnameSessionProgress {
+    id: number; // Unique identifier for the progress item
     assetTag: string;
     assetChanges: {
         newStatus?: string;

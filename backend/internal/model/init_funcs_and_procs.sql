@@ -478,6 +478,7 @@ $$;
 -- load_opname_progress loads the latest scan progress for a given opname session
 CREATE OR REPLACE FUNCTION public.load_opname_progress(_session_id INT)
 	RETURNS TABLE (
+		id INT,
 		"changes" JSONB,
 		change_reason TEXT,
 		asset_tag VARCHAR(12)
@@ -486,9 +487,8 @@ CREATE OR REPLACE FUNCTION public.load_opname_progress(_session_id INT)
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT ac."changes", ac.change_reason, ac.asset_tag
+		SELECT ac.id, ac."changes", ac.change_reason, ac.asset_tag
 		FROM "AssetChanges" as ac
-		WHERE session_id = _session_id
-		ORDER BY ac.id ASC;
+		WHERE session_id = _session_id;
 	END;
 $$;

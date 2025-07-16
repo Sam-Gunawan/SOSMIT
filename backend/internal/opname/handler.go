@@ -306,6 +306,7 @@ func (handler *Handler) LoadOpnameProgressHandler(context *gin.Context) {
 	var responseProgress []map[string]any
 	for _, progress := range progressList {
 		progressItem := map[string]any{
+			"id":            progress.ID,
 			"asset_tag":     progress.AssetTag,
 			"changes":       string(progress.Changes),
 			"change_reason": progress.ChangeReason,

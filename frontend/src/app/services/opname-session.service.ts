@@ -169,26 +169,30 @@ export class OpnameSessionService {
       map((response: any): OpnameSessionProgress[] => {
         // Handle the new response structure with progress array
         if (response.progress && Array.isArray(response.progress)) {
-          return response.progress.map((progressItem: any): OpnameSessionProgress => {
+          // Sort by id descending before mapping
+          const sortedProgress = response.progress.sort((a: any, b: any) => b.id - a.id);
+          return sortedProgress.map((progressItem: any): OpnameSessionProgress => {
             // Parse the changes JSON string back to an object
             const changes = JSON.parse(progressItem.changes || '{}');
             return {
+              id: progressItem.id,
               assetTag: progressItem.asset_tag,
               assetChanges: {
-                newStatus: changes.newStatus,
-                newStatusReason: changes.newStatusReason,
-                newCondition: changes.newCondition,
-                newConditionNotes: changes.newConditionNotes,
-                newConditionPhotoURL: changes.newConditionPhotoURL,
-                newLocation: changes.newLocation,
-                newRoom: changes.newRoom,
-                newOwnerID: changes.newOwnerID,
-                newSiteID: changes.newSiteID,
-                changeReason: progressItem.change_reason
+              newStatus: changes.newStatus,
+              newStatusReason: changes.newStatusReason,
+              newCondition: changes.newCondition,
+              newConditionNotes: changes.newConditionNotes,
+              newConditionPhotoURL: changes.newConditionPhotoURL,
+              newLocation: changes.newLocation,
+              newRoom: changes.newRoom,
+              newOwnerID: changes.newOwnerID,
+              newSiteID: changes.newSiteID,
+              changeReason: progressItem.change_reason
               }
             };
-          });
+          })
         }
+
         return []; // Return empty array if no progress found
       }),
       tap((response: OpnameSessionProgress[]) => {

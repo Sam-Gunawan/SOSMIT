@@ -85,37 +85,6 @@ export class OpnameAssetComponent {
     private cdr: ChangeDetectorRef
   ) {}
 
-  // Check if there are any meaningful changes in the current form
-  get hasFormChanges(): boolean {
-    if (this.currentActiveIndex < 0) return false;
-    const result = this.searchResults[this.currentActiveIndex];
-    return this.hasFormChangesForAsset(result);
-  }
-
-  // Check if there are any meaningful changes for a specific asset
-  hasFormChangesForAsset(result: any): boolean {
-    if (!result) return false;
-    const pending = result.pendingAsset;
-    const existing = result.existingAsset;
-    
-    const hasChanges = pending.assetStatus !== existing.assetStatus ||
-           pending.statusReason !== existing.statusReason ||
-           pending.condition !== existing.condition ||
-           pending.conditionNotes !== existing.conditionNotes ||
-           pending.conditionPhotoURL !== existing.conditionPhotoURL ||
-           pending.location !== existing.location ||
-           pending.room !== existing.room ||
-           pending.assetOwner !== existing.assetOwner ||
-           pending.siteID !== existing.siteID;
-
-    // Auto-clear change reason if no changes exist
-    if (!hasChanges && result.changeReason) {
-      result.changeReason = '';
-    }
-
-    return hasChanges;
-  }
-
   ngOnInit(): void {
     this.isLoading = true;
     this.checkScreenSize();
@@ -123,8 +92,8 @@ export class OpnameAssetComponent {
     this.initOpnameData();
     this.getAllUsers();
     this.getAllSites();
-    this.isLoading = false;
     this.errorMessage = '';
+    // Remove isLoading = false from here - let the async operations control it
   }
   
   getAllUsers(): void {
@@ -152,29 +121,41 @@ export class OpnameAssetComponent {
   }
   
   loadOpnameProgress(sessionID: number): void {
-    this.isLoading = true;
     this.opnameSessionService.loadOpnameProgress(sessionID).subscribe({
       next: (progress: OpnameSessionProgress[]) => {
         this.populateSessionData(progress);
         console.log('[OpnameAsset] Opname session progress loaded:', progress);
-        this.isLoading = false;
+        // Don't set isLoading = false here - let populateSessionData handle it
       },
       error: (error) => {
         console.error('[OpnameAsset] Error loading opname session progress:', error);
         this.errorMessage = 'Failed to load opname session progress. Please try again later.';
-        this.isLoading = false;
+        this.isLoading = false; // Only set false on error
       }
     });
   }
 
   populateSessionData(progress: OpnameSessionProgress[]): void {
-    for (const savedRecord of progress) {
+    // Clear existing search results first
+    this.searchResults = [];
+    
+    // If no progress, loading is complete
+    if (progress.length === 0) {
+      this.isLoading = false;
+      return;
+    }
+    
+    // Pre-allocate array with the correct length to preserve order
+    const orderedResults: Array<any> = new Array(progress.length);
+    let completedCount = 0;
+    
+    progress.forEach((savedRecord, index) => {
       // Get the existing asset from API
       this.apiService.getAssetByAssetTag(savedRecord.assetTag).subscribe({
         next: (asset: AssetInfo) => {
           const existingAsset = JSON.parse(JSON.stringify(asset)); // Deep copy to preserve original
           
-          // Determine the owner ID and site ID to use (from saved record if available, otherwise from original asset)
+          // ...existing code...
           const ownerID = savedRecord.assetChanges.newOwnerID ?? asset.assetOwner;
           const siteID = savedRecord.assetChanges.newSiteID ?? asset.siteID;
           
@@ -223,30 +204,46 @@ export class OpnameAssetComponent {
 
           console.log("pending asset loaded: ", pendingAsset);
           
-          // Add to search results
-          const newIndex = this.searchResults.length;
-          this.searchResults.push({
+          // Store in the correct position to preserve order
+          orderedResults[index] = {
             existingAsset: existingAsset,
             pendingAsset: pendingAsset,
             assetProcessed: true,
             processingStatus: hasChanges ? 'edited' : 'all_good',
             savedChangeReason: savedRecord.assetChanges.changeReason || '',
             changeReason: savedRecord.assetChanges.changeReason || ''
-          });
+          };
 
-          // Set as current asset if it's the first one
-          if (newIndex === 0) {
-            this.currentActiveIndex = 0;
+          completedCount++;
+          
+          // When all API calls are complete, update searchResults in the correct order
+          if (completedCount === progress.length) {
+            this.searchResults = orderedResults;
+            
+            // Set as current asset if it's the first one
+            if (this.searchResults.length > 0) {
+              this.currentActiveIndex = 0;
+            }
+            
+            this.isLoading = false; // Now loading is truly complete
+            this.cdr.detectChanges(); // Trigger change detection to update the view
           }
-
-          this.cdr.detectChanges(); // Trigger change detection to update the view
         },
         error: (error) => {
           console.error('[OpnameAsset] Error fetching master asset:', error);
           this.errorMessage = 'Failed to load master asset. Please try again later.';
+          
+          completedCount++;
+          // Even on error, check if we've completed all calls
+          if (completedCount === progress.length) {
+            // Filter out any undefined entries caused by errors
+            this.searchResults = orderedResults.filter(result => result !== undefined);
+            this.isLoading = false; // Loading complete even with errors
+            this.cdr.detectChanges();
+          }
         }
       })
-    }
+    });
   }
 
   initOpnameData(): void {
@@ -309,7 +306,7 @@ export class OpnameAssetComponent {
         // Add the found asset to the search results, using deep copies to avoid reference issues
         const newAsset = JSON.parse(JSON.stringify(asset));
         
-        this.searchResults.push({
+        this.searchResults.unshift({
           existingAsset: newAsset,
           pendingAsset: JSON.parse(JSON.stringify(asset)), // Deep copy for modifications
           assetProcessed: false,
@@ -462,6 +459,30 @@ export class OpnameAssetComponent {
     }
   }
 
+  // Check if there are any meaningful changes for a specific asset
+  hasFormChangesForAsset(result: any): boolean {
+    if (!result) return false;
+    const pending = result.pendingAsset;
+    const existing = result.existingAsset;
+    
+    const hasChanges = pending.assetStatus !== existing.assetStatus ||
+           pending.statusReason !== existing.statusReason ||
+           pending.condition !== existing.condition ||
+           pending.conditionNotes !== existing.conditionNotes ||
+           pending.conditionPhotoURL !== existing.conditionPhotoURL ||
+           pending.location !== existing.location ||
+           pending.room !== existing.room ||
+           pending.assetOwner !== existing.assetOwner ||
+           pending.siteID !== existing.siteID;
+
+    // Auto-clear change reason if no changes exist
+    if (!hasChanges && result.changeReason) {
+      result.changeReason = '';
+    }
+
+    return hasChanges;
+  }
+
   // Process the asset change from the edit modal
   processAssetChange(index: number): void {
     this.errorMessage = '';
@@ -480,7 +501,7 @@ export class OpnameAssetComponent {
 
     // Validate the required input fields
     // Check if any change has been made
-    if (!this.hasFormChanges) {
+    if (!this.hasFormChangesForAsset(result)) {
       this.errorMessage = 'No changes made to the asset. Please modify at least one field.';
       return;
     }
