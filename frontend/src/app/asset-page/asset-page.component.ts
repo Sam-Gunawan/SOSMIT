@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, input } from '@angular/core';
+import { Component, Input, OnInit, input, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AssetInfo } from '../model/asset-info.model';
@@ -19,6 +19,9 @@ export class AssetPageComponent implements OnInit {
   @Input() isInOpnameSession: boolean = false; // Flag to check if in an opname session
   @Input() isEditable: boolean = false; // Flag to check if the user can edit assets in this opname session
   
+  screenSize: 'large' | 'small' = 'large';
+  isMobile: boolean = false;
+
   assetTag = input.required<string>();
   assetPage? : AssetInfo;
   sessionID: number = -1; // Default value, will be set later
@@ -78,10 +81,26 @@ export class AssetPageComponent implements OnInit {
   }
   
   ngOnInit(): void {
+    this.checkScreenSize();
     this.fetchAssetPage(); // Fetch asset page data when the component initializes
     this.siteID = Number(this.route.snapshot.paramMap.get('id')); // Get site ID from route parameters
     if (this.isInOpnameSession) {
       this.initializeSessionId(); // Initialize session ID if in an opname session
+    }
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.checkScreenSize();
+  }
+
+  private checkScreenSize() {
+    this.isMobile = window.innerWidth < 768; // Define mobile breakpoint
+    
+    if (this.isMobile) {
+      this.screenSize = 'small';
+    } else {
+      this.screenSize = 'large';
     }
   }
 

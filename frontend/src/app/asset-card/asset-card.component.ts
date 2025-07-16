@@ -12,13 +12,13 @@ import { AssetPageComponent } from '../asset-page/asset-page.component';
   styleUrl: './asset-card.component.scss'
 })
 export class AssetCardComponent {
-    @Input() variant: 'default' | 'compact' = 'default';
+  @Input() variant: 'default' | 'compact' = 'default';
   @Input() showLocation: boolean = false;
   @Input() showHeader: boolean = true;
   @Input() isInOpnameSession: boolean = false; // Flag to check if in an opname session
 
   currentView: 'card' | 'list' = 'card';
-  screenSize: 'small' | 'large' = 'large';
+  screenSize: 'large' | 'small' = 'large';
   isMobile: boolean = false;
 
   actualVariant: 'default' | 'compact' = 'default';

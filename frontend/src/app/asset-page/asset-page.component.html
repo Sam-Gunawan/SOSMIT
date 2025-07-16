@@ -1,6 +1,6 @@
 <div class="modal fade" [id]="'modal-' + assetPage?.assetTag" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" [attr.aria-labelledby]="'modal-' + assetPage?.assetTag + '-label'" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" *ngIf="errorMessage === '' && !isLoading">
+        <div class="modal-content" *ngIf="errorMessage === '' && !isLoading && screenSize === 'large'">
             <div class="modal-header">
                 <section class="asset-header">
                     <h2 class="modal-title fs-5 asset-tag">{{ assetPage?.assetTag }}</h2>
@@ -29,7 +29,7 @@
                                 class="asset-status"
                                 [ngClass]="{
                                     'status-deployed': assetPage?.assetStatus === 'Deployed',
-                                    'status-onLoan': assetPage?.assetStatus === 'On Loan',
+                                    'status-onloan': assetPage?.assetStatus === 'On Loan',
                                     'status-disposed': assetPage?.assetStatus === 'Disposed'
                                 }">
                                 {{ assetPage?.assetStatus }}
@@ -75,14 +75,78 @@
             </div>
         
             <div class="modal-footer">
-                <!-- Editable asset in opname session (right column) -->
-                <ng-container *ngIf="isInOpnameSession">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">All good</button>
-                    <button type="button" class="btn btn-primary" [attr.data-bs-target]="'#edit-modal-' + assetPage?.assetTag" data-bs-toggle="modal">Edit</button>
-                </ng-container>
-                
                 <!-- Non-editable asset in opname session (left column) or Regular asset view -->
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal" *ngIf="!isInOpnameSession">Close</button>
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+        <div class="modal-content" *ngIf="errorMessage === '' && !isLoading && screenSize === 'small'">
+            <div class="modal-header">
+                <section class="asset-header">
+                    <h2 class="modal-title fs-5 asset-tag">{{ assetPage?.assetTag }}</h2>
+                    <p class="serial-number">{{ assetPage?.serialNumber }}</p>
+                </section>
+        
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+        
+            <div class="modal-body mobile">
+                <div class="asset-information">
+                        <div class="main-info-mobile">
+                            <h5 class="asset-name-mobile">{{ assetPage?.assetName }}</h5>
+                            <div class="status-container">
+                                <span 
+                                    class="asset-status"
+                                    [ngClass]="{
+                                        'status-deployed': assetPage?.assetStatus === 'Deployed',
+                                        'status-onloan': assetPage?.assetStatus === 'On Loan',
+                                        'status-disposed': assetPage?.assetStatus === 'Disposed'
+                                    }">
+                                    {{ assetPage?.assetStatus }}
+                                </span>
+                                <p class="status-reason" *ngIf="assetPage?.assetStatus === 'Disposed' && assetPage?.statusReason">
+                                    {{ assetPage?.statusReason }}
+                                </p>
+                            </div>
+                        </div>
+        
+                        <div class="user-info-mobile">
+                            <p>Owned by:</p>
+                            <h5 class="asset-owner">{{ assetPage?.assetOwnerName }}</h5>
+                            <p class="user-position">{{ assetPage?.assetOwnerPosition }}</p>
+                            <p class="cost-center">Cost Center: {{ assetPage?.assetOwnerCostCenter }}</p>
+                        </div>
+
+                        <div class="asset-location-mobile">
+                            <h5>Location - {{ assetPage?.regionName }}</h5>
+                            <p>{{ assetPage?.location }}</p>
+                            <p>{{ assetPage?.room }}</p>
+                            <p>{{ assetPage?.siteGroupName }}</p>
+                        </div>
+        
+                        <div class="asset-condition-mobile">  
+                            <div class="rating">
+                                <p class="condition">Condition</p>
+                                <span class="like grow" [class.active]="isLiked" (click)="setLike()">
+                                    <i class="fa fa-thumbs-up like" aria-hidden="true"></i>
+                                </span>
+                                <span class="dislike grow" [class.active]="isDisliked" (click)="setDislike()">
+                                    <i class="fa fa-thumbs-down dislike" aria-hidden="true"></i>
+                                </span>
+                            </div>
+    
+                            <!-- TODO: CHANGE THIS TO IMAGE -->
+                            <div *ngIf="isDisliked">
+                                <p class="condition-notes">{{ assetPage?.conditionNotes }}</p>
+                                <p class="condition-photo">{{ assetPage?.conditionPhotoURL }}</p>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        
+            <div class="modal-footer">
+                <!-- Non-editable asset in opname session (left column) or Regular asset view -->
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

@@ -161,3 +161,25 @@ hr {
 .form-floating {
   font-size: 15px;
 }
+
+.mobile {
+  padding-top: 20px;
+}
+
+.main-info-mobile {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 20px;
+  align-items: center;
+
+  .asset-name-mobile {
+    flex-grow: 1;
+  }
+}
+
+.user-info-mobile, .asset-location-mobile, .asset-condition-mobile {
+  border-top: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 30%);
+  padding-top: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}

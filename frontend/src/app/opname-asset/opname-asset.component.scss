@@ -446,3 +446,20 @@ p {
     font-size: 15px;
   }
 }
+
+
+.mobile {
+  padding-top: 20px;
+}
+
+.main-info-mobile {
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.user-info-mobile, .asset-location-mobile, .asset-condition-mobile {
+  border-top: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 30%);
+  padding-top: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}

@@ -15,7 +15,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './opname-page.component.scss'
 })
 export class OpnamePageComponent implements OnInit, OnDestroy {
-  currentView: 'large' | 'small' = 'large';
+  // currentView: 'large' | 'small' = 'large';
   isMobile: boolean = false;
   
   constructor(private apiService: ApiService, private route: ActivatedRoute, private router: Router, private opnameSessionService: OpnameSessionService) {}
@@ -29,7 +29,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   private subscription?: Subscription; // Subscription to manage service state
 
   ngOnInit() {
-    this.checkScreenSize();
+    // this.checkScreenSize();
     this.siteID = Number(this.route.snapshot.paramMap.get('id')); // Get site ID from route parameters
     this.initializeSessionId();
     this.isLoading = false;
@@ -94,7 +94,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
-    this.checkScreenSize();
+    // this.checkScreenSize();
     this.updateResponsiveSettings();
   }
 
@@ -131,15 +131,15 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     });
   }
 
-  private checkScreenSize() {
-    this.isMobile = window.innerWidth < 768; // Define mobile breakpoint
+  // private checkScreenSize() {
+  //   this.isMobile = window.innerWidth < 768; // Define mobile breakpoint
     
-    if (this.isMobile) {
-      this.currentView = 'small'; // Force list view on mobile
-    } else {
-      this.currentView = 'large'; // Default to card view on desktop
-    }
-  }
+  //   if (this.isMobile) {
+  //     this.currentView = 'small'; // Force list view on mobile
+  //   } else {
+  //     this.currentView = 'large'; // Default to card view on desktop
+  //   }
+  // }
 
   private updateResponsiveSettings() {
     if (window.innerWidth >= 768) {
