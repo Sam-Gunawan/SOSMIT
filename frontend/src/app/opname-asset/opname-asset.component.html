@@ -352,6 +352,8 @@
                                 {{ result.pendingAsset.assetStatus }}
                             </span>
                         </div>
+
+                        <span class="delete-icon material-symbols-outlined" (click)="removeAsset(i)">delete</span>
                     </div>
                     
                     <div class="modal fade" [id]="'edit-modal-' + result.existingAsset.assetTag" tabindex="-1" aria-hidden="true">
@@ -532,6 +534,8 @@
                             </div>
                         </div>
                     </div>
+
+                    
                 </div>
             </section>
         </div>

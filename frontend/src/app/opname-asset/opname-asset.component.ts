@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, ChangeDetectorRef } from '@angular/core';
+import { Component, HostListener, Input, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { AssetInfo } from '../model/asset-info.model';
@@ -10,7 +10,6 @@ import { AssetPageComponent } from '../asset-page/asset-page.component';
 import { User } from '../model/user.model';
 import { SiteInfo } from '../model/site-info.model';
 import { OpnameSessionProgress } from '../model/opname-session-progress.model';
-import { popResultSelector } from 'rxjs/internal/util/args';
 
 @Component({
   selector: 'app-opname-asset',
@@ -18,7 +17,7 @@ import { popResultSelector } from 'rxjs/internal/util/args';
   templateUrl: './opname-asset.component.html',
   styleUrl: './opname-asset.component.scss'
 })
-export class OpnameAssetComponent {
+export class OpnameAssetComponent implements OnDestroy {
   @Input() variant: 'default' | 'compact' = 'default';
   @Input() showLocation: boolean = false;
   @Input() sessionID: number = -1; // Session ID for the current opname session
@@ -70,7 +69,7 @@ export class OpnameAssetComponent {
   screenSize: 'large' | 'small' = 'large'; // Default to large screen
   isMobile: boolean = false;
   actualVariant: 'default' | 'compact' = 'default';
-  actualShowLocation: boolean = false;
+  actualShowLocation: boolean = true;
 
   // Other properties
   opnameSession: OpnameSession = {} as OpnameSession;
@@ -78,6 +77,7 @@ export class OpnameAssetComponent {
   allSites: SiteInfo[] = []; // List of all sites in the company
   isLoading: boolean = false; // Loading state for fetching assets
   errorMessage: string = ''; // Error message for fetching assets
+  private resizeCheckInterval?: number; // Interval for periodic size checks
 
   constructor(
     private apiService: ApiService,
@@ -93,7 +93,21 @@ export class OpnameAssetComponent {
     this.getAllUsers();
     this.getAllSites();
     this.errorMessage = '';
+    
+    // Set up periodic window size checking to catch missed events
+    this.resizeCheckInterval = window.setInterval(() => {
+      this.checkScreenSize();
+      this.updateResponsiveSettings();
+    }, 1000); // Check every second
+    
     // Remove isLoading = false from here - let the async operations control it
+  }
+
+  ngOnDestroy(): void {
+    // Clean up the interval
+    if (this.resizeCheckInterval) {
+      clearInterval(this.resizeCheckInterval);
+    }
   }
   
   getAllUsers(): void {
@@ -264,9 +278,29 @@ export class OpnameAssetComponent {
     });
   }
 
-  @HostListener('window:resize', ['$event']) onResize(event: any) {
+  @HostListener('window:resize', ['$event']) 
+  onResize(event: any) {
     this.updateResponsiveSettings();
     this.checkScreenSize();
+  }
+
+  @HostListener('window:focus', ['$event'])
+  onWindowFocus(event: any) {
+    // Window regained focus (possibly from maximize)
+    this.updateResponsiveSettings();
+    this.checkScreenSize();
+  }
+
+  @HostListener('document:visibilitychange', ['$event'])
+  onVisibilityChange(event: any) {
+    // Document visibility changed (minimize/restore)
+    if (!document.hidden) {
+      // Window became visible again
+      setTimeout(() => {
+        this.updateResponsiveSettings();
+        this.checkScreenSize();
+      }, 100); // Small delay to ensure window size is updated
+    }
   }
 
   setSearchType(type: 'asset_tag' | 'serial_number') {
@@ -706,13 +740,20 @@ export class OpnameAssetComponent {
 
 
   private checkScreenSize() {
-    this.isMobile = window.innerWidth < 768; // Define mobile breakpoint
-    if (this.isMobile) {
-      this.currentView = 'list'; // Force list view on mobile
-      this.screenSize = 'small';
-    } else {
-      this.currentView = 'card'; // Default to card view on desktop
-      this.screenSize = 'large';
+    const newIsMobile = window.innerWidth < 768; // Define mobile breakpoint
+    const newScreenSize = newIsMobile ? 'small' : 'large';
+    const newCurrentView = newIsMobile ? 'list' : 'card';
+    
+    // Only update if values have changed
+    if (this.isMobile !== newIsMobile || this.screenSize !== newScreenSize || this.currentView !== newCurrentView) {
+      this.isMobile = newIsMobile;
+      this.screenSize = newScreenSize;
+      if (this.isMobile) {
+        this.currentView = 'list'; // Force list view on mobile
+      } else {
+        this.currentView = 'card'; // Default to card view on desktop
+      }
+      this.cdr.detectChanges(); // Only trigger change detection when needed
     }
   }
 
@@ -723,15 +764,14 @@ export class OpnameAssetComponent {
   }
 
   private updateResponsiveSettings() {
-      // Update responsive settings based on current view and device type
-    if (window.innerWidth >= 1000) {
-      // Large screens: use the passed variant and showLocation
-      this.actualVariant = this.variant;
-      this.actualShowLocation = this.showLocation;
-    } else {
-      // Small screens: force default variant and hide location
-      this.actualVariant = 'default';
-      this.actualShowLocation = false;
+    const newActualVariant = window.innerWidth >= 1000 ? this.variant : 'default';
+    const newActualShowLocation = window.innerWidth >= 1000 ? this.showLocation : false;
+    
+    // Only update if values have changed
+    if (this.actualVariant !== newActualVariant || this.actualShowLocation !== newActualShowLocation) {
+      this.actualVariant = newActualVariant;
+      this.actualShowLocation = newActualShowLocation;
+      this.cdr.detectChanges(); // Only trigger change detection when needed
     }
   }
 
