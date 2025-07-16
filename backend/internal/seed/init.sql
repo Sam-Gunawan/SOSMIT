@@ -83,10 +83,10 @@ CREATE TABLE "Asset" (
     "condition_notes" TEXT DEFAULT 'No notes provided',
     "condition_photo_url" TEXT
     CHECK (
-        ("condition" = TRUE AND ("condition_photo_url" = '-1' OR "condition_photo_url" IS NOT NULL))
+        ("condition" = TRUE AND ("condition_photo_url" = '' OR "condition_photo_url" IS NOT NULL))
         OR
-        ("condition" = FALSE AND "condition_photo_url" != '-1' AND "condition_photo_url" IS NOT NULL)
-    ) DEFAULT '-1',
+        ("condition" = FALSE AND "condition_photo_url" != '' AND "condition_photo_url" IS NOT NULL)
+    ) DEFAULT '',
     "location" VARCHAR(255),
     "room" VARCHAR(255),
     -- Foreign key to User (owner of the asset).

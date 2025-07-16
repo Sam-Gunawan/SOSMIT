@@ -243,6 +243,13 @@
                                                                     style="height: 100px"></textarea>
                                                             <label [for]="'condition-notes-' + result.pendingAsset.assetTag">Notes</label>
                                                         </div>
+
+                                                        <!-- Display condition photo if any -->
+                                                        <div class="mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== ''">
+                                                            <img [src]="serverURL + result.pendingAsset.conditionPhotoURL" 
+                                                                [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
+                                                                class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
+                                                        </div>
                                                         
                                                         <!-- File input for condition photo -->
                                                         <div class="mb-3">
@@ -486,6 +493,13 @@
                                                         <label [for]="'condition-notes-' + result.pendingAsset.assetTag">Notes</label>
                                                     </div>
                                                     
+                                                    <!-- Display condition photo if any -->
+                                                    <div class="mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== ''">
+                                                        <img [src]="serverURL + result.pendingAsset.conditionPhotoURL" 
+                                                            [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
+                                                            class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
+                                                    </div>
+
                                                     <!-- File input for condition photo -->
                                                     <div class="mb-3">
                                                         <label [for]="'condition-photo-' + result.pendingAsset.assetTag" class="form-label">

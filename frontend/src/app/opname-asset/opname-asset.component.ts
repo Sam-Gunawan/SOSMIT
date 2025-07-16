@@ -10,6 +10,7 @@ import { AssetPageComponent } from '../asset-page/asset-page.component';
 import { User } from '../model/user.model';
 import { SiteInfo } from '../model/site-info.model';
 import { OpnameSessionProgress } from '../model/opname-session-progress.model';
+import { environment } from '../../environments/environments';
 
 @Component({
   selector: 'app-opname-asset',
@@ -18,6 +19,8 @@ import { OpnameSessionProgress } from '../model/opname-session-progress.model';
   styleUrl: './opname-asset.component.scss'
 })
 export class OpnameAssetComponent implements OnDestroy {
+  public readonly serverURL = environment.serverURL; // Expose environment for use in the template
+
   @Input() variant: 'default' | 'compact' = 'default';
   @Input() showLocation: boolean = false;
   @Input() sessionID: number = -1; // Session ID for the current opname session
@@ -99,8 +102,6 @@ export class OpnameAssetComponent implements OnDestroy {
       this.checkScreenSize();
       this.updateResponsiveSettings();
     }, 1000); // Check every second
-    
-    // Remove isLoading = false from here - let the async operations control it
   }
 
   ngOnDestroy(): void {
@@ -366,13 +367,22 @@ export class OpnameAssetComponent implements OnDestroy {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0] && this.currentActiveIndex >= 0) {
       this.conditionPhoto = input.files[0];
-      
-      // For now, we're not actually uploading the image, just storing it in memory
-      // In a real app, you'd upload this to a server and get a URL back
-      // For now, we'll just set a placeholder
       const result = this.searchResults[this.currentActiveIndex];
-      result.pendingAsset.conditionPhotoURL = 'photo_url_placeholder';
-      this.cdr.detectChanges();
+      
+      this.apiService.uploadConditionPhoto(this.conditionPhoto).subscribe({
+        next: (response) => {
+          console.log('[OpnameAsset] Condition photo uploaded successfully:', response);
+          result.pendingAsset.conditionPhotoURL = response.url; // Use the URL returned from the API
+          this.cdr.detectChanges(); // Trigger change detection to update the view
+
+          this.successMessage = 'Photo uploaded successfully!';
+          setTimeout(() => this.successMessage = '', 3000); // Clear message after 3 seconds
+        },
+        error: (error) => {
+          console.error('[OpnameAsset] Error uploading condition photo:', error);
+          this.errorMessage = 'Failed to upload condition photo. Please try again.';
+        }
+      })
     }
   }
 

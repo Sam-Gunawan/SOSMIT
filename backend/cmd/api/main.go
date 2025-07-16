@@ -10,6 +10,7 @@ import (
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/auth"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/opname"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/site"
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/upload"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -66,6 +67,10 @@ func main() {
 	assetHandler := asset.NewHandler(assetService)
 	opnameHandler := opname.NewHandler(opnameService)
 	siteHandler := site.NewHandler(siteService)
+	uploadHandler := upload.NewHandler()
+
+	// Setup the static file server route for serving uploaded files.
+	router.Static("/uploads", "../uploads")
 
 	// Setup CORS (Cross-Origin Resource Sharing) middleware.
 	// This allows us to handle requests from the Angular frontend.
@@ -142,6 +147,12 @@ func main() {
 
 			// DELETE /api/opname/:session-id/remove-asset
 			opnameRoutes.DELETE("/:session-id/remove-asset", opnameHandler.RemoveAssetChangeHandler)
+		}
+
+		uploadRoutes := api.Group("/upload").Use(auth.AuthMiddleware())
+		{
+			// POST /api/upload/photo
+			uploadRoutes.POST("/photo", uploadHandler.UploadPhotoHandler)
 		}
 
 	}

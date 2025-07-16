@@ -8,16 +8,18 @@ import { AssetInfo } from '../model/asset-info.model';
 import { User } from '../model/user.model';
 import { formatDate, titleCase } from '../reusable_functions';
 import { SiteInfo } from '../model/site-info.model';
+import { environment } from '../../environments/environments';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiService {
   // This service will handle API calls, such as login, fetching data, etc.
-  private authApiUrl = 'http://localhost:8080/api/auth'
-  private userApiUrl = 'http://localhost:8080/api/user'
-  private siteApiUrl = 'http://localhost:8080/api/site'
-  private assetApiUrl = 'http://localhost:8080/api/asset'
+  private authApiUrl = `${environment.serverURL}/api/auth`
+  private userApiUrl = `${environment.serverURL}/api/user`
+  private siteApiUrl = `${environment.serverURL}/api/site`
+  private assetApiUrl = `${environment.serverURL}/api/asset`
+  private uploadApiUrl = `${environment.serverURL}/api/upload`
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -245,6 +247,20 @@ export class ApiService {
     }
   }
 
+  uploadConditionPhoto(file: File): Observable<any> {
+    // This method will upload a photo to the server
+    // Create a FormData object to hold the file
+    const formData = new FormData();
+    formData.append('condition_photo', file, file.name);
+
+    return this.http.post(`${this.uploadApiUrl}/photo`, formData).pipe(
+      tap((response: any) => {
+        // Log the response for debugging purposes.
+        console.log('[ApiService] Photo uploaded successfully:', response);
+      })
+    );
+  }
+
   // Helper method to get icon path based on product variety
   private getAssetIcon(productVariety: string): string {
     const varietyMap: { [key: string]: string } = {
@@ -258,4 +274,5 @@ export class ApiService {
     
     return varietyMap[productVariety] || 'assets/desktop.svg'; // Default to desktop icon if variety not found
   }
+  
 }
