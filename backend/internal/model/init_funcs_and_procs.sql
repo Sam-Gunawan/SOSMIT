@@ -362,31 +362,31 @@ AS $$
 
 		-- Compare the old and new values, and build the changes JSONB object
 		IF _new_status IS DISTINCT FROM _old_data.status THEN
-			_changes := jsonb_set(_changes, '{assetStatus}', to_jsonb(_new_status));
+			_changes := jsonb_set(_changes, '{newStatus}', to_jsonb(_new_status));
 		END IF;
 		IF _new_status_reason IS DISTINCT FROM _old_data.status_reason THEN
-			_changes := jsonb_set(_changes, '{statusReason}', to_jsonb(_new_status_reason));
+			_changes := jsonb_set(_changes, '{newStatusReason}', to_jsonb(_new_status_reason));
 		END IF;
 		IF _new_condition IS DISTINCT FROM _old_data.condition THEN
-			_changes := jsonb_set(_changes, '{condition}', to_jsonb(_new_condition));
+			_changes := jsonb_set(_changes, '{newCondition}', to_jsonb(_new_condition));
 		END IF;
 		IF _new_condition_notes IS DISTINCT FROM _old_data.condition_notes THEN
-			_changes := jsonb_set(_changes, '{conditionNotes}', to_jsonb(_new_condition_notes));
+			_changes := jsonb_set(_changes, '{newConditionNotes}', to_jsonb(_new_condition_notes));
 		END IF;
 		IF _new_condition_photo_url IS DISTINCT FROM _old_data.condition_photo_url THEN
-			_changes := jsonb_set(_changes, '{conditionPhotoURL}', to_jsonb(_new_condition_photo_url));
+			_changes := jsonb_set(_changes, '{newConditionPhotoURL}', to_jsonb(_new_condition_photo_url));
 		END IF;
 		IF _new_location IS DISTINCT FROM _old_data.location THEN
-			_changes := jsonb_set(_changes, '{location}', to_jsonb(_new_location));
+			_changes := jsonb_set(_changes, '{newLocation}', to_jsonb(_new_location));
 		END IF;
 		IF _new_room IS DISTINCT FROM _old_data.room THEN
-			_changes := jsonb_set(_changes, '{room}', to_jsonb(_new_room));
+			_changes := jsonb_set(_changes, '{newRoom}', to_jsonb(_new_room));
 		END IF;
 		IF _new_owner_id IS DISTINCT FROM _old_data.owner_id THEN
-			_changes := jsonb_set(_changes, '{assetOwner}', to_jsonb(_new_owner_id));
+			_changes := jsonb_set(_changes, '{newOwnerID}', to_jsonb(_new_owner_id));
 		END IF;
 		IF _new_site_id IS DISTINCT FROM _old_data.site_id THEN
-			_changes := jsonb_set(_changes, '{siteID}', to_jsonb(_new_site_id));
+			_changes := jsonb_set(_changes, '{newSiteID}', to_jsonb(_new_site_id));
 		END IF;
 
 		-- Regardless of whether changes were made, we will insert a record of the changes.
@@ -487,6 +487,7 @@ AS $$
 		RETURN QUERY
 		SELECT ac."changes", ac.change_reason, ac.asset_tag
 		FROM "AssetChanges" as ac
-		WHERE session_id = _session_id;
+		WHERE session_id = _session_id
+		ORDER BY ac.id ASC;
 	END;
 $$;
