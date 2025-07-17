@@ -58,7 +58,8 @@ func main() {
 	authService := auth.NewService(userRepo)
 	userService := user.NewService(userRepo)
 	assetService := asset.NewService(assetRepo)
-	opnameService := opname.NewService(opnameRepo)
+	uploadService := upload.NewService()
+	opnameService := opname.NewService(opnameRepo, uploadService)
 	siteService := site.NewService(siteRepo)
 
 	// Initialize the handlers
@@ -67,7 +68,7 @@ func main() {
 	assetHandler := asset.NewHandler(assetService)
 	opnameHandler := opname.NewHandler(opnameService)
 	siteHandler := site.NewHandler(siteService)
-	uploadHandler := upload.NewHandler()
+	uploadHandler := upload.NewHandler(uploadService)
 
 	// Setup the static file server route for serving uploaded files.
 	router.Static("/uploads", "../uploads")
