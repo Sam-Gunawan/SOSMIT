@@ -5,16 +5,20 @@ import (
 	"errors"
 	"log"
 	"strings"
+
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/upload"
 )
 
 type Service struct {
-	repo *Repository
+	repo          *Repository
+	uploadService *upload.Service
 }
 
 // NewService creates a new Opname service with the provided repository.
-func NewService(repo *Repository) *Service {
+func NewService(repo *Repository, uploadService *upload.Service) *Service {
 	return &Service{
-		repo: repo,
+		repo:          repo,
+		uploadService: uploadService,
 	}
 }
 
@@ -76,7 +80,6 @@ func (service *Service) DeleteSession(sessionID int, requestingUserID int, userP
 		log.Printf("❌ Error retrieving opname session by ID %d: %v", sessionID, err)
 		return err
 	}
-
 	if session == nil {
 		log.Printf("⚠ No opname session found with ID: %d", sessionID)
 		return errors.New("opname session not found")
@@ -87,6 +90,21 @@ func (service *Service) DeleteSession(sessionID int, requestingUserID int, userP
 	if session.UserID != requestingUserID && strings.ToUpper(userPosition) != "L1 SUPPORT" {
 		log.Printf("⚠ Forbidden: User %d is not authorized to delete session %d", requestingUserID, sessionID)
 		return errors.New("you are not authorized to delete this opname session")
+	}
+
+	// Delete all the condition photos associated with the session.
+	conditionPhotos, err := service.repo.GetPhotosBySessionID(sessionID)
+	if err != nil {
+		log.Printf("❌ Error retrieving condition photos for session %d: %v", sessionID, err)
+		return errors.New("failed to retrieve condition photos for session")
+	}
+
+	for _, conditionPhotoURL := range conditionPhotos {
+		if err := service.uploadService.DeleteConditionPhoto(conditionPhotoURL); err != nil {
+			log.Printf("❌ Error deleting condition photo %s for session %d: %v", conditionPhotoURL, sessionID, err)
+			return err
+		}
+		log.Printf("✅ Successfully deleted condition photo %s for session %d", conditionPhotoURL, sessionID)
 	}
 
 	// Call the repository to delete the session.
@@ -128,8 +146,19 @@ func (service *Service) RemoveAssetChange(sessionID int, assetTag string) error 
 		return errors.New("invalid sessionID or assetTag")
 	}
 
+	newConditionPhotoURL, err := service.repo.GetAssetChangePhoto(sessionID, assetTag)
+	if err != nil {
+		log.Printf("❌ Error retrieving asset change for session %d, asset %s: %v", sessionID, assetTag, err)
+		return errors.New("asset change record not found")
+	}
+
+	// Call the file service to delete the old condition photo if it exists
+	if err := service.uploadService.DeleteConditionPhoto(newConditionPhotoURL); err != nil && newConditionPhotoURL != "" {
+		log.Printf("❌ Error deleting old condition photo for asset %s: %v", assetTag, err)
+	}
+
 	// Call the repository to delete the asset change
-	err := service.repo.DeleteAssetChange(sessionID, assetTag)
+	err = service.repo.DeleteAssetChange(sessionID, assetTag)
 	if err != nil {
 		log.Printf("❌ Error deleting asset change for session %d, asset %s: %v", sessionID, assetTag, err)
 		return err

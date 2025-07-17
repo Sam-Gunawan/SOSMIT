@@ -247,11 +247,12 @@ export class ApiService {
     }
   }
 
-  uploadConditionPhoto(file: File): Observable<any> {
+  uploadConditionPhoto(file: File, oldPhotoURL: string): Observable<any> {
     // This method will upload a photo to the server
     // Create a FormData object to hold the file
     const formData = new FormData();
     formData.append('condition_photo', file, file.name);
+    formData.append('old_condition_photo_url', oldPhotoURL); // Include the old photo URL to handle deletion on the server
 
     return this.http.post(`${this.uploadApiUrl}/photo`, formData).pipe(
       tap((response: any) => {

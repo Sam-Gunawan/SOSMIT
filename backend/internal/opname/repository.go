@@ -151,6 +151,50 @@ func (repo *Repository) DeleteAssetChange(sessionID int, assetTag string) error 
 	return nil
 }
 
+// GetAssetChangePhoto retrieves an asset change by its session ID and asset tag.
+func (repo *Repository) GetAssetChangePhoto(sessionID int, assetTag string) (string, error) {
+	query := `SELECT * FROM get_asset_change_photo($1, $2)`
+
+	row := repo.db.QueryRow(query, sessionID, assetTag)
+
+	var newConditionPhotoURL string
+	err := row.Scan(&newConditionPhotoURL)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("⚠ No asset change found for asset %s in session %d", assetTag, sessionID)
+			return "", nil // No change found.
+		}
+		log.Printf("❌ Error retrieving asset change for asset %s in session %d: %v", assetTag, sessionID, err)
+		return "", err // Other error.
+	}
+
+	return newConditionPhotoURL, nil
+}
+
+// GetPhotosBySessionID retrieves all photos associated with an opname session.
+func (repo *Repository) GetPhotosBySessionID(sessionID int) ([]string, error) {
+	query := `SELECT * FROM get_all_photos_by_session_id($1)`
+
+	rows, err := repo.db.Query(query, sessionID)
+	if err != nil {
+		log.Printf("❌ Error retrieving photos for session %d: %v", sessionID, err)
+		return nil, err // Query failed for some error.
+	}
+	defer rows.Close()
+
+	var conditionPhotos []string
+	for rows.Next() {
+		var conditionPhotoURL string
+		if err := rows.Scan(&conditionPhotoURL); err != nil {
+			log.Printf("❌ Error scanning photo URL for session %d: %v", sessionID, err)
+			return nil, err // Row scan failed for some error.
+		}
+		conditionPhotos = append(conditionPhotos, conditionPhotoURL)
+	}
+
+	return conditionPhotos, nil
+}
+
 // LoadOpnameProgress retrieves the current progress of an opname session in terms of recorded asset changes tied to that session.
 func (repo *Repository) LoadOpnameProgress(sessionID int) ([]OpnameSessionProgress, error) {
 	var progressList []OpnameSessionProgress

@@ -11,11 +11,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type Handler struct{}
+type Handler struct {
+	service *Service
+}
 
 // NewHandler creates a new upload handler.
-func NewHandler() *Handler {
-	return &Handler{}
+func NewHandler(service *Service) *Handler {
+	return &Handler{
+		service: service,
+	}
 }
 
 // UploadPhotoHandler handles photo uploads.
@@ -59,7 +63,20 @@ func (handler *Handler) UploadPhotoHandler(context *gin.Context) {
 		return
 	}
 
-	// If successful, return the file path.
+	// Delete the old photo if it exists, this is in case a user wants to reupload a photo
+	oldPhotoURL := context.PostForm("old_condition_photo_url")
+
+	if err := handler.service.DeleteConditionPhoto(oldPhotoURL); err != nil {
+		log.Printf("⚠️ Warning: Could not delete old photo %s: %v", oldPhotoURL, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to delete the old photo.",
+		})
+		return
+	} else {
+		log.Printf("✅ Successfully deleted old photo: %s", oldPhotoURL)
+	}
+
+	// If successful, return the new file path.
 	fileURL := "/uploads/asset_condition_photos/" + filename
 	log.Printf("✅ File uploaded successfully: %s", fileURL)
 	context.JSON(http.StatusOK, gin.H{

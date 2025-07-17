@@ -369,7 +369,7 @@ export class OpnameAssetComponent implements OnDestroy {
       this.conditionPhoto = input.files[0];
       const result = this.searchResults[this.currentActiveIndex];
       
-      this.apiService.uploadConditionPhoto(this.conditionPhoto).subscribe({
+      this.apiService.uploadConditionPhoto(this.conditionPhoto, result.pendingAsset.conditionPhotoURL).subscribe({
         next: (response) => {
           console.log('[OpnameAsset] Condition photo uploaded successfully:', response);
           result.pendingAsset.conditionPhotoURL = response.url; // Use the URL returned from the API
