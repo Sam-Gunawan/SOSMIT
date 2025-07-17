@@ -10,8 +10,30 @@
                     <div class="finish-button">
                         <button class="btn btn-success">Finish Opname</button>
                     </div>
-                    <div class="close-button">
-                        <button class="btn btn-danger" (click)="cancelOpnameSession()">Cancel Opname</button>
+
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#opnameCanceled">
+                        Cancel Opname
+                    </button>
+
+                    <div class="modal fade" id="opnameCanceled" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Are you sure to Cancel Opname?</h1>
+                                </div>
+                                <div class="modal-body">
+                                    This will cancel the current opname session and <strong>all changed data will be lost</strong>. Are you sure you want to proceed?
+                                    <br>
+                                    <br>
+                                    <strong>Note:</strong> This action cannot be undone.
+                                    <br>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button class="btn btn-danger" (click)="cancelOpnameSession()">Proceed</button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

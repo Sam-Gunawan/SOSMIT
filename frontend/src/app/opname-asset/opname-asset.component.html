@@ -82,13 +82,13 @@
             <div class="col">
                 <!-- Card view for pending user actions -->
                 <section class="asset-card-layout" [ngClass]="variant" *ngIf="currentView === 'card' && !result.assetProcessed && result.processingStatus === 'pending'">
-                    <div class="asset-card" [ngClass]="variant"> 
-                        <div class="card-body" type="button">
-                            <div class="pending-action">
+                    <div class="asset-card verify-body" [ngClass]="variant"> 
+                        <div class="verify-body">
+                            <div class="pending-action mb-2">
                                 <p>Pending action</p>
                             </div>
                             <div class="opname-action-buttons">
-                                <button class="verify-asset-btn btn btn-primary" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
+                                <button class="verify-asset-btn btn btn-outline-secondary btn-sm" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
                                     Verify Asset
                                 </button>
                             </div>
@@ -318,12 +318,36 @@
                                             <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                             Save Changes
                                         </button>
-                                        <button type="button" class="btn btn-secondary" [disabled]="isLoading" (click)="markAsAllGood(i)">
-                                            <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+
+                                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" [attr.data-bs-target]="'#assetAllGood-' + i">
                                             All good
                                         </button>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal fade" [attr.id]="'assetAllGood-' + i" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Asset Data correct?</h1>
+                            </div>
+                            <div class="modal-body">
+                                This will confirm that the asset data is correct.
+                                <br>
+                                <br>
+                                <strong>Note:</strong> If you have changed the asset data, please keep in mind that this action will <strong class="text-danger">delete the changes you make</strong> and <strong>revert back to the original data</strong>.
+                                <br>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-secondary" [disabled]="isLoading" (click)="markAsAllGood(i)">
+                                    <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    All good
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -359,9 +383,9 @@
                                 {{ result.pendingAsset.assetStatus }}
                             </span>
                         </div>
-
-                        <span class="delete-icon material-symbols-outlined" (click)="removeAsset(i)">delete</span>
                     </div>
+                    
+                    <span class="delete-icon-mobile material-symbols-outlined" (click)="removeAsset(i)">delete</span>
                     
                     <div class="modal fade" [id]="'edit-modal-' + result.existingAsset.assetTag" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
@@ -529,8 +553,8 @@
                                                 <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                                                 Save Changes
                                             </button>
-                                            <button type="button" class="btn btn-secondary" [disabled]="isLoading" (click)="markAsAllGood(i)">
-                                                <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+
+                                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" [attr.data-bs-target]="'#listAllGood-' + i">
                                                 All good
                                             </button>
                                         </div>
@@ -540,7 +564,29 @@
                         </div>
                     </div>
 
-                    
+                    <div class="modal fade" [attr.id]="'listAllGood-' + i" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Asset Data correct?</h1>
+                                </div>
+                                <div class="modal-body">
+                                    This will confirm that the asset data is correct.
+                                    <br>
+                                    <br>
+                                    <strong>Note:</strong> If you have changed the asset data, please keep in mind that this action will <strong class="text-danger">delete the changes you make</strong> and <strong>revert back to the original data</strong>.
+                                    <br>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-secondary" [disabled]="isLoading" (click)="markAsAllGood(i)">
+                                        <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        All good
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>

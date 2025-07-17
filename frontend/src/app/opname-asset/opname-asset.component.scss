@@ -94,11 +94,11 @@ p {
 }
 
 .assets-info-header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 20px;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  justify-content: space-between;
 }
 
 .view-icon {
@@ -111,66 +111,66 @@ p {
 	
 	.card-view, .list-view {
 		cursor: pointer;
-		opacity: 0.6;
-		transition: opacity 0.2s;
+		  opacity: 0.6;
+		  transition: opacity 0.2s;
 		
 		&.active {
-		opacity: 1;
+		  opacity: 1;
 		}
 		
 		&:hover {
-		opacity: 0.8;
+      opacity: 0.8;
 		}
-  	}
+  }
 
 	@media (max-width: 767px) {
-        display: none !important; // Force hide on mobile
-    }
+    display: none !important; // Force hide on mobile
+  }
 }
 
 .asset-card-layout.default {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 10px;
-    margin-top: 20px;
-    transition: transform 0.2s ease-in-out;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin-top: 20px;
+  transition: transform 0.2s ease-in-out;
 }
 
 .asset-card.default {
-    position: relative; // Added for absolute positioning of child elements
-    border-radius: 20px;
-    padding: 10px;
-    background-color: styles.$tertiary-color;
-    color: styles.$primary-text-color;
-    height: 8rem; //temporary
-    display: flex;
-    align-items: center;
+  position: relative; // Added for absolute positioning of child elements
+  border-radius: 20px;
+  padding: 10px;
+  background-color: styles.$tertiary-color;
+  color: styles.$primary-text-color;
+  height: 8rem; //temporary
+  display: flex;
+  align-items: center;
 
-    .additional-info {
-        justify-items: right;
-    }
+  .additional-info {
+    justify-items: right;
+  }
 }
 
 .asset-card.compact {
-    position: relative; // Added for absolute positioning of child elements
-    border-radius: 20px;
-    padding: 10px;
-    background-color: styles.$tertiary-color;
-    color: styles.$primary-text-color;
-    height: 8rem; //temporary
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+  position: relative; // Added for absolute positioning of child elements
+  border-radius: 20px;
+  padding: 10px;
+  background-color: styles.$tertiary-color;
+  color: styles.$primary-text-color;
+  height: 8rem; //temporary
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
 
-    .additional-info {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-    }
+  .additional-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+  }
 }
 
-.asset-card, .list-body {
+.asset-card {
   .delete-icon {
     position: absolute;
     top: 10px;
@@ -189,76 +189,103 @@ p {
 }
 
 .opname-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
-    margin: 0px 5px;
-    border-left: 1px solid styles.$primary-text-color;
-    padding-left: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: end;
+  margin: 0px 5px;
+  border-left: 1px solid styles.$primary-text-color;
+  padding-left: 50px;
 }
 
 .card-body {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.verify-body {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .main-info {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    margin: 0px 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin: 0px 5px;
 }
 
 .asset-icon {
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    // padding: 5px 0px;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  // padding: 5px 0px;
 }
 
 .asset-status {
-    font-size: 10px !important;
-    border-radius: 15px;
-    padding: 5px 10px;
+  font-size: 10px !important;
+  border-radius: 15px;
+  padding: 5px 10px;
 
-    @each $name, $color in styles.$asset-pill-colors {
-		&.status-#{$name} {
-			background-color: $color;
+  @each $name, $color in styles.$asset-pill-colors {
+    &.status-#{$name} {
+      background-color: $color;
             border: 1px solid color.adjust($color, $lightness: -10%);
-		}
-	}
+    }
+  }
 }
 
 .asset-tag {
-    font-size: 15px;
-    font-weight: bold;
-    margin: 0px 5px;
+  font-size: 15px;
+  font-weight: bold;
+  margin: 0px 5px;
 }
 
 .asset-name {
-    font-size: 12px;
-    margin: 5px;
-    max-width: 110px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
+  font-size: 12px;
+  margin: 5px;
+  max-width: 110px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
 }
 
 @media (max-width: 768px) {
-    .asset-card {
-        font-size: 0.85rem;
-        
-        .asset-tag {
-            font-size: 0.8rem;
-        }
-        
-        .asset-name {
-            font-size: 0.8rem;
-        }
+  .asset-card {
+    font-size: 0.85rem;
+    
+    .asset-tag {
+      font-size: 0.8rem;
     }
+    
+    .asset-name {
+      font-size: 0.8rem;
+    }
+  }
+}
+
+.asset-list {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  .delete-icon-mobile {
+  margin-left: 10px;
+  font-size: 20px;
+  z-index: 99;
+  cursor: pointer;
+  color: rgb(243, 131, 131);
+  transition: 0.05s;
+    
+    &:hover {
+      color: #e72323;
+      transform: scale(1.1);
+    }
+  }
 }
 
 .asset-list-layout {
@@ -273,25 +300,26 @@ p {
 	flex-direction: row;
 	justify-content: space-between;
 	align-items: center;
+  flex-grow: 1;
 }
 
 .first-column{
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-    justify-content: center;
+  justify-content: center;
 
-    img {
-        width: 50px;
-        height: 50px;
-        object-fit: cover;
-    }
+  img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+  }
 }
 
 .second-column {
-    margin-left: 10px;
-    flex-grow: 1;
-    display: flex;
+  margin-left: 10px;
+  flex-grow: 1;
+  display: flex;
 	flex-direction: column;
 	align-items: start;
 }
@@ -446,7 +474,6 @@ p {
     font-size: 15px;
   }
 }
-
 
 .mobile {
   padding-top: 20px;
