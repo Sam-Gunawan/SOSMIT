@@ -170,13 +170,13 @@
                                                     <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
                                                         [(ngModel)]="result.pendingAsset.assetOwnerName" name="newOwnerName" 
                                                         list="all-users" (input)="onOwnerInputChange(i)"
-                                                        [class.is-invalid]="result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName" 
+                                                        [class.is-invalid]="result.pendingAsset.assetOwner === 0 && !result.pendingAsset.assetOwnerName" 
                                                         required>
                                                     <label [for]="'owner-name-' + result.pendingAsset.assetTag">User</label>
                                                     <datalist id="all-users">
                                                         <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
                                                     </datalist>
-                                                    <div *ngIf="result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName" class="invalid-feedback">
+                                                    <div *ngIf="result.pendingAsset.assetOwner === 0 && !result.pendingAsset.assetOwnerName" class="invalid-feedback">
                                                         Please select a valid user from the list.
                                                     </div>
                                                 </div>
@@ -432,13 +432,19 @@
                                                 <div class="form-floating mb-3">
                                                     <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
                                                         [(ngModel)]="result.pendingAsset.assetOwnerName" name="newOwnerName" 
-                                                        [placeholder]="result.pendingAsset.assetOwnerName || 'Asset Owner'"
+                                                        [class.is-invalid]="result.pendingAsset.assetOwner === 0 && !result.pendingAsset.assetOwnerName" 
+                                                        (input)="onOwnerInputChange(i)"
                                                         required
                                                         list="all-users">
                                                     <label [for]="'owner-name-' + result.pendingAsset.assetTag">User</label>
                                                     <datalist id="all-users" *ngFor="let user of allUsers">
-                                                        <option [value]="user.firstName + ' ' + user.lastName">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
+                                                        <select>
+                                                            <option [value]="user.firstName + ' ' + user.lastName">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
+                                                        </select>
                                                     </datalist>
+                                                    <div *ngIf="result.pendingAsset.assetOwner === 0 && !result.pendingAsset.assetOwnerName" class="invalid-feedback">
+                                                        Please select a valid user from the list.
+                                                    </div>
                                                 </div>
                     
                                                 <p class="user-position">{{ result.pendingAsset.assetOwnerPosition }}</p>
@@ -453,8 +459,18 @@
                                                     <input type="text" class="form-control" 
                                                         [id]="'site-name-' + result.pendingAsset.assetTag" 
                                                         [(ngModel)]="result.pendingAsset.siteName" name="siteName"
-                                                        [placeholder]="result.pendingAsset.siteName || 'Site Name'">
+                                                        (input)="onSiteInputChange(i)"
+                                                        list="all-sites"
+                                                        [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName">
                                                     <label [for]="'site-name-' + result.pendingAsset.assetTag">Site Name</label>
+                                                    <datalist id="all-sites">
+                                                        <select>
+                                                            <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
+                                                        </select>
+                                                    </datalist>
+                                                    <div *ngIf="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName" class="invalid-feedback">
+                                                        Please select a valid site from the list.
+                                                    </div>
                                                 </div>
                                                 <div class="form-floating mb-2">
                                                     <input type="text" class="form-control" 
