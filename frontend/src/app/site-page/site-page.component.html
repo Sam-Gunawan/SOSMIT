@@ -32,18 +32,23 @@
         </section>
 
         <div id="container-floating">
-            <div class="nd2 nds">
+            <div class="nd2 nds my-tooltip">
                 <img class="report" src="assets/report.svg">
+                <span class="tooltiptext">See opname report</span>
             </div>
             
-            <div class="nd1 nds">
+            <div class="nd1 nds my-tooltip">
                 <img class="previous" src="assets/previous.svg" (click)="continueOpname()">
+                <span class="tooltiptext">See previous opname</span>
             </div>
             
             <!-- TODO: navigate to opname and start opname in ts file -->
             <div id="floating-button">
                 <img class="more" src="assets/more.svg">
-                <img class="add" src="assets/add.svg" (click)="startNewOpname()">
+                <div class="my-tooltip">
+                    <img class="add" src="assets/add.svg" (click)="startNewOpname()"/>
+                    <span class="tooltiptext">Start new opname</span>
+                </div>
             </div>
         </div>
 

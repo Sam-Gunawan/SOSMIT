@@ -309,4 +309,27 @@ p {
     left: 0;
     right: 0;
     line-height: 40px;
+}   
+
+.my-tooltip .tooltiptext {
+  visibility: hidden;
+  width: 90px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+  font-size: 12px;
+ 
+  position: absolute;
+  z-index: 1;
+}
+
+.my-tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
+.my-tooltip .tooltiptext {
+  top: -5px;
+  right: 105%;
 }
