@@ -175,7 +175,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       },
       error: (error: any) => {
         this.isLoading = false; // Set loading state to false on error
-        this.errorMessage = 'Failed to finish opname session. Please try again later.';
+        this.errorMessage = 'No asset changes recorded for this session. Please ensure you have made changes before finishing.';
         console.error('[OpnamePage] Error finishing opname session:', error);
       }
     });

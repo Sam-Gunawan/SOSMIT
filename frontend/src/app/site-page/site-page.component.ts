@@ -19,7 +19,6 @@ import { OpnameSession } from '../model/opname-session.model';
     isLoading: boolean = true; // Loading state to show a spinner or loading indicator
     errorMessage: string = '';
     opnameLoading: boolean = false; // Loading state for starting a new opname session
-    actionButtonError: string = ''; // Error message for floating action button (at bottom right corner)
     opnameSession?: OpnameSession; // Optional opname session to hold the current session data
 
     constructor(private route: ActivatedRoute, private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService) {
@@ -75,7 +74,7 @@ import { OpnameSession } from '../model/opname-session.model';
 
       // This method will start a new stock opname session for the current site.
       this.opnameLoading = true; // Set loading state to true before starting the request
-      this.actionButtonError = ''; // Clear any previous errors
+      this.errorMessage = ''; // Clear any previous errors
       
       console.log('[SitePage] Starting new opname for site ID:', this.sitePage.siteID);
       
@@ -99,8 +98,8 @@ import { OpnameSession } from '../model/opname-session.model';
 
         error: (error) => {
           this.opnameLoading = false; // Set loading state to false even if there's an error
-          console.error('[SitePage] Error starting new opname session:', error);
-          this.actionButtonError = 'Failed to start a new opname session. Please try again later.';
+          console.error('[SitePage] Error starting new opname session:', error.error.error);
+          this.errorMessage = error.error.error || 'Failed to start new opname session. Please try again later.';
         }
       });
     }
@@ -114,11 +113,11 @@ import { OpnameSession } from '../model/opname-session.model';
       }
       
       this.opnameLoading = true;
-      this.actionButtonError = ''; // Clear any previous errors
+      this.errorMessage = ''; // Clear any previous errors
       
       if (this.sitePage.opnameSessionID <= 0) {
         this.opnameLoading = false;
-        this.actionButtonError = 'No opname session ID available.';
+        this.errorMessage = 'No opname session ID available.';
         console.error('[SitePage] No opname session ID to continue');
         return;
       }
@@ -135,13 +134,13 @@ import { OpnameSession } from '../model/opname-session.model';
           } else {
             const status = this.opnameSession ? this.opnameSession.status : 'unknown';
             console.error('[SitePage] Opname session is not active:', status);
-            this.actionButtonError = `Opname session is not active (current status: ${status}).`;
+            this.errorMessage = `Opname session is not active (current status: ${status}).`;
           }
         },
         error: (error) => {
           console.error('[SitePage] Error fetching current opname session:', error);
           this.opnameLoading = false; // Set loading state to false on error
-          this.actionButtonError = 'Failed to fetch current opname session. Please try again later.';
+          this.errorMessage = 'Failed to fetch current opname session. Please try again later.';
         }
       });
     }

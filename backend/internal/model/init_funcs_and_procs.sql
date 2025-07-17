@@ -269,19 +269,20 @@ CREATE OR REPLACE FUNCTION public.create_new_opname_session(
 	LANGUAGE plpgsql
 AS $$
 	DECLARE
-		-- Local variable to count existing active sessions for the site.
-		_active_session_count INT;
+		-- Local variable to count existing ongoing sessions for the site.
+		-- Sessions in 'Active' and 'Completed' status are considered ongoing.
+		_ongoing_session_count INT;
 		_new_session_id INT := 0; -- Initialize to 0, will be set if a new session is created.
 	BEGIN
 		-- Check if there are any active opname sessions for the site.
-		-- Count how many rows in "OpnameSession" have the same site_id and status 'Active' or 'Pending'.
+		-- Count how many rows in "OpnameSession" have the same site_id and status 'Active' or 'Completed'.
 		SELECT COUNT(*)
-		INTO _active_session_count
+		INTO _ongoing_session_count
 		FROM "OpnameSession"
-		WHERE site_id = _site_id AND "status" = 'Active';
+		WHERE site_id = _site_id AND ("status" = 'Active' OR "status" = 'Completed');
 
-		-- If there are no active sessions, proceed to create a new one.
-		IF _active_session_count = 0 THEN
+		-- If there are no ongoing sessions, proceed to create a new one.
+		IF _ongoing_session_count = 0 THEN
 			-- Insert a new opname session into the OpnameSession table.
 			INSERT INTO "OpnameSession" (user_id, site_id, "status", start_date)
 			VALUES (_user_id, _site_id, 'Active', NOW())
@@ -292,7 +293,7 @@ AS $$
 			RAISE NOTICE 'New opname session created with ID: %', _new_session_id;
 		ELSE
 			-- If there is already an active session, do nothing. _new_session_id will remain 0.
-			RAISE NOTICE 'An active opname session already exists for site ID: %, cannot create a new one.', _site_id;
+			RAISE NOTICE 'An ongoing opname session already exists for site ID: %, cannot create a new one.', _site_id;
 		END IF;
 
 		RETURN _new_session_id;
@@ -331,6 +332,15 @@ AS $$
 			WHERE id = _session_id AND "status" = 'Active'
 		) THEN
 			RAISE EXCEPTION 'No active opname session found with ID: %', _session_id;
+		END IF;
+
+		-- Check if there any asset changes recorded for this session
+		IF NOT EXISTS (
+			SELECT 1
+			FROM "AssetChanges"
+			WHERE session_id = _session_id
+		) THEN
+			RAISE EXCEPTION 'No asset changes recorded for opname session ID: %', _session_id;
 		END IF;
 
 		-- Update the opname session to mark it as finished

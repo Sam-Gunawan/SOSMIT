@@ -86,12 +86,11 @@ export class OpnameSessionService {
   startNewOpname(siteID: number): Observable<any> {
     // This method will start a new stock opname session for the specified site.
     return this.http.post(`${this.opnameApiUrl}/start`, {site_id: siteID}).pipe(
-        map((response: any) => {
-            return {
-            opnameSessionID: response.session_id,
-            }
-        }),
-
+      map((response: any) => {
+          return {
+          opnameSessionID: response.session_id,
+          }
+      }),
       tap((response: any) => {
           // Log the response for debugging purposes.
           console.log('[OpnameService] Started new opname session:', response);

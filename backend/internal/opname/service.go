@@ -37,11 +37,11 @@ func (service *Service) StartNewSession(userID int, siteID int) (int, error) {
 		return 0, err
 	}
 
-	// If newSessionID is 0, it indicates failure in session creation due to active sessions already available.
+	// If newSessionID is 0, it indicates failure in session creation due to ongoing sessions already available.
 	// We translate this from business logic into a more user-friendly error.
 	if newSessionID == 0 {
-		log.Printf("⚠ No new session created, an active session already exists for siteID %d", siteID)
-		return 0, errors.New("an active opname session already exists for this user at the specified site")
+		log.Printf("⚠ No new session created, an ongoing session already exists for siteID %d", siteID)
+		return 0, errors.New("an ongoing opname session already exists for this user at the specified site")
 	}
 
 	// If session creation is successful, return the new session ID
