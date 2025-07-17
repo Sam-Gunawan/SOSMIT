@@ -26,6 +26,17 @@ p {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+
+  @media (max-width: 768px) {
+    .buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+    .btn {
+      font-size: 0.75rem;
+      width: 113px;
+    }
+  }
 }
 
 .divider {
