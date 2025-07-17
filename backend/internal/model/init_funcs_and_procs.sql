@@ -482,6 +482,39 @@ AS $$
 	END;
 $$;
 
+-- get_asset_change retrieves the condition photo of a specific asset change by session ID and asset tag
+CREATE OR REPLACE FUNCTION public.get_asset_change_photo(_session_id INT, _asset_tag VARCHAR(12))
+	RETURNS TABLE (
+		condition_photo_url TEXT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		-- Get the condition photo URL for the specified asset change JSON key
+		SELECT ac.changes ->> 'newConditionPhotoURL' as condition_photo_url
+		FROM "AssetChanges" AS ac
+		WHERE ac.session_id = _session_id AND ac.asset_tag = _asset_tag;
+	END;
+$$;
+
+-- get_all_photos_by_session_id retrieves all condition photos for a given opname session
+CREATE OR REPLACE FUNCTION public.get_all_photos_by_session_id(_session_id INT)
+	RETURNS TABLE (
+		condition_photo_url TEXT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT ac.changes ->> 'newConditionPhotoURL' AS condition_photo_url
+		FROM "AssetChanges" AS ac
+		WHERE ac.session_id = _session_id
+		  AND ac.changes ? 'newConditionPhotoURL'; -- Ensure the key exists in the JSONB object
+	END;
+$$;
+
+
 -- get_all_sites retrieves all sites with their details
 CREATE OR REPLACE FUNCTION public.get_all_sites()
 	RETURNS TABLE (
