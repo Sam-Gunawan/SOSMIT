@@ -54,12 +54,22 @@
 
         <div class="bottom-fade"></div>
     </div>
-
+    
     <!-- ERROR MESSAGE -->
-    <div class="error-message" *ngIf="errorMessage">
+    <div *ngIf="errorMessage && showToast" class="my-toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <h5>{{ errorMessage }}</h5>
+                <p>Please try again later.</p>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="showToast = false" aria-label="Close"></button>
+        </div>
+    </div>
+    
+    <!-- <div class="error-message" *ngIf="errorMessage">
         <h1>{{ errorMessage }}</h1>
         <p>Please try again later.</p>
-    </div>
+    </div> -->
 
     <!-- LOADING -->
     <div class="loading" *ngIf="isLoading">

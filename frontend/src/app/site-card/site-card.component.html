@@ -44,7 +44,7 @@
                 <select class="form-select" aria-label="Small select example" [value]="selectedFilter" #statusSelect (change)="filterByDropdown(statusSelect.value)">
                     <option value="">All Status</option>
                     <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
+                    <option value="Completed">Completed</option>
                     <option value="Verified">Verified</option>
                     <option value="Rejected">Rejected</option>
                     <option value="Outdated">Outdated</option>
@@ -70,9 +70,8 @@
                 class="site-status"
                 [ngClass]="{
                     'status-active': siteCard.opnameStatus === 'Active',
-                    'status-completed': siteCard.opnameStatus === 'Inactive',
-                    'status-pending': siteCard.opnameStatus === 'Pending',
-                    'status-verified': siteCard.opnameStatus === 'Maintenance',
+                    'status-completed': siteCard.opnameStatus === 'Completed',
+                    'status-verified': siteCard.opnameStatus === 'Verified',
                     'status-rejected': siteCard.opnameStatus === 'Rejected',
                     'status-outdated': siteCard.opnameStatus === 'Outdated'
                 }">
@@ -101,9 +100,8 @@
                 class="site-status"
                 [ngClass]="{
                     'status-active': siteCard.opnameStatus === 'Active',
-                    'status-completed': siteCard.opnameStatus === 'Inactive',
-                    'status-pending': siteCard.opnameStatus === 'Pending',
-                    'status-verified': siteCard.opnameStatus === 'Maintenance',
+                    'status-completed': siteCard.opnameStatus === 'Completed',
+                    'status-verified': siteCard.opnameStatus === 'Verified',
                     'status-rejected': siteCard.opnameStatus === 'Rejected',
                     'status-outdated': siteCard.opnameStatus === 'Outdated'
                 }">

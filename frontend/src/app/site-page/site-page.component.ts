@@ -20,6 +20,7 @@ import { OpnameSession } from '../model/opname-session.model';
     errorMessage: string = '';
     opnameLoading: boolean = false; // Loading state for starting a new opname session
     opnameSession?: OpnameSession; // Optional opname session to hold the current session data
+    showToast = false;
 
     constructor(private route: ActivatedRoute, private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService) {
       this.sitePage = {
@@ -61,6 +62,8 @@ import { OpnameSession } from '../model/opname-session.model';
           console.error('[SitePage] Failed to fetch site cards:', error);
           this.isLoading = false; // Set loading state to false even if there's an error
           this.errorMessage = 'Failed to load site cards. Please try again later.';
+          this.showToast = true;
+          setTimeout(() => this.showToast = false, 4000);
         }
       });
     }
@@ -100,6 +103,7 @@ import { OpnameSession } from '../model/opname-session.model';
           this.opnameLoading = false; // Set loading state to false even if there's an error
           console.error('[SitePage] Error starting new opname session:', error.error.error);
           this.errorMessage = error.error.error || 'Failed to start new opname session. Please try again later.';
+          this.showToast = true;
         }
       });
     }
@@ -119,6 +123,7 @@ import { OpnameSession } from '../model/opname-session.model';
         this.opnameLoading = false;
         this.errorMessage = 'No opname session ID available.';
         console.error('[SitePage] No opname session ID to continue');
+        this.showToast = true;
         return;
       }
       
@@ -141,6 +146,7 @@ import { OpnameSession } from '../model/opname-session.model';
           console.error('[SitePage] Error fetching current opname session:', error);
           this.opnameLoading = false; // Set loading state to false on error
           this.errorMessage = 'Failed to fetch current opname session. Please try again later.';
+          this.showToast = true;
         }
       });
     }

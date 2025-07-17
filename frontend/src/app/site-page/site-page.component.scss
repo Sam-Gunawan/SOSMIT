@@ -333,3 +333,12 @@ p {
   top: -5px;
   right: 105%;
 }
+
+.my-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  min-width: 300px;
+  z-index: 9999;
+  display: block;
+}
