@@ -220,3 +220,18 @@ func (repo *Repository) LoadOpnameProgress(sessionID int) ([]OpnameSessionProgre
 
 	return progressList, nil
 }
+
+// FinishOpnameSession marks an opname session as finished.
+func (repo *Repository) FinishOpnameSession(sessionID int) error {
+	query := `CALL finish_opname_session($1)`
+
+	_, err := repo.db.Exec(query, sessionID)
+	if err != nil {
+		log.Printf("❌ Error finishing opname session with ID %d: %v", sessionID, err)
+		return err // Finishing failed for some error.
+	}
+
+	// If successful, log the completion.
+	log.Printf("✅ Opname session with ID %d finished successfully", sessionID)
+	return nil
+}

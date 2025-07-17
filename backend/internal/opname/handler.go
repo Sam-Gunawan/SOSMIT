@@ -320,3 +320,31 @@ func (handler *Handler) LoadOpnameProgressHandler(context *gin.Context) {
 		"progress": responseProgress,
 	})
 }
+
+// FinishOpnameSessionHandler marks an opname session as finished.
+func (handler *Handler) FinishOpnameSessionHandler(context *gin.Context) {
+	// Get the session ID from the URL parameter
+	sessionIDstr := context.Param("session-id")
+	sessionID, err := validateSessionID(sessionIDstr)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid session_id, must be a positive integer",
+		})
+		return
+	}
+
+	// Call the service to finish the opname session
+	err = handler.service.FinishOpnameSession(sessionID)
+	if err != nil {
+		log.Printf("❌ Error finishing opname session with ID %d: %v", sessionID, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to finish opname session: " + err.Error(),
+		})
+		return
+	}
+
+	log.Printf("✅ Opname session with ID %d finished successfully", sessionID)
+	context.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Opname session %d finished successfully", sessionID),
+	})
+}

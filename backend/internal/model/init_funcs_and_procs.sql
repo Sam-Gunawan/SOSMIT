@@ -7,9 +7,12 @@ DROP FUNCTION IF EXISTS public.get_asset_by_serial_number(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
 DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT);
 DROP FUNCTION IF EXISTS public.get_opname_session_by_id(INT);
+DROP PROCEDURE IF EXISTS public.finish_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
 DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), INT, INT, TEXT);
-DROP FUNCTION IF EXISTS public.update_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), INT, INT, TEXT);
+DROP PROCEDURE IF EXISTS public.delete_asset_change(INT, VARCHAR(12));
+DROP FUNCTION IF EXISTS public.get_asset_change_photo(INT, VARCHAR(12));
+DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
 DROP FUNCTION IF EXISTS public.get_all_sites();
 DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
@@ -117,7 +120,7 @@ AS $$
 			INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 			INNER JOIN "Region" AS r ON sg.region_id = r.id
 			LEFT JOIN "OpnameSession" AS os ON s.id = os.site_id AND
-				os.status IN ('Active', 'Pending', 'Verified', 'Rejected', 'Outdated')
+				os.status IN ('Active', 'Completed', 'Verified', 'Rejected', 'Outdated')
 			WHERE u.user_id = _user_id
 			  AND (
 				LOWER(u.position) = 'l1 support'
@@ -256,7 +259,6 @@ AS $$
 	END;
 $$;
 
-
 -- create_new_opname_session creates a new opname session for a site
 CREATE OR REPLACE FUNCTION public.create_new_opname_session(
 	-- The ID of the user creating the session (from JWT).
@@ -264,7 +266,7 @@ CREATE OR REPLACE FUNCTION public.create_new_opname_session(
 	-- The ID of the site for which the session is being created (from request body).
 	_site_id INT
 ) RETURNS INT -- Returns the new session ID, or 0 if it fails.
-LANGUAGE plpgsql
+	LANGUAGE plpgsql
 AS $$
 	DECLARE
 		-- Local variable to count existing active sessions for the site.
@@ -314,6 +316,34 @@ AS $$
 		SELECT os.id, os."start_date", os.end_date, os."status", os.user_id, os.approver_id, os.site_id
 		FROM "OpnameSession" AS os
 		WHERE os.id = _session_id;
+	END;
+$$;
+
+-- finish_opname_session marks an opname session as finished
+CREATE OR REPLACE PROCEDURE public.finish_opname_session(_session_id INT)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		-- Check if the opname session exists and is currently active
+		IF NOT EXISTS (
+			SELECT 1
+			FROM "OpnameSession"
+			WHERE id = _session_id AND "status" = 'Active'
+		) THEN
+			RAISE EXCEPTION 'No active opname session found with ID: %', _session_id;
+		END IF;
+
+		-- Update the opname session to mark it as finished
+		UPDATE "OpnameSession"
+		SET "status" = 'Completed', end_date = NOW()
+		WHERE id = _session_id;
+
+		-- Update the site's last_opname_date to the end date as well
+		UPDATE "Site"
+		SET last_opname_date = NOW()
+		WHERE id = (SELECT site_id FROM "OpnameSession" WHERE id = _session_id);
+
+		RAISE NOTICE 'Opname session with ID: % has been marked as finished.', _session_id;
 	END;
 $$;
 
@@ -424,35 +454,21 @@ AS $$
 	END;
 $$;
 
--- get_asset_change retrieves the condition photo of a specific asset change by session ID and asset tag
-CREATE OR REPLACE FUNCTION public.get_asset_change_photo(_session_id INT, _asset_tag VARCHAR(12))
+-- get_asset_change retrieves the changes made to an asset during an opname session
+CREATE OR REPLACE FUNCTION public.get_asset_change(_session_id INT, _asset_tag VARCHAR(12))
 	RETURNS TABLE (
-		condition_photo_url TEXT
+		id INT,
+		"changes" JSONB,
+		change_reason TEXT,
+		asset_tag VARCHAR(12)
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		-- Get the condition photo URL for the specified asset change JSON key
-		SELECT ac.changes ->> 'newConditionPhotoURL' as condition_photo_url
+		SELECT ac.id, ac."changes", ac.change_reason, ac.asset_tag
 		FROM "AssetChanges" AS ac
 		WHERE ac.session_id = _session_id AND ac.asset_tag = _asset_tag;
-	END;
-$$;
-
--- get_all_photos_by_session_id retrieves all condition photos for a given opname session
-CREATE OR REPLACE FUNCTION public.get_all_photos_by_session_id(_session_id INT)
-	RETURNS TABLE (
-		condition_photo_url TEXT
-	)
-	LANGUAGE plpgsql
-AS $$
-	BEGIN
-		RETURN QUERY
-		SELECT ac.changes ->> 'newConditionPhotoURL' AS condition_photo_url
-		FROM "AssetChanges" AS ac
-		WHERE ac.session_id = _session_id
-		  AND ac.changes ? 'newConditionPhotoURL'; -- Ensure the key exists in the JSONB object
 	END;
 $$;
 

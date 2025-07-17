@@ -120,9 +120,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   }
 
   cancelOpnameSession() {
-    console.log('[OpnamePage] cancelOpnameSession() called');
-    console.log('[OpnamePage] Current session ID:', this.sessionID);
-    
+    // This method will cancel the current stock opname session.
     if (this.sessionID <= 0) {
       console.error('[OpnamePage] Invalid session ID:', this.sessionID);
       this.errorMessage = 'Invalid opname session.';
@@ -148,6 +146,37 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
         this.isLoading = false; // Set loading state to false on error
         this.errorMessage = 'Failed to cancel opname session. Please try again later.';
         console.error('[OpnamePage] Error cancelling opname session:', error);
+      }
+    });
+  }
+
+  finishOpnameSession() {
+    // This method will finish the current stock opname session.
+    if (this.sessionID <= 0) {
+      console.error('[OpnamePage] Invalid session ID:', this.sessionID);
+      this.errorMessage = 'Invalid opname session.';
+      return;
+    }
+
+    this.isLoading = true; // Set loading state to true before finishing
+    console.log('[OpnamePage] About to call API to finish session:', this.sessionID);
+
+    this.opnameSessionService.finishOpnameSession(this.sessionID).subscribe({
+      next: () => {
+        this.isLoading = false; // Set loading state to false after finishing
+        console.log('[OpnamePage] Opname session finished successfully!');
+        
+        // Clear the session from the service and localStorage !!!
+        this.opnameSessionService.clearSession();
+        
+        // Navigate back to the site page
+        console.log('[OpnamePage] Navigating back to site:', this.siteID);
+        this.router.navigate(['/site', this.siteID]);
+      },
+      error: (error: any) => {
+        this.isLoading = false; // Set loading state to false on error
+        this.errorMessage = 'Failed to finish opname session. Please try again later.';
+        console.error('[OpnamePage] Error finishing opname session:', error);
       }
     });
   }

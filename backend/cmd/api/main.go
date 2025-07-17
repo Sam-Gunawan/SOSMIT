@@ -143,6 +143,9 @@ func main() {
 			// POST /api/opname/:session-id/process-asset
 			opnameRoutes.POST("/:session-id/process-asset", opnameHandler.ProcessAssetChangesHandler)
 
+			// PUT /api/opname/:session-id/finish
+			opnameRoutes.PUT("/:session-id/finish", opnameHandler.FinishOpnameSessionHandler)
+
 			// DELETE /api/opname/:session-id/cancel
 			opnameRoutes.DELETE("/:session-id/cancel", opnameHandler.DeleteSessionHandler)
 

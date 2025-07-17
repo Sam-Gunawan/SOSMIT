@@ -99,6 +99,17 @@ export class OpnameSessionService {
     )
   }
 
+  finishOpnameSession(sessionID: number): Observable<any> {
+    // This method will finish the current stock opname session.
+    console.log('[OpnameService] Finishing opname session:', sessionID);
+    return this.http.put(`${this.opnameApiUrl}/${sessionID}/finish`, {}).pipe(
+      tap((response: any) => {
+        // Log the response for debugging purposes.
+        console.log('[OpnameService] Finished opname session:', response);
+      })
+    );
+  }
+
   cancelOpnameSession(sessionID: number): Observable<any> {
       // This method will cancel an existing opname session.
       return this.http.delete(`${this.opnameApiUrl}/${sessionID}/cancel`).pipe(

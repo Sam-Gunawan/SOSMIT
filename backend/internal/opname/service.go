@@ -191,3 +191,22 @@ func (service *Service) LoadOpnameProgress(sessionID int) ([]OpnameSessionProgre
 	log.Printf("✅ Opname progress for session %d loaded successfully", sessionID)
 	return progress, nil
 }
+
+// FinishOpnameSession marks an opname session as finished.
+func (service *Service) FinishOpnameSession(sessionID int) error {
+	// Validate sessionID
+	if sessionID <= 0 {
+		log.Printf("⚠ Invalid sessionID: %d", sessionID)
+		return errors.New("invalid sessionID")
+	}
+
+	// Call the repository to finish the opname session
+	err := service.repo.FinishOpnameSession(sessionID)
+	if err != nil {
+		log.Printf("❌ Error finishing opname session with ID %d: %v", sessionID, err)
+		return err
+	}
+
+	log.Printf("✅ Opname session with ID %d finished successfully", sessionID)
+	return nil
+}
