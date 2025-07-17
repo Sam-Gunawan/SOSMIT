@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { OpnameSession } from '../model/opname-session.model';
 import { AssetChange } from '../model/asset-changes.model';
 import { OpnameSessionProgress } from '../model/opname-session-progress.model';
+import { formatDate } from '../reusable_functions';
 
 @Injectable({ providedIn: 'root' })
 export class OpnameSessionService {
@@ -70,8 +71,8 @@ export class OpnameSessionService {
               siteID: response.site_id,
               userID: response.user_id,
               status: response.status,
-              startDate: response.start_date,
-              endDate: response.end_date || null, // Handle optional end date
+              startDate: formatDate(response.start_date),
+              endDate: formatDate(response.end_date),
               approverID: response.approver_id || null // Handle optional approver ID
             };
         }),

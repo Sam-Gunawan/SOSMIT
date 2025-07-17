@@ -6,6 +6,7 @@ import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { OpnameSession } from '../model/opname-session.model';
 
 @Component({
   selector: 'app-opname-page',
@@ -22,6 +23,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   
   cardVariant: 'default' | 'compact' = 'compact';
   showLocation: boolean = true;
+  opnameSession: OpnameSession = {} as OpnameSession;
   sessionID: number = -1; // Default value, will be set later
   siteID: number = -1; // Site ID for the current opname session
   isLoading: boolean = true; // Loading state for the opname session
@@ -29,9 +31,10 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   private subscription?: Subscription; // Subscription to manage service state
 
   ngOnInit() {
-    // this.checkScreenSize();
+    this.isLoading = true;
     this.siteID = Number(this.route.snapshot.paramMap.get('id')); // Get site ID from route parameters
-    this.initializeSessionId();
+    this.initSessionID();
+    this.initOpnameSession();
     this.isLoading = false;
   }
 
@@ -41,7 +44,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     }
   }
 
-  private initializeSessionId() {
+  private initSessionID() {
     this.isLoading = true;
     
     // Method 1: Try to get from service (which now also checks localStorage)
@@ -92,6 +95,24 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     this.errorMessage = 'No opname session found. Please start a new session.';
   }
 
+  private initOpnameSession() {
+    this.opnameSessionService.getOpnameSession(this.sessionID).subscribe({
+      next: (session) => {
+        this.opnameSession = session;
+        this.isLoading = false; // Set loading state to false after fetching session
+        console.log('[OpnamePage] Opname session initialized:', this.opnameSession);
+        
+        // Update responsive settings based on screen size
+        this.updateResponsiveSettings();
+      },
+      error: (error) => {
+        this.isLoading = false; // Set loading state to false on error
+        this.errorMessage = 'Failed to load opname session. Please try again later.';
+        console.error('[OpnamePage] Error initializing opname session:', error);
+      }
+    });
+  }
+
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
     // this.checkScreenSize();
@@ -130,16 +151,6 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       }
     });
   }
-
-  // private checkScreenSize() {
-  //   this.isMobile = window.innerWidth < 768; // Define mobile breakpoint
-    
-  //   if (this.isMobile) {
-  //     this.currentView = 'small'; // Force list view on mobile
-  //   } else {
-  //     this.currentView = 'large'; // Default to card view on desktop
-  //   }
-  // }
 
   private updateResponsiveSettings() {
     if (window.innerWidth >= 768) {
