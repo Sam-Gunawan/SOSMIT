@@ -276,26 +276,33 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 	return nil
 }
 
-// FilterOpnameSessions retrieves all opname sessions filtered by date and site.
-func (service *Service) FilterOpnameSessions(opnameDate string, siteID int) ([]string, error) {
-	// Validate opnameDate and siteID
-	if opnameDate == "" || siteID <= 0 {
-		log.Printf("⚠ Invalid opnameDate or siteID: opnameDate=%s, siteID=%d", opnameDate, siteID)
-		return nil, errors.New("invalid opnameDate or siteID")
+// GetOpnameOnSite retrieves all opname sessions for a specific site.
+func (service *Service) GetOpnameOnSite(siteID int) ([]OpnameFilter, error) {
+	// Validate siteID
+	if siteID <= 0 {
+		log.Printf("⚠ Invalid siteID: %d", siteID)
+		return nil, errors.New("invalid siteID")
 	}
 
-	// Call the repository to filter sessions by date and site
-	sessions, err := service.repo.FilterOpnameSessions(opnameDate, siteID)
+	// Call the repository to get all opname sessions for the site
+	sessions, err := service.repo.GetOpnameOnSite(siteID)
 	if err != nil {
-		log.Printf("❌ Error filtering opname sessions by date %s and site %d: %v", opnameDate, siteID, err)
+		log.Printf("❌ Error retrieving opname sessions for site %d: %v", siteID, err)
 		return nil, err
 	}
 
 	if len(sessions) == 0 {
-		log.Printf("⚠ No opname sessions found for date %s and site %d", opnameDate, siteID)
-		return make([]string, 0), nil // Return an empty slice if no sessions are found.
+		log.Printf("⚠ No opname sessions found for site %d", siteID)
+		return nil, errors.New("no opname sessions found for this site")
 	}
 
-	log.Printf("✅ Opname sessions filtered by date %s and site %d successfully", opnameDate, siteID)
+	// Parse the completed date to a YYYY-MM-DD format.
+	for i, session := range sessions {
+		if session.CompletedDate != "" {
+			sessions[i].CompletedDate = session.CompletedDate[:10]
+		}
+	}
+
+	log.Printf("✅ Opname sessions for site %d retrieved successfully", siteID)
 	return sessions, nil
 }

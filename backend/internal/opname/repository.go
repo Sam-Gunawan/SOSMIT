@@ -235,27 +235,39 @@ func (repo *Repository) FinishOpnameSession(sessionID int) error {
 	return nil
 }
 
-// FilterOpnameSessions retrieves all opname sessions filtered by date and site.
-func (repo *Repository) FilterOpnameSessions(opnameDate string, siteID int) ([]string, error) {
-	var sessionIDs []string
+type OpnameFilter struct {
+	SessionID     int    `json:"session_id"`
+	CompletedDate string `json:"completed_date"` // Format: YYYY-MM-DD
+}
 
-	query := `SELECT * FROM get_opname_by_date_and_site($1, $2)`
+// GetOpnameOnSite retrieves all opname sessions for a specific site.
+// Only non-active sessions are returned.
+func (repo *Repository) GetOpnameOnSite(siteID int) ([]OpnameFilter, error) {
+	query := `SELECT * FROM get_opname_by_site_id($1)`
 
-	rows, err := repo.db.Query(query, opnameDate, siteID)
+	rows, err := repo.db.Query(query, siteID)
 	if err != nil {
-		log.Printf("❌ Error filtering opname sessions by date %s and site %d: %v", opnameDate, siteID, err)
+		log.Printf("❌ Error retrieving opname sessions for site %d: %v", siteID, err)
 		return nil, err // Query failed for some error.
 	}
+
 	defer rows.Close()
 
+	var sessions []OpnameFilter
 	for rows.Next() {
-		var sessionID string
-		if err := rows.Scan(&sessionID); err != nil {
-			log.Printf("❌ Error scanning session ID: %v", err)
+		var session OpnameFilter
+		if err := rows.Scan(&session.SessionID, &session.CompletedDate); err != nil {
+			log.Printf("❌ Error scanning row for opname session: %v", err)
 			return nil, err // Row scan failed for some error.
 		}
-		sessionIDs = append(sessionIDs, sessionID)
+		sessions = append(sessions, session)
 	}
 
-	return sessionIDs, nil
+	if err := rows.Err(); err != nil {
+		log.Printf("❌ Error iterating over rows for opname sessions: %v", err)
+		return nil, err // Error occurred while iterating.
+	}
+
+	log.Printf("✅ Retrieved %d opname sessions for site %d", len(sessions), siteID)
+	return sessions, nil
 }

@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, HostListener, Input, ChangeDetectorRef, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { AssetInfo } from '../model/asset-info.model';
@@ -18,7 +18,7 @@ import { environment } from '../../environments/environments';
   templateUrl: './opname-asset.component.html',
   styleUrl: './opname-asset.component.scss'
 })
-export class OpnameAssetComponent implements OnDestroy {
+export class OpnameAssetComponent implements OnDestroy, OnChanges {
   public readonly serverURL = environment.serverURL; // Expose environment for use in the template
 
   @Input() isInReport: boolean = false; // Flag to check if in report view
@@ -107,6 +107,16 @@ export class OpnameAssetComponent implements OnDestroy {
       this.checkScreenSize();
       this.updateResponsiveSettings();
     }, 1000); // Check every second
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    // React to sessionID changes after initial setup
+    if (changes['sessionID'] && !changes['sessionID'].firstChange && this.sessionID !== -1) {
+      console.log('[OpnameAsset] Session ID changed from', changes['sessionID'].previousValue, 'to', changes['sessionID'].currentValue);
+      this.isLoading = true;
+      this.errorMessage = '';
+      this.initOpnameData();
+    }
   }
 
   ngOnDestroy(): void {

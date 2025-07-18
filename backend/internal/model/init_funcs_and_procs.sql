@@ -18,7 +18,7 @@ DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
 DROP FUNCTION IF EXISTS public.get_all_sites();
 DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
-DROP FUNCTION IF EXISTS public.get_opname_by_date_and_site(DATE, INT);
+DROP FUNCTION IF EXISTS public.get_opname_by_site_id(INT);
 
 -- get_credentials retrieves user credentials by username (for login auth)
 -- ! email not implemented yet
@@ -126,48 +126,75 @@ $$;
 -- Note: This function assumes that "l1 support" users can see all sites, while others are restricted to their region.
 -- It returns site details along with the latest opname session if available.
 CREATE OR REPLACE FUNCTION public.get_user_site_cards(_user_id INT)
-	RETURNS TABLE (
-		site_id INT,
-		site_name VARCHAR(100),
-		site_group_name VARCHAR(100),
-		region_name VARCHAR(100),
-		site_ga_id INT,
-		opname_session_id INT,
-		opname_status VARCHAR(20),
-		last_opname_date TIMESTAMP WITH TIME ZONE
-	)
-	LANGUAGE plpgsql
+    RETURNS TABLE (
+        site_id INT,
+        site_name VARCHAR(100),
+        site_group_name VARCHAR(100),
+        region_name VARCHAR(100),
+        site_ga_id INT,
+        opname_session_id INT,
+        opname_status VARCHAR(20),
+        last_opname_date TIMESTAMP WITH TIME ZONE
+    )
+    LANGUAGE plpgsql
 AS $$
-	BEGIN
-		RETURN QUERY
-			SELECT s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, 
-				s.site_ga_id,
-				COALESCE(os.id, -1) AS opname_session_id,
-				COALESCE(os.status, 'Outdated') AS opname_status,
-				COALESCE(os.end_date, s.last_opname_date) AS last_opname_date
-			FROM "User" AS u
-			-- For "l1 support", join all sites; for others, restrict to user's region
-			CROSS JOIN "Site" AS s
-			INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-			INNER JOIN "Region" AS r ON sg.region_id = r.id
-			LEFT JOIN "OpnameSession" AS os ON s.id = os.site_id AND
-				os.status IN ('Active', 'Completed', 'Verified', 'Rejected', 'Outdated')
-			WHERE u.user_id = _user_id
-			  AND (
-				LOWER(u.position) = 'l1 support'
-				OR (
-					LOWER(u.position) = 'admin staff general affairs'
-					AND r.id = (
-						SELECT user_r.id
-						FROM "Site" AS user_site
-						INNER JOIN "SiteGroup" AS user_sg ON user_site.site_group_id = user_sg.id
-						INNER JOIN "Region" AS user_r ON user_sg.region_id = user_r.id
-						WHERE user_site.id = u.site_id
-						LIMIT 1
-					)
-				)
-			  )
-			ORDER BY s.site_name;
+DECLARE
+    _user_position VARCHAR;
+    _user_region_id INT;
+BEGIN
+    -- Fetch the user's position and region ID into variables first.
+    SELECT
+        LOWER(u.position),
+        r.id
+    INTO
+        _user_position,
+        _user_region_id
+    FROM "User" AS u
+    LEFT JOIN "Site" AS s ON u.site_id = s.id
+    LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+    LEFT JOIN "Region" AS r ON sg.region_id = r.id
+    WHERE u.user_id = _user_id;
+
+    -- Fetch the site cards based on the user's position and region.
+	-- Show the latest opname session status if available and not outdated.
+    RETURN QUERY
+        SELECT
+            s.id AS site_id,
+            s.site_name,
+            sg.site_group_name,
+            r.region_name,
+            s.site_ga_id,
+            COALESCE(latest_session.session_id, -1) AS opname_session_id,
+            CASE
+                WHEN latest_session.session_status = 'Active' THEN 'Active'
+                WHEN latest_session.session_status IN ('Completed', 'Verified', 'Rejected')
+					-- TODO: Make the interval dynamic based on user settings.
+                    AND COALESCE(latest_session.session_end_date, latest_session.session_start_date) > (NOW() - INTERVAL '30 days')
+                    THEN latest_session.session_status
+                ELSE 'Outdated'
+            END AS opname_status,
+            COALESCE(latest_session.session_end_date, s.last_opname_date) AS last_opname_date
+        FROM "Site" AS s
+        INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+        INNER JOIN "Region" AS r ON sg.region_id = r.id
+        -- The subquery for the latest session is good, so we keep it as is.
+        LEFT JOIN (
+            SELECT DISTINCT ON (os.site_id)
+                os.site_id,
+                os.id AS session_id,
+                os.status AS session_status,
+                os.end_date AS session_end_date,
+                os.start_date AS session_start_date
+            FROM "OpnameSession" AS os
+            WHERE os.status IN ('Active', 'Completed', 'Verified', 'Rejected', 'Outdated')
+            ORDER BY os.site_id, os.start_date DESC
+        ) AS latest_session ON s.id = latest_session.site_id
+        -- The WHERE clause is now much cleaner and more efficient.
+        WHERE
+            _user_position = 'l1 support'
+            OR
+            (_user_position = 'admin staff general affairs' AND r.id = _user_region_id)
+        ORDER BY s.site_name;
 	END;
 $$;
 
@@ -630,33 +657,18 @@ AS $$
 	END;
 $$;
 
--- get_opname_by_date_and_site retrieves opname session ID for a specific date on a specific site
-CREATE OR REPLACE FUNCTION public.get_opname_by_date_and_site(_opname_date DATE, _site_id INT)
-	RETURNS TABLE (
-		session_id INT
-	)
-	LANGUAGE plpgsql
-AS $$
-	BEGIN
-		RETURN QUERY
-		SELECT os.id
-		FROM "OpnameSession" AS os
-		WHERE os.end_date::DATE = _opname_date AND os.site_id = _site_id;
-	END;
-$$;
-
--- get_opname_by_site retrieves all opname sessions for a specific site
+-- get_opname_by_site_id retrieves all opname sessions for a specific site
 -- ! This function is only for report page, it will only return sessions that are not 'Active'
-CREATE OR REPLACE FUNCTION public.get_opname_by_site(_site_id INT)
+CREATE OR REPLACE FUNCTION public.get_opname_by_site_id(_site_id INT)
 	RETURNS TABLE (
 		session_id INT,
-		completed_date TIMESTAMP WITH TIME ZONE
+		completed_date DATE
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT os.id, os.end_date AS completed_date
+		SELECT os.id, DATE(os.end_date) AS completed_date
 		FROM "OpnameSession" AS os
 		WHERE os.site_id = _site_id AND os.status != 'Active';
 	END;

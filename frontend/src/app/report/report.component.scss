@@ -17,6 +17,45 @@ p {
   color: styles.$quaternary-text-color;
 }
 
+// Date dropdown styling
+.date-dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  
+  .date-dropdown {
+    width: 100%;
+    padding-right: 35px; // Make space for the icon
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background: white;
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #495057;
+    cursor: pointer;
+    
+    &:focus {
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+  }
+  
+  .calendar-icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #6c757d;
+    font-size: 1rem;
+  }
+}
+
 .report-wrapper {
   padding: 20px 30px;
 }

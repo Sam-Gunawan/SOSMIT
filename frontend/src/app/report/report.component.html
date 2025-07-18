@@ -34,8 +34,15 @@
 
                 <div class="search-view mb-4">
                     <div class="filter-dropdown">
-                        <input type="date" id="date" name="date" [(ngModel)]="selectedDate" class="form-control"/>
-                        <p>{{ selectedDate }}</p>
+                        <div class="date-dropdown-wrapper">
+                            <select id="date" name="date" class="form-control date-dropdown" [(ngModel)]="selectedDate" (change)="onDateChange()">
+                                <option value="">Select a date</option>
+                                <option *ngFor="let dateOption of dateOptions" [value]="dateOption.value">
+                                    {{ dateOption.label }}
+                                </option>
+                            </select>
+                            <i class="calendar-icon fas fa-calendar-alt"></i>
+                        </div>
                     </div>
                     <form class="d-flex search-bar" role="search">
                         <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search" />
@@ -43,8 +50,13 @@
                     </form>
                 </div>
 
-                <div class="my-container">
-                    <app-opname-asset [variant]="cardVariant" [showLocation]="showLocation" [siteID]="site.siteID" [isInReport]="true" [sessionID]="10"></app-opname-asset>
+                <div class="my-container" *ngIf="selectedDate">
+                    <app-opname-asset [variant]="cardVariant" [showLocation]="showLocation" [siteID]="site.siteID" [isInReport]="true" [sessionID]="sessionID"></app-opname-asset>
+                </div>
+
+                <!-- TODO: Design a "no date selected" display -->
+                <div class="no-date-selected" *ngIf="!selectedDate">
+                    <h4>Please select a date to view the report.</h4>
                 </div>
             </div>
         </section>

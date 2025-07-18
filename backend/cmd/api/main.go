@@ -142,8 +142,8 @@ func main() {
 			// GET /api/opname/:session-id/load-progress
 			opnameRoutes.GET("/:session-id/load-progress", opnameHandler.LoadOpnameProgressHandler)
 
-			// GET /api/opname/filter/site/:site_id?opname_date=YYYY-MM-DD
-			opnameRoutes.GET("/filter/site/:site_id", opnameHandler.FilterOpnameSessionsHandler)
+			// GET /api/opname/filter/site/:site_id
+			opnameRoutes.GET("/filter/site/:site_id", opnameHandler.GetOpnameOnSiteHandler)
 
 			// POST /api/opname/start
 			opnameRoutes.POST("/start", opnameHandler.StartNewSessionHandler)

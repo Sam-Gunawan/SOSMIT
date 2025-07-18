@@ -358,9 +358,9 @@ func (handler *Handler) FinishOpnameSessionHandler(context *gin.Context) {
 	})
 }
 
-// FilterOpnameSessionsHandler retrieves all opname sessions for a specific date and site.
-func (handler *Handler) FilterOpnameSessionsHandler(context *gin.Context) {
-	// Get the site ID from URL parameters
+// GetOpnameOnSiteHandler retrieves all opname sessions for a specific site.
+func (handler *Handler) GetOpnameOnSiteHandler(context *gin.Context) {
+	// Get the site ID from the URL parameter
 	siteIDstr := context.Param("site_id")
 	siteID, err := strconv.Atoi(siteIDstr)
 	if err != nil || siteID <= 0 {
@@ -371,40 +371,28 @@ func (handler *Handler) FilterOpnameSessionsHandler(context *gin.Context) {
 		return
 	}
 
-	// Get the opname date from query parameters
-	opnameDate := context.Query("opname_date")
-	if opnameDate == "" {
-		log.Printf("⚠ Opname date not provided")
-		context.JSON(http.StatusBadRequest, gin.H{
-			"error": "opname_date query parameter is required",
-		})
-		return
-	}
-
-	// Call the service to filter opname sessions
-	sessions, err := handler.service.FilterOpnameSessions(opnameDate, siteID)
+	// Call the service to get all opname sessions for the site
+	sessions, err := handler.service.GetOpnameOnSite(siteID)
 	if err != nil {
-		log.Printf("❌ Error filtering opname sessions for date %s and site %d: %v", opnameDate, siteID, err)
+		log.Printf("❌ Error retrieving opname sessions for site %d: %v", siteID, err)
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to filter opname sessions: " + err.Error(),
+			"error": "failed to retrieve opname sessions: " + err.Error(),
 		})
 		return
 	}
-
 	if len(sessions) == 0 {
-		log.Printf("⚠ No opname sessions found for date %s and site %d", opnameDate, siteID)
+		log.Printf("⚠ No opname sessions found for site %d", siteID)
 		context.JSON(http.StatusOK, gin.H{
-			"message":  "No opname sessions found for the specified date and site",
-			"sessions": sessions,
+			"message":  "No opname sessions found for this site",
+			"sessions": []OpnameFilter{},
 		})
 		return
 	}
 
-	var filteredSessions []string
-	filteredSessions = append(filteredSessions, sessions...)
-
+	// If successful, return the list of sessions
+	log.Printf("✅ Retrieved %d opname sessions for site %d", len(sessions), siteID)
 	context.JSON(http.StatusOK, gin.H{
-		"message":  "Opname sessions retrieved successfully",
-		"sessions": filteredSessions,
+		"message":  fmt.Sprintf("Retrieved %d opname sessions for site %d", len(sessions), siteID),
+		"sessions": sessions,
 	})
 }
