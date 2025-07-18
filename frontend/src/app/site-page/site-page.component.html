@@ -33,7 +33,7 @@
 
         <div id="container-floating">
             <div class="nd2 nds my-tooltip">
-                <img class="report" src="assets/report.svg">
+                <img class="report" src="assets/report.svg" (click)="goToReport()">
                 <span class="tooltiptext">See opname report</span>
             </div>
             
@@ -42,7 +42,6 @@
                 <span class="tooltiptext">See previous opname</span>
             </div>
             
-            <!-- TODO: navigate to opname and start opname in ts file -->
             <div id="floating-button">
                 <img class="more" src="assets/more.svg">
                 <div class="my-tooltip">

@@ -4,7 +4,9 @@
             <div class="report-header">
                 <div class="report-details">
                     <h2>Opname Report</h2>
-                    <p class="site-location">[site group, site region]</p>
+                    <p class="site-location">{{ site.siteGroupName }}, {{ site.regionName }}</p>
+                    <!-- TODO: apply css for site GA -->
+                    <p class="site-ga">GA: {{ site.siteGaName }}</p>
                 </div>
             </div>
 
@@ -40,7 +42,7 @@
                     </form>
                 </div>
 
-                <div class="container">
+                <div class="my-container">
                     <app-asset-card [showHeader]="false" *ngIf="currentView === 'list'"></app-asset-card>
                 </div>
             </div>
