@@ -123,6 +123,28 @@ export class ApiService {
     );
   }
 
+  getSiteByID(siteID: number): Observable<SiteInfo> {
+    // This method will fetch a specific site by its ID.
+    return this.http.get<SiteInfo>(`${this.siteApiUrl}/${siteID}`).pipe(
+      map((response: any) => {
+        // Map the response to the desired format.
+        return {
+          siteID: response.site_id,
+          siteName: response.site_name,
+          siteGroupName: response.site_group_name,
+          regionName: response.region_name,
+          siteGaID: response.site_ga_id,
+          siteGaName: titleCase(response.site_ga_name),
+          siteGaEmail: response.site_ga_email
+        };
+      }),
+      tap((siteInfo: SiteInfo) => {
+        // Log the fetched site info for debugging purposes.
+        console.log('[ApiService] Fetched site info:', siteInfo);
+      })
+    );
+  }
+
   getAssetByAssetTag(assetTag: string): Observable<any> {
     // This method will fetch the details of a specific asset by its tag.
     return this.http.get<AssetInfo>(`${this.assetApiUrl}/tag/${assetTag}`).pipe(

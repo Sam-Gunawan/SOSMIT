@@ -51,7 +51,7 @@ func (repo *Repository) GetAllSites() ([]*Site, error) {
 func (repo *Repository) GetSiteByID(siteID int) (*Site, error) {
 	var site Site
 
-	query := `SELECT site_id, site_name, site_group_name, region_name, site_ga_id, site_ga_name, site_ga_email FROM get_site_by_id($1)`
+	query := `SELECT * FROM get_site_by_id($1)`
 	err := repo.db.QueryRow(query, siteID).Scan(&site.SiteID, &site.SiteName, &site.SiteGroupName, &site.RegionName, &site.SiteGaID, &site.SiteGaName, &site.SiteGaEmail)
 	if err != nil {
 		if err == sql.ErrNoRows {

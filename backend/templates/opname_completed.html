@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Opname Submitted | SOSMIT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS is inlined for maximum email client compatibility */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .header {
+            padding: 30px;
+            text-align: center;
+            background-color: #f8f9fa;
+        }
+        .logo {
+            max-height: 40px;
+        }
+        .content {
+            padding: 30px 40px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .content h1 {
+            font-size: 1.5rem;
+            color: #2d3748;
+            margin-top: 0;
+            font-weight: 700;
+        }
+        .content p {
+            font-size: 16px;
+            color: #4a5568;
+        }
+        .details {
+            font-family: 'Inter', sans-serif;
+            background-color: #fffaf0;
+            border-left: 4px solid #f6ad55;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .details strong {
+            color: #2d3748;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #a0aec0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <!-- TODO: CHANGE IMAGE URL SO THAT ITS A PUBLIC URL (use ngrok) -->
+            <img src="http://localhost:8080/uploads/server-assets/sm-logo-inline-text-no-bg.png" alt="PT SM Logo" class="logo">
+        </div>
+        <div class="content">
+            <h1>Selamat Pagi, {{.Submitter}}!</h1>
+            <p>Your opname session for <strong>{{.SiteName}}</strong> has been successfully completed and submitted for verification.</p>
+            <p>We've notified the L1 Support team, and they'll review it shortly. You'll receive another notification once it has been verified.</p>
+            
+            <div class="details">
+                <strong>Site:</strong> {{.SiteName}}<br>
+                <strong>Submitted On:</strong> {{.CompletedDate}}
+            </div>
+
+            <p>Thank you for your cooperation!</p>
+            <p>— The SOSMIT Team</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated notification from the SOSMIT Application.</p>
+            <p>&copy; 2025 Samuel Theodore Gunawan and Priska Aimee Likarsa.<br>All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

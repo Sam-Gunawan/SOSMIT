@@ -1,7 +1,9 @@
 DROP FUNCTION IF EXISTS public.get_credentials(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_all_users();
+DROP FUNCTION IF EXISTS public.get_user_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_user_by_username(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_user_site_cards(INT);
+DROP FUNCTION IF EXISTS public.get_l1_support_emails();
 DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_asset_by_serial_number(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
@@ -18,7 +20,7 @@ DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
 
 -- get_credentials retrieves user credentials by username (for login auth)
--- NOTES: email not implemented yet!!
+-- ! email not implemented yet
 CREATE OR REPLACE FUNCTION public.get_credentials(_username VARCHAR(255))
     RETURNS table (
 		user_id INT,
@@ -60,6 +62,34 @@ AS $$
 		INNER JOIN "Site" AS s ON u.site_id = s.id
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 		INNER JOIN "Region" AS r ON sg.region_id = r.id;
+	END;
+$$;
+
+-- get_user_by_id retrieves user details by user ID
+CREATE OR REPLACE FUNCTION public.get_user_by_id(_user_id INT)
+	RETURNS table (
+		user_id INT,
+		username VARCHAR(255),
+		email VARCHAR(255),
+		first_name VARCHAR(255),
+		last_name VARCHAR(255),
+		"position" VARCHAR(100),
+		site_id INT,
+		site_name VARCHAR(100),
+		site_group_name VARCHAR(100),
+		region_name VARCHAR(100),
+		cost_center_id INT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN 
+		RETURN QUERY
+		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
+		FROM "User" AS u
+		INNER JOIN "Site" AS s ON u.site_id = s.id
+		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+		INNER JOIN "Region" AS r ON sg.region_id = r.id
+		WHERE u.user_id = _user_id; 
 	END;
 $$;
 
@@ -137,6 +167,22 @@ AS $$
 				)
 			  )
 			ORDER BY s.site_name;
+	END;
+$$;
+
+-- get_l1_support_emails retrieves all L1 support users' emails
+CREATE OR REPLACE FUNCTION public.get_l1_support_emails()
+	RETURNS TABLE (
+		email VARCHAR(255)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+			SELECT u.email
+			FROM "User" AS u
+			WHERE LOWER(u.position) = 'l1 support'
+			ORDER BY u.email;
 	END;
 $$;
 
@@ -513,7 +559,6 @@ AS $$
 		  AND ac.changes ? 'newConditionPhotoURL'; -- Ensure the key exists in the JSONB object
 	END;
 $$;
-
 
 -- get_all_sites retrieves all sites with their details
 CREATE OR REPLACE FUNCTION public.get_all_sites()

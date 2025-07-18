@@ -157,4 +157,17 @@ import { OpnameSession } from '../model/opname-session.model';
         }
       });
     }
+
+    goToReport(): void {
+      // Navigate to the report page for the current site
+      const siteID = this.sitePage.siteID;
+      if (siteID > 0) {
+        this.router.navigate(['/site', siteID, 'report']);
+      } else {
+        console.error('[SitePage] Invalid site ID for report navigation:', siteID);
+        this.errorMessage = 'Invalid site ID for report navigation.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
+      }
+    }
   }

@@ -1,6 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AssetCardComponent } from '../asset-card/asset-card.component';
+import { ApiService } from '../services/api.service';
+import { OpnameSessionService } from '../services/opname-session.service';
+import { ActivatedRoute } from '@angular/router';
+import { SiteInfo } from '../model/site-info.model';
 
 @Component({
   selector: 'app-report',
@@ -10,4 +14,27 @@ import { AssetCardComponent } from '../asset-card/asset-card.component';
 })
 export class ReportComponent {
   currentView: string = 'list';
+  siteID: number = -1;
+  site: SiteInfo = {} as SiteInfo;
+
+  constructor(private apiService: ApiService, private opnameSessionService: OpnameSessionService, private route: ActivatedRoute) {
+    this.siteID = Number(this.route.snapshot.paramMap.get('id'));
+  }
+
+  ngOnInit() {
+    this.initSiteInfo();
+  }
+
+  initSiteInfo() {
+    this.apiService.getSiteByID(this.siteID).subscribe({
+      next: (site) => {
+        this.site = site;
+        console.log('[Report] Site info fetched successfully:', this.site);
+      },
+      error: (error) => {
+        console.error('[Report] Error fetching site info:', error);
+      }
+    });
+  }
+
 }

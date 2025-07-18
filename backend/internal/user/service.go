@@ -51,6 +51,24 @@ func (service *Service) GetAllUsers() ([]*User, error) {
 	return allUsers, nil
 }
 
+// GetUserByID retrieves a user by their ID.
+func (service *Service) GetUserByID(userID int64) (*User, error) {
+	user, err := service.repo.GetUserByID(userID)
+	if err != nil {
+		// Log the error and return it
+		log.Printf("Error fetching user by ID %d: %v", userID, err)
+		return nil, err
+	}
+	if user == nil {
+		// If no user is found, return nil
+		log.Printf("No user found with ID: %d", userID)
+		return nil, nil // No user found
+	}
+
+	log.Printf("Successfully retrieved user by ID: %d", userID)
+	return user, nil
+}
+
 // GetUserSiteCards retrieves all site cards for a user by their user ID.
 func (service *Service) GetUserSiteCards(userID int64) ([]*UserSiteCard, error) {
 	userSiteCards, err := service.repo.GetUserSiteCards(userID)

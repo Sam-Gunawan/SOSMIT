@@ -333,8 +333,17 @@ func (handler *Handler) FinishOpnameSessionHandler(context *gin.Context) {
 		return
 	}
 
+	// Get the user ID from context (placed by auth middleware)
+	userID, exists := context.Get("user_id")
+	if !exists {
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"error": "user unauthorized, user_id not found in context",
+		})
+		return
+	}
+
 	// Call the service to finish the opname session
-	err = handler.service.FinishOpnameSession(sessionID)
+	err = handler.service.FinishOpnameSession(sessionID, userID.(int64))
 	if err != nil {
 		log.Printf("❌ Error finishing opname session with ID %d: %v", sessionID, err)
 		context.JSON(http.StatusInternalServerError, gin.H{

@@ -4,6 +4,7 @@ package user
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -86,6 +87,57 @@ func (handler *Handler) GetAllUsersHandler(context *gin.Context) {
 
 	context.JSON(http.StatusOK, gin.H{
 		"users": allUsers,
+	})
+}
+
+// GetUserByIDHandler retrieves a user by their ID.
+func (handler *Handler) GetUserByIDHandler(context *gin.Context) {
+	// Get the user ID from the URL parameters
+	userIDParam := context.Param("user_id")
+	if userIDParam == "" {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "user_id parameter is required",
+		})
+		return
+	}
+
+	// Convert userIDParam to int64
+	userID, err := strconv.ParseInt(userIDParam, 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid user_id format",
+		})
+		return
+	}
+
+	// Call the service to get the user by ID
+	user, err := handler.service.GetUserByID(userID)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to fetch user by ID: " + err.Error(),
+		})
+		return
+	}
+
+	if user == nil {
+		context.JSON(http.StatusNotFound, gin.H{
+			"error": "user not found with ID: " + strconv.FormatInt(userID, 10),
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"user_id":        user.UserID,
+		"username":       user.Username,
+		"email":          user.Email,
+		"first_name":     user.FirstName,
+		"last_name":      user.LastName,
+		"position":       user.Position,
+		"site_id":        user.SiteID,
+		"site_name":      user.SiteName,
+		"site_group":     user.SiteGroupName,
+		"region_name":    user.RegionName,
+		"cost_center_id": user.CostCenterID,
 	})
 }
 
