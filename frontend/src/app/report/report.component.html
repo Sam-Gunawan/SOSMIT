@@ -32,18 +32,19 @@
                     </div>
                 </div>
 
-                <div class="search-view">
+                <div class="search-view mb-4">
                     <div class="filter-dropdown">
-                        <input type="date" id="date" name="date">
+                        <input type="date" id="date" name="date" [(ngModel)]="selectedDate" class="form-control"/>
+                        <p>{{ selectedDate }}</p>
                     </div>
                     <form class="d-flex search-bar" role="search">
-                        <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search"/>
+                        <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search" />
                         <button class="btn btn-outline-success" type="submit">Search</button>
                     </form>
                 </div>
 
                 <div class="my-container">
-                    <app-asset-card [showHeader]="false" *ngIf="currentView === 'list'"></app-asset-card>
+                    <app-opname-asset [variant]="cardVariant" [showLocation]="showLocation" [siteID]="site.siteID" [isInReport]="true" [sessionID]="10"></app-opname-asset>
                 </div>
             </div>
         </section>

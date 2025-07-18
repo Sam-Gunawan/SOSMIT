@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=delete" />
 
-<div class="opname-sticky-top">
+<div class="opname-sticky-top" *ngIf="!isInReport">
     <div class="search-bar">
         <form class="d-flex" role="search" (ngSubmit)="onSearch()">
             <input
@@ -94,7 +94,7 @@
                             </div>
                         </div>
 
-                        <span class="delete-icon material-symbols-outlined" (click)="removeAsset(i)">delete</span>
+                        <span class="delete-icon material-symbols-outlined" *ngIf="!isInReport" (click)="removeAsset(i)">delete</span>
                     </div>
                 </section>
 
@@ -130,7 +130,7 @@
                             </div>
                         </div>
 
-                        <span class="delete-icon material-symbols-outlined" (click)="removeAsset(i)">delete</span>
+                        <span class="delete-icon material-symbols-outlined" *ngIf="!isInReport" (click)="removeAsset(i)">delete</span>
                     </div>
                 </section>
 
@@ -385,7 +385,7 @@
                         </div>
                     </div>
                     
-                    <span class="delete-icon-mobile material-symbols-outlined" (click)="removeAsset(i)">delete</span>
+                    <span class="delete-icon-mobile material-symbols-outlined" *ngIf="!isInReport" (click)="removeAsset(i)">delete</span>
                     
                     <div class="modal fade" [id]="'edit-modal-' + result.existingAsset.assetTag" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg">

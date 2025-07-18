@@ -357,3 +357,54 @@ func (handler *Handler) FinishOpnameSessionHandler(context *gin.Context) {
 		"message": fmt.Sprintf("Opname session %d finished successfully", sessionID),
 	})
 }
+
+// FilterOpnameSessionsHandler retrieves all opname sessions for a specific date and site.
+func (handler *Handler) FilterOpnameSessionsHandler(context *gin.Context) {
+	// Get the site ID from URL parameters
+	siteIDstr := context.Param("site_id")
+	siteID, err := strconv.Atoi(siteIDstr)
+	if err != nil || siteID <= 0 {
+		log.Printf("⚠ Invalid site ID: %s", siteIDstr)
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid site_id, must be a positive integer",
+		})
+		return
+	}
+
+	// Get the opname date from query parameters
+	opnameDate := context.Query("opname_date")
+	if opnameDate == "" {
+		log.Printf("⚠ Opname date not provided")
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "opname_date query parameter is required",
+		})
+		return
+	}
+
+	// Call the service to filter opname sessions
+	sessions, err := handler.service.FilterOpnameSessions(opnameDate, siteID)
+	if err != nil {
+		log.Printf("❌ Error filtering opname sessions for date %s and site %d: %v", opnameDate, siteID, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to filter opname sessions: " + err.Error(),
+		})
+		return
+	}
+
+	if len(sessions) == 0 {
+		log.Printf("⚠ No opname sessions found for date %s and site %d", opnameDate, siteID)
+		context.JSON(http.StatusOK, gin.H{
+			"message":  "No opname sessions found for the specified date and site",
+			"sessions": sessions,
+		})
+		return
+	}
+
+	var filteredSessions []string
+	filteredSessions = append(filteredSessions, sessions...)
+
+	context.JSON(http.StatusOK, gin.H{
+		"message":  "Opname sessions retrieved successfully",
+		"sessions": filteredSessions,
+	})
+}

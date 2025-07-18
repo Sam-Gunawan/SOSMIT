@@ -212,4 +212,19 @@ export class OpnameSessionService {
       })
     );
   }
+
+  filterOpnameSessionsByDate(siteID: number, opnameDate: string): Observable<number[]> {
+    // This method will filter opname sessions by date for a specific site.
+    console.log('[OpnameService] Filtering opname sessions for site:', siteID, 'on date:', opnameDate);
+    return this.http.get(`${this.opnameApiUrl}/filter/site/${siteID}`, { params: { opname_date: opnameDate } }).pipe(
+      map((response: any): number[] => {
+        // Expecting response.sessions to be an array of session ID strings
+        return Array.isArray(response.sessions) ? response.sessions.map((id: string) => Number(id)) : [];
+      }),
+      tap((response: number[]) => {
+        // Log the response for debugging purposes.
+        console.log('[OpnameService] Filtered opname session IDs:', response);
+      })
+    );
+  }
 }

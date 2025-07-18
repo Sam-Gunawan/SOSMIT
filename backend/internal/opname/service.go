@@ -275,3 +275,27 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 	log.Printf("✅ Opname session with ID %d finished successfully", sessionID)
 	return nil
 }
+
+// FilterOpnameSessions retrieves all opname sessions filtered by date and site.
+func (service *Service) FilterOpnameSessions(opnameDate string, siteID int) ([]string, error) {
+	// Validate opnameDate and siteID
+	if opnameDate == "" || siteID <= 0 {
+		log.Printf("⚠ Invalid opnameDate or siteID: opnameDate=%s, siteID=%d", opnameDate, siteID)
+		return nil, errors.New("invalid opnameDate or siteID")
+	}
+
+	// Call the repository to filter sessions by date and site
+	sessions, err := service.repo.FilterOpnameSessions(opnameDate, siteID)
+	if err != nil {
+		log.Printf("❌ Error filtering opname sessions by date %s and site %d: %v", opnameDate, siteID, err)
+		return nil, err
+	}
+
+	if len(sessions) == 0 {
+		log.Printf("⚠ No opname sessions found for date %s and site %d", opnameDate, siteID)
+		return make([]string, 0), nil // Return an empty slice if no sessions are found.
+	}
+
+	log.Printf("✅ Opname sessions filtered by date %s and site %d successfully", opnameDate, siteID)
+	return sessions, nil
+}

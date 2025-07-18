@@ -21,6 +21,7 @@ import { environment } from '../../environments/environments';
 export class OpnameAssetComponent implements OnDestroy {
   public readonly serverURL = environment.serverURL; // Expose environment for use in the template
 
+  @Input() isInReport: boolean = false; // Flag to check if in report view
   @Input() variant: 'default' | 'compact' = 'default';
   @Input() showLocation: boolean = false;
   @Input() sessionID: number = -1; // Session ID for the current opname session
@@ -92,10 +93,14 @@ export class OpnameAssetComponent implements OnDestroy {
     this.isLoading = true;
     this.checkScreenSize();
     this.updateResponsiveSettings();
-    this.initOpnameData();
     this.getAllUsers();
     this.getAllSites();
     this.errorMessage = '';
+
+    setTimeout(() => {
+      this.isLoading = true;
+      this.initOpnameData(); // Delayed initialization to ensure all inputs are set
+    }, 0) // Use 0 to ensure it runs after the current call stack
     
     // Set up periodic window size checking to catch missed events
     this.resizeCheckInterval = window.setInterval(() => {

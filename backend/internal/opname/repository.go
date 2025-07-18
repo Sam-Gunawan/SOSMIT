@@ -7,14 +7,13 @@ import (
 )
 
 type OpnameSession struct {
-	ID        int            `json:"id"`
-	StartDate string         `json:"start_date"`
-	EndDate   sql.NullString `json:"end_date"` // Use sql.NullString to handle
-	// nullable end_date
-	Status     string        `json:"status"`
-	UserID     int           `json:"user_id"`
-	ApproverID sql.NullInt64 `json:"approver_id"` // Use sql.NullInt64 for nullable approver_id
-	SiteID     int           `json:"site_id"`
+	ID         int            `json:"id"`
+	StartDate  string         `json:"start_date"`
+	EndDate    sql.NullString `json:"end_date"` // Use sql.NullString to handle nullable end_date
+	Status     string         `json:"status"`
+	UserID     int            `json:"user_id"`
+	ApproverID sql.NullInt64  `json:"approver_id"` // Use sql.NullInt64 for nullable approver_id
+	SiteID     int            `json:"site_id"`
 }
 
 type AssetChange struct {
@@ -234,4 +233,29 @@ func (repo *Repository) FinishOpnameSession(sessionID int) error {
 	// If successful, log the completion.
 	log.Printf("✅ Opname session with ID %d finished successfully", sessionID)
 	return nil
+}
+
+// FilterOpnameSessions retrieves all opname sessions filtered by date and site.
+func (repo *Repository) FilterOpnameSessions(opnameDate string, siteID int) ([]string, error) {
+	var sessionIDs []string
+
+	query := `SELECT * FROM get_opname_by_date_and_site($1, $2)`
+
+	rows, err := repo.db.Query(query, opnameDate, siteID)
+	if err != nil {
+		log.Printf("❌ Error filtering opname sessions by date %s and site %d: %v", opnameDate, siteID, err)
+		return nil, err // Query failed for some error.
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var sessionID string
+		if err := rows.Scan(&sessionID); err != nil {
+			log.Printf("❌ Error scanning session ID: %v", err)
+			return nil, err // Row scan failed for some error.
+		}
+		sessionIDs = append(sessionIDs, sessionID)
+	}
+
+	return sessionIDs, nil
 }

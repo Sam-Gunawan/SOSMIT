@@ -18,6 +18,7 @@ DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
 DROP FUNCTION IF EXISTS public.get_all_sites();
 DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
+DROP FUNCTION IF EXISTS public.get_opname_by_date_and_site(DATE, INT);
 
 -- get_credentials retrieves user credentials by username (for login auth)
 -- ! email not implemented yet
@@ -626,5 +627,37 @@ AS $$
 		SELECT ac.id, ac."changes", ac.change_reason, ac.asset_tag
 		FROM "AssetChanges" as ac
 		WHERE session_id = _session_id;
+	END;
+$$;
+
+-- get_opname_by_date_and_site retrieves opname session ID for a specific date on a specific site
+CREATE OR REPLACE FUNCTION public.get_opname_by_date_and_site(_opname_date DATE, _site_id INT)
+	RETURNS TABLE (
+		session_id INT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT os.id
+		FROM "OpnameSession" AS os
+		WHERE os.end_date::DATE = _opname_date AND os.site_id = _site_id;
+	END;
+$$;
+
+-- get_opname_by_site retrieves all opname sessions for a specific site
+-- ! This function is only for report page, it will only return sessions that are not 'Active'
+CREATE OR REPLACE FUNCTION public.get_opname_by_site(_site_id INT)
+	RETURNS TABLE (
+		session_id INT,
+		completed_date TIMESTAMP WITH TIME ZONE
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT os.id, os.end_date AS completed_date
+		FROM "OpnameSession" AS os
+		WHERE os.site_id = _site_id AND os.status != 'Active';
 	END;
 $$;
