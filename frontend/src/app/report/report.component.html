@@ -8,17 +8,32 @@
                     <!-- TODO: apply css for site GA -->
                     <p class="site-ga">GA: {{ site.siteGaName }}</p>
                 </div>
-                <div class="export-report">
-                    <img class="export-icon" src="assets/export.svg" alt="Export Report"/>
+
+                <div class="export-search">
+                    <div class="export-report">
+                        <img class="export-icon" src="assets/export.svg" alt="Export Report"/>
+                    </div>
+    
+                    <div class="filter-dropdown">
+                        <div class="date-dropdown-wrapper">
+                            <select id="date" name="date" class="form-control date-dropdown" [(ngModel)]="selectedDate" (change)="onDateChange()">
+                                <option value="">Select a date</option>
+                                <option *ngFor="let dateOption of dateOptions" [value]="dateOption.value">
+                                    {{ dateOption.label }}
+                                </option>
+                            </select>
+                            <i class="calendar-icon fas fa-calendar-alt"></i>
+                        </div>
+                    </div>
                 </div>
-                <div class="buttons">
+                <!-- <div class="buttons">
                     <div class="verify-button">
                         <button class="btn btn-success btn-sm">Verify Opname</button>
                     </div>
                     <div class="reject-button">
                         <button class="btn btn-danger btn-sm">Reject Opname</button>
                     </div>
-                </div>
+                </div> -->
             </div>
 
             <hr class="divider">
@@ -26,7 +41,7 @@
             <div class="opname-body">                
                 <div class="report-cards">
                     <div class="card card-1">
-                        <p>Asset Changes</p>
+                        <p>Working</p>
                         <h4>5</h4>
                     </div>
                     <div class="card card-2">
@@ -34,7 +49,7 @@
                         <h4>5</h4>
                     </div>
                     <div class="card card-3">
-                        <p>Asset Changes</p>
+                        <p>Administration Issue</p>
                         <h4>5</h4>
                     </div>
                     <div class="card card-4">
@@ -43,7 +58,7 @@
                     </div>
                 </div>
 
-                <div class="search-view mb-4">
+                <!-- <div class="search-view mb-4">
                     <div class="filter-dropdown">
                         <div class="date-dropdown-wrapper">
                             <select id="date" name="date" class="form-control date-dropdown" [(ngModel)]="selectedDate" (change)="onDateChange()">
@@ -59,7 +74,7 @@
                         <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search" />
                         <button class="btn btn-outline-success" type="submit">Search</button>
                     </form>
-                </div>
+                </div> -->
 
                 <div class="my-container" *ngIf="selectedDate">
                     <app-opname-asset [variant]="cardVariant" [showLocation]="showLocation" [siteID]="site.siteID" [isInReport]="true" [sessionID]="sessionID"></app-opname-asset>
