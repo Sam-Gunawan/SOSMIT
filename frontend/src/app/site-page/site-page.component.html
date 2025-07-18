@@ -1,5 +1,15 @@
 <main class="site-wrapper">
-    <div class="site-page" *ngIf="errorMessage === '' && !isLoading">
+    <div class="site-page" *ngIf="!isLoading">
+        <!-- ERROR MESSAGE -->
+        <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <p>{{ errorMessage }}</p>
+                    <p>Please try again later.</p>
+                </div>
+                <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
+            </div>
+        </div>
         <section class="site-content">
             <div class="site-information">
                 <div class="basic-info">
@@ -56,15 +66,15 @@
     </div>
     
     <!-- ERROR MESSAGE -->
-    <div *ngIf="errorMessage && showToast" class="my-toast align-items-center text-bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <!-- <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
         <div class="d-flex">
             <div class="toast-body">
-                <h5>{{ errorMessage }}</h5>
+                <p>{{ errorMessage }}</p>
                 <p>Please try again later.</p>
             </div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" (click)="showToast = false" aria-label="Close"></button>
+            <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
         </div>
-    </div>
+    </div> -->
     
     <!-- <div class="error-message" *ngIf="errorMessage">
         <h1>{{ errorMessage }}</h1>

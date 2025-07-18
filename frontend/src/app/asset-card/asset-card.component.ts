@@ -27,6 +27,7 @@ export class AssetCardComponent {
   assetsOnSite?: AssetInfo[] = [];
   isLoading: boolean = true;
   errorMessage: string = '';
+  showToast: boolean = false;
 
   constructor(private apiService: ApiService, private route: ActivatedRoute) {}
 
@@ -83,6 +84,8 @@ export class AssetCardComponent {
       },
       error: (error) => {
         this.errorMessage = 'Failed to fetch assets. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
         this.isLoading = false;
         console.error('[AssetCard] Error fetching assets:', error);
       }

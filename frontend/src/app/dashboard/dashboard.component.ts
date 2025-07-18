@@ -17,6 +17,7 @@ export class DashboardComponent {
   isLoading: boolean = true;
   errorMessage: string = '';
   loggedInUser: User;
+  showToast: boolean = false;
   
   constructor(private apiService: ApiService) {
     this.loggedInUser = {
@@ -57,6 +58,8 @@ export class DashboardComponent {
       error: (error) => {
         this.errorMessage = "User's profile not found.";
         this.isLoading = false; // Set loading state to false
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
         console.error('[Dashboard] Failed to fetch user profile:', error);
       }
     });

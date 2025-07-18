@@ -1,5 +1,16 @@
 <main class="dashboard-wrapper">
     <div class="dashboard-page">
+        <!-- ERROR MESSAGE -->
+        <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <p>Error: {{ errorMessage }}</p>
+                    <p>Please try again later or contact support.</p>
+                </div>
+                <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
+            </div>
+        </div>
+        
         <section class="dashboard-content" *ngIf="errorMessage === '' && !isLoading">
             <div class="greeting-card">
                 <h2>Selamat Pagi, {{ loggedInUser.firstName }}!</h2>
@@ -12,13 +23,12 @@
             </div>
         </section>
 
-        <!-- ERROR MESSAGE -->
-        <section class="dashboard-content" *ngIf="errorMessage">
+        <!-- <section class="dashboard-content" *ngIf="errorMessage">
             <div class="error-message">
                 <h2>Error: {{ errorMessage }}</h2>
                 <p>Please try again later or contact support.</p>
             </div>
-        </section>
+        </section> -->
 
         <!-- LOADING -->
         <section class="dashboard-content" *ngIf="isLoading">

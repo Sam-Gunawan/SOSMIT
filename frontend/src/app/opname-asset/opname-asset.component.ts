@@ -30,6 +30,7 @@ export class OpnameAssetComponent implements OnDestroy {
   searchQuery: string = '';
   searchType: 'asset_tag' | 'serial_number' = 'asset_tag'; // Default search type
   isSearching: boolean = false;
+  showToast: boolean = false;
 
   // Assets - Each search result is stored as an object in this array (it is appended to the array)
   searchResults: Array<{
@@ -119,6 +120,8 @@ export class OpnameAssetComponent implements OnDestroy {
       error: (error) => {
         console.error('[OpnameAsset] Error fetching all users:', error);
         this.errorMessage = 'Failed to fetch user list. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
       }
     })
   }
@@ -131,6 +134,8 @@ export class OpnameAssetComponent implements OnDestroy {
       error: (error) => {
         console.error('[OpnameAsset] Error fetching all sites:', error);
         this.errorMessage = 'Failed to fetch site list. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
       }
     })
   }
@@ -145,6 +150,8 @@ export class OpnameAssetComponent implements OnDestroy {
       error: (error) => {
         console.error('[OpnameAsset] Error loading opname session progress:', error);
         this.errorMessage = 'Failed to load opname session progress. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
         this.isLoading = false; // Only set false on error
       }
     });
@@ -247,6 +254,8 @@ export class OpnameAssetComponent implements OnDestroy {
         error: (error) => {
           console.error('[OpnameAsset] Error fetching master asset:', error);
           this.errorMessage = 'Failed to load master asset. Please try again later.';
+          this.showToast = true;
+          setTimeout(() => this.showToast = false, 3000);
           
           completedCount++;
           // Even on error, check if we've completed all calls
@@ -275,6 +284,8 @@ export class OpnameAssetComponent implements OnDestroy {
       error: (error) => {
         console.error('[OpnameAsset] Error loading opname session:', error);
         this.errorMessage = 'Failed to load opname session. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
       }
     });
   }
@@ -312,12 +323,16 @@ export class OpnameAssetComponent implements OnDestroy {
   onSearch(): void {
     if (!this.searchQuery.trim()) {
       this.errorMessage = 'Please type something into the search bar.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       return;
     }
 
     this.searchQuery = this.searchQuery.trim().toUpperCase(); // Normalize search query
     this.isSearching = true;
     this.errorMessage = ''; // Clear previous error message
+    this.showToast = true;
+    setTimeout(() => this.showToast = false, 3000);
 
     console.log('[OpnameAsset] Starting search for:', this.searchQuery, 'by', this.searchType);
 
@@ -330,6 +345,8 @@ export class OpnameAssetComponent implements OnDestroy {
     if (alreadyExists) {
       this.isSearching = false;
       this.errorMessage = 'Asset already exists in the search results. Please check the list.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       console.log('[OpnameAsset] Asset already exists in search results:', this.searchQuery);
       return;
     }
@@ -358,6 +375,8 @@ export class OpnameAssetComponent implements OnDestroy {
         console.error('[OpnameAsset] Error during search:', error);
         this.isSearching = false;
         this.errorMessage = 'Asset not found. Please check the asset tag or serial number.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
       }      
     });
   }
@@ -381,6 +400,8 @@ export class OpnameAssetComponent implements OnDestroy {
         error: (error) => {
           console.error('[OpnameAsset] Error uploading condition photo:', error);
           this.errorMessage = 'Failed to upload condition photo. Please try again.';
+          this.showToast = true;
+          setTimeout(() => this.showToast = false, 3000);
         }
       })
     }
@@ -532,11 +553,15 @@ export class OpnameAssetComponent implements OnDestroy {
   processAssetChange(index: number): void {
     this.errorMessage = '';
     this.successMessage = '';
+    this.showToast = true;
+    setTimeout(() => this.showToast = false, 3000);
 
     // Validate the index to ensure it is within bounds of the search results array
     if (index < 0 || index >= this.searchResults.length) {
       console.error('[OpnameAsset] Invalid index for asset changes:', index);
       this.errorMessage = 'Invalid asset index. Please try again.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       return;
     }
 
@@ -548,12 +573,16 @@ export class OpnameAssetComponent implements OnDestroy {
     // Check if any change has been made
     if (!this.hasFormChangesForAsset(result)) {
       this.errorMessage = 'No changes made to the asset. Please modify at least one field.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       return;
     }
 
     // Check for change reason (required for any changes made)
     if (!result.changeReason) {
       this.errorMessage = 'Please provide a reason for the changes.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
       return;
     }
@@ -561,6 +590,8 @@ export class OpnameAssetComponent implements OnDestroy {
     // Check for valid owner (must have a valid ID)
     if (pending.assetOwner === undefined || pending.assetOwner === 0) {
       this.errorMessage = 'Please select a valid user from the list.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
       return;
     }
@@ -568,6 +599,8 @@ export class OpnameAssetComponent implements OnDestroy {
     // Check for valid site (must have a valid ID)
     if (pending.siteID === undefined) {
       this.errorMessage = 'Please select a valid site from the list.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
       return;
     }
@@ -648,6 +681,8 @@ export class OpnameAssetComponent implements OnDestroy {
       error: (error) => {
         console.error('[OpnameAsset] Error processing asset:', error);
         this.errorMessage = 'Failed to process asset. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
         this.isSearching = false;
         this.isLoading = false;
         return; // Exit early on error
@@ -698,6 +733,8 @@ export class OpnameAssetComponent implements OnDestroy {
       },
       error: (error) => {
         this.errorMessage = 'Failed to mark asset as verified: ' + (error.message || 'Unkown error');
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
         this.isLoading = false;
         return;
       }
@@ -713,6 +750,8 @@ export class OpnameAssetComponent implements OnDestroy {
     if (index < 0 || index >= this.searchResults.length) {
       console.error('[OpnameAsset] Invalid index for asset removal:', index);
       this.errorMessage = 'Invalid asset index. Please try again.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       return;
     }
 
@@ -728,6 +767,8 @@ export class OpnameAssetComponent implements OnDestroy {
         error: (error: any) => {
           console.error('[OpnameAsset] Error removing asset from session:', error);
           this.errorMessage = 'Failed to remove asset. Please try again later.';
+          this.showToast = true;
+          setTimeout(() => this.showToast = false, 3000);
         }
       });
     }

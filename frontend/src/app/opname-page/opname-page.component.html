@@ -1,5 +1,16 @@
 <main class="opname-wrapper">
     <div class="opname-page">
+        <!-- ERROR MESSAGE -->
+        <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <p>{{ errorMessage }}</p>
+                    <p>Please try again later.</p>
+                </div>
+                <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
+            </div>
+        </div>
+
         <section class="opname-content">
             <div class="opname-header">
                 <div class="opname-details">
@@ -44,10 +55,10 @@
                 <app-opname-asset [variant]="cardVariant" [showLocation]="showLocation" [sessionID]="sessionID" [siteID]="siteID"></app-opname-asset>
             </div>
 
-            <div class="error-message">
+            <!-- <div class="error-message">
                 <h1 *ngIf="errorMessage">{{ errorMessage }}</h1>
                 <p *ngIf="errorMessage">Please try again later.</p>
-            </div>
+            </div> -->
         </section>
     </div>
 </main>

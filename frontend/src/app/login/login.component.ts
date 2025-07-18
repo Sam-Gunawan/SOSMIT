@@ -17,6 +17,7 @@ export class LoginComponent {
   };
 
   errorMessage: string = '';
+  showAlert: boolean = false;
 
   constructor(private apiService: ApiService, private router: Router) {}
 
@@ -27,6 +28,8 @@ export class LoginComponent {
     // Check if username and password are provided
     if (!username || !password) {
       this.errorMessage = 'Username and password are required.';
+      this.showAlert = true;
+      setTimeout(() => this.showAlert = false, 3000);
       console.log(this.errorMessage); 
       return; 
     }
@@ -44,6 +47,8 @@ export class LoginComponent {
         // Handle errors gracefully (HTTP 400-599)
         error: (error) => {
           this.errorMessage = 'Login failed. Incorrect username or password.';
+          this.showAlert = true;
+          setTimeout(() => this.showAlert = false, 3000);
           console.error('Login error:', error);
         }
 

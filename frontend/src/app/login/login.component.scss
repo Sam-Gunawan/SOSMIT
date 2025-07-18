@@ -209,240 +209,27 @@ p #error-message {
   font-size: 0.5rem;
 }
 
+.my-alert {
+  display: block;
+  z-index: 9999;
+  padding: 10px 20px;
+  border-radius: 10px;
+  background-color: color.adjust(styles.$secondary-color, $lightness: 20%);
+  opacity: 0.8;
+  margin-bottom: 0px;
 
-// @use "../../styles.scss" as styles;
+  p {
+    font-size: 14px;
+  }
+}
 
-// * {
-//     @include styles.default-styles;
-// }
+.input-error-wrapper {
+  position: relative;
+  width: 100%;
+}
 
-// .login-page {
-//     flex-grow: 1;
-//     display: flex;
-//     align-items: center;
-//     justify-content: center;
-//     padding: 20px;
-//     gap: 40px;
-//     flex-direction: row;
-//     min-height: 100vh;
-// }
-
-// .login-image {
-//     flex: 1;
-//     display: flex;
-//     justify-content: center;
-//     align-items: center;
-//     max-width: 50%;
-// }
-
-// .login-form {
-//     flex: 0 0 auto;
-//     display: flex;
-//     justify-content: center;
-//     align-items: center;
-//     max-width: 650px;
-//     width: 100%;
-//     min-width: unset;
-//     // margin-right: 5%;
-// }
-
-// .login-container {
-//     background-color: styles.$background-color;
-//     padding: 3.5rem 3.5rem;
-//     border-radius: 1rem;
-//     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-//     width: 100%;
-//     max-width: 600px;
-//     min-width: unset;
-//     min-height: 500px;
-//     // max-height: 90vh;
-//     text-align: center;
-//     // display: flex;
-//     // flex-direction: column;
-//     // justify-content: center;
-//     align-items: center;
-//     // margin-left: auto;
-//     // margin-right: auto;
-
-//     h2 {
-//         font-size: 2.5rem;
-//         font-weight: 700;
-//         color: #333;
-//         margin-bottom: 2.5rem;
-//     }
-
-//     .form-group {
-//         margin-bottom: 1.8rem;
-//         text-align: left;
-//         display: flex;
-//         flex-direction: column;
-//         gap: 0.8rem;
-//     }
-
-//     label {
-//         font-size: 1.1rem;
-//     }
-
-//     input {
-//         padding: 1.2rem 1rem;
-//         font-size: 1.1rem;
-//         border: 1px solid #ddd;
-//         border-radius: 0.5rem;
-//     }
-
-//     button {
-//     padding: 1.2rem 2.5rem;
-//     border: none;
-//     border-radius: 0.5rem;
-//     background-color: styles.$secondary-color;
-//     color: #fff;
-//     font-size: 1.2rem;
-//     font-weight: 600;
-//     cursor: pointer;
-//     transition: background-color 0.3s ease;
-//     margin-top: 2rem;
-
-//     &:hover {
-//       background-color: color.adjust(styles.$secondary-color, 10%); // Example hover effect
-//     }
-//   }
-// }
-
-// .login-decoration {
-//     background-color: styles.$background-color;
-//     padding: 3.5rem 3.5rem;
-//     border-radius: 1rem;
-//     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-//     width: 100%;
-//     max-width: 600px;
-//     min-width: unset;
-//     min-height: 500px;
-//     text-align: center;
-//     align-items: center;
-// }
-
-// main {
-//     display: flex;
-//     flex-direction: column;
-//     // min-height: 100vh;
-//     width: 100%;
-//     background-color:transparent;
-//     justify-content: center;
-//     align-items: center;
-//     min-height: 100vh;
-// }
-
-
-
-
-// @use "../../styles.scss" as styles;
-
-// * {
-//     @include styles.default-styles;
-// }
-
-// .login-page {
-//     flex-grow: 1;
-//     display: flex;
-//     align-items: center;
-//     justify-content: flex-end;
-//     padding: 20px;
-//     gap: 40px;
-//     flex-direction: row;
-//     background-image: url("https://img.freepik.com/free-vector/warehouse-interior-with-cardboard-boxes-racks_107791-1633.jpg");
-//     background-size: cover;
-//     background-position: center;
-//     min-height: 100vh;
-// }
-
-// // .login-image {
-// //     flex: 1;
-// //     display: flex;
-// //     justify-content: center;
-// //     align-items: center;
-// //     max-width: 50%;
-// // }
-
-// .login-form {
-//     flex: 0 0 auto;
-//     display: flex;
-//     justify-content: center;
-//     align-items: center;
-//     max-width: 650px;
-//     width: 100%;
-//     min-width: unset;
-//     // margin-right: 5%;
-// }
-
-// .login-container {
-//     background-color: styles.$background-color;
-//     padding: 3.5rem 3.5rem;
-//     border-radius: 1rem;
-//     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-//     width: 100%;
-//     max-width: 600px;
-//     min-width: unset;
-//     min-height: 500px;
-//     // max-height: 90vh;
-//     text-align: center;
-//     // display: flex;
-//     // flex-direction: column;
-//     // justify-content: center;
-//     align-items: center;
-//     // margin-left: auto;
-//     // margin-right: auto;
-
-//     h2 {
-//         font-size: 2.5rem;
-//         font-weight: 700;
-//         color: #333;
-//         margin-bottom: 2.5rem;
-//     }
-
-//     .form-group {
-//         margin-bottom: 1.8rem;
-//         text-align: left;
-//         display: flex;
-//         flex-direction: column;
-//         gap: 0.8rem;
-//     }
-
-//     label {
-//         font-size: 1.1rem;
-//     }
-
-//     input {
-//         padding: 1.2rem 1rem;
-//         font-size: 1.1rem;
-//         border: 1px solid #ddd;
-//         border-radius: 0.5rem;
-//     }
-
-//     button {
-//     padding: 1.2rem 2.5rem;
-//     border: none;
-//     border-radius: 0.5rem;
-//     background-color: styles.$secondary-color;
-//     color: #fff;
-//     font-size: 1.2rem;
-//     font-weight: 600;
-//     cursor: pointer;
-//     transition: background-color 0.3s ease;
-//     margin-top: 2rem;
-
-//     &:hover {
-//       background-color: color.adjust(styles.$secondary-color, 10%); // Example hover effect
-//     }
-//   }
-// }
-
-// main {
-//     display: flex;
-//     flex-direction: column;
-//     // min-height: 100vh;
-//     width: 100%;
-//     background-color:transparent;
-//     justify-content: center;
-//     align-items: center;
-//     min-height: 100vh;
-// }
+.input-error {
+  border: 1px solid #dc3545 !important;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
