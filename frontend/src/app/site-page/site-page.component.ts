@@ -20,7 +20,7 @@ import { OpnameSession } from '../model/opname-session.model';
     errorMessage: string = '';
     opnameLoading: boolean = false; // Loading state for starting a new opname session
     opnameSession?: OpnameSession; // Optional opname session to hold the current session data
-    showToast = false;
+    showToast: boolean = false;
 
     constructor(private route: ActivatedRoute, private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService) {
       this.sitePage = {
@@ -52,6 +52,8 @@ import { OpnameSession } from '../model/opname-session.model';
             this.sitePage = fetchedSite; // Set the sitePage to the fetched site
           } else {
             this.errorMessage = 'Site not found.';
+            this.showToast = true;
+            setTimeout(() => this.showToast = false, 3000);
             console.error('[SitePage] Site not found for ID:', id);
             return
           }
@@ -63,7 +65,7 @@ import { OpnameSession } from '../model/opname-session.model';
           this.isLoading = false; // Set loading state to false even if there's an error
           this.errorMessage = 'Failed to load site cards. Please try again later.';
           this.showToast = true;
-          setTimeout(() => this.showToast = false, 4000);
+          setTimeout(() => this.showToast = false, 3000);
         }
       });
     }
@@ -104,6 +106,7 @@ import { OpnameSession } from '../model/opname-session.model';
           console.error('[SitePage] Error starting new opname session:', error.error.error);
           this.errorMessage = error.error.error || 'Failed to start new opname session. Please try again later.';
           this.showToast = true;
+          setTimeout(() => this.showToast = false, 3000);
         }
       });
     }
@@ -124,6 +127,7 @@ import { OpnameSession } from '../model/opname-session.model';
         this.errorMessage = 'No opname session ID available.';
         console.error('[SitePage] No opname session ID to continue');
         this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
         return;
       }
       
@@ -140,6 +144,8 @@ import { OpnameSession } from '../model/opname-session.model';
             const status = this.opnameSession ? this.opnameSession.status : 'unknown';
             console.error('[SitePage] Opname session is not active:', status);
             this.errorMessage = `Opname session is not active (current status: ${status}).`;
+            this.showToast = true;
+            setTimeout(() => this.showToast = false, 3000);
           }
         },
         error: (error) => {
@@ -147,6 +153,7 @@ import { OpnameSession } from '../model/opname-session.model';
           this.opnameLoading = false; // Set loading state to false on error
           this.errorMessage = 'Failed to fetch current opname session. Please try again later.';
           this.showToast = true;
+          setTimeout(() => this.showToast = false, 3000);
         }
       });
     }

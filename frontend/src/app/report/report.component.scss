@@ -65,7 +65,42 @@ p {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-}   
+}
+
+.report-details {
+  flex-grow: 1;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  .btn {
+    width: 137px;
+  }
+
+  @media (max-width: 768px) {
+    .btn {
+      font-size: 0.75rem;
+      width: 113px;
+    }
+  }
+}
+
+.export-report {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 5px 10px;
+
+  img {
+    width: 40px;
+    height: 40px;
+  }
+}
 
 .report-cards {
   display: grid;

@@ -312,33 +312,48 @@ p {
 }   
 
 .my-tooltip .tooltiptext {
-  visibility: hidden;
-  width: 90px;
-  background-color: black;
-  color: #fff;
-  text-align: center;
-  padding: 5px 0;
-  border-radius: 6px;
-  font-size: 12px;
- 
-  position: absolute;
-  z-index: 1;
+    visibility: hidden;
+    width: 90px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+    font-size: 12px;
+    position: absolute;
+    z-index: 1;
 }
 
 .my-tooltip:hover .tooltiptext {
-  visibility: visible;
+    visibility: visible;
 }
 
 .my-tooltip .tooltiptext {
-  top: -5px;
-  right: 105%;
+    top: -5px;
+    right: 105%;
 }
 
 .my-toast {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  min-width: 300px;
-  z-index: 9999;
-  display: block;
+    display: block;
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 9999;
+    max-width: 400px;
+    border-radius: 20px;
+    padding: 10px 20px;
+    // border: 0.5px solid rgb(82, 6, 6);
+    background-color: color.adjust(styles.$secondary-color, $lightness: 20%);
+    opacity: 0.8;
+    box-shadow: 0px 10px 16px rgba(0, 0, 0, 0.1);
+
+    .toast-body {
+        padding-right: 5px;
+    }
+    
+    p {
+        margin: 0;
+        font-size: 14px;
+        color: rgb(51, 3, 3);
+    }
 }

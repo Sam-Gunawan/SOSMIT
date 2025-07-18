@@ -151,8 +151,19 @@
         </div>
     </div>
 
+    <!-- ERROR MESSAGE -->
+    <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <p>{{ errorMessage }}</p>
+                <p>Please try again later.</p>
+            </div>
+            <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
+        </div>
+    </div>
+
     <!-- Error generating modal for asset view -->
-    <div class="modal-content" *ngIf="errorMessage">
+    <!-- <div class="modal-content" *ngIf="errorMessage">
         <div class="modal-header">
             <h5 class="modal-title">Error</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -166,7 +177,7 @@
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
-    </div>
+    </div> -->
 
     <!-- Loading modal for asset view -->
     <div class="modal-content" *ngIf="isLoading">

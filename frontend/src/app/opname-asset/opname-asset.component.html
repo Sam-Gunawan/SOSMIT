@@ -153,8 +153,19 @@
                                 </div>
 
                                 <!-- Error Message Alert -->
-                                <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
+                                <!-- <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
                                     {{ errorMessage }}
+                                </div> -->
+
+                                <!-- ERROR MESSAGE -->
+                                <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+                                    <div class="d-flex">
+                                        <div class="toast-body">
+                                            <p>{{ errorMessage }}</p>
+                                            <p>Please try again later.</p>
+                                        </div>
+                                        <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
+                                    </div>
                                 </div>
 
                                 <form (ngSubmit)="processAssetChange(i)">
@@ -406,8 +417,19 @@
                                     </div>
 
                                     <!-- Error Message Alert -->
-                                    <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
+                                    <!-- <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
                                         {{ errorMessage }}
+                                    </div> -->
+
+                                    <!-- ERROR MESSAGE -->
+                                    <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+                                        <div class="d-flex">
+                                            <div class="toast-body">
+                                                <p>{{ errorMessage }}</p>
+                                                <p>Please try again later.</p>
+                                            </div>
+                                            <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
+                                        </div>
                                     </div>
 
                                     <form (ngSubmit)="processAssetChange(i)">
@@ -609,9 +631,21 @@
      </div>
 
 </div>
+
 <!-- Session error message -->
-<div class="alert alert-danger" *ngIf="errorMessage">
+<!-- <div class="alert alert-danger" *ngIf="errorMessage">
     {{ errorMessage }}
+</div> -->
+
+<!-- ERROR MESSAGE -->
+<div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+        <div class="toast-body">
+            <p>{{ errorMessage }}</p>
+            <p>Please try again later.</p>
+        </div>
+        <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
+    </div>
 </div>
 
 <!-- Loading indicator -->

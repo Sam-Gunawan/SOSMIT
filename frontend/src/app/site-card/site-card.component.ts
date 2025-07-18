@@ -22,6 +22,7 @@ export class SiteCardComponent {
   filter = input<string>(''); // Input property to filter site cards
   selectedFilter: string = ''; // Track selected filter pill
   searchText: string = ''; // Track search input
+  showToast: boolean = false;
 
   constructor(private apiService: ApiService, private route: Router) {}
 
@@ -72,6 +73,8 @@ export class SiteCardComponent {
 
       error: (error) => {
         this.errorMessage = 'Failed to fetch your sites. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
         this.isLoading = false;
         console.log('[SiteCard] Error fetching site cards:', error);
       }

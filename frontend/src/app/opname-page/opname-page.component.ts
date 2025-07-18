@@ -28,6 +28,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   siteID: number = -1; // Site ID for the current opname session
   isLoading: boolean = true; // Loading state for the opname session
   errorMessage: string = ''; // Error message for the opname session
+  showToast: boolean = false;
   private subscription?: Subscription; // Subscription to manage service state
 
   ngOnInit() {
@@ -93,6 +94,8 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     }
     
     this.errorMessage = 'No opname session found. Please start a new session.';
+    this.showToast = true;
+    setTimeout(() => this.showToast = false, 3000);
   }
 
   private initOpnameSession() {
@@ -108,6 +111,8 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       error: (error) => {
         this.isLoading = false; // Set loading state to false on error
         this.errorMessage = 'Failed to load opname session. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
         console.error('[OpnamePage] Error initializing opname session:', error);
       }
     });
@@ -124,6 +129,8 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     if (this.sessionID <= 0) {
       console.error('[OpnamePage] Invalid session ID:', this.sessionID);
       this.errorMessage = 'Invalid opname session.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       return;
     }
     
@@ -145,6 +152,8 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       error: (error) => {
         this.isLoading = false; // Set loading state to false on error
         this.errorMessage = 'Failed to cancel opname session. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
         console.error('[OpnamePage] Error cancelling opname session:', error);
       }
     });
@@ -155,6 +164,8 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     if (this.sessionID <= 0) {
       console.error('[OpnamePage] Invalid session ID:', this.sessionID);
       this.errorMessage = 'Invalid opname session.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       return;
     }
 
@@ -176,6 +187,8 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       error: (error: any) => {
         this.isLoading = false; // Set loading state to false on error
         this.errorMessage = 'No asset changes recorded for this session. Please ensure you have made changes before finishing.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
         console.error('[OpnamePage] Error finishing opname session:', error);
       }
     });

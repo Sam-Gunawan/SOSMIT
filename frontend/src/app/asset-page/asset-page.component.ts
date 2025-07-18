@@ -29,6 +29,7 @@ export class AssetPageComponent implements OnInit {
   isLoading: boolean = true;
   errorMessage: string = '';
   successMessage: string = '';
+  showToast: boolean = false;
 
   // Form data for editing
   formData: AssetChange & {newOwnerName?: string, newSiteName?: string} = {
@@ -187,16 +188,22 @@ export class AssetPageComponent implements OnInit {
     // Validate the form
     if (!this.formData.changeReason) {
       this.errorMessage = 'Please provide a reason for the changes.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
       return;
     }
     if (!this.formData.newOwnerName) {
       this.errorMessage = 'Please provide an owner name.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
       return;
     }
     if (!this.formData.newSiteName) {
       this.errorMessage = 'Please provide a site name.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
     }
     
@@ -205,6 +212,8 @@ export class AssetPageComponent implements OnInit {
     if (!this.sessionID || this.sessionID <= 0) {
       console.error('[AssetPage] Invalid session ID:', this.sessionID);
       this.errorMessage = 'Invalid session ID. Please start a new session.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
       return;
     }
@@ -252,6 +261,8 @@ export class AssetPageComponent implements OnInit {
         console.error('[AssetPage] Failed to fetch asset:', error);
         this.isLoading = false; // Set loading state to false even if there's an error
         this.errorMessage = 'Failed to load asset. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
       }
     });
   }
@@ -262,6 +273,8 @@ export class AssetPageComponent implements OnInit {
     if (!this.sessionID || this.sessionID <= 0) {
       console.error('[AssetPage] Invalid session ID:', this.sessionID);
       this.errorMessage = 'Invalid session ID. Please start a new session.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
       return;
     }
@@ -301,6 +314,8 @@ export class AssetPageComponent implements OnInit {
         console.error('[AssetPage] Failed to process asset:', error);
         this.isLoading = false;
         this.errorMessage = error.error?.message || 'Failed to process asset. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
       }
     });
   }
@@ -339,6 +354,8 @@ export class AssetPageComponent implements OnInit {
     console.error('[OpnamePage] No session ID found in any source');
     this.router.navigate(['/site', this.siteID]); // Navigate to site page if no session ID
     this.errorMessage = 'No opname session found. Please start a new session.';
+    this.showToast = true;
+    setTimeout(() => this.showToast = false, 3000);
     this.isLoading = false;
   }
 }
