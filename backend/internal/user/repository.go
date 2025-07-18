@@ -130,6 +130,29 @@ func (repo *Repository) GetAllUsers() ([]*User, error) {
 	return allUsers, nil // Return the slice of users found
 }
 
+// GetUserByID retrieves a user's details by their user ID from the database.
+func (repo *Repository) GetUserByID(userID int64) (*User, error) {
+	var user User
+
+	query := `SELECT * FROM get_user_by_id($1)`
+
+	err := repo.db.QueryRow(query, userID).Scan(&user.UserID, &user.Username, &user.Email, &user.FirstName, &user.LastName, &user.Position, &user.SiteID, &user.SiteName, &user.SiteGroupName, &user.RegionName, &user.CostCenterID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// If no user is found, return nil
+			log.Printf("⚠ No user found with ID: %d\n", userID)
+			return nil, nil // No user found
+		}
+
+		// Any other error is unexpected
+		log.Printf("❌ Error retrieving user by ID: %d, error: %v\n", userID, err)
+		return nil, err // Return the error for unexpected cases
+	}
+
+	log.Printf("✅ Successfully retrieved user by ID: %d\n", userID)
+	return &user, nil
+}
+
 // GetUserByUsername retrieves a user's details by their username from the database.
 func (repo *Repository) GetUserByUsername(username string) (*User, error) {
 	var user User
@@ -196,4 +219,33 @@ func (repo *Repository) GetUserSiteCards(userID int64) ([]*UserSiteCard, error) 
 	}
 
 	return userSiteCards, nil
+}
+
+// GetL1SupportEmails retrieves all L1 support emails from the database.
+func (repo *Repository) GetL1SupportEmails() ([]string, error) {
+	query := `SELECT * FROM get_l1_support_emails()`
+	rows, err := repo.db.Query(query)
+	if err != nil {
+		log.Printf("❌ Error retrieving L1 support emails, error: %v\n", err)
+		return nil, err // Return the error for unexpected cases
+	}
+	defer rows.Close()
+
+	var emails []string
+	for rows.Next() {
+		var email string
+		if err := rows.Scan(&email); err != nil {
+			log.Printf("❌ Error scanning L1 support email, error: %v\n", err)
+			return nil, err // Return the error for unexpected cases
+		}
+		emails = append(emails, email)
+	}
+
+	if err = rows.Err(); err != nil {
+		log.Printf("❌ Error encountered while iterating L1 support emails, error: %v\n", err)
+		return nil, err // Return the error for unexpected cases
+	}
+
+	log.Printf("✅ Successfully retrieved %d L1 support emails from the database\n", len(emails))
+	return emails, nil // Return the slice of emails found
 }

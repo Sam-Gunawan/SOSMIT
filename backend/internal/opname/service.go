@@ -3,22 +3,38 @@ package opname
 
 import (
 	"errors"
+	"fmt"
 	"log"
+	"os"
+	"strconv"
 	"strings"
+	"time"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/email"
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/site"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/upload"
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
 )
 
 type Service struct {
 	repo          *Repository
 	uploadService *upload.Service
+	userRepo      *user.Repository
+	siteRepo      *site.Repository
+	emailService  *email.Service
 }
 
 // NewService creates a new Opname service with the provided repository.
-func NewService(repo *Repository, uploadService *upload.Service) *Service {
+func NewService(repo *Repository, uploadService *upload.Service, userRepo *user.Repository, siteRepo *site.Repository, emailService *email.Service) *Service {
 	return &Service{
 		repo:          repo,
 		uploadService: uploadService,
+		userRepo:      userRepo,
+		siteRepo:      siteRepo,
+		emailService:  emailService,
 	}
 }
 
@@ -193,7 +209,7 @@ func (service *Service) LoadOpnameProgress(sessionID int) ([]OpnameSessionProgre
 }
 
 // FinishOpnameSession marks an opname session as finished.
-func (service *Service) FinishOpnameSession(sessionID int) error {
+func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int64) error {
 	// Validate sessionID
 	if sessionID <= 0 {
 		log.Printf("⚠ Invalid sessionID: %d", sessionID)
@@ -206,6 +222,55 @@ func (service *Service) FinishOpnameSession(sessionID int) error {
 		log.Printf("❌ Error finishing opname session with ID %d: %v", sessionID, err)
 		return err
 	}
+
+	// Send a notification email to the user who started the session using a Go routine.
+	go func() {
+		recipient, _ := service.userRepo.GetUserByID(requestingUserID)
+		session, _ := service.repo.GetSessionByID(sessionID)
+		site, _ := service.siteRepo.GetSiteByID(session.SiteID)
+		completedDate := time.Now().Format("Mon, 02 Jan 2006 15:04:05")
+		recipientName := cases.Title(language.English).String((recipient.FirstName + " " + recipient.LastName))
+
+		log.Printf("📧 Sending completion email to %s for session %d at site %s", recipientName, sessionID, site.SiteName)
+
+		// Prepare the email data for user who completed the session and send it.
+		emailDataUser := email.EmailData{
+			Submitter:        recipientName,
+			Approver:         "",
+			SiteName:         site.SiteName,
+			CompletedDate:    completedDate,
+			VerificationLink: "",
+		}
+
+		service.emailService.SendEmail(
+			recipient.Email,
+			recipient.Username,
+			fmt.Sprintf("Opname for %s completed", site.SiteName),
+			"opname_completed.html",
+			emailDataUser,
+		)
+
+		// Prepare the email data for L1 SUPPORT and send it.
+		l1SupportEmails, _ := service.userRepo.GetL1SupportEmails()
+		emailDataL1 := email.EmailData{
+			Submitter:        recipientName,
+			Approver:         "",
+			SiteName:         site.SiteName,
+			CompletedDate:    completedDate,
+			VerificationLink: os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(session.SiteID),
+		}
+
+		for _, emailAddr := range l1SupportEmails {
+			service.emailService.SendEmail(
+				emailAddr,
+				"L1 Support Team",
+				fmt.Sprintf("Opname for %s needs your verification!", site.SiteName),
+				"opname_verification_needed.html",
+				emailDataL1,
+			)
+		}
+
+	}()
 
 	log.Printf("✅ Opname session with ID %d finished successfully", sessionID)
 	return nil

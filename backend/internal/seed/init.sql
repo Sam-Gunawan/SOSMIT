@@ -52,7 +52,7 @@ CREATE TABLE "CostCenter" (
 CREATE TABLE "User" (
     "user_id" INT PRIMARY KEY,
     "username" VARCHAR(255) UNIQUE NOT NULL,
-    "email" VARCHAR(255) UNIQUE NOT NULL,
+    "email" VARCHAR(255) NOT NULL, -- For demo purposes, email is not unique.
     "password" VARCHAR(255) NOT NULL, -- For demo purposes, store in plain text for now.
     "first_name" VARCHAR(255) NOT NULL,
     "last_name" VARCHAR(255) NOT NULL,

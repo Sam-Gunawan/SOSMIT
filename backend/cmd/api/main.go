@@ -8,6 +8,7 @@ import (
 
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/asset"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/auth"
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/email"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/opname"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/site"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/upload"
@@ -55,11 +56,12 @@ func main() {
 	siteRepo := site.NewRepository(db)
 
 	// Initialize the services
+	uploadService := upload.NewService()
+	emailService := email.NewService()
 	authService := auth.NewService(userRepo)
 	userService := user.NewService(userRepo)
 	assetService := asset.NewService(assetRepo)
-	uploadService := upload.NewService()
-	opnameService := opname.NewService(opnameRepo, uploadService)
+	opnameService := opname.NewService(opnameRepo, uploadService, userRepo, siteRepo, emailService)
 	siteService := site.NewService(siteRepo)
 
 	// Initialize the handlers
@@ -99,6 +101,9 @@ func main() {
 		{
 			// GET /api/user/me
 			userRoutes.GET("/me", userHandler.GetMeHandler)
+
+			// GET /api/user/:user-id
+			userRoutes.GET("/:user-id", userHandler.GetUserByIDHandler)
 
 			// GET /api/user/site-cards
 			userRoutes.GET("/site-cards", userHandler.GetUserSiteCardsHandler)
