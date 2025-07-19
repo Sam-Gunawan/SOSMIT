@@ -1,4 +1,4 @@
-<div class="modal fade" [id]="'modal-' + assetPage?.assetTag" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" [attr.aria-labelledby]="'modal-' + assetPage?.assetTag + '-label'" aria-hidden="true">
+<div class="modal fade" [id]="isPending ? 'pending-modal-' + assetPage?.assetTag : 'modal-' + assetPage?.assetTag" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" [attr.aria-labelledby]="'modal-' + assetPage?.assetTag + '-label'" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content" *ngIf="errorMessage === '' && !isLoading && screenSize === 'large'">
             <div class="modal-header">
@@ -45,18 +45,21 @@
                             <div class="asset-condition">  
                                 <div class="rating">
                                     <p class="condition">Condition</p>
-                                    <span class="like grow" [class.active]="isLiked" (click)="setLike()">
-                                        <i class="fa fa-thumbs-up like" aria-hidden="true"></i>
+                                    <span class="like grow" [class.active]="isLiked">
+                                        <i class="fa fa-thumbs-up like" aria-hidden="true" *ngIf="assetPage?.condition"></i>
                                     </span>
-                                    <span class="dislike grow" [class.active]="isDisliked" (click)="setDislike()">
+                                    <span class="dislike grow" [class.active]="isDisliked" *ngIf="!assetPage?.condition">
                                         <i class="fa fa-thumbs-down dislike" aria-hidden="true"></i>
                                     </span>
                                 </div>
         
-                                <!-- TODO: CHANGE THIS TO IMAGE -->
                                 <div *ngIf="isDisliked">
                                     <p class="condition-notes">{{ assetPage?.conditionNotes }}</p>
-                                    <p class="condition-photo">{{ assetPage?.conditionPhotoURL }}</p>
+                                    <div class="mb-3" *ngIf="assetPage?.conditionPhotoURL !== ''">
+                                        <img [src]="serverURL + assetPage?.conditionPhotoURL" 
+                                            [alt]="'Condition photo for ' + assetPage?.assetTag" 
+                                            class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -161,23 +164,6 @@
             <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
         </div>
     </div>
-
-    <!-- Error generating modal for asset view -->
-    <!-- <div class="modal-content" *ngIf="errorMessage">
-        <div class="modal-header">
-            <h5 class="modal-title">Error</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-
-        <div class="modal-body">
-            <p>{{ errorMessage }}</p>
-            <p>Please try again later.</p>
-        </div>
-
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
-    </div> -->
 
     <!-- Loading modal for asset view -->
     <div class="modal-content" *ngIf="isLoading">

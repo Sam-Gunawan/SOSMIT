@@ -73,7 +73,7 @@
                             </div>
                         </div>
                     
-                        <app-asset-page [assetTag]="result.existingAsset.assetTag" [isInOpnameSession]="false"></app-asset-page>
+                        <app-asset-page [assetTag]="result.existingAsset.assetTag"></app-asset-page>
                     </div>
                 </section>
             </div>
@@ -101,7 +101,7 @@
                 <!-- Card view for displaying latest changes -->
                  <section class="asset-card-layout" [ngClass]="variant" *ngIf="currentView === 'card' && result.assetProcessed">
                     <div class="asset-card" [ngClass]="variant"> 
-                        <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
+                        <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="isInReport ? '#pending-modal-' + result.existingAsset.assetTag : '#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
                             <div class="main-info">
                                 <img class="asset-icon" [src]="result.existingAsset.assetIcon" [alt]="result.existingAsset.assetName"/>
                                 <span 
@@ -134,7 +134,10 @@
                     </div>
                 </section>
 
-                <div class="modal fade" [id]="'edit-modal-' + result.existingAsset.assetTag" tabindex="-1" aria-hidden="true">
+                <!-- ! STILL NOT WORKING -->
+                <app-asset-page [assetTag]="result.pendingAsset.assetTag" [assetPage]="result.pendingAsset" [isPending]="true" *ngIf="isInReport"></app-asset-page>
+
+                <div class="modal fade" [id]="'edit-modal-' + result.existingAsset.assetTag" tabindex="-1" aria-hidden="true" *ngIf="!isInReport">
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header"> 
@@ -246,7 +249,8 @@
                                                         </span>
                                                     </div>
                             
-                                                    <div *ngIf="isDisliked">                                                            <div class="form-floating mb-3">
+                                                    <div *ngIf="isDisliked">                                                            
+                                                        <div class="form-floating mb-3">
                                                                 <textarea class="form-control" 
                                                                     [id]="'condition-notes-' + result.pendingAsset.assetTag" 
                                                                     [(ngModel)]="result.pendingAsset.conditionNotes" name="newConditionNotes"
@@ -373,7 +377,7 @@
         <div class="col" *ngFor="let result of searchResults; let i = index">
             <section class="asset-list-layout" *ngIf="currentView === 'list'">
                 <div class="asset-list" [ngClass]="variant">
-                    <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
+                    <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="isInReport ? '#pending-modal-' + result.existingAsset.assetTag : '#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)" *ngIf="!isInReport">
                         <div class="first-column">
                             <img class="asset-icon" [src]="result.existingAsset.assetIcon" [alt]="result.existingAsset.assetName"/>
                         </div>
@@ -398,6 +402,10 @@
                     
                     <span class="delete-icon-mobile material-symbols-outlined" *ngIf="!isInReport" (click)="removeAsset(i)">delete</span>
                     
+                    <div class="modal fade" [id]="'pending-modal-' + result.pendingAsset.assetTag" tabindex="-1" aria-hidden="true" *ngIf="isInReport">
+                        <app-asset-page [assetTag]="result.pendingAsset.assetTag" [assetPage]="result.pendingAsset" [isPending]="true"></app-asset-page>
+                    </div>
+
                     <div class="modal fade" [id]="'edit-modal-' + result.existingAsset.assetTag" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">

@@ -15,7 +15,6 @@ export class AssetCardComponent {
   @Input() variant: 'default' | 'compact' = 'default';
   @Input() showLocation: boolean = false;
   @Input() showHeader: boolean = true;
-  @Input() isInOpnameSession: boolean = false; // Flag to check if in an opname session
 
   currentView: 'card' | 'list' = 'card';
   screenSize: 'large' | 'small' = 'large';
