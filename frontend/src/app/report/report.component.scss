@@ -21,7 +21,7 @@ p {
 .date-dropdown-wrapper {
   position: relative;
   display: inline-block;
-  width: 100%;
+  width: 135px;
   
   .date-dropdown {
     width: 100%;
@@ -71,30 +71,37 @@ p {
   flex-grow: 1;
 }
 
-.buttons {
+.export-search {
   display: flex;
   flex-direction: column;
+  align-items: end;
   justify-content: center;
-  align-items: center;
-  gap: 10px;
-
-  .btn {
-    width: 137px;
-  }
-
-  @media (max-width: 768px) {
-    .btn {
-      font-size: 0.75rem;
-      width: 113px;
-    }
-  }
 }
+
+// .buttons {
+//   display: flex;
+//   flex-direction: column;
+//   justify-content: center;
+//   align-items: center;
+//   gap: 10px;
+
+//   .btn {
+//     width: 137px;
+//   }
+
+//   @media (max-width: 768px) {
+//     .btn {
+//       font-size: 0.75rem;
+//       width: 113px;
+//     }
+//   }
+// }
 
 .export-report {
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 5px 10px;
+  padding: 5px 0px;
 
   img {
     width: 40px;
@@ -133,17 +140,17 @@ p {
   background-color: color.adjust(styles.$tertiary-color, $lightness: -5%);
 }
 
-.search-view{
-  display: flex;
-	flex-direction: row;
-	align-items: center;
-	gap: 10px;
-}
+// .search-view{
+//   display: flex;
+// 	flex-direction: row;
+// 	align-items: center;
+// 	gap: 10px;
+// }
 
-.search-bar {
-  align-items: center;
-	flex-grow: 1;
-}
+// .search-bar {
+//   align-items: center;
+// 	flex-grow: 1;
+// }
 
 #date{
   color: styles.$quaternary-text-color;
