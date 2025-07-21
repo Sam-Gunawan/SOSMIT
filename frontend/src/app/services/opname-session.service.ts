@@ -73,7 +73,10 @@ export class OpnameSessionService {
               status: response.status,
               startDate: formatDate(response.start_date),
               endDate: formatDate(response.end_date.String),
-              approverID: response.approver_id || null // Handle optional approver ID
+              managerReviewerID: response.manager_reviewer_id || '',
+              managerReviewedAt: response.manager_reviewed_at || '',
+              l1ReviewerID: response.l1_reviewer_id || '',
+              l1ReviewedAt: response.l1_reviewed_at || ''
             };
         }),
         tap((response: any) => {
@@ -143,6 +146,7 @@ export class OpnameSessionService {
       new_condition_photo_url: assetChanges.newConditionPhotoURL,
       new_location: assetChanges.newLocation,
       new_room: assetChanges.newRoom,
+      new_equipments: assetChanges.newEquipments,
       new_owner_id: assetChanges.newOwnerID,
       new_site_id: assetChanges.newSiteID,
       change_reason: assetChanges.changeReason,
@@ -196,6 +200,7 @@ export class OpnameSessionService {
               newConditionPhotoURL: changes.newConditionPhotoURL,
               newLocation: changes.newLocation,
               newRoom: changes.newRoom,
+              newEquipments: changes.newEquipments,
               newOwnerID: changes.newOwnerID,
               newSiteID: changes.newSiteID,
               changeReason: progressItem.change_reason
@@ -227,7 +232,10 @@ export class OpnameSessionService {
           status: '',
           startDate: '',
           endDate: session.completed_date || '',
-          approverID: '',
+          managerReviewerID: session.manager_reviewer_id || '',
+          managerReviewedAt: session.manager_reviewed_at || '',
+          l1ReviewerID: session.l1_reviewer_id || '',
+          l1ReviewedAt: session.l1_reviewed_at || ''
         }));
       }),
       tap((response: OpnameSession[]) => {

@@ -1,301 +1,304 @@
-import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
-import { SiteCardInfo } from '../model/site-card-info.model';
-import { AssetInfo } from '../model/asset-info.model';
-import { User } from '../model/user.model';
-import { formatDate, titleCase } from '../reusable_functions';
-import { SiteInfo } from '../model/site-info.model';
-import { environment } from '../../environments/environments';
+  import { Injectable } from '@angular/core';
+  import { HttpClient } from '@angular/common/http';
+  import { Router } from '@angular/router';
+  import { Observable } from 'rxjs';
+  import { tap, map } from 'rxjs/operators';
+  import { SiteCardInfo } from '../model/site-card-info.model';
+  import { AssetInfo } from '../model/asset-info.model';
+  import { User } from '../model/user.model';
+  import { formatDate, titleCase } from '../reusable_functions';
+  import { SiteInfo } from '../model/site-info.model';
+  import { environment } from '../../environments/environments';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class ApiService {
-  // This service will handle API calls, such as login, fetching data, etc.
-  private authApiUrl = `${environment.serverURL}/api/auth`
-  private userApiUrl = `${environment.serverURL}/api/user`
-  private siteApiUrl = `${environment.serverURL}/api/site`
-  private assetApiUrl = `${environment.serverURL}/api/asset`
-  private uploadApiUrl = `${environment.serverURL}/api/upload`
+  @Injectable({
+    providedIn: 'root'
+  })
+  export class ApiService {
+    // This service will handle API calls, such as login, fetching data, etc.
+    private authApiUrl = `${environment.serverURL}/api/auth`
+    private userApiUrl = `${environment.serverURL}/api/user`
+    private siteApiUrl = `${environment.serverURL}/api/site`
+    private assetApiUrl = `${environment.serverURL}/api/asset`
+    private uploadApiUrl = `${environment.serverURL}/api/upload`
 
-  constructor(private http: HttpClient, private router: Router) {}
+    constructor(private http: HttpClient, private router: Router) {}
 
-  login(credentials: {username: string, password: string}): Observable<any> {
-    return this.http.post(`${this.authApiUrl}/login`, credentials).pipe(
-      // Handle the response here if needed.
-      // The 'tap' operator can be used to perform side effects without modifying the response.
-      // Side effects meaning actions that you perform with the response, like storing tokens.
-      tap((response: any) => {
-        // Here, we store the JWT token in localStorage so users can stay logged in.
-        // If the login is successful and we receive a token...
-        if (response && response.token) {
-          // ...store the token in localStorage.
-          localStorage.setItem('auth_token', response.token);
-        }
-      })
-    );
-  }
-
-  logout(): void {
-    // This method will simply remove the token from localStorage.
-    localStorage.removeItem('auth_token');
-    
-    // Then, redirect to login page.
-    this.router.navigate(['/login']);
-  }
-
-  getUserProfile(username: string): Observable<any> {
-    // This method will fetch the user profile data.
-    // Authorization header is already handled by AuthInterceptor at ../services/auth.interceptor.ts
-    return this.http.get(`${this.userApiUrl}/${username}`);
-  }
-
-  getAllUsers(): Observable<User[]> {
-    // This method will fetch all users from the database.
-    return this.http.get<User[]>(`${this.userApiUrl}/all`).pipe(
-      map((response: any) => {
-        // Map the response to the desired format.
-        return response.users.map((user: any) => ({
-          userID: user.UserID,
-          username: user.Username,
-          email: user.Email,
-          firstName: titleCase(user.FirstName),
-          lastName: titleCase(user.LastName),
-          position: titleCase(user.Position),
-          siteID: user.SiteID,
-          siteName: user.SiteName,
-          siteGroupName: user.SiteGroupName,
-          regionName: user.RegionName,
-          costCenterID: user.CostCenterID
-        }));
-      }),
-      tap((users: User[]) => {
-        // Log the fetched users for debugging purposes.
-        console.log('[ApiService] Fetched users:', users);
-      })
-    );
-  }
-
-  getAllSites(): Observable<SiteInfo[]> {
-    // This method will fetch all sites from the database.
-    return this.http.get<SiteInfo[]>(`${this.siteApiUrl}/all`).pipe(
-      map((response: any) => {
-        // Map the response to the desired format.
-        return response.sites.map((site: any) => ({
-          siteID: site.SiteID,
-          siteName: site.SiteName,
-          siteGroupName: site.SiteGroupName,
-          regionName: site.RegionName,
-          siteGaID: site.SiteGaID,
-          siteGaName: titleCase(site.SiteGaName),
-          siteGaEmail: site.SiteGaEmail
-        }));
-      }),
-      tap((sites: SiteInfo[]) => {
-        // Log the fetched sites for debugging purposes.
-        console.log('[ApiService] Fetched sites:', sites);
-      })
-    )
-  }
-
-  getUserSiteCards(): Observable<SiteCardInfo[]> {
-    // This method will fetch the site cards that the user has access to.
-    return this.http.get<SiteCardInfo[]>(`${this.userApiUrl}/site-cards`).pipe(
-      map((response: any) => {
-        return response.site_cards.map((site: any) => ({
-          siteID: site.SiteID,
-          siteName: site.SiteName,
-          siteGroup: site.SiteGroupName,
-          siteRegion: site.RegionName,
-          siteGA: site.SiteGaID,
-          opnameSessionID: site.OpnameSessionID,
-          opnameStatus: site.OpnameStatus,
-          opnameDate: formatDate(new Date(site.OpnameDate))
-        }))
-      }), // Extract site cards from the response
-      tap((siteCards: SiteCardInfo[]) => {
-        // Log the fetched site cards for debugging purposes.
-        console.log('[ApiService] Fetched site cards:', siteCards);
-      })
-    );
-  }
-
-  getSiteByID(siteID: number): Observable<SiteInfo> {
-    // This method will fetch a specific site by its ID.
-    return this.http.get<SiteInfo>(`${this.siteApiUrl}/${siteID}`).pipe(
-      map((response: any) => {
-        // Map the response to the desired format.
-        return {
-          siteID: response.site_id,
-          siteName: response.site_name,
-          siteGroupName: response.site_group_name,
-          regionName: response.region_name,
-          siteGaID: response.site_ga_id,
-          siteGaName: titleCase(response.site_ga_name),
-          siteGaEmail: response.site_ga_email
-        };
-      }),
-      tap((siteInfo: SiteInfo) => {
-        // Log the fetched site info for debugging purposes.
-        console.log('[ApiService] Fetched site info:', siteInfo);
-      })
-    );
-  }
-
-  getAssetByAssetTag(assetTag: string): Observable<any> {
-    // This method will fetch the details of a specific asset by its tag.
-    return this.http.get<AssetInfo>(`${this.assetApiUrl}/tag/${assetTag}`).pipe(
-      map((response: any) => {
-        // Map the response to the desired format.
-        return {
-          assetTag: response.asset_tag,
-          assetIcon: this.getAssetIcon(response.product_variety), // Generate icon path based on product variety
-          serialNumber: response.serial_number,
-          assetStatus: response.status,
-          statusReason: response.status_reason || '-1', // Default to '-1' if status reason is not provided
-          category: response.product_category,
-          subCategory: response.product_subcategory,
-          productVariety: response.product_variety,
-          assetBrand: response.brand_name,
-          assetName: response.product_name,
-          condition: response.condition,
-          conditionNotes: response.condition_notes,
-          conditionPhotoURL: response.condition_photo_url || '', // Default to empty string if condition photo
-          location: response.location,
-          room: response.room,
-          assetOwner: response.owner_id,
-          assetOwnerName: titleCase(response.owner_name) || '', // Default to empty string if owner name is not provided
-          assetOwnerPosition: titleCase(response.owner_position),
-          assetOwnerCostCenter: response.owner_cost_center,
-          siteID: response.site_id,
-          siteName: response.site_name,
-          siteGroupName: response.site_group_name,
-          regionName: response.region_name
-        };
-      }),
-      tap((assetDetails: AssetInfo) => {
-        // Log the fetched asset details for debugging purposes.
-        console.log('[ApiService] Fetched asset details:', assetDetails);
-      })
-    );
-  }
-
-  getAssetsOnSite(siteID: number): Observable<any> {
-    // This method will fetch all assets on a specific site.
-    return this.http.get<AssetInfo[]>(`${this.siteApiUrl}/${siteID}/assets`).pipe(
-      map((response: any) => {
-        // Map the response to the desired format.
-        return response.assets_on_site.map((asset: any) => ({
-          assetTag: asset.AssetTag,
-          assetIcon: this.getAssetIcon(asset.ProductVariety), // Generate icon path based on product variety
-          serialNumber: asset.SerialNumber,
-          assetStatus: asset.Status,
-          statusReason: asset.StatusReason || '-1', // Default to '-1' if status reason is not provided
-          category: asset.ProductCategory,
-          subCategory: asset.ProductSubCategory,
-          productVariety: asset.ProductVariety,
-          assetBrand: asset.BrandName,
-          assetName: asset.ProductName,
-          condition: asset.Condition,
-          conditionNotes: asset.ConditionNotes,
-          conditionPhotoURL: asset.ConditionPhotoURL || '', // Default to empty string if condition photo
-          location: asset.Location,
-          room: asset.Room,
-          assetOwner: asset.OwnerID,
-          assetOwnerName: titleCase(asset.OwnerName) || '', // Default to empty string if owner name is not provided
-          assetOwnerPosition: titleCase(asset.OwnerPosition),
-          assetOwnerCostCenter: asset.OwnerCostCenter,
-          siteID: asset.SiteID,
-          siteName: asset.SiteName,
-          siteGroupName: asset.SiteGroupName,
-          regionName: asset.RegionName
-        }));
-      }),
-      tap((response: any) => {
-        // Log the fetched assets for debugging purposes.
-        console.log(`[ApiService] Fetched assets for site ${siteID}:`, response);
-      })
-    );
-  }
-
-  // Search for an asset by serial number
-  getAssetBySerialNumber(serialNumber: string): Observable<any> {
-    // This method will search for an asset using its serial number
-    return this.http.get<AssetInfo>(`${this.assetApiUrl}/serial/${serialNumber}`).pipe(
-      map((response: any) => {
-        // Map the response to the desired format for consistency with getAssetDetails
-        return {
-          assetTag: response.asset_tag,
-          serialNumber: response.serial_number,
-          assetStatus: response.status,
-          statusReason: response.status_reason,
-          category: response.product_category,
-          subCategory: response.product_subcategory,
-          productVariety: response.product_variety,
-          assetBrand: response.brand_name,
-          assetName: response.product_name,
-          condition: response.condition,
-          conditionNotes: response.condition_notes,
-          conditionPhotoURL: response.condition_photo_url,
-          location: response.location,
-          room: response.room,
-          assetOwner: response.owner_id,
-          assetOwnerName: response.owner_name,
-          assetOwnerPosition: response.owner_position,
-          assetOwnerCostCenter: response.owner_cost_center,
-          siteID: response.site_id,
-          siteName: response.site_name,
-          siteGroupName: response.site_group_name,
-          regionName: response.region_name,
-          assetIcon: this.getAssetIcon(response.product_variety)
-        };
-      }),
-      tap((assetDetails: AssetInfo) => {
-        console.log('[ApiService] Asset found by serial number:', assetDetails);
-      })
-    );
-  }
-
-  // Universal search for assets (by tag or serial number)
-  searchAsset(searchTerm: string, searchType: 'asset_tag' | 'serial_number'): Observable<any> {
-    // This is a wrapper that calls the appropriate search method based on the search type
-    if (searchType === 'asset_tag') {
-      return this.getAssetByAssetTag(searchTerm);
-    } else {
-      return this.getAssetBySerialNumber(searchTerm);
+    login(credentials: {username: string, password: string}): Observable<any> {
+      return this.http.post(`${this.authApiUrl}/login`, credentials).pipe(
+        // Handle the response here if needed.
+        // The 'tap' operator can be used to perform side effects without modifying the response.
+        // Side effects meaning actions that you perform with the response, like storing tokens.
+        tap((response: any) => {
+          // Here, we store the JWT token in localStorage so users can stay logged in.
+          // If the login is successful and we receive a token...
+          if (response && response.token) {
+            // ...store the token in localStorage.
+            localStorage.setItem('auth_token', response.token);
+          }
+        })
+      );
     }
-  }
 
-  uploadConditionPhoto(file: File, oldPhotoURL: string): Observable<any> {
-    // This method will upload a photo to the server
-    // Create a FormData object to hold the file
-    const formData = new FormData();
-    formData.append('condition_photo', file, file.name);
-    formData.append('old_condition_photo_url', oldPhotoURL); // Include the old photo URL to handle deletion on the server
+    logout(): void {
+      // This method will simply remove the token from localStorage.
+      localStorage.removeItem('auth_token');
+      
+      // Then, redirect to login page.
+      this.router.navigate(['/login']);
+    }
 
-    return this.http.post(`${this.uploadApiUrl}/photo`, formData).pipe(
-      tap((response: any) => {
-        // Log the response for debugging purposes.
-        console.log('[ApiService] Photo uploaded successfully:', response);
-      })
-    );
-  }
+    getUserProfile(username: string): Observable<any> {
+      // This method will fetch the user profile data.
+      // Authorization header is already handled by AuthInterceptor at ../services/auth.interceptor.ts
+      return this.http.get(`${this.userApiUrl}/${username}`);
+    }
 
-  // Helper method to get icon path based on product variety
-  private getAssetIcon(productVariety: string): string {
-    const varietyMap: { [key: string]: string } = {
-      'Laptop': 'assets/laptop.svg',
-      'Desktop': 'assets/desktop.svg',
-      'Monitor': 'assets/monitor.svg',
-      'Uninterrupted Power Supply': 'assets/ups.svg',
-      'Personal Digital Assistant': 'assets/handheld.svg',
-      'Printer/Multifunction': 'assets/printer.svg'
-    };
+    getAllUsers(): Observable<User[]> {
+      // This method will fetch all users from the database.
+      return this.http.get<User[]>(`${this.userApiUrl}/all`).pipe(
+        map((response: any) => {
+          // Map the response to the desired format.
+          return response.users.map((user: any) => ({
+            userID: user.UserID,
+            username: user.Username,
+            email: user.Email,
+            firstName: titleCase(user.FirstName),
+            lastName: titleCase(user.LastName),
+            position: titleCase(user.Position),
+            siteID: user.SiteID,
+            siteName: user.SiteName,
+            siteGroupName: user.SiteGroupName,
+            regionName: user.RegionName,
+            costCenterID: user.CostCenterID
+          }));
+        }),
+        tap((users: User[]) => {
+          // Log the fetched users for debugging purposes.
+          console.log('[ApiService] Fetched users:', users);
+        })
+      );
+    }
+
+    getAllSites(): Observable<SiteInfo[]> {
+      // This method will fetch all sites from the database.
+      return this.http.get<SiteInfo[]>(`${this.siteApiUrl}/all`).pipe(
+        map((response: any) => {
+          // Map the response to the desired format.
+          return response.sites.map((site: any) => ({
+            siteID: site.SiteID,
+            siteName: site.SiteName,
+            siteGroupName: site.SiteGroupName,
+            regionName: site.RegionName,
+            siteGaID: site.SiteGaID,
+            siteGaName: titleCase(site.SiteGaName),
+            siteGaEmail: site.SiteGaEmail
+          }));
+        }),
+        tap((sites: SiteInfo[]) => {
+          // Log the fetched sites for debugging purposes.
+          console.log('[ApiService] Fetched sites:', sites);
+        })
+      )
+    }
+
+    getUserSiteCards(): Observable<SiteCardInfo[]> {
+      // This method will fetch the site cards that the user has access to.
+      return this.http.get<SiteCardInfo[]>(`${this.userApiUrl}/site-cards`).pipe(
+        map((response: any) => {
+          return response.site_cards.map((site: any) => ({
+            siteID: site.SiteID,
+            siteName: site.SiteName,
+            siteGroup: site.SiteGroupName,
+            siteRegion: site.RegionName,
+            siteGA: site.SiteGaID,
+            opnameSessionID: site.OpnameSessionID,
+            opnameStatus: site.OpnameStatus,
+            opnameDate: formatDate(new Date(site.OpnameDate))
+          }))
+        }), // Extract site cards from the response
+        tap((siteCards: SiteCardInfo[]) => {
+          // Log the fetched site cards for debugging purposes.
+          console.log('[ApiService] Fetched site cards:', siteCards);
+        })
+      );
+    }
+
+    getSiteByID(siteID: number): Observable<SiteInfo> {
+      // This method will fetch a specific site by its ID.
+      return this.http.get<SiteInfo>(`${this.siteApiUrl}/${siteID}`).pipe(
+        map((response: any) => {
+          // Map the response to the desired format.
+          return {
+            siteID: response.site_id,
+            siteName: response.site_name,
+            siteGroupName: response.site_group_name,
+            regionName: response.region_name,
+            siteGaID: response.site_ga_id,
+            siteGaName: titleCase(response.site_ga_name),
+            siteGaEmail: response.site_ga_email
+          };
+        }),
+        tap((siteInfo: SiteInfo) => {
+          // Log the fetched site info for debugging purposes.
+          console.log('[ApiService] Fetched site info:', siteInfo);
+        })
+      );
+    }
+
+    getAssetByAssetTag(assetTag: string): Observable<any> {
+      // This method will fetch the details of a specific asset by its tag.
+      return this.http.get<AssetInfo>(`${this.assetApiUrl}/tag/${assetTag}`).pipe(
+        map((response: any) => {
+          // Map the response to the desired format.
+          return {
+            assetTag: response.asset_tag,
+            assetIcon: this.getAssetIcon(response.product_variety), // Generate icon path based on product variety
+            serialNumber: response.serial_number,
+            assetStatus: response.status,
+            statusReason: response.status_reason || '-1', // Default to '-1' if status reason is not provided
+            category: response.product_category,
+            subCategory: response.product_subcategory,
+            productVariety: response.product_variety,
+            assetBrand: response.brand_name,
+            assetName: response.product_name,
+            condition: response.condition,
+            conditionNotes: response.condition_notes,
+            conditionPhotoURL: response.condition_photo_url || '', // Default to empty string if condition photo
+            location: response.location,
+            room: response.room,
+            equipments: response.equipments || '', // Default to empty string if equipments are not provided
+            assetOwner: response.owner_id,
+            assetOwnerName: titleCase(response.owner_name) || '', // Default to empty string if owner name is not provided
+            assetOwnerPosition: titleCase(response.owner_position),
+            assetOwnerCostCenter: response.owner_cost_center,
+            siteID: response.site_id,
+            siteName: response.site_name,
+            siteGroupName: response.site_group_name,
+            regionName: response.region_name
+          };
+        }),
+        tap((assetDetails: AssetInfo) => {
+          // Log the fetched asset details for debugging purposes.
+          console.log('[ApiService] Fetched asset details:', assetDetails);
+        })
+      );
+    }
+
+    getAssetsOnSite(siteID: number): Observable<any> {
+      // This method will fetch all assets on a specific site.
+      return this.http.get<AssetInfo[]>(`${this.siteApiUrl}/${siteID}/assets`).pipe(
+        map((response: any) => {
+          // Map the response to the desired format.
+          return response.assets_on_site.map((asset: any) => ({
+            assetTag: asset.AssetTag,
+            assetIcon: this.getAssetIcon(asset.ProductVariety), // Generate icon path based on product variety
+            serialNumber: asset.SerialNumber,
+            assetStatus: asset.Status,
+            statusReason: asset.StatusReason || '-1', // Default to '-1' if status reason is not provided
+            category: asset.ProductCategory,
+            subCategory: asset.ProductSubCategory,
+            productVariety: asset.ProductVariety,
+            assetBrand: asset.BrandName,
+            assetName: asset.ProductName,
+            condition: asset.Condition,
+            conditionNotes: asset.ConditionNotes,
+            conditionPhotoURL: asset.ConditionPhotoURL || '', // Default to empty string if condition photo
+            location: asset.Location,
+            room: asset.Room,
+            equipments: asset.Equipments || '', // Default to empty string if equipments are not provided
+            assetOwner: asset.OwnerID,
+            assetOwnerName: titleCase(asset.OwnerName) || '', // Default to empty string if owner name is not provided
+            assetOwnerPosition: titleCase(asset.OwnerPosition),
+            assetOwnerCostCenter: asset.OwnerCostCenter,
+            siteID: asset.SiteID,
+            siteName: asset.SiteName,
+            siteGroupName: asset.SiteGroupName,
+            regionName: asset.RegionName
+          }));
+        }),
+        tap((response: any) => {
+          // Log the fetched assets for debugging purposes.
+          console.log(`[ApiService] Fetched assets for site ${siteID}:`, response);
+        })
+      );
+    }
+
+    // Search for an asset by serial number
+    getAssetBySerialNumber(serialNumber: string): Observable<any> {
+      // This method will search for an asset using its serial number
+      return this.http.get<AssetInfo>(`${this.assetApiUrl}/serial/${serialNumber}`).pipe(
+        map((response: any) => {
+          // Map the response to the desired format for consistency with getAssetDetails
+          return {
+            assetTag: response.asset_tag,
+            serialNumber: response.serial_number,
+            assetStatus: response.status,
+            statusReason: response.status_reason,
+            category: response.product_category,
+            subCategory: response.product_subcategory,
+            productVariety: response.product_variety,
+            assetBrand: response.brand_name,
+            assetName: response.product_name,
+            condition: response.condition,
+            conditionNotes: response.condition_notes,
+            conditionPhotoURL: response.condition_photo_url,
+            location: response.location,
+            room: response.room,
+            equipments: response.equipments || '', // Default to empty string if equipments are not provided
+            assetOwner: response.owner_id,
+            assetOwnerName: response.owner_name,
+            assetOwnerPosition: response.owner_position,
+            assetOwnerCostCenter: response.owner_cost_center,
+            siteID: response.site_id,
+            siteName: response.site_name,
+            siteGroupName: response.site_group_name,
+            regionName: response.region_name,
+            assetIcon: this.getAssetIcon(response.product_variety)
+          };
+        }),
+        tap((assetDetails: AssetInfo) => {
+          console.log('[ApiService] Asset found by serial number:', assetDetails);
+        })
+      );
+    }
+
+    // Universal search for assets (by tag or serial number)
+    searchAsset(searchTerm: string, searchType: 'asset_tag' | 'serial_number'): Observable<any> {
+      // This is a wrapper that calls the appropriate search method based on the search type
+      if (searchType === 'asset_tag') {
+        return this.getAssetByAssetTag(searchTerm);
+      } else {
+        return this.getAssetBySerialNumber(searchTerm);
+      }
+    }
+
+    uploadConditionPhoto(file: File, oldPhotoURL: string): Observable<any> {
+      // This method will upload a photo to the server
+      // Create a FormData object to hold the file
+      const formData = new FormData();
+      formData.append('condition_photo', file, file.name);
+      formData.append('old_condition_photo_url', oldPhotoURL); // Include the old photo URL to handle deletion on the server
+
+      return this.http.post(`${this.uploadApiUrl}/photo`, formData).pipe(
+        tap((response: any) => {
+          // Log the response for debugging purposes.
+          console.log('[ApiService] Photo uploaded successfully:', response);
+        })
+      );
+    }
+
+    // Helper method to get icon path based on product variety
+    private getAssetIcon(productVariety: string): string {
+      const varietyMap: { [key: string]: string } = {
+        'Laptop': 'assets/laptop.svg',
+        'Desktop': 'assets/desktop.svg',
+        'Monitor': 'assets/monitor.svg',
+        'Uninterrupted Power Supply': 'assets/ups.svg',
+        'Personal Digital Assistant': 'assets/handheld.svg',
+        'Printer/Multifunction': 'assets/printer.svg'
+      };
+      
+      return varietyMap[productVariety] || 'assets/desktop.svg'; // Default to desktop icon if variety not found
+    }
     
-    return varietyMap[productVariety] || 'assets/desktop.svg'; // Default to desktop icon if variety not found
   }
-  
-}

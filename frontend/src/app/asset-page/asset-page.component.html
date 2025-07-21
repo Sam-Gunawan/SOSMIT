@@ -72,13 +72,19 @@
                                 <p>{{ assetPage?.room }}</p>
                                 <p>{{ assetPage?.siteGroupName }}</p>
                             </div>
+
+                            <!-- TODO: style asset equipment display! -->
+                            <div class="asset-equipments">
+                                <h5>Equipments</h5>
+                                <p *ngIf="assetPage?.equipments">{{ assetPage?.equipments }}</p>
+                                <p *ngIf="!assetPage?.equipments">No equipments.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         
             <div class="modal-footer">
-                <!-- Non-editable asset in opname session (left column) or Regular asset view -->
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
@@ -126,6 +132,13 @@
                             <p>{{ assetPage?.room }}</p>
                             <p>{{ assetPage?.siteGroupName }}</p>
                         </div>
+
+                        <!-- TODO: style asset equipment display! -->
+                        <div class="asset-equipments-mobile">
+                            <h5>Equipments</h5>
+                            <p *ngIf="assetPage?.equipments">{{ assetPage?.equipments }}</p>
+                            <p *ngIf="!assetPage?.equipments">No equipments.</p>
+                        </div>
         
                         <div class="asset-condition-mobile">  
                             <div class="rating">
@@ -138,10 +151,13 @@
                                 </span>
                             </div>
     
-                            <!-- TODO: CHANGE THIS TO IMAGE -->
                             <div *ngIf="isDisliked">
                                 <p class="condition-notes">{{ assetPage?.conditionNotes }}</p>
-                                <p class="condition-photo">{{ assetPage?.conditionPhotoURL }}</p>
+                                <div class="mb-3" *ngIf="assetPage?.conditionPhotoURL !== ''">
+                                    <img [src]="serverURL + assetPage?.conditionPhotoURL" 
+                                        [alt]="'Condition photo for ' + assetPage?.assetTag" 
+                                        class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
+                                </div>
                             </div>
                         </div>
                 </div>

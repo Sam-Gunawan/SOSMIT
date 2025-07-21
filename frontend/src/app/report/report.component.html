@@ -77,7 +77,7 @@
                 </div> -->
 
                 <div class="my-container" *ngIf="selectedDate">
-                    <app-opname-asset [variant]="cardVariant" [showLocation]="showLocation" [siteID]="site.siteID" [isInReport]="true" [sessionID]="sessionID"></app-opname-asset>
+                    <app-opname-asset [variant]="cardVariant" [currentView]="currentView" [showLocation]="showLocation" [siteID]="site.siteID" [isInReport]="true" [sessionID]="sessionID"></app-opname-asset>
                 </div>
 
                 <!-- TODO: Design a "no date selected" display -->

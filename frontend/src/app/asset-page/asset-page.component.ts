@@ -53,6 +53,7 @@ export class AssetPageComponent implements OnInit {
       conditionPhotoURL: '',
       location: '',
       room: '',
+      equipments: '',
       assetOwner: -1,
       assetOwnerName: 'N/A',
       assetOwnerPosition: 'N/A',

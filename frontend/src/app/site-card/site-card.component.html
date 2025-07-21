@@ -11,9 +11,13 @@
                     [class.selected]="selectedFilter === 'Active'"
                     (click)="filterByStatus('Active')">Active</span>
                 <span 
-                    class="site-status filter-pill filter-completed" 
-                    [class.selected]="selectedFilter === 'Completed'"
-                    (click)="filterByStatus('Completed')">Completed</span>
+                    class="site-status filter-pill filter-submitted" 
+                    [class.selected]="selectedFilter === 'Submitted'"
+                    (click)="filterByStatus('Submitted')">Submitted</span>
+                <span 
+                    class="site-status filter-pill filter-escalated" 
+                    [class.selected]="selectedFilter === 'Escalated'"
+                    (click)="filterByStatus('Escalated')">Escalated</span>
                 <span 
                     class="site-status filter-pill filter-verified" 
                     [class.selected]="selectedFilter === 'Verified'"
@@ -44,7 +48,8 @@
                 <select class="form-select" aria-label="Small select example" [value]="selectedFilter" #statusSelect (change)="filterByDropdown(statusSelect.value)">
                     <option value="">All Status</option>
                     <option value="Active">Active</option>
-                    <option value="Completed">Completed</option>
+                    <option value="Submitted">Submitted</option>
+                    <option value="Escalated">Escalated</option>
                     <option value="Verified">Verified</option>
                     <option value="Rejected">Rejected</option>
                     <option value="Outdated">Outdated</option>
@@ -70,7 +75,8 @@
                 class="site-status"
                 [ngClass]="{
                     'status-active': siteCard.opnameStatus === 'Active',
-                    'status-completed': siteCard.opnameStatus === 'Completed',
+                    'status-submitted': siteCard.opnameStatus === 'Submitted',
+                    'status-escalated': siteCard.opnameStatus === 'Escalated',
                     'status-verified': siteCard.opnameStatus === 'Verified',
                     'status-rejected': siteCard.opnameStatus === 'Rejected',
                     'status-outdated': siteCard.opnameStatus === 'Outdated'
@@ -100,7 +106,8 @@
                 class="site-status"
                 [ngClass]="{
                     'status-active': siteCard.opnameStatus === 'Active',
-                    'status-completed': siteCard.opnameStatus === 'Completed',
+                    'status-submitted': siteCard.opnameStatus === 'Submitted',
+                    'status-escalated': siteCard.opnameStatus === 'Escalated',
                     'status-verified': siteCard.opnameStatus === 'Verified',
                     'status-rejected': siteCard.opnameStatus === 'Rejected',
                     'status-outdated': siteCard.opnameStatus === 'Outdated'

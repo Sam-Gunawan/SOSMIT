@@ -315,6 +315,18 @@
                                                         <label [for]="'room-' + result.pendingAsset.assetTag">Room</label>
                                                     </div>
                                                 </div>
+
+                                                <!-- TODO: style asset equipment display! -->
+                                                <div class="asset-equipments">
+                                                    <h5>Equipments</h5>
+                                                    <div class="form-floating mb-2">
+                                                        <input type="text" class="form-control" 
+                                                            [id]="'equipments-' + result.pendingAsset.assetTag" 
+                                                            [(ngModel)]="result.pendingAsset.equipments" name="newEquipments"
+                                                            [placeholder]="result.pendingAsset.equipments || 'Equipments'">
+                                                        <label [for]="'equipments-' + result.pendingAsset.assetTag">Equipments</label>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -377,7 +389,7 @@
         <div class="col" *ngFor="let result of searchResults; let i = index">
             <section class="asset-list-layout" *ngIf="currentView === 'list'">
                 <div class="asset-list" [ngClass]="variant">
-                    <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="isInReport ? '#pending-modal-' + result.existingAsset.assetTag : '#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)" *ngIf="!isInReport">
+                    <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="isInReport ? '#pending-modal-' + result.existingAsset.assetTag : '#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
                         <div class="first-column">
                             <img class="asset-icon" [src]="result.existingAsset.assetIcon" [alt]="result.existingAsset.assetName"/>
                         </div>
@@ -402,9 +414,9 @@
                     
                     <span class="delete-icon-mobile material-symbols-outlined" *ngIf="!isInReport" (click)="removeAsset(i)">delete</span>
                     
-                    <div class="modal fade" [id]="'pending-modal-' + result.pendingAsset.assetTag" tabindex="-1" aria-hidden="true" *ngIf="isInReport">
-                        <app-asset-page [assetTag]="result.pendingAsset.assetTag" [assetPage]="result.pendingAsset" [isPending]="true"></app-asset-page>
-                    </div>
+                    
+                    <app-asset-page [assetTag]="result.pendingAsset.assetTag" [assetPage]="result.pendingAsset" [isPending]="true"></app-asset-page>
+                    
 
                     <div class="modal fade" [id]="'edit-modal-' + result.existingAsset.assetTag" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
@@ -539,6 +551,18 @@
                                                         [(ngModel)]="result.pendingAsset.room" name="newRoom"
                                                         [placeholder]="result.pendingAsset.room || 'Room'">
                                                     <label [for]="'room-' + result.pendingAsset.assetTag">Room</label>
+                                                </div>
+                                            </div>
+
+                                            <!-- TODO: style asset equipment display! -->
+                                            <div class="asset-equipments-mobile">
+                                                <h5>Equipments</h5>
+                                                <div class="form-floating mb-2">
+                                                    <input type="text" class="form-control" 
+                                                        [id]="'equipments-' + result.pendingAsset.assetTag" 
+                                                        [(ngModel)]="result.pendingAsset.equipments" name="newEquipments"
+                                                        [placeholder]="result.pendingAsset.equipments || 'Equipments'">
+                                                    <label [for]="'equipments-' + result.pendingAsset.assetTag">Equipments</label>
                                                 </div>
                                             </div>
 
