@@ -90,8 +90,9 @@
                         </div>
                     </div>
 
-                    <button class="btn btn-primary" *ngIf="currentView === 'small'" src="assets/notif.svg" alt="Notification" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNotifSmall" aria-controls="offcanvasWithBothOptions">
-                        <img class="notif-logo" src="assets/notif.svg" alt="Notification"/>
+                    <button class="btn btn-primary" *ngIf="currentView === 'small'" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNotifSmall" aria-controls="offcanvasWithBothOptions">
+                        <!-- <img class="notif-logo" src="assets/notif.svg" alt="Notification"/> -->
+                        <p class="notif-text">Notification</p>
                     </button>
 
                     <div class="offcanvas offcanvas-top" *ngIf="currentView === 'small'" data-bs-backdrop="static" tabindex="-1" id="offcanvasNotifSmall" aria-labelledby="offcanvasWithBothOptionsLabel">
@@ -212,8 +213,9 @@
                         </div>
                     </div>
 
-                    <button class="btn btn-primary" *ngIf="currentView === 'small'" src="assets/profile.svg" alt="Profile" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasProfileSmall" aria-controls="offcanvasWithBothOptions">
-                        <img class="profile-logo" src="assets/profile.svg" alt="Profile"/>
+                    <button class="btn btn-primary" *ngIf="currentView === 'small'" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasProfileSmall" aria-controls="offcanvasWithBothOptions">
+                        <!-- <img class="profile-logo" src="assets/profile.svg" alt="Profile"/> -->
+                        <p class="profile-text">Profile</p>
                     </button>
 
                     <div class="offcanvas offcanvas-top" *ngIf="currentView === 'small'" data-bs-backdrop="static" tabindex="-1" id="offcanvasProfileSmall" aria-labelledby="offcanvasWithBothOptionsLabel">

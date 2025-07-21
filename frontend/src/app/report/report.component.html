@@ -3,17 +3,13 @@
         <section class="report-content">
             <div class="report-header">
                 <div class="report-details">
-                    <h2>Opname Report</h2>
+                    <h2>Opname Report - {{ site.siteName }}</h2>
                     <p class="site-location">{{ site.siteGroupName }}, {{ site.regionName }}</p>
                     <!-- TODO: apply css for site GA -->
                     <p class="site-ga">GA: {{ site.siteGaName }}</p>
                 </div>
 
                 <div class="export-search">
-                    <div class="export-report">
-                        <img class="export-icon" src="assets/export.svg" alt="Export Report"/>
-                    </div>
-    
                     <div class="filter-dropdown">
                         <div class="date-dropdown-wrapper">
                             <select id="date" name="date" class="form-control date-dropdown" [(ngModel)]="selectedDate" (change)="onDateChange()">
@@ -24,6 +20,10 @@
                             </select>
                             <i class="calendar-icon fas fa-calendar-alt"></i>
                         </div>
+                    </div>
+                    <div class="export-report">
+                        <img class="export-icon" src="assets/export.svg" alt="Export Report"/>
+                        <p class="export-text">Export to PDF</p>
                     </div>
                 </div>
                 <!-- <div class="buttons">
@@ -42,19 +42,19 @@
                 <div class="report-cards">
                     <div class="card card-1">
                         <p>Working</p>
-                        <h4>5</h4>
+                        <h5>5</h5>
                     </div>
                     <div class="card card-2">
                         <p>Broken</p>
-                        <h4>5</h4>
+                        <h5>5</h5>
                     </div>
                     <div class="card card-3">
                         <p>Administration Issue</p>
-                        <h4>5</h4>
+                        <h5>5</h5>
                     </div>
                     <div class="card card-4">
                         <p>Missing</p>
-                        <h4>5</h4>
+                        <h5>5</h5>
                     </div>
                 </div>
 
@@ -82,7 +82,9 @@
 
                 <!-- TODO: Design a "no date selected" display -->
                 <div class="no-date-selected" *ngIf="!selectedDate">
-                    <h4>Please select a date to view the report.</h4>
+                    <p>Please select a date to view the report.</p>
+                    <!-- <img class="no-date-icon" src="assets/report-first.jpg" alt="Report Hamster"/> -->
+                    <img class="no-date-icon" src="assets/report-second.jpeg" alt="Report Hamster"/>
                 </div>
             </div>
         </section>
