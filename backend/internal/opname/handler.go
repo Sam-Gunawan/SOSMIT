@@ -106,7 +106,7 @@ func (handler *Handler) GetSessionByIDHandler(context *gin.Context) {
 		"end_date":    session.EndDate,
 		"status":      session.Status,
 		"user_id":     session.UserID,
-		"approver_id": session.ApproverID,
+		"approver_id": session.ReviewerID,
 		"site_id":     session.SiteID,
 	})
 }
@@ -153,6 +153,7 @@ type AssetChangeRequest struct {
 	NewConditionPhotoURL *string `json:"new_condition_photo_url"`
 	NewLocation          *string `json:"new_location"`
 	NewRoom              *string `json:"new_room"`
+	NewEquipments        *string `json:"new_equipments"`
 	NewOwnerID           *int    `json:"new_owner_id"`
 	NewSiteID            *int    `json:"new_site_id"`
 	ChangeReason         string  `json:"change_reason"`
@@ -200,6 +201,7 @@ func (handler *Handler) ProcessAssetChangesHandler(context *gin.Context) {
 		NewConditionPhotoURL: assetChangeRequest.NewConditionPhotoURL,
 		NewLocation:          assetChangeRequest.NewLocation,
 		NewRoom:              assetChangeRequest.NewRoom,
+		NewEquipments:        assetChangeRequest.NewEquipments,
 		NewOwnerID:           assetChangeRequest.NewOwnerID,
 		NewSiteID:            assetChangeRequest.NewSiteID,
 		ChangeReason:         assetChangeRequest.ChangeReason,
@@ -394,5 +396,79 @@ func (handler *Handler) GetOpnameOnSiteHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"message":  fmt.Sprintf("Retrieved %d opname sessions for site %d", len(sessions), siteID),
 		"sessions": sessions,
+	})
+}
+
+// ApproveOpnameSessionHandler verifies an opname session by its ID.
+func (handler *Handler) ApproveOpnameSessionHandler(context *gin.Context) {
+	// Get the session ID from the URL parameter
+	sessionIDstr := context.Param("session-id")
+	sessionID, err := validateSessionID(sessionIDstr)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid session_id, must be a positive integer",
+		})
+		return
+	}
+
+	// Get the user ID from context (placed by auth middleware)
+	userID, exists := context.Get("user_id")
+	if !exists {
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"error": "user unauthorized, user_id not found in context",
+		})
+		return
+	}
+
+	// Call the service to verify the opname session
+	err = handler.service.ApproveOpnameSession(sessionID, int(userID.(int64)))
+	if err != nil {
+		log.Printf("❌ Error verifying opname session with ID %d: %v", sessionID, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to verify opname session: " + err.Error(),
+		})
+		return
+	}
+
+	log.Printf("✅ Opname session with ID %d verified successfully", sessionID)
+	context.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Opname session %d verified successfully", sessionID),
+	})
+}
+
+// RejectOpnameSessionHandler rejects an opname session by its ID.
+func (handler *Handler) RejectOpnameSessionHandler(context *gin.Context) {
+	// Get the session ID from the URL parameter
+	sessionIDstr := context.Param("session-id")
+	sessionID, err := validateSessionID(sessionIDstr)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid session_id, must be a positive integer",
+		})
+		return
+	}
+
+	// Get the user ID from context (placed by auth middleware)
+	userID, exists := context.Get("user_id")
+	if !exists {
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"error": "user unauthorized, user_id not found in context",
+		})
+		return
+	}
+
+	// Call the service to reject the opname session
+	err = handler.service.RejectOpnameSession(sessionID, int(userID.(int64)))
+	if err != nil {
+		log.Printf("❌ Error rejecting opname session with ID %d: %v", sessionID, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to reject opname session: " + err.Error(),
+		})
+		return
+	}
+
+	log.Printf("✅ Opname session with ID %d rejected successfully", sessionID)
+	context.JSON(http.StatusOK, gin.H{
+		"message": fmt.Sprintf("Opname session %d rejected successfully", sessionID),
 	})
 }

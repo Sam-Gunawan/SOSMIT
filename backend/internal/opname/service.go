@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	"golang.org/x/text/cases"
@@ -99,13 +98,6 @@ func (service *Service) DeleteSession(sessionID int, requestingUserID int, userP
 	if session == nil {
 		log.Printf("⚠ No opname session found with ID: %d", sessionID)
 		return errors.New("opname session not found")
-	}
-
-	// Security check!
-	// Session can only be deleted by the user who created it or any L1 SUPPORT user.
-	if session.UserID != requestingUserID && strings.ToUpper(userPosition) != "L1 SUPPORT" {
-		log.Printf("⚠ Forbidden: User %d is not authorized to delete session %d", requestingUserID, sessionID)
-		return errors.New("you are not authorized to delete this opname session")
 	}
 
 	// Delete all the condition photos associated with the session.
@@ -305,4 +297,42 @@ func (service *Service) GetOpnameOnSite(siteID int) ([]OpnameFilter, error) {
 
 	log.Printf("✅ Opname sessions for site %d retrieved successfully", siteID)
 	return sessions, nil
+}
+
+// ApproveOpnameSession verifies an opname session by its ID.
+func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) error {
+	// Validate sessionID and reviewerID
+	if sessionID <= 0 || reviewerID <= 0 {
+		log.Printf("⚠ Invalid sessionID or reviewerID: sessionID=%d, reviewerID=%d", sessionID, reviewerID)
+		return errors.New("invalid sessionID or reviewerID")
+	}
+
+	// Call the repository to verify the opname session
+	err := service.repo.ApproveOpnameSession(sessionID, reviewerID)
+	if err != nil {
+		log.Printf("❌ Error verifying opname session with ID %d: %v", sessionID, err)
+		return err
+	}
+
+	log.Printf("✅ Opname session with ID %d verified successfully by user %d", sessionID, reviewerID)
+	return nil
+}
+
+// RejectOpnameSession rejects an opname session by its ID.
+func (service *Service) RejectOpnameSession(sessionID int, reviewerID int) error {
+	// Validate sessionID and reviewerID
+	if sessionID <= 0 || reviewerID <= 0 {
+		log.Printf("⚠ Invalid sessionID or reviewerID: sessionID=%d, reviewerID=%d", sessionID, reviewerID)
+		return errors.New("invalid sessionID or reviewerID")
+	}
+
+	// Call the repository to reject the opname session
+	err := service.repo.RejectOpnameSession(sessionID, reviewerID)
+	if err != nil {
+		log.Printf("❌ Error rejecting opname session with ID %d: %v", sessionID, err)
+		return err
+	}
+
+	log.Printf("✅ Opname session with ID %d rejected successfully by user %d", sessionID, reviewerID)
+	return nil
 }
