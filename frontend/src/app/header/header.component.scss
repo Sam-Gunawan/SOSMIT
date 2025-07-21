@@ -111,9 +111,8 @@ header {
   }
 
   .menu {
+    padding: 40px 30px;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
     width: 50vw;
     height: 100vh;
     position: fixed;
@@ -125,10 +124,6 @@ header {
   }
 
   .menu li {
-    margin-top: 40px;
-  }
-
-  .menu li a {
     padding: 10px;
   }
 
@@ -144,6 +139,18 @@ header {
 .notif-logo {
   width: 28px;
   height: 28px;
+}
+
+.notif-text, .profile-text {
+  display: flex;
+  text-decoration: none;
+  color: gray;
+  text-align: center;
+  transition: 0.15s ease-in-out;
+  position: relative;
+  font-family: "Rubik", sans-serif;
+  font-weight: bold;
+  margin: 0px;
 }
 
 .profile-logo {
