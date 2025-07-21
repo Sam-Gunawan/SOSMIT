@@ -7,13 +7,16 @@ import (
 )
 
 type OpnameSession struct {
-	ID         int            `json:"id"`
-	StartDate  string         `json:"start_date"`
-	EndDate    sql.NullString `json:"end_date"` // Use sql.NullString to handle nullable end_date
-	Status     string         `json:"status"`
-	UserID     int            `json:"user_id"`
-	ReviewerID sql.NullInt64  `json:"reviewer_id"` // Use sql.NullInt64 for nullable reviewer_id
-	SiteID     int            `json:"site_id"`
+	ID                int            `json:"id"`
+	StartDate         string         `json:"start_date"`
+	EndDate           sql.NullString `json:"end_date"` // Use sql.NullString to handle nullable end_date
+	Status            string         `json:"status"`
+	UserID            int            `json:"user_id"`
+	ManagerReviewerID sql.NullInt64  `json:"manager_reviewer_id"`
+	ManagerReviewedAt sql.NullString `json:"manager_reviewed_at"`
+	L1ReviewerID      sql.NullInt64  `json:"l1_reviewer_id"`
+	L1ReviewedAt      sql.NullString `json:"l1_reviewed_at"`
+	SiteID            int            `json:"site_id"`
 }
 
 type AssetChange struct {
@@ -77,7 +80,10 @@ func (repo *Repository) GetSessionByID(sessionID int) (*OpnameSession, error) {
 		&session.EndDate,
 		&session.Status,
 		&session.UserID,
-		&session.ReviewerID,
+		&session.ManagerReviewerID,
+		&session.ManagerReviewedAt,
+		&session.L1ReviewerID,
+		&session.L1ReviewedAt,
 		&session.SiteID,
 	)
 	if err != nil {
@@ -111,7 +117,7 @@ func (repo *Repository) DeleteSession(sessionID int) error {
 func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, error) {
 	var changesJSON []byte // Use []byte to receive raw JSON data.
 
-	query := `SELECT record_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`
+	query := `SELECT record_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
 
 	err := repo.db.QueryRow(query,
 		changedAsset.SessionID,

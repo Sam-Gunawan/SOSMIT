@@ -14,7 +14,7 @@ DROP PROCEDURE IF EXISTS public.finish_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.approve_opname_session(INT, INT);
 DROP PROCEDURE IF EXISTS public.reject_opname_session(INT, INT);
-DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), INT, INT, TEXT);
+DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, INT, TEXT);
 DROP PROCEDURE IF EXISTS public.delete_asset_change(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_asset_change_photo(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
@@ -405,14 +405,19 @@ CREATE OR REPLACE FUNCTION public.get_opname_session_by_id(_session_id INT)
 		end_date TIMESTAMP WITH TIME ZONE,
 		"status" VARCHAR(20),
 		user_id INT,
-		approver_id INT,
+		manager_reviewer_id INT,
+		manager_reviewed_at TIMESTAMP WITH TIME ZONE,
+		l1_reviewer_id INT,
+		l1_reviewed_at TIMESTAMP WITH TIME ZONE,
 		site_id INT
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT os.id, os."start_date", os.end_date, os."status", os.user_id, os.approver_id, os.site_id
+		SELECT os.id, os."start_date", os.end_date, os."status", os.user_id,
+		 	os.manager_reviewer_id, os.manager_reviewed_at, os.l1_reviewer_id, os.l1_reviewed_at,
+			os.site_id
 		FROM "OpnameSession" AS os
 		WHERE os.id = _session_id;
 	END;
@@ -492,7 +497,7 @@ AS $$
 			SELECT 1
 			FROM "OpnameSession"
 			WHERE id = _session_id AND "status" = 'Submitted'
-			AND approver_id IS NULL
+			AND manager_reviewer_id IS NULL
 		) AND LOWER(_user_position) != 'area manager' THEN
 			RAISE EXCEPTION 'Opname session with ID: % is not yet approved by an area manager.', _session_id;
 		ELSE
@@ -509,7 +514,7 @@ AS $$
 			SELECT 1
 			FROM "OpnameSession"
 			WHERE id = _session_id AND "status" = 'Escalated'
-			AND approver_id IS NULL
+			AND l1_reviewer_id IS NULL
 		) AND LOWER(_user_position) != 'l1 support' THEN
 			RAISE EXCEPTION 'Opname session with ID: % is not yet approved by L1 support.', _session_id;
 		ELSE
@@ -547,7 +552,7 @@ AS $$
 			SELECT 1
 			FROM "OpnameSession"
 			WHERE id = _session_id AND "status" = 'Submitted'
-			AND approver_id IS NULL
+			AND manager_reviewer_id IS NULL
 		) AND LOWER(_user_position) != 'area manager' THEN
 			RAISE EXCEPTION 'Opname session with ID: % is not yet approved by an area manager.', _session_id;
 		ELSE
@@ -564,7 +569,7 @@ AS $$
 			SELECT 1
 			FROM "OpnameSession"
 			WHERE id = _session_id AND "status" = 'Escalated'
-			AND approver_id IS NULL
+			AND l1_reviewer_id IS NULL
 		) AND LOWER(_user_position) != 'l1 support' THEN
 			RAISE EXCEPTION 'Opname session with ID: % is not yet approved by L1 support.', _session_id;
 		ELSE
@@ -589,8 +594,8 @@ CREATE OR REPLACE FUNCTION public.record_asset_change(
 	_new_condition_photo_url TEXT,
 	_new_location VARCHAR(255),
 	_new_room VARCHAR(255),
-	_new_owner_id INT,
 	_new_equipments TEXT,
+	_new_owner_id INT,
 	_new_site_id INT,
 	_change_reason TEXT
 ) RETURNS JSONB
