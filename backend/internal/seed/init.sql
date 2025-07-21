@@ -32,7 +32,7 @@ CREATE TABLE "SiteGroup" (
 CREATE TABLE "Site" (
     "id" SERIAL PRIMARY KEY,
     "site_name" VARCHAR(100) NOT NULL,
-    "last_opname_date" TIMESTAMP WITH TIME ZONE DEFAULT '2025-06-01 00:00:00+07', 
+    "last_opname_date" TIMESTAMP WITH TIME ZONE DEFAULT '1945-08-17 00:00:00+07', 
 
     -- Foreign key to SiteGroup.
     "site_group_id" INT NOT NULL REFERENCES "SiteGroup"("id") ON DELETE CASCADE,
@@ -89,6 +89,7 @@ CREATE TABLE "Asset" (
     ) DEFAULT '',
     "location" VARCHAR(255),
     "room" VARCHAR(255),
+    "equipments" TEXT, -- e.g. "Monitor, Keyboard, Mouse"
     -- Foreign key to User (owner of the asset).
     "owner_id" INT NOT NULL REFERENCES "User"("user_id") ON DELETE SET NULL,
 
@@ -104,13 +105,18 @@ CREATE TABLE "OpnameSession" (
     "id" SERIAL PRIMARY KEY,
     "start_date" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     "end_date" TIMESTAMP WITH TIME ZONE,
-    "status" VARCHAR(20) NOT NULL CHECK ("status" IN ('Outdated', 'Active', 'Completed', 'Verified', 'Rejected')) DEFAULT 'Outdated',
+    "status" VARCHAR(20) NOT NULL CHECK ("status" IN ('Outdated', 'Active', 'Submitted', 'Escalated', 'Verified', 'Rejected')) DEFAULT 'Outdated',
 
     -- Foreign key to User (the user who created the opname session).
     "user_id" INT NOT NULL REFERENCES "User"("user_id"),
 
-    -- Foreign key to User (the user who verified the opname session).
-    "approver_id" INT REFERENCES "User"("user_id") ON DELETE SET NULL,
+    -- Foreign key to User (the manager who verified/rejected the opname session).
+    "manager_reviewer_id" INT REFERENCES "User"("user_id") ON DELETE SET NULL,
+    "manager_reviewed_at" TIMESTAMP WITH TIME ZONE,
+
+    -- Foreign key to User (the L1 support who verified/rejected the opname session).
+    "l1_reviewer_id" INT REFERENCES "User"("user_id") ON DELETE SET NULL,
+    "l1_reviewed_at" TIMESTAMP WITH TIME ZONE,
     
     -- Foreign key to Site (the site where the opname session is performed).
     "site_id" INT NOT NULL REFERENCES "Site"("id")

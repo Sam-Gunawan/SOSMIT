@@ -7,13 +7,16 @@ import (
 )
 
 type OpnameSession struct {
-	ID         int            `json:"id"`
-	StartDate  string         `json:"start_date"`
-	EndDate    sql.NullString `json:"end_date"` // Use sql.NullString to handle nullable end_date
-	Status     string         `json:"status"`
-	UserID     int            `json:"user_id"`
-	ApproverID sql.NullInt64  `json:"approver_id"` // Use sql.NullInt64 for nullable approver_id
-	SiteID     int            `json:"site_id"`
+	ID                int            `json:"id"`
+	StartDate         string         `json:"start_date"`
+	EndDate           sql.NullString `json:"end_date"` // Use sql.NullString to handle nullable end_date
+	Status            string         `json:"status"`
+	UserID            int            `json:"user_id"`
+	ManagerReviewerID sql.NullInt64  `json:"manager_reviewer_id"`
+	ManagerReviewedAt sql.NullString `json:"manager_reviewed_at"`
+	L1ReviewerID      sql.NullInt64  `json:"l1_reviewer_id"`
+	L1ReviewedAt      sql.NullString `json:"l1_reviewed_at"`
+	SiteID            int            `json:"site_id"`
 }
 
 type AssetChange struct {
@@ -26,6 +29,7 @@ type AssetChange struct {
 	NewConditionPhotoURL *string `json:"new_condition_photo_url"`
 	NewLocation          *string `json:"new_location"`
 	NewRoom              *string `json:"new_room"`
+	NewEquipments        *string `json:"new_equipments"`
 	NewOwnerID           *int    `json:"new_owner_id"`
 	NewSiteID            *int    `json:"new_site_id"`
 	ChangeReason         string  `json:"change_reason"`
@@ -76,7 +80,10 @@ func (repo *Repository) GetSessionByID(sessionID int) (*OpnameSession, error) {
 		&session.EndDate,
 		&session.Status,
 		&session.UserID,
-		&session.ApproverID,
+		&session.ManagerReviewerID,
+		&session.ManagerReviewedAt,
+		&session.L1ReviewerID,
+		&session.L1ReviewedAt,
 		&session.SiteID,
 	)
 	if err != nil {
@@ -110,7 +117,7 @@ func (repo *Repository) DeleteSession(sessionID int) error {
 func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, error) {
 	var changesJSON []byte // Use []byte to receive raw JSON data.
 
-	query := `SELECT record_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`
+	query := `SELECT record_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
 
 	err := repo.db.QueryRow(query,
 		changedAsset.SessionID,
@@ -122,6 +129,7 @@ func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, err
 		changedAsset.NewConditionPhotoURL,
 		changedAsset.NewLocation,
 		changedAsset.NewRoom,
+		changedAsset.NewEquipments,
 		changedAsset.NewOwnerID,
 		changedAsset.NewSiteID,
 		changedAsset.ChangeReason,
@@ -232,6 +240,34 @@ func (repo *Repository) FinishOpnameSession(sessionID int) error {
 
 	// If successful, log the completion.
 	log.Printf("✅ Opname session with ID %d finished successfully", sessionID)
+	return nil
+}
+
+// ApproveOpnameSession sets the status of an opname session to "escalated" by an area manager or "verified" by an L1 support.
+func (repo *Repository) ApproveOpnameSession(sessionID int, reviewerID int) error {
+	query := `CALL verify_opname_session($1, $2)`
+	_, err := repo.db.Exec(query, sessionID, reviewerID)
+	if err != nil {
+		log.Printf("❌ Error verifying opname session with ID %d by approver %d: %v", sessionID, reviewerID, err)
+		return err // Verification failed for some error.
+	}
+
+	// If successful, log the verification.
+	log.Printf("✅ Opname session with ID %d verified successfully by approver %d", sessionID, reviewerID)
+	return nil
+}
+
+// RejectOpnameSession sets the status of an opname session to "rejected" by an approver.
+func (repo *Repository) RejectOpnameSession(sessionID int, reviewerID int) error {
+	query := `CALL reject_opname_session($1, $2)`
+	_, err := repo.db.Exec(query, sessionID, reviewerID)
+	if err != nil {
+		log.Printf("❌ Error rejecting opname session with ID %d by approver %d: %v", sessionID, reviewerID, err)
+		return err
+	}
+
+	// If successful, log the rejection.
+	log.Printf("✅ Opname session with ID %d rejected successfully by approver %d", sessionID, reviewerID)
 	return nil
 }
 

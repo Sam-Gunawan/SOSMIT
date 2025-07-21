@@ -21,6 +21,7 @@ type Asset struct {
 	ConditionPhotoURL  string
 	Location           string
 	Room               string
+	Equipments         string
 	OwnerID            int64
 	OwnerName          string // Owner's full name, can be a combination of first and last name
 	OwnerPosition      string
@@ -62,6 +63,7 @@ func (repo *Repository) GetAssetByTag(assetTag string) (*Asset, error) {
 		&asset.ConditionPhotoURL,
 		&asset.Location,
 		&asset.Room,
+		&asset.Equipments,
 		&asset.OwnerID,
 		&asset.OwnerName,
 		&asset.OwnerPosition,
@@ -107,6 +109,7 @@ func (repo *Repository) GetAssetBySerialNumber(serialNumber string) (*Asset, err
 		&asset.ConditionPhotoURL,
 		&asset.Location,
 		&asset.Room,
+		&asset.Equipments,
 		&asset.OwnerID,
 		&asset.OwnerName,
 		&asset.OwnerPosition,

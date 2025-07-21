@@ -4,6 +4,7 @@ DROP FUNCTION IF EXISTS public.get_user_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_user_by_username(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_user_site_cards(INT);
 DROP FUNCTION IF EXISTS public.get_l1_support_emails();
+DROP FUNCTION IF EXISTS public.get_area_manager_email(INT);
 DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_asset_by_serial_number(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
@@ -11,7 +12,9 @@ DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT);
 DROP FUNCTION IF EXISTS public.get_opname_session_by_id(INT);
 DROP PROCEDURE IF EXISTS public.finish_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
-DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), INT, INT, TEXT);
+DROP PROCEDURE IF EXISTS public.approve_opname_session(INT, INT);
+DROP PROCEDURE IF EXISTS public.reject_opname_session(INT, INT);
+DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, INT, TEXT);
 DROP PROCEDURE IF EXISTS public.delete_asset_change(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_asset_change_photo(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
@@ -19,6 +22,10 @@ DROP FUNCTION IF EXISTS public.get_all_sites();
 DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
 DROP FUNCTION IF EXISTS public.get_opname_by_site_id(INT);
+
+-- TODO: IMPLEMENT VERIFY/REJECT OPNAME SESSION IN EMAIL
+-- TODO: SEND EMAIL TO MANAGER BEFORE L1 SUPPORT!
+-- ! Email goes to area manager once completed, then to L1 support after verified by manager.
 
 -- get_credentials retrieves user credentials by username (for login auth)
 -- ! email not implemented yet
@@ -138,63 +145,61 @@ CREATE OR REPLACE FUNCTION public.get_user_site_cards(_user_id INT)
     )
     LANGUAGE plpgsql
 AS $$
-DECLARE
-    _user_position VARCHAR;
-    _user_region_id INT;
-BEGIN
-    -- Fetch the user's position and region ID into variables first.
-    SELECT
-        LOWER(u.position),
-        r.id
-    INTO
-        _user_position,
-        _user_region_id
-    FROM "User" AS u
-    LEFT JOIN "Site" AS s ON u.site_id = s.id
-    LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-    LEFT JOIN "Region" AS r ON sg.region_id = r.id
-    WHERE u.user_id = _user_id;
+	DECLARE
+		_user_position VARCHAR;
+		_user_region_id INT;
+	BEGIN
+		-- Fetch the user's position and region ID into variables first.
+		SELECT
+			LOWER(u.position),
+			r.id
+		INTO
+			_user_position,
+			_user_region_id
+		FROM "User" AS u
+		LEFT JOIN "Site" AS s ON u.site_id = s.id
+		LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+		LEFT JOIN "Region" AS r ON sg.region_id = r.id
+		WHERE u.user_id = _user_id;
 
-    -- Fetch the site cards based on the user's position and region.
-	-- Show the latest opname session status if available and not outdated.
-    RETURN QUERY
-        SELECT
-            s.id AS site_id,
-            s.site_name,
-            sg.site_group_name,
-            r.region_name,
-            s.site_ga_id,
-            COALESCE(latest_session.session_id, -1) AS opname_session_id,
-            CASE
-                WHEN latest_session.session_status = 'Active' THEN 'Active'
-                WHEN latest_session.session_status IN ('Completed', 'Verified', 'Rejected')
-					-- TODO: Make the interval dynamic based on user settings.
-                    AND COALESCE(latest_session.session_end_date, latest_session.session_start_date) > (NOW() - INTERVAL '30 days')
-                    THEN latest_session.session_status
-                ELSE 'Outdated'
-            END AS opname_status,
-            COALESCE(latest_session.session_end_date, s.last_opname_date) AS last_opname_date
-        FROM "Site" AS s
-        INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-        INNER JOIN "Region" AS r ON sg.region_id = r.id
-        -- The subquery for the latest session is good, so we keep it as is.
-        LEFT JOIN (
-            SELECT DISTINCT ON (os.site_id)
-                os.site_id,
-                os.id AS session_id,
-                os.status AS session_status,
-                os.end_date AS session_end_date,
-                os.start_date AS session_start_date
-            FROM "OpnameSession" AS os
-            WHERE os.status IN ('Active', 'Completed', 'Verified', 'Rejected', 'Outdated')
-            ORDER BY os.site_id, os.start_date DESC
-        ) AS latest_session ON s.id = latest_session.site_id
-        -- The WHERE clause is now much cleaner and more efficient.
-        WHERE
-            _user_position = 'l1 support'
-            OR
-            (_user_position = 'admin staff general affairs' AND r.id = _user_region_id)
-        ORDER BY s.site_name;
+		-- Fetch the site cards based on the user's position and region.
+		-- Show the latest opname session status if available and not outdated.
+		RETURN QUERY
+			SELECT
+				s.id AS site_id,
+				s.site_name,
+				sg.site_group_name,
+				r.region_name,
+				s.site_ga_id,
+				COALESCE(latest_session.session_id, -1) AS opname_session_id,
+				CASE
+					WHEN latest_session.session_status = 'Active' THEN 'Active'
+					WHEN latest_session.session_status IN ('Submitted', 'Escalated', 'Verified', 'Rejected')
+						-- TODO: Make the interval dynamic based on user settings.
+						AND COALESCE(latest_session.session_end_date, latest_session.session_start_date) > (NOW() - INTERVAL '30 days')
+						THEN latest_session.session_status
+					ELSE 'Outdated'
+				END AS opname_status,
+				COALESCE(latest_session.session_end_date, s.last_opname_date) AS last_opname_date
+			FROM "Site" AS s
+			INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+			INNER JOIN "Region" AS r ON sg.region_id = r.id
+			LEFT JOIN (
+				-- Get the latest opname session for each site.
+				SELECT DISTINCT ON (os.site_id)
+					os.site_id,
+					os.id AS session_id,
+					os.status AS session_status,
+					os.end_date AS session_end_date,
+					os.start_date AS session_start_date
+				FROM "OpnameSession" AS os
+				ORDER BY os.site_id, os.start_date DESC
+			) AS latest_session ON s.id = latest_session.site_id
+			WHERE
+				_user_position = 'l1 support'
+				OR
+				(_user_position IN ('admin staff general affairs', 'area manager') AND r.id = _user_region_id)
+			ORDER BY s.site_name;
 	END;
 $$;
 
@@ -211,6 +216,23 @@ AS $$
 			FROM "User" AS u
 			WHERE LOWER(u.position) = 'l1 support'
 			ORDER BY u.email;
+	END;
+$$;
+
+-- get_area_manager_email retrieves the email of the area manager for a given site
+CREATE OR REPLACE FUNCTION public.get_area_manager_email(_site_id INT)
+	RETURNS TABLE (
+		email VARCHAR(255)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+			SELECT u.email
+			FROM "User" AS u
+			INNER JOIN "Site" AS s ON u.site_id = s.id
+			WHERE LOWER(u.position) = 'area manager'
+			AND s.id = _site_id;
 	END;
 $$;
 
@@ -231,6 +253,7 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_tag(_asset_tag VARCHAR(12))
 		condition_photo_url TEXT,
 		"location" VARCHAR(255),
 		room VARCHAR(255),
+		equipments TEXT,
 		owner_id INT,
 		owner_name VARCHAR(510),
 		owner_position VARCHAR(100),
@@ -248,7 +271,7 @@ AS $$
 				a.product_category, a.product_subcategory, a.product_variety,
 				a.brand_name, a.product_name, 
 				a.condition, a.condition_notes, a.condition_photo_url::TEXT,
-				a.location, a.room,
+				a.location, a.room, a.equipments,
 				a.owner_id,
 				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
 				u.position AS owner_position,
@@ -283,6 +306,7 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_serial_number(_serial_number VARC
 		condition_photo_url TEXT,
 		"location" VARCHAR(255),
 		room VARCHAR(255),
+		equipments TEXT,
 		owner_id INT,
 		owner_name VARCHAR(510),
 		owner_position VARCHAR(100),
@@ -300,7 +324,7 @@ AS $$
 				a.product_category, a.product_subcategory, a.product_variety,
 				a.brand_name, a.product_name, 
 				a.condition, a.condition_notes, a.condition_photo_url::TEXT,
-				a.location, a.room,
+				a.location, a.room, a.equipments,
 				a.owner_id,
 				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
 				u.position AS owner_position,
@@ -344,16 +368,16 @@ CREATE OR REPLACE FUNCTION public.create_new_opname_session(
 AS $$
 	DECLARE
 		-- Local variable to count existing ongoing sessions for the site.
-		-- Sessions in 'Active' and 'Completed' status are considered ongoing.
+		-- Sessions in 'Active', 'Submitted', and 'Escalated' status are considered ongoing.
 		_ongoing_session_count INT;
 		_new_session_id INT := 0; -- Initialize to 0, will be set if a new session is created.
 	BEGIN
 		-- Check if there are any active opname sessions for the site.
-		-- Count how many rows in "OpnameSession" have the same site_id and status 'Active' or 'Completed'.
+		-- Count how many rows in "OpnameSession" have the same site_id and status 'Active', 'Submitted', or 'Escalated'.
 		SELECT COUNT(*)
 		INTO _ongoing_session_count
 		FROM "OpnameSession"
-		WHERE site_id = _site_id AND ("status" = 'Active' OR "status" = 'Completed');
+		WHERE site_id = _site_id AND "status" IN ('Active', 'Submitted', 'Escalated');
 
 		-- If there are no ongoing sessions, proceed to create a new one.
 		IF _ongoing_session_count = 0 THEN
@@ -381,14 +405,19 @@ CREATE OR REPLACE FUNCTION public.get_opname_session_by_id(_session_id INT)
 		end_date TIMESTAMP WITH TIME ZONE,
 		"status" VARCHAR(20),
 		user_id INT,
-		approver_id INT,
+		manager_reviewer_id INT,
+		manager_reviewed_at TIMESTAMP WITH TIME ZONE,
+		l1_reviewer_id INT,
+		l1_reviewed_at TIMESTAMP WITH TIME ZONE,
 		site_id INT
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT os.id, os."start_date", os.end_date, os."status", os.user_id, os.approver_id, os.site_id
+		SELECT os.id, os."start_date", os.end_date, os."status", os.user_id,
+		 	os.manager_reviewer_id, os.manager_reviewed_at, os.l1_reviewer_id, os.l1_reviewed_at,
+			os.site_id
 		FROM "OpnameSession" AS os
 		WHERE os.id = _session_id;
 	END;
@@ -417,9 +446,9 @@ AS $$
 			RAISE EXCEPTION 'No asset changes recorded for opname session ID: %', _session_id;
 		END IF;
 
-		-- Update the opname session to mark it as finished
+		-- Update the opname session to mark it as finished and await manager approval
 		UPDATE "OpnameSession"
-		SET "status" = 'Completed', end_date = NOW()
+		SET "status" = 'Submitted', end_date = NOW()
 		WHERE id = _session_id;
 
 		-- Update the site's last_opname_date to the end date as well
@@ -427,7 +456,7 @@ AS $$
 		SET last_opname_date = NOW()
 		WHERE id = (SELECT site_id FROM "OpnameSession" WHERE id = _session_id);
 
-		RAISE NOTICE 'Opname session with ID: % has been marked as finished.', _session_id;
+		RAISE NOTICE 'Opname session with ID: % has been submitted.', _session_id;
 	END;
 $$;
 
@@ -444,6 +473,116 @@ AS $$
 	END;
 $$;
 
+-- approve_opname_session verifies an opname session by session ID
+CREATE OR REPLACE PROCEDURE public.approve_opname_session(_reviewer_id INT, _session_id INT)
+	LANGUAGE plpgsql
+AS $$
+	DECLARE _user_position VARCHAR;
+	BEGIN
+		-- Check if the opname session exists and is currently completed
+		IF NOT EXISTS (
+			SELECT 1
+			FROM "OpnameSession"
+			WHERE id = _session_id AND "status" IN ('Submitted', 'Escalated')
+		) THEN
+			RAISE EXCEPTION 'No submitted opname session found with ID: %', _session_id;
+		END IF;
+
+		-- Get the user's position
+		SELECT LOWER(u.position) FROM "User" AS u WHERE u.user_id = _reviewer_id
+		INTO _user_position;
+
+		-- If the session is already submitted, only the area manager can escalate it.
+		IF EXISTS (
+			SELECT 1
+			FROM "OpnameSession"
+			WHERE id = _session_id AND "status" = 'Submitted'
+			AND manager_reviewer_id IS NULL
+		) AND LOWER(_user_position) != 'area manager' THEN
+			RAISE EXCEPTION 'Opname session with ID: % is not yet approved by an area manager.', _session_id;
+		ELSE
+			UPDATE "OpnameSession"
+			SET manager_reviewer_id = _reviewer_id,
+				"status" = 'Escalated',
+				manager_reviewed_at = NOW()
+			WHERE id = _session_id;
+			RAISE NOTICE 'Opname session with ID: % has been escalated by area manager.', _session_id;
+		END IF;
+
+		-- If the session is already escalated, only the L1 support can verify it.
+		IF EXISTS (
+			SELECT 1
+			FROM "OpnameSession"
+			WHERE id = _session_id AND "status" = 'Escalated'
+			AND l1_reviewer_id IS NULL
+		) AND LOWER(_user_position) != 'l1 support' THEN
+			RAISE EXCEPTION 'Opname session with ID: % is not yet approved by L1 support.', _session_id;
+		ELSE
+			UPDATE "OpnameSession"
+			SET l1_reviewer_id = _reviewer_id,
+				"status" = 'Verified',
+				l1_reviewed_at = NOW()
+			WHERE id = _session_id;
+			RAISE NOTICE 'Opname session with ID: % has been verified by L1 support.', _session_id;
+		END IF;
+	END;
+$$;
+
+-- reject_opname_session marks an opname session as rejected
+CREATE OR REPLACE PROCEDURE public.reject_opname_session(_reviewer_id INT, _session_id INT)
+	LANGUAGE plpgsql
+AS $$
+	DECLARE _user_position VARCHAR;
+	BEGIN
+		-- Check if the opname session exists and is currently completed
+		IF NOT EXISTS (
+			SELECT 1
+			FROM "OpnameSession"
+			WHERE id = _session_id AND "status" IN ('Submitted', 'Escalated')
+		) THEN
+			RAISE EXCEPTION 'No submitted opname session found with ID: %', _session_id;
+		END IF;
+
+		-- Get the user's position
+		SELECT LOWER(u.position) FROM "User" AS u WHERE u.user_id = _reviewer_id
+		INTO _user_position;
+
+		-- If the session is already submitted, only the area manager can reject it.
+		IF EXISTS (
+			SELECT 1
+			FROM "OpnameSession"
+			WHERE id = _session_id AND "status" = 'Submitted'
+			AND manager_reviewer_id IS NULL
+		) AND LOWER(_user_position) != 'area manager' THEN
+			RAISE EXCEPTION 'Opname session with ID: % is not yet approved by an area manager.', _session_id;
+		ELSE
+			UPDATE "OpnameSession"
+			SET manager_reviewer_id = _reviewer_id,
+				"status" = 'Rejected',
+				manager_reviewed_at = NOW()
+			WHERE id = _session_id;
+			RAISE NOTICE 'Opname session with ID: % has been escalated by area manager.', _session_id;
+		END IF;
+
+		-- If the session is already escalated, only the L1 support can verify it.
+		IF EXISTS (
+			SELECT 1
+			FROM "OpnameSession"
+			WHERE id = _session_id AND "status" = 'Escalated'
+			AND l1_reviewer_id IS NULL
+		) AND LOWER(_user_position) != 'l1 support' THEN
+			RAISE EXCEPTION 'Opname session with ID: % is not yet approved by L1 support.', _session_id;
+		ELSE
+			UPDATE "OpnameSession"
+			SET l1_reviewer_id = _reviewer_id,
+				"status" = 'Rejected',
+				l1_reviewed_at = NOW()
+			WHERE id = _session_id;
+			RAISE NOTICE 'Opname session with ID: % has been verified by L1 support.', _session_id;
+		END IF;
+	END;
+$$;
+
 -- record_asset_change records changes made to an asset during an opname session
 CREATE OR REPLACE FUNCTION public.record_asset_change(
 	_session_id INT,
@@ -455,6 +594,7 @@ CREATE OR REPLACE FUNCTION public.record_asset_change(
 	_new_condition_photo_url TEXT,
 	_new_location VARCHAR(255),
 	_new_room VARCHAR(255),
+	_new_equipments TEXT,
 	_new_owner_id INT,
 	_new_site_id INT,
 	_change_reason TEXT
@@ -496,6 +636,9 @@ AS $$
 		END IF;
 		IF _new_room IS NOT NULL AND _new_room IS DISTINCT FROM _old_data.room THEN
 			_changes := jsonb_set(_changes, '{newRoom}', to_jsonb(_new_room));
+		END IF;
+		IF _new_equipments IS NOT NULL AND _new_equipments IS DISTINCT FROM _old_data.equipments THEN
+			_changes := jsonb_set(_changes, '{newEquipments}', to_jsonb(_new_equipments));
 		END IF;
 		IF _new_owner_id IS NOT NULL AND _new_owner_id IS DISTINCT FROM _old_data.owner_id THEN
 			_changes := jsonb_set(_changes, '{newOwnerID}', to_jsonb(_new_owner_id));

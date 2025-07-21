@@ -211,7 +211,8 @@ func seedUser(db *sql.DB, record []string) error {
 
 // Expected CSV format for asset.csv:
 // asset_tag [PK], serial_number, status, status_reason, product_category, product_subcategory,
-// product_variety, brand_name, product_name, condition, condition_photo_url, location, room, owner_id [FK], site_id [FK]
+// product_variety, brand_name, product_name, condition, condition_photo_url, location, room,
+// equipments, owner_id [FK], site_id [FK]
 func seedAsset(db *sql.DB, record []string) error {
 	asset_tag := record[0]
 	serial_number := record[1]
@@ -226,8 +227,9 @@ func seedAsset(db *sql.DB, record []string) error {
 	condition_photo_url := record[10]
 	location := record[11]
 	room := record[12]
-	owner_id := record[13]
-	site_id := record[14]
+	equipments := record[13]
+	owner_id := record[14]
+	site_id := record[15]
 
 	// Convert condition to int
 	condition, err := strconv.Atoi(conditionStr)
@@ -245,10 +247,10 @@ func seedAsset(db *sql.DB, record []string) error {
 		condition_photo_url = "-1"
 	}
 
-	query := `INSERT INTO "Asset" (asset_tag, serial_number, status, status_reason, product_category, product_subcategory, product_variety, brand_name, product_name, condition, condition_photo_url, location, room, owner_id, site_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) ON CONFLICT (asset_tag) DO NOTHING`
+	query := `INSERT INTO "Asset" (asset_tag, serial_number, status, status_reason, product_category, product_subcategory, product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, owner_id, site_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) ON CONFLICT (asset_tag) DO NOTHING`
 
 	_, err = db.Exec(query, asset_tag, serial_number, status, status_reason, product_category, product_subcategory,
-		product_variety, brand_name, product_name, condition, condition_photo_url, location, room, owner_id, site_id)
+		product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, owner_id, site_id)
 	if err != nil {
 		log.Fatalf("Error inserting record into Asset table: %v\n", err)
 

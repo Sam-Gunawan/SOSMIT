@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, Host, HostListener, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
@@ -17,10 +17,15 @@ import { FormsModule } from '@angular/forms';
 export class ReportComponent {
   @Input() selectedDate: string = ''; // Track selected date for filtering
   
-  currentView: string = 'list';
+  currentView: 'list' | 'card' = 'card';
+  isMobile: boolean = false;
+  screenSize: 'large' | 'small' = 'large';
   siteID: number = -1;
   site: SiteInfo = {} as SiteInfo;
   sessionID: number = -1;
+  successMessage: string = '';
+  errorMessage: string = '';
+  showSuccessToast: boolean = false;
 
   // Wrap both sessionID and endDate into an object
   availableOpnameSessions: { sessionID: number, endDate: string }[] = [];
@@ -36,8 +41,14 @@ export class ReportComponent {
   }
 
   ngOnInit() {
+    this.checkScreenSize();
     this.initSiteInfo();
     this.initAvailableOpnames();
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: Event) {
+    this.checkScreenSize();
   }
 
   initSiteInfo() {
@@ -63,9 +74,13 @@ export class ReportComponent {
         
         // Generate date options after data is loaded
         this.generateDateOptions();
+
+        // Check for input from URL
+        this.handleInputFromURL();
       },
       error: (error) => {
         console.error('[Report] Error fetching available opname sessions:', error);
+        this.errorMessage = 'Failed to load available sessions.';
       }
     });
   }
@@ -87,5 +102,59 @@ export class ReportComponent {
     this.sessionID = found ? found.sessionID : -1;
     console.log('[Report] Date changed to:', this.selectedDate, 'Session ID:', this.sessionID);
     this.cdr.detectChanges();
+  }
+
+  private handleInputFromURL() {
+    // Check if there's a selectedDate and selectedSessionID in query parameters
+    // This is when a user was redirected after finishing an opname
+    this.route.queryParams.subscribe(params => {
+      const selectedSessionID = params['session_id'];
+
+      if (selectedSessionID) {
+        this.sessionID = Number(selectedSessionID);
+        console.log('[Report] Session ID from URL:', this.sessionID);
+        
+        // Find the corresponding date for this session ID
+        const session = this.availableOpnameSessions.find(s => s.sessionID === this.sessionID);
+        if (session) {
+          this.selectedDate = session.endDate;
+          console.log('[Report] Selected date from session:', this.selectedDate);
+          this.onDateChange(); // Trigger date change logic
+          this.successMessage = 'Opname session finished successfully!';
+          this.showSuccessMessage();
+        } else {
+          console.warn('[Report] No session found for ID:', this.sessionID);
+          this.errorMessage = 'Session not found.';
+        }
+      }
+    })
+  }
+
+  private showSuccessMessage() {
+    this.showSuccessToast = true;
+    setTimeout(() => {
+      this.showSuccessToast = false;
+      this.successMessage = ''; // Clear message after showing
+    }, 5000); // Show for 5 seconds
+  }
+
+  private checkScreenSize() {
+    const newIsMobile = window.innerWidth < 768; // Define mobile breakpoint
+    const newScreenSize = newIsMobile ? 'small' : 'large';
+    const newCurrentView = newIsMobile ? 'list' : 'card';
+    
+    // Only update if values have changed
+    if (this.isMobile !== newIsMobile || this.screenSize !== newScreenSize || this.currentView !== newCurrentView) {
+      this.isMobile = newIsMobile;
+      this.screenSize = newScreenSize;
+      this.currentView = newCurrentView;
+      this.cdr.detectChanges(); // Only trigger change detection when needed
+    }
+  }
+
+  toggleView(view: 'card' | 'list') {
+    if (!this.isMobile) { // Only allow toggle on desktop view
+      this.currentView = view;
+    }
   }
 }

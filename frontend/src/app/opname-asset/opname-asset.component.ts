@@ -26,6 +26,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
   @Input() showLocation: boolean = false;
   @Input() sessionID: number = -1; // Session ID for the current opname session
   @Input() siteID: number = -1; // Site ID for the current opname session
+  @Input() currentView: 'card' | 'list' = 'card';
 
   // Search parameters
   searchQuery: string = '';
@@ -70,7 +71,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
   conditionPhoto?: File;
 
   // Flags for responsive design
-  currentView: 'card' | 'list' = 'card';
   screenSize: 'large' | 'small' = 'large'; // Default to large screen
   isMobile: boolean = false;
   actualVariant: 'default' | 'compact' = 'default';
@@ -218,6 +218,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
             conditionPhotoURL: savedRecord.assetChanges.newConditionPhotoURL ?? asset.conditionPhotoURL,
             location: savedRecord.assetChanges.newLocation ?? asset.location,
             room: savedRecord.assetChanges.newRoom ?? asset.room,
+            equipments: savedRecord.assetChanges.newEquipments ?? asset.equipments,
             assetOwner: ownerID,
             siteID: siteID,
             siteName: siteName,
@@ -236,6 +237,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
                            savedRecord.assetChanges.newConditionPhotoURL !== undefined ||
                            savedRecord.assetChanges.newLocation !== undefined ||
                            savedRecord.assetChanges.newRoom !== undefined ||
+                           savedRecord.assetChanges.newEquipments !== undefined ||
                            savedRecord.assetChanges.newOwnerID !== undefined ||
                            savedRecord.assetChanges.newSiteID !== undefined;
 
@@ -553,6 +555,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
            pending.conditionPhotoURL !== existing.conditionPhotoURL ||
            pending.location !== existing.location ||
            pending.room !== existing.room ||
+           pending.equipments !== existing.equipments ||
            pending.assetOwner !== existing.assetOwner ||
            pending.siteID !== existing.siteID;
 
@@ -646,6 +649,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
     if (pending.room !== existing.room) {
       assetChanges.newRoom = pending.room;
     }
+    if (pending.equipments !== existing.equipments) {
+      assetChanges.newEquipments = pending.equipments;
+    }
     if (pending.assetOwner !== existing.assetOwner) {
       assetChanges.newOwnerID = pending.assetOwner;
     }
@@ -728,6 +734,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
       newConditionPhotoURL: existing.conditionPhotoURL,
       newLocation: existing.location,
       newRoom: existing.room,
+      newEquipments: existing.equipments,
       newOwnerID: existing.assetOwner,
       newSiteID: existing.siteID,
       changeReason: "No changes. Asset verified on " + this.opnameSession?.startDate
@@ -808,17 +815,20 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
   private checkScreenSize() {
     const newIsMobile = window.innerWidth < 768; // Define mobile breakpoint
     const newScreenSize = newIsMobile ? 'small' : 'large';
-    const newCurrentView = newIsMobile ? 'list' : 'card';
+    let newCurrentView = this.currentView;
+    if (!this.isInReport) {
+      newCurrentView = newIsMobile ? 'list' : 'card'; // Default to list view on mobile
+    }
     
-    // Only update if values have changed
+    // Only update if values have changed and NOT in report page
     if (this.isMobile !== newIsMobile || this.screenSize !== newScreenSize || this.currentView !== newCurrentView) {
       this.isMobile = newIsMobile;
       this.screenSize = newScreenSize;
-      if (this.isMobile) {
-        this.currentView = 'list'; // Force list view on mobile
-      } else {
-        this.currentView = 'card'; // Default to card view on desktop
+
+      if (!this.isInReport) {
+        this.currentView = newCurrentView
       }
+
       this.cdr.detectChanges(); // Only trigger change detection when needed
     }
   }

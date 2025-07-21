@@ -127,7 +127,7 @@ p {
 	@each $name, $color in styles.$filter-pill-colors {
 		.filter-#{$name} {
 			background-color: $color;
-			color: styles.$primary-text-color;
+			color: color.adjust($color, $lightness: -55%);
 			cursor: pointer;
 			transition: all 0.1s ease;
 			border: 1px solid color.adjust($color, $lightness: -10%);
@@ -137,12 +137,12 @@ p {
 			}
 	
 			&:active {
-				background-color: color.adjust($color, $lightness: -20%);
+				background-color: color.adjust($color, $lightness: -30%);
 			}
 	
 			&.selected {
-				background-color: styles.$primary-color !important;
-				color: white;
+				background-color: color.adjust($color, $lightness: -25%);
+				color: color.adjust($color, $lightness: -75%);
 				transform: scale(1.05);
 			}
 		}

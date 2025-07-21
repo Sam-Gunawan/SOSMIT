@@ -14,6 +14,7 @@ export interface AssetInfo {
     conditionPhotoURL: string;
     location: string;
     room: string;
+    equipments: string;
     assetOwner: number | undefined; // Allow undefined for editing validation
     assetOwnerName: string;
     assetOwnerPosition: string;

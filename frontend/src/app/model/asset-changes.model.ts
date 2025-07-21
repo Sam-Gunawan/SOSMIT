@@ -7,6 +7,7 @@ export interface AssetChange {
     newConditionPhotoURL?: string;
     newLocation?: string;
     newRoom?: string;
+    newEquipments?: string;
     newOwnerID?: number;
     newSiteID?: number;
     changeReason?: string;

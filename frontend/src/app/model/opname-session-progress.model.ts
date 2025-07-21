@@ -9,6 +9,7 @@ export interface OpnameSessionProgress {
         newConditionPhotoURL?: string;
         newLocation?: string;
         newRoom?: string;
+        newEquipments?: string;
         newOwnerID?: number;
         newSiteID?: number;
         changeReason?: string;

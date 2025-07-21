@@ -2,8 +2,11 @@ export interface OpnameSession {
     sessionID: number;
     siteID: number;
     userID: number;
-    status: 'Outdated' | 'Active' | 'Completed' | 'Verified' | 'Rejected';
+    status: 'Outdated' | 'Active' | 'Submitted' | 'Escalated' | 'Verified' | 'Rejected';
     startDate: string;
     endDate?: string;
-    approverID: number | null; // Nullable if not yet approved
+    managerReviewerID?: number | null;
+    managerReviewedAt?: string | null;
+    l1ReviewerID?: number | null;
+    l1ReviewedAt?: string | null;
 }

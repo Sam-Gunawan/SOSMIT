@@ -154,6 +154,12 @@ func main() {
 			// PUT /api/opname/:session-id/finish
 			opnameRoutes.PUT("/:session-id/finish", opnameHandler.FinishOpnameSessionHandler)
 
+			// PUT /api/opname/:session-id/approve
+			opnameRoutes.PUT("/:session-id/approve", opnameHandler.ApproveOpnameSessionHandler)
+
+			// PUT /api/opname/:session-id/reject
+			opnameRoutes.PUT("/:session-id/reject", opnameHandler.RejectOpnameSessionHandler)
+
 			// DELETE /api/opname/:session-id/cancel
 			opnameRoutes.DELETE("/:session-id/cancel", opnameHandler.DeleteSessionHandler)
 
