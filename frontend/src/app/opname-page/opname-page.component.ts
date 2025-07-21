@@ -181,8 +181,10 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
         this.opnameSessionService.clearSession();
         
         // Navigate back to the site page
-        console.log('[OpnamePage] Navigating back to site:', this.siteID);
-        this.router.navigate(['/site', this.siteID]);
+        console.log('[OpnamePage] Navigating to report page:', this.siteID);
+        this.router.navigate(['/site', this.siteID, 'report'], {
+          queryParams: { session_id: this.sessionID }
+        });
       },
       error: (error: any) => {
         this.isLoading = false; // Set loading state to false on error
