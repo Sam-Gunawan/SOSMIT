@@ -43,3 +43,11 @@ h1, h2, h3, h4, h5, h6 {
         color: rgb(51, 3, 3);
     }
 }
+
+.loading-spinner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+}

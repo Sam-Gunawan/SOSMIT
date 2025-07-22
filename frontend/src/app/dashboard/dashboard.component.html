@@ -33,7 +33,10 @@
         <!-- LOADING -->
         <section class="dashboard-content" *ngIf="isLoading">
             <div class="loading-spinner">
-                <p>Loading...</p>
+                <div class="spinner-border text-dark" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p style="margin-top: 1rem;">Loading...</p>
             </div>
         </section>
     </div>
