@@ -199,20 +199,34 @@ p {
     }
 }
 
-.pdf-table {
+.pdf-table, .pdf-table-attachment {
   width: 100%;
   border-collapse: collapse;
   margin-top: 1em;
   font-size: 0.8rem;
 }
 
-.pdf-table th, .pdf-table td {
+.pdf-table th, .pdf-table td, .pdf-table-attachment th, .pdf-table-attachment td {
   border: 0.8px solid #aaa;
   padding: 0.5em;
   text-align: left;
 }
 
-.pdf-table th {
+.pdf-table th, .pdf-table-attachment th {
   background: #e3eefa;
   text-align: center;
+}
+
+.pdf-footer {
+  font-size: 0.8rem;
+
+  p {
+    color: black;
+    margin-top: 0.5em;
+  }
+}
+
+.pdf-page-break {
+  page-break-before: always;
+  break-before: page;
 }
