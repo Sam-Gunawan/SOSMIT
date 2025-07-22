@@ -6,30 +6,36 @@
             </div>
     
             <div class="filter-pills" *ngIf="currentView ==='card'">
-                <span class="asset-filter filter-pill filter-deployed">Deployed</span>
-                <span class="asset-filter filter-pill filter-onloan">On Loan</span>
-                <span class="asset-filter filter-pill filter-disposed">Disposed</span>
-                <span class="clear-filter">Clear All</span>
+                <span class="asset-filter filter-deployed" [class.selected]="selectedFilter === 'Deployed'" (click)="filterByStatus('Deployed')">Deployed</span>
+                <span class="asset-filter filter-onloan" [class.selected]="selectedFilter === 'On Loan'" (click)="filterByStatus('On Loan')">On Loan</span>
+                <span class="asset-filter filter-inventory" [class.selected]="selectedFilter === 'In Inventory'" (click)="filterByStatus('In Inventory')">In Inventory</span>
+                <span class="asset-filter filter-repair" [class.selected]="selectedFilter === 'In Repair'" (click)="filterByStatus('In Repair')">In Repair</span>
+                <span class="asset-filter filter-down" [class.selected]="selectedFilter === 'Down'" (click)="filterByStatus('Down')">Down</span>
+                <span class="asset-filter filter-disposed" [class.selected]="selectedFilter === 'Disposed'" (click)="filterByStatus('Disposed')">Disposed</span>
+                <span class="clear-filter" (click)="clearAllFilters()">Clear All</span>
             </div>
 
             <div class="filter-pills" *ngIf="currentView === 'list'">
-                <span class="clear-filter">Clear All</span>
+                <span class="clear-filter" (click)="clearAllFilters()">Clear All</span>
             </div>
         </div>
     
         <div class="search-view">
             <div class="filter-dropdown" *ngIf="currentView === 'list'">
-                <select class="form-select" aria-label="Small select example">
+                <select class="form-select" aria-label="Small select example" [value]="selectedFilter" #selectedStatus (change)="filterByStatus(selectedStatus.value)">
                     <option value="">All Status</option>
                     <option value="Deployed">Deployed</option>
                     <option value="On Loan">On Loan</option>
+                    <option value="In Inventory">In Inventory</option>
+                    <option value="In Repair">In Repair</option>
+                    <option value="Down">Down</option>
                     <option value="Disposed">Disposed</option>
                 </select>
             </div>
-            <form class="d-flex search-bar" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search"/>
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
+            <div class="d-flex search-bar" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search" #filter (input)="filterAssetCards(filter.value)"/>
+                <button class="btn btn-outline-success">Search</button>
+            </div>
             <div class="view-icon" *ngIf="!isMobile">
                 <img class="card-view" [class.active]="currentView === 'card'" src="assets/card.svg" alt="Card View" (click)="toggleView('card')"/>
                 <img class="list-view" [class.active]="currentView === 'list'" src="assets/list.svg" alt="List View" (click)="toggleView('list')"/>
@@ -38,8 +44,10 @@
     </div>
 </div>
 
+
+
 <section class="asset-card-layout" [ngClass]="variant" *ngIf="currentView === 'card'">
-    <div class="asset-card" [ngClass]="variant" *ngFor="let assetCard of assetsOnSite">
+    <div class="asset-card" [ngClass]="variant" *ngFor="let assetCard of filteredAssetsOnSite">
         <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
             <div class="main-info">
                 <img class="asset-icon" [src]="assetCard.assetIcon" [alt]="assetCard.assetName"/>
@@ -48,6 +56,9 @@
                     [ngClass]="{
                         'status-deployed': assetCard.assetStatus === 'Deployed',
                         'status-onloan': assetCard.assetStatus === 'On Loan',
+                        'status-inventory': assetCard.assetStatus === 'In Inventory',
+                        'status-repair': assetCard.assetStatus === 'In Repair',
+                        'status-down': assetCard.assetStatus === 'Down',
                         'status-disposed': assetCard.assetStatus === 'Disposed'
                     }">
                     {{ assetCard.assetStatus }}
@@ -73,18 +84,9 @@
     </div>
 </section>
 
-<!-- NO ASSETS FOUND MESSAGE -->
-<section *ngIf="assetsOnSite && assetsOnSite.length === 0">
-    <p class="no-assets-message">No assets found for this site</p>
-</section>
-
-<!-- LOADING ASSETS -->
-<section class="loading" *ngIf="isLoading">
-    <p>Loading assets...</p>
-</section>
-
+<!-- LIST VIEW -->
 <section class="asset-list-layout" *ngIf="currentView === 'list'">
-    <div class="asset-list" [ngClass]="variant" *ngFor="let assetCard of assetsOnSite">
+    <div class="asset-list" [ngClass]="variant" *ngFor="let assetCard of filteredAssetsOnSite">
         <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
             <div class="first-column">
                 <img class="asset-icon" [src]="assetCard.assetIcon" [alt]="assetCard.assetName"/>
@@ -101,6 +103,9 @@
                     [ngClass]="{
                         'status-deployed': assetCard.assetStatus === 'Deployed',
                         'status-onloan': assetCard.assetStatus === 'On Loan',
+                        'status-inventory': assetCard.assetStatus === 'In Inventory',
+                        'status-repair': assetCard.assetStatus === 'In Repair',
+                        'status-down': assetCard.assetStatus === 'Down',
                         'status-disposed': assetCard.assetStatus === 'Disposed'
                     }">
                     {{ assetCard.assetStatus }}
@@ -110,6 +115,24 @@
     
         <app-asset-page [assetTag]="assetCard.assetTag"></app-asset-page>
     </div>
+</section>
+
+<!-- NO ASSETS FOUND FROM SEARCH -->
+<section *ngIf="filteredAssetsOnSite.length === 0 && !isLoading && assetsOnSite && assetsOnSite.length > 0" class="no-assets-search-message">
+    <p>No assets match your search or filter.</p>
+</section>
+
+<!-- NO ASSETS FOUND FOR THE SITE MESSAGE -->
+<section *ngIf="assetsOnSite && assetsOnSite.length === 0">
+    <p class="no-assets-message">No assets found for this site</p>
+</section>
+
+<!-- LOADING ASSETS -->
+<section class="loading d-flex flex-column align-items-center justify-content-center" *ngIf="isLoading">
+    <div class="spinner-border text-dark mb-2" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-dark">Loading assets...</p>
 </section>
 
 <!-- ERROR MESSAGE -->

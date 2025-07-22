@@ -82,7 +82,10 @@
     </div> -->
 
     <!-- LOADING -->
-    <div class="loading" *ngIf="isLoading">
-        <p>Loading site data...</p>
+    <div class="loading d-flex flex-column align-items-center justify-content-center" *ngIf="isLoading">
+        <div class="spinner-border text-dark mb-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="text-dark">Loading site...</p>
     </div>
 </main>

@@ -52,7 +52,23 @@ p {
 	@each $name, $color in styles.$asset-pill-colors {
 		&.filter-#{$name} {
 			background-color: $color;
-			border: 1px solid color.adjust($color, $lightness: -20%);
+			color: color.adjust($color, $lightness: -55%);
+			cursor: pointer;
+			border: 1px solid color.adjust($color, $lightness: -10%);
+	
+			&:hover {
+				background-color: color.adjust($color, $lightness: -10%);
+			}
+	
+			&:active {
+				background-color: color.adjust($color, $lightness: -30%);
+			}
+	
+			&.selected {
+				background-color: color.adjust($color, $lightness: -25%);
+				color: color.adjust($color, $lightness: -75%);
+				transform: scale(1.05);
+			}
 		}
 	}
 }
@@ -84,30 +100,6 @@ p {
 	gap: 8px;
 	flex-wrap: wrap;
 	justify-content: end;
-
-	@each $name, $color in styles.$filter-pill-colors {
-		.filter-#{$name} {
-			background-color: $color;
-			color: styles.$primary-text-color;
-			cursor: pointer;
-			transition: all 0.1s ease;
-			border: 1px solid color.adjust($color, $lightness: -10%);
-	
-			&:hover {
-				background-color: color.adjust($color, $lightness: -10%);
-			}
-	
-			&:active {
-				background-color: color.adjust($color, $lightness: -20%);
-			}
-	
-			&.selected {
-				background-color: styles.$primary-color !important;
-				color: white;
-				transform: scale(1.05);
-			}
-		}
-	}
 
 	.clear-filter {
 		background-color: #dc3545;

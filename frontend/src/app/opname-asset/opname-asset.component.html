@@ -52,6 +52,9 @@
                                     [ngClass]="{
                                         'status-deployed': result.existingAsset.assetStatus === 'Deployed',
                                         'status-onLoan': result.existingAsset.assetStatus === 'On loan',
+                                        'status-inventory': result.existingAsset.assetStatus === 'In Inventory',
+                                        'status-repair': result.existingAsset.assetStatus === 'In Repair',
+                                        'status-down': result.existingAsset.assetStatus === 'Down',
                                         'status-disposed': result.existingAsset.assetStatus === 'Disposed'
                                     }">
                                     {{ result.existingAsset.assetStatus }}
@@ -109,6 +112,9 @@
                                     [ngClass]="{
                                         'status-deployed': result.pendingAsset.assetStatus === 'Deployed',
                                         'status-onLoan': result.pendingAsset.assetStatus === 'On Loan',
+                                        'status-inventory': result.pendingAsset.assetStatus === 'In Inventory',
+                                        'status-repair': result.pendingAsset.assetStatus === 'In Repair',
+                                        'status-down': result.pendingAsset.assetStatus === 'Down',
                                         'status-disposed': result.pendingAsset.assetStatus === 'Disposed'
                                     }">
                                     {{ result.pendingAsset.assetStatus }}
@@ -207,6 +213,9 @@
                                                         <option value="">Select status</option>
                                                         <option value="Deployed">Deployed</option>
                                                         <option value="On Loan">On Loan</option>
+                                                        <option value="In Inventory">In Inventory</option>
+                                                        <option value="In Repair">In Repair</option>
+                                                        <option value="Down">Down</option>
                                                         <option value="Disposed">Disposed</option>
                                                     </select>
                                                     <label [for]="'asset-status-' + result.pendingAsset.assetTag">Asset Status</label>
@@ -405,6 +414,9 @@
                                 [ngClass]="{
                                     'status-deployed': result.pendingAsset.assetStatus === 'Deployed',
                                     'status-onLoan': result.pendingAsset.assetStatus === 'On Loan',
+                                    'status-inventory': result.pendingAsset.assetStatus === 'In Inventory',
+                                    'status-repair': result.pendingAsset.assetStatus === 'In Repair',
+                                    'status-down': result.pendingAsset.assetStatus === 'Down',
                                     'status-disposed': result.pendingAsset.assetStatus === 'Disposed'
                                 }">
                                 {{ result.pendingAsset.assetStatus }}
@@ -464,6 +476,9 @@
                                                         <option value="">Select status</option>
                                                         <option value="Deployed">Deployed</option>
                                                         <option value="On Loan">On Loan</option>
+                                                        <option value="In Inventory">In Inventory</option>
+                                                        <option value="In Repair">In Repair</option>
+                                                        <option value="Down">Down</option>
                                                         <option value="Disposed">Disposed</option>
                                                     </select>
                                                     <label [for]="'asset-status-' + result.pendingAsset.assetTag">Asset Status</label>
