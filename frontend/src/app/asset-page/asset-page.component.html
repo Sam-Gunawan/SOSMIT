@@ -30,6 +30,9 @@
                                 [ngClass]="{
                                     'status-deployed': assetPage?.assetStatus === 'Deployed',
                                     'status-onloan': assetPage?.assetStatus === 'On Loan',
+                                    'status-inventory': assetPage?.assetStatus === 'In Inventory',
+                                    'status-repair': assetPage?.assetStatus === 'In Repair',
+                                    'status-down': assetPage?.assetStatus === 'Down',
                                     'status-disposed': assetPage?.assetStatus === 'Disposed'
                                 }">
                                 {{ assetPage?.assetStatus }}
@@ -109,6 +112,9 @@
                                     [ngClass]="{
                                         'status-deployed': assetPage?.assetStatus === 'Deployed',
                                         'status-onloan': assetPage?.assetStatus === 'On Loan',
+                                        'status-inventory': assetPage?.assetStatus === 'In Inventory',
+                                        'status-repair': assetPage?.assetStatus === 'In Repair',
+                                        'status-down': assetPage?.assetStatus === 'Down',
                                         'status-disposed': assetPage?.assetStatus === 'Disposed'
                                     }">
                                     {{ assetPage?.assetStatus }}
