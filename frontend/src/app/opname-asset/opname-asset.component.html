@@ -13,8 +13,8 @@
                 [disabled]="isSearching"
             />
             <button class="btn btn-outline-success" type="submit" [disabled]="isSearching">
-                <span *ngIf="isSearching" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                Search
+                <span *ngIf="isSearching" class="spinner-border spinner-border-sm mx-1" role="status" aria-hidden="true"></span>
+                <span *ngIf="!isSearching">Search</span>
             </button>
         </form>
     </div>
