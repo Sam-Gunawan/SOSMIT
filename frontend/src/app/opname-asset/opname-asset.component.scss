@@ -351,7 +351,7 @@ p {
 
   .custom-grid {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: 369px 369px 1fr;
     grid-template-rows: auto auto auto;
     grid-template-areas: 
       "icon user-info"

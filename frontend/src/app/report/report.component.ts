@@ -6,6 +6,8 @@ import { ActivatedRoute } from '@angular/router';
 import { SiteInfo } from '../model/site-info.model';
 import { OpnameAssetComponent } from '../opname-asset/opname-asset.component';
 import { FormsModule } from '@angular/forms';
+import { ViewChild, ElementRef } from '@angular/core';
+import html2pdf from 'html2pdf.js';
 
 @Component({
   selector: 'app-report',
@@ -26,6 +28,8 @@ export class ReportComponent {
   successMessage: string = '';
   errorMessage: string = '';
   showSuccessToast: boolean = false;
+  isExporting = false;
+  @ViewChild('exportSection', { static: false }) exportSection!: ElementRef;
 
   // Wrap both sessionID and endDate into an object
   availableOpnameSessions: { sessionID: number, endDate: string }[] = [];
@@ -38,6 +42,28 @@ export class ReportComponent {
 
   constructor(private apiService: ApiService, private opnameSessionService: OpnameSessionService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
     this.siteID = Number(this.route.snapshot.paramMap.get('id'));
+  }
+
+  async exportToPDF() {
+    this.isExporting = true;
+    this.cdr.detectChanges(); // Ensure the export section is rendered
+
+    // Wait a tick to ensure DOM is updated
+    setTimeout(async () => {
+      const options = {
+        margin: 0.5,
+        filename: 'opname-report.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+      };
+
+      const element = this.exportSection.nativeElement;
+      await html2pdf().from(element).set(options).save();
+
+      this.isExporting = false;
+      this.cdr.detectChanges();
+    }, 0);
   }
 
   ngOnInit() {
@@ -157,4 +183,29 @@ export class ReportComponent {
       this.currentView = view;
     }
   }
+
+  // isExporting: boolean = false;
+  // @ViewChild('exportSection', { static: false }) exportSection!: ElementRef;
+
+  // exportToPDF() {
+  //   if (!this.exportSection) return;
+
+  //   const options = {
+  //     margin: 0.5,
+  //     filename: 'opname-report.pdf',
+  //     image: { type: 'jpeg', quality: 0.98 },
+  //     html2canvas: { scale: 2 },
+  //     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+  //   };
+
+  //   // Clone the export section and inject the export CSS
+  //   // const printContents = this.exportSection.nativeElement.cloneNode(true);
+  //   // const style = document.createElement('link');
+  //   // style.rel = 'stylesheet';
+  //   // style.href = 'assets/report-export.css';
+  //   // printContents.prepend(style);
+
+  //   // html2pdf().from(printContents).set(options).save();
+  //   html2pdf().from(this.exportSection.nativeElement).set(options).save();
+  // }
 }
