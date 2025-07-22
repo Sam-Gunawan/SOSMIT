@@ -355,9 +355,8 @@ p {
     grid-template-rows: auto auto auto;
     grid-template-areas: 
       "icon user-info"
-      "left-top right"
-      "left-bottom right";
-    gap: 10px;
+      "left-top right-top"
+      "left-bottom right-bottom";
   }
 
   .asset-main-info {
@@ -383,9 +382,9 @@ p {
   .left-top { 
     grid-area: left-top; 
     display: flex;
+    padding: 10px;
     flex-direction: column;
     justify-content: center;
-    gap: 10px;
     align-items: flex-start;
     border-bottom: 1px solid styles.$quaternary-text-color;
   }
@@ -396,23 +395,36 @@ p {
     padding: 5px 10px;
   }
 
-  .status-reason{
-    background-color: styles.$button-color; //change color based on the reason
-    border-radius: 15px;
-    padding: 5px 10px;
-  }
-
   .left-bottom { 
-    grid-area: left-bottom; 
-  }
-
-  .right { 
-    grid-area: right;
+    grid-area: left-bottom;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    padding: 10px;
+  }
+
+  .right-top { 
+    grid-area: right-top;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border-bottom: 1px solid styles.$quaternary-text-color;
+    border-left: 1px solid styles.$quaternary-text-color;
+
+    h5 {
+      margin-bottom: 10px;
+    }
+  }
+
+  .right-bottom { 
+    grid-area: right-bottom;
+    display: flex;
+    flex-direction: column;
     padding: 10px;
     border-left: 1px solid styles.$quaternary-text-color;
+
+    h5 {
+      margin-bottom: 10px;
+    }
   }
 
   .user-info {
@@ -437,10 +449,11 @@ p {
     flex-direction: row;
     text-align: center;
     align-items: center;
+    margin-bottom: 10px;
   }
 
   .condition {
-    padding: 0px 5px 0px 0px;
+    padding-right: 5px;
   }
 
   .like,
@@ -466,6 +479,7 @@ p {
 
   .pick-status-reason {
     display: flex;
+    padding-top: 10px;
     flex-direction: row;
     gap: 10px;
   }
@@ -484,11 +498,19 @@ p {
   align-items: center;
 }
 
-.user-info-mobile, .asset-location-mobile, .asset-condition-mobile {
+.asset-name-mobile {
+  margin-bottom: 10px;
+}
+
+.user-info-mobile, .asset-location-mobile, .asset-condition-mobile, .asset-equipments-mobile {
   border-top: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 30%);
   padding-top: 10px;
   margin-bottom: 20px;
   align-items: center;
+
+  h5 {
+    margin-bottom: 10px;
+  }
 }
 
 .my-toast {

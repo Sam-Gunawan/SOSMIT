@@ -36,9 +36,8 @@ p {
   grid-template-rows: auto auto auto;
   grid-template-areas: 
     "icon user-info"
-    "left-top right"
-    "left-bottom right";
-  gap: 10px;
+    "left-top right-top"
+    "left-bottom right-bottom";
 }
 
 .asset-main-info {
@@ -64,10 +63,9 @@ p {
 .left-top { 
   grid-area: left-top; 
   display: flex;
+  padding: 10px;
   flex-direction: column;
   justify-content: center;
-  gap: 10px;
-  align-items: flex-start;
   border-bottom: 1px solid styles.$quaternary-text-color;
 }
 
@@ -75,6 +73,7 @@ p {
     font-size: 12px !important;
     border-radius: 15px;
     padding: 5px 10px;
+    margin-bottom: 5px;
 
     @each $name, $color in styles.$asset-pill-colors {
 		&.status-#{$name} {
@@ -84,21 +83,23 @@ p {
 	}
 }
 
-.status-reason{
-  background-color: styles.$button-color; //change color based on the reason
-  border-radius: 15px;
-  padding: 5px 10px;
-}
-
 .left-bottom { 
-  grid-area: left-bottom; 
+  grid-area: left-bottom;
+  display: flex;
+  padding: 10px;
 }
 
-.right { 
-  grid-area: right;
+.right-top { 
+  grid-area: right-top;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  padding: 10px;
+  border-bottom: 1px solid styles.$quaternary-text-color;
+  border-left: 1px solid styles.$quaternary-text-color;
+}
+
+.right-bottom { 
+  grid-area: right-bottom;
+  display: flex;
   padding: 10px;
   border-left: 1px solid styles.$quaternary-text-color;
 }

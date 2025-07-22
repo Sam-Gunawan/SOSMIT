@@ -37,8 +37,6 @@
                             <p class="status-reason" *ngIf="assetPage?.assetStatus === 'Disposed' && assetPage?.statusReason">
                                 Reason: {{ assetPage?.statusReason }}
                             </p>
-                            
-                            <hr>
                         </div>
         
                         <div class="left-bottom">
@@ -63,21 +61,23 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="right-top">
+                            <!-- TODO: style asset equipment display! -->
+                            <div class="asset-equipments">
+                                <h5>Equipments</h5>
+                                <p *ngIf="assetPage?.equipments">{{ assetPage?.equipments }}</p>
+                                <p *ngIf="!assetPage?.equipments">No equipments.</p>
+                            </div>
+                        </div>
         
-                        <div class="right">
+                        <div class="right-bottom">
                             <!-- <hr class="vertical"> -->
                             <div class="asset-location">
                                 <h5>Location - {{ assetPage?.regionName }}</h5>
                                 <p>{{ assetPage?.location }}</p>
                                 <p>{{ assetPage?.room }}</p>
                                 <p>{{ assetPage?.siteGroupName }}</p>
-                            </div>
-
-                            <!-- TODO: style asset equipment display! -->
-                            <div class="asset-equipments">
-                                <h5>Equipments</h5>
-                                <p *ngIf="assetPage?.equipments">{{ assetPage?.equipments }}</p>
-                                <p *ngIf="!assetPage?.equipments">No equipments.</p>
                             </div>
                         </div>
                     </div>

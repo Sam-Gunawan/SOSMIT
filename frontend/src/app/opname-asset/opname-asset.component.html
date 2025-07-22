@@ -258,19 +258,20 @@
                                                                     style="height: 100px"></textarea>
                                                             <label [for]="'condition-notes-' + result.pendingAsset.assetTag">Notes</label>
                                                         </div>
-
-                                                        <!-- Display condition photo if any -->
-                                                        <div class="mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== ''">
-                                                            <img [src]="serverURL + result.pendingAsset.conditionPhotoURL" 
-                                                                [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
-                                                                class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
-                                                        </div>
                                                         
                                                         <!-- File input for condition photo -->
                                                         <div class="mb-3">
                                                             <label [for]="'condition-photo-' + result.pendingAsset.assetTag" class="form-label">
                                                                 Condition Photo
                                                             </label>
+
+                                                            <!-- Display condition photo if any -->
+                                                            <div class="mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== ''">
+                                                                <img [src]="serverURL + result.pendingAsset.conditionPhotoURL" 
+                                                                    [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
+                                                                    class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
+                                                            </div>
+
                                                             <input type="file" class="form-control" 
                                                                 [id]="'condition-photo-' + result.pendingAsset.assetTag" 
                                                                 name="conditionPhoto"
@@ -280,8 +281,19 @@
                                                     </div>
                                                 </div>
                                             </div>
+
+                                            <div class="right-top">
+                                                <h5>Equipments</h5>
+                                                <div class="form-floating mb-2">
+                                                    <input type="text" class="form-control" 
+                                                        [id]="'equipments-' + result.pendingAsset.assetTag" 
+                                                        [(ngModel)]="result.pendingAsset.equipments" name="newEquipments"
+                                                        [placeholder]="result.pendingAsset.equipments || 'Equipments'">
+                                                    <label [for]="'equipments-' + result.pendingAsset.assetTag">Equipments</label>
+                                                </div>
+                                            </div>
                             
-                                            <div class="right">
+                                            <div class="right-bottom">
                                                 <div class="asset-location">
                                                     <h5>Location</h5>
                                                     <p>Region - {{ result.pendingAsset.regionName }}</p>
@@ -313,18 +325,6 @@
                                                             [(ngModel)]="result.pendingAsset.room" name="newRoom"
                                                             [placeholder]="result.pendingAsset.room || 'Room'">
                                                         <label [for]="'room-' + result.pendingAsset.assetTag">Room</label>
-                                                    </div>
-                                                </div>
-
-                                                <!-- TODO: style asset equipment display! -->
-                                                <div class="asset-equipments">
-                                                    <h5>Equipments</h5>
-                                                    <div class="form-floating mb-2">
-                                                        <input type="text" class="form-control" 
-                                                            [id]="'equipments-' + result.pendingAsset.assetTag" 
-                                                            [(ngModel)]="result.pendingAsset.equipments" name="newEquipments"
-                                                            [placeholder]="result.pendingAsset.equipments || 'Equipments'">
-                                                        <label [for]="'equipments-' + result.pendingAsset.assetTag">Equipments</label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -495,7 +495,7 @@
                                             </div>
                             
                                             <div class="user-info-mobile">
-                                                <div class="form-floating mb-3">
+                                                <div class="form-floating mb-2">
                                                     <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
                                                         [(ngModel)]="result.pendingAsset.assetOwnerName" name="newOwnerName" 
                                                         [class.is-invalid]="result.pendingAsset.assetOwner === 0 && !result.pendingAsset.assetOwnerName" 
@@ -586,19 +586,20 @@
                                                             style="height: 100px"></textarea>
                                                         <label [for]="'condition-notes-' + result.pendingAsset.assetTag">Notes</label>
                                                     </div>
-                                                    
-                                                    <!-- Display condition photo if any -->
-                                                    <div class="mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== ''">
-                                                        <img [src]="serverURL + result.pendingAsset.conditionPhotoURL" 
-                                                            [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
-                                                            class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
-                                                    </div>
 
                                                     <!-- File input for condition photo -->
                                                     <div class="mb-3">
                                                         <label [for]="'condition-photo-' + result.pendingAsset.assetTag" class="form-label">
                                                             Condition Photo
                                                         </label>
+
+                                                        <!-- Display condition photo if any -->
+                                                        <div class="mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== ''">
+                                                            <img [src]="serverURL + result.pendingAsset.conditionPhotoURL" 
+                                                                [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
+                                                                class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
+                                                        </div>
+
                                                         <input type="file" class="form-control" 
                                                             [id]="'condition-photo-' + result.pendingAsset.assetTag" 
                                                             name="conditionPhoto"
