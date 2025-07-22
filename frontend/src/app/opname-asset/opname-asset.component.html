@@ -102,7 +102,7 @@
                 </section>
 
                 <!-- Card view for displaying latest changes -->
-                 <section class="asset-card-layout" [ngClass]="variant" *ngIf="currentView === 'card' && result.assetProcessed">
+                <section class="asset-card-layout changed" [ngClass]="variant" *ngIf="currentView === 'card' && result.assetProcessed">
                     <div class="asset-card" [ngClass]="variant"> 
                         <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="isInReport ? '#pending-modal-' + result.existingAsset.assetTag : '#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
                             <div class="main-info">
