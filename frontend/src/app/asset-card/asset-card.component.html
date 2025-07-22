@@ -61,7 +61,7 @@
                         'status-down': assetCard.assetStatus === 'Down',
                         'status-disposed': assetCard.assetStatus === 'Disposed'
                     }">
-                    {{ assetCard.assetStatus }}
+                    {{ assetCard.assetStatus.replace('In ', '') }}
                 </span>
             </div>
     
@@ -108,7 +108,7 @@
                         'status-down': assetCard.assetStatus === 'Down',
                         'status-disposed': assetCard.assetStatus === 'Disposed'
                     }">
-                    {{ assetCard.assetStatus }}
+                    {{ assetCard.assetStatus.replace('In ', '') }}
                 </span>
             </div>
         </div>
