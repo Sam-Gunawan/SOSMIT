@@ -113,19 +113,6 @@ func seedSiteGroup(db *sql.DB, record []string) error {
 		return err
 	}
 
-	// Check if the referenced region_id exists
-	// var exists bool
-	// checkQuery := `SELECT EXISTS(SELECT 1 FROM "Region" WHERE id = $1)`
-	// err = db.QueryRow(checkQuery, region_id).Scan(&exists)
-	// if err != nil {
-	// 	log.Fatalf("Error checking existence of region_id %d: %v\n", region_id, err)
-	// 	return err
-	// }
-	// if !exists {
-	// 	log.Fatalf("Region with id %d does not exist. Cannot insert SiteGroup '%s'.\n", region_id, site_group_name)
-	// 	return log.Errorf("region_id %d does not exist", region_id)
-	// }
-
 	query := `INSERT INTO "SiteGroup" (site_group_name, region_id) VALUES ($1, $2) ON CONFLICT (site_group_name) DO NOTHING`
 
 	_, err = db.Exec(query, site_group_name, region_id)
