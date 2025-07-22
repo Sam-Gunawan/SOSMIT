@@ -1,0 +1,148 @@
+<!-- =================================================================================================================== -->
+<!-- TEMPLATE: OPNAME REJECTED (FOR USER)                                                                                -->
+<!-- PURPOSE: Sent to the user when either a Manager or L1 Support rejects their submission.                             -->
+<!-- FILENAME: opname_rejected.html                                                                                      -->
+<!-- =================================================================================================================== -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update: Opname Requires Revision | SOSMIT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS is inlined for maximum email client compatibility */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .header {
+            padding: 30px;
+            text-align: center;
+            background-color: #f8f9fa;
+        }
+
+        .logo {
+            max-height: 40px;
+        }
+
+        .hamster-img {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+        }
+
+        .content {
+            padding: 30px 40px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .content h1 {
+            font-size: 1.5rem;
+            color: #2d3748;
+            margin-top: 0;
+            font-weight: 700;
+        }
+
+        .content p {
+            font-size: 16px;
+            color: #4a5568;
+        }
+
+        .details {
+            font-family: 'Inter', sans-serif;
+            background-color: #fff5f5;
+            border-left: 4px solid #e53e3e;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .details p {
+            margin: 0;
+        }
+
+        .details strong {
+            color: #2d3748;
+        }
+
+        .reason {
+            font-style: italic;
+            color: #c53030;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #a0aec0;
+        }
+
+        .view-report-btn {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .view-report-btn a {
+            display: inline-block;
+            background-color: #e53e3e;
+            color: #ffffff !important;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://i.ibb.co/JFQFftMt/sm-logo-inline-text-no-bg.png" alt="PT SM Logo" class="logo">
+            <img src="https://i.ibb.co/k3y5g3g/hamster-sad.png" alt="Sad Hamster" class="hamster-img">
+        </div>
+        <div class="content">
+            <h1>Update for Your Opname, {{.Submitter}}</h1>
+            <p>Your opname session for <strong>{{.SiteName}}</strong> has been reviewed, and it requires some revisions before it can be approved. No worries, this is a normal part of the process!</p>
+            
+            <div class="details">
+                <p><strong>Site:</strong> {{.SiteName}}</p>
+                <p><strong>Submitted On:</strong> {{.CompletedDate}}</p>
+                <p><strong>Rejected By:</strong> {{.Reviewer}}</p>
+                <p><strong>Reason for Rejection:</strong></p>
+                <p class="reason">"Rejection reason"</p>
+            </div>
+            
+            <p>Please review the feedback and make the necessary corrections. You can then start a new opname session for the site when you're ready.</p>
+
+            <div class="view-report-btn">
+                <a href="{{.PageLink}}" target="_blank">View Report</a>
+            </div>
+
+            <p>If you have any questions, please reach out to your manager.</p>
+            <p>— The SOSMIT Team</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated notification from the SOSMIT Application.</p>
+            <p>&copy; 2025 Samuel Theodore Gunawan and Priska Aimee Likarsa.<br>All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

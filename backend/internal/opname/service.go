@@ -507,6 +507,86 @@ func (service *Service) RejectOpnameSession(sessionID int, reviewerID int) error
 		return err
 	}
 
+	// Send a notification email to the user who started the session.
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("‼ Panic recovered in RejectOpnameSession goroutine: %v", r)
+			}
+		}()
+
+		// Get the reviewer details
+		reviewer, err := service.userRepo.GetUserByID(int64(reviewerID))
+		if err != nil || reviewer == nil {
+			log.Printf("❌ Error getting reviewer: %v", err)
+			return
+		}
+		reviewerName := cases.Title(language.English).String((reviewer.FirstName + " " + reviewer.LastName))
+
+		// Get the opname session info
+		session, err := service.repo.GetSessionByID(sessionID)
+		if err != nil || session == nil {
+			log.Printf("❌ Error getting session: %v", err)
+			return
+		}
+
+		opnameCompletedDateStr, err := time.Parse(time.RFC3339, session.EndDate.String)
+		if err != nil {
+			log.Printf("❌ Error parsing session end date: %v", err)
+			opnameCompletedDateStr = time.Now()
+		}
+		opnameCompletedDate := opnameCompletedDateStr.Format("Mon, 02 Jan 2006 15:04:05")
+
+		submitter, err := service.userRepo.GetUserByID(int64(session.UserID))
+		if err != nil {
+			log.Printf("❌ Error getting submitter: %v", err)
+			return
+		}
+		submitterName := cases.Title(language.English).String((submitter.FirstName + " " + submitter.LastName))
+
+		site, err := service.siteRepo.GetSiteByID(session.SiteID)
+		if err != nil {
+			log.Printf("❌ Error getting site: %v", err)
+			return
+		}
+
+		// Prepare the email data for the user who started the session.
+		emailData := email.EmailData{
+			Submitter:        submitterName,
+			Reviewer:         reviewerName,
+			SiteName:         site.SiteName,
+			CompletedDate:    opnameCompletedDate,
+			VerificationLink: "",
+			PageLink:         os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(site.SiteID) + "/report?session_id=" + strconv.Itoa(sessionID),
+		}
+
+		var ccEmails []string
+
+		// If the reviewer is an L1 support, we cc the area manager.
+		if strings.ToLower(reviewer.Position) == "l1 support" {
+			// Get the area manager's email
+			_, areaManagerEmail, err := service.userRepo.GetAreaManagerInfo(int64(site.SiteID))
+			if err != nil {
+				log.Printf("❌ Error getting area manager info: %v", err)
+				return
+			}
+
+			// Add the area manager's email to the ccEmails
+			ccEmails = []string{areaManagerEmail}
+		}
+
+		// Send the email
+		service.emailService.SendEmail(
+			submitter.Email,
+			submitter.Username,
+			fmt.Sprintf("Opname for %s rejected by %s", site.SiteName, reviewerName),
+			"opname_rejected.html",
+			emailData,
+			ccEmails,
+		)
+
+	}()
+
 	log.Printf("✅ Opname session with ID %d rejected successfully by user %d", sessionID, reviewerID)
 	return nil
 }
