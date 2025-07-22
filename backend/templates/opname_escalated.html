@@ -1,14 +1,14 @@
 <!-- =================================================================================================================== -->
-<!-- TEMPLATE: OPNAME IN REVIEW (BY L1 SUPPORT)                                                                          -->
-<!-- PURPOSE: The notification email sent to L1 Support for final approval after the area manager has approved it.       -->
-<!-- FILENAME: opname_verification_needed.html                                                                           -->
+<!-- TEMPLATE: OPNAME ESCALATED (FOR USER)                                                                               -->
+<!-- PURPOSE: The first confirmation email sent to the user after their manager approved the opname.                     -->
+<!-- FILENAME: opname_escalated.html                                                                                     -->
 <!-- =================================================================================================================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Action Required: Opname Verification | SOSMIT</title>
+    <title>Update: Opname Approved by Manager | SOSMIT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -30,18 +30,13 @@
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-       .header {
+        .header {
             padding: 30px;
             text-align: center;
             background-color: #f8f9fa;
         }
         .logo {
             max-height: 40px;
-        }
-        .hamster-img {
-            width: 120px;
-            height: 120px;
-            margin: 0 auto;
         }
         .content {
             padding: 30px 40px;
@@ -60,8 +55,8 @@
         }
         .details {
             font-family: 'Inter', sans-serif;
-            background-color: #fffaf0;
-            border-left: 4px solid #f6ad55;
+            background-color: #e6fffa;
+            border-left: 4px solid #3182ce;
             padding: 20px;
             margin: 20px 0;
             border-radius: 8px;
@@ -69,26 +64,25 @@
         .details strong {
             color: #2d3748;
         }
-        .cta-button {
-            display: flex;
-            width: 100%;
-            justify-content: center;
-            align-items: center;
-            margin-top: 20px;
-        }
-        .cta-button a {
-            background-color: #f6ad55;
-            color: #ffffff !important;
-            padding: 12px 24px;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-        }
         .footer {
             text-align: center;
             padding: 20px;
             font-size: 12px;
             color: #a0aec0;
+        }
+        .view-report-btn {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .view-report-btn a {
+            display: inline-block;
+            background-color: #3182ce;
+            color: #ffffff !important;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
         }
     </style>
 </head>
@@ -98,23 +92,21 @@
             <img src="https://i.ibb.co/JFQFftMt/sm-logo-inline-text-no-bg.png" alt="PT SM Logo" class="logo">
         </div>
         <div class="content">
-            <h1>Action Required: Review Opname</h1>
-            <p>Selamat Pagi L1 Support Team,</p>
-            <p>An opname session has been completed by <strong>{{.Submitter}}</strong> and is now ready for your verification.</p>
+            <h1>Good News, {{.Submitter}}!</h1>
+            <p>Just a quick update: your opname session for <strong>{{.SiteName}}</strong> has been reviewed and **approved** by your manager, <strong>{{.Reviewer}}</strong>.</p>
+            <p>The session has now been escalated to the L1 Support team for final verification. Almost there!</p>
             
             <div class="details">
                 <strong>Site:</strong> {{.SiteName}}<br>
-                <strong>Submitted By:</strong> {{.Submitter}}<br>
-                <strong>Submitted On:</strong> {{.CompletedDate}}<br>
-                <strong>Approved By:</strong> {{.Reviewer}}
+                <strong>Manager Approved On:</strong> {{.CompletedDate}}
+            </div>
+            
+            <div class="view-report-btn">
+                <a href="{{.PageLink}}" target="_blank">View Progress</a>
             </div>
 
-            <p>Please review the changes and either approve or reject the submission in the SOSMIT application.</p>
-        
-            <!-- TODO: figure out how to center this button -->
-            <div class="cta-button">
-                <a href="{{.VerificationLink}}">Review Session</a>
-            </div>
+            <p>We'll send you one last email when it's fully verified.</p>
+            <p>— The SOSMIT Team</p>
         </div>
         <div class="footer">
             <p>This is an automated notification from the SOSMIT Application.</p>

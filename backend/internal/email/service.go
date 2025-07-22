@@ -19,11 +19,12 @@ type Service struct {
 }
 
 type EmailData struct {
-	Approver         string
+	Reviewer         string
 	Submitter        string
 	SiteName         string
 	CompletedDate    string
 	VerificationLink string
+	PageLink         string
 }
 
 // NewService creates a new email service with the provided SendGrid API key and sender email.
@@ -47,7 +48,7 @@ func NewService() *Service {
 }
 
 // SendEmail sends an email using the SendGrid API.
-func (service *Service) SendEmail(recipientEmail, recipientName, subject, templateName string, data EmailData) error {
+func (service *Service) SendEmail(recipientEmail, recipientName, subject, templateName string, data EmailData, ccEmail []string) error {
 	// Parse the HTML template
 	templatePath := filepath.Join("templates", templateName)
 	templateFile, err := template.ParseFiles(templatePath)
@@ -67,6 +68,10 @@ func (service *Service) SendEmail(recipientEmail, recipientName, subject, templa
 	from := mail.NewEmail("SOSMIT App", service.senderEmail)
 	to := mail.NewEmail(recipientName, recipientEmail)
 	message := mail.NewSingleEmail(from, subject, to, "", body.String())
+	for _, cc := range ccEmail { // Add cc recipients if provided.
+		ccRecipient := mail.NewEmail("", cc)
+		message.Personalizations[0].AddCCs(ccRecipient)
+	}
 	client := sendgrid.NewSendClient(service.sendgridKey)
 	response, err := client.Send(message)
 

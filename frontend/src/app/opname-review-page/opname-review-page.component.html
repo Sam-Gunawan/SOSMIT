@@ -1,0 +1,90 @@
+
+    <div class="verification-container-wrapper p-4">
+        
+        <!-- Main Verification Container -->
+        <div class="card verification-card w-100 shadow-lg">
+            
+            <!-- Header Section -->
+            <div class="card-header p-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h1 class="h3 fw-bold text-dark mb-0">Opname Verification</h1>
+                        <p class="text-muted mb-0 mt-1">
+                            Submitted by <span class="fw-semibold text-dark">Fajar Nugroho</span> for site <span class="fw-semibold text-dark">Branch Office Asia Afrika</span>
+                        </p>
+                    </div>
+                    <img src="assets/sm-logo.png" alt="SOSMIT Logo" style="height: 40px;">
+                </div>
+            </div>
+
+            <!-- PDF Preview Section -->
+            <div class="card-body p-4">
+                <h2 class="h5 fw-semibold text-secondary mb-3">Opname Report Preview</h2>
+                <div class="pdf-viewer rounded border">
+                    <!-- TODO: replace with PDF report -->
+                    <embed src="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" type="application/pdf" width="100%" height="100%">
+                </div>
+            </div>
+
+            <!-- Action Section -->
+            <div class="card-footer p-4">
+                <!-- This is the container for the action buttons -->
+                <div id="action-container">
+                     <p class="text-muted mb-3 small">Please review the report above. Once approved, the changes will be escalated for final L1 verification. If rejected, the session will be returned to the submitter.</p>
+                    <div class="d-flex flex-column flex-sm-row gap-3">
+                        <!-- "View on Web" Button -->
+                        <a id="view-web-btn" class="btn btn-secondary w-100" (click)="goToReport()">
+                            View Interactive Report
+                        </a>
+                        <!-- Reject Button -->
+                        <button id="reject-btn" class="btn btn-danger w-100" (click)="rejectOpname()">
+                            Reject
+                        </button>
+                        <!-- Approve Button -->
+                        <button id="approve-btn" class="btn btn-success w-100" (click)="approveOpname()">
+                            Approve
+                        </button>
+                    </div>
+                </div>
+
+                <!-- This is the container for the rejection reason, hidden by default -->
+                <div id="rejection-container" class="d-none">
+                     <label for="rejection-reason" class="form-label fw-semibold">Reason for Rejection</label>
+                     <textarea id="rejection-reason" rows="3" class="form-control" placeholder="Please provide a clear reason..."></textarea>
+                     <div class="d-flex gap-3 mt-3">
+                        <button id="cancel-rejection-btn" class="btn btn-secondary w-100">
+                            Cancel
+                        </button>
+                        <button id="confirm-rejection-btn" class="btn btn-danger w-100">
+                            Confirm Rejection
+                        </button>
+                     </div>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center text-muted small mt-4">If you are having trouble viewing the PDF, please use the "View Interactive Report" button.</p>
+
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle (needed for some components, good to have) -->
+    <!-- TODO: replace with angular ts -->
+    <script>
+        // Simple JavaScript to handle the UI logic for the rejection flow.
+        const actionContainer = document.getElementById('action-container');
+        const rejectionContainer = document.getElementById('rejection-container');
+        const rejectBtn = document.getElementById('reject-btn');
+        const cancelRejectionBtn = document.getElementById('cancel-rejection-btn');
+
+        // When the user clicks the initial "Reject" button...
+        rejectBtn.addEventListener('click', () => {
+            actionContainer.classList.add('d-none');
+            rejectionContainer.classList.remove('d-none');
+        });
+
+        // When the user clicks "Cancel" in the rejection view...
+        cancelRejectionBtn.addEventListener('click', () => {
+            rejectionContainer.classList.add('d-none');
+            actionContainer.classList.remove('d-none');
+        });
+    </script>

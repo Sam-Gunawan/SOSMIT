@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/text/cases"
@@ -217,51 +218,54 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 
 	// Send a notification email to the user who started the session using a Go routine.
 	go func() {
-		recipient, _ := service.userRepo.GetUserByID(requestingUserID)
+		submitter, _ := service.userRepo.GetUserByID(requestingUserID)
 		session, _ := service.repo.GetSessionByID(sessionID)
 		site, _ := service.siteRepo.GetSiteByID(session.SiteID)
 		completedDate := time.Now().Format("Mon, 02 Jan 2006 15:04:05")
-		recipientName := cases.Title(language.English).String((recipient.FirstName + " " + recipient.LastName))
+		submitterName := cases.Title(language.English).String((submitter.FirstName + " " + submitter.LastName))
 
-		log.Printf("📧 Sending completion email to %s for session %d at site %s", recipientName, sessionID, site.SiteName)
+		// Area manager info
+		managerID, managerEmail, _ := service.userRepo.GetAreaManagerInfo(int64(site.SiteID))
+		manager, _ := service.userRepo.GetUserByID(managerID)
+		managerName := cases.Title(language.English).String((manager.FirstName + " " + manager.LastName))
 
 		// Prepare the email data for user who completed the session and send it.
 		emailDataUser := email.EmailData{
-			Submitter:        recipientName,
-			Approver:         "",
+			Submitter:        submitterName,
+			Reviewer:         managerName,
 			SiteName:         site.SiteName,
 			CompletedDate:    completedDate,
 			VerificationLink: "",
+			PageLink:         os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(site.SiteID) + "/report?session_id=" + strconv.Itoa(sessionID),
 		}
 
 		service.emailService.SendEmail(
-			recipient.Email,
-			recipient.Username,
-			fmt.Sprintf("Opname for %s completed", site.SiteName),
-			"opname_completed.html",
+			submitter.Email,
+			submitter.Username,
+			fmt.Sprintf("Opname for %s submitted", site.SiteName),
+			"opname_submitted.html",
 			emailDataUser,
+			nil,
 		)
 
-		// Prepare the email data for L1 SUPPORT and send it.
-		l1SupportEmails, _ := service.userRepo.GetL1SupportEmails()
-		emailDataL1 := email.EmailData{
-			Submitter:        recipientName,
-			Approver:         "",
+		// Prepare the email data for the area manager and send it.
+		emailDataAreaManager := email.EmailData{
+			Submitter:        submitterName,
+			Reviewer:         managerName,
 			SiteName:         site.SiteName,
 			CompletedDate:    completedDate,
-			VerificationLink: os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(session.SiteID),
+			VerificationLink: os.Getenv("FRONTEND_URL") + "/opname/" + strconv.Itoa(sessionID) + "/review",
+			PageLink:         "",
 		}
 
-		for _, emailAddr := range l1SupportEmails {
-			service.emailService.SendEmail(
-				emailAddr,
-				"L1 Support Team",
-				fmt.Sprintf("Opname for %s needs your verification!", site.SiteName),
-				"opname_verification_needed.html",
-				emailDataL1,
-			)
-		}
-
+		service.emailService.SendEmail(
+			managerEmail,
+			manager.Username,
+			fmt.Sprintf("Opname for %s completed by %s", site.SiteName, submitterName),
+			"opname_review_manager.html",
+			emailDataAreaManager,
+			nil,
+		)
 	}()
 
 	log.Printf("✅ Opname session with ID %d finished successfully", sessionID)
@@ -310,8 +314,106 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 	// Call the repository to verify the opname session
 	err := service.repo.ApproveOpnameSession(sessionID, reviewerID)
 	if err != nil {
-		log.Printf("❌ Error verifying opname session with ID %d: %v", sessionID, err)
+		log.Printf("❌ Error approving opname session with ID %d: %v", sessionID, err)
 		return err
+	}
+
+	// Init the ccEmails
+	var ccEmails []string
+
+	// Get the reviewer details
+	reviewer, _ := service.userRepo.GetUserByID(int64(reviewerID))
+
+	// Get the reviewer's position
+	var reviewerPosition = reviewer.Position
+
+	// Get the opname session info
+	session, _ := service.repo.GetSessionByID(sessionID)
+
+	// If a manager approves the session, send a notification email to the user who started the session and request verification from L1 support.
+	if strings.ToLower(reviewerPosition) == "area manager" {
+		go func() {
+			submitter, _ := service.userRepo.GetUserByID(int64(session.UserID))
+			submitterName := cases.Title(language.English).String((submitter.FirstName + " " + submitter.LastName))
+			managerName := cases.Title(language.English).String((reviewer.FirstName + " " + reviewer.LastName))
+			site, _ := service.siteRepo.GetSiteByID(session.SiteID)
+			completedDate := time.Now().Format("Mon, 02 Jan 2006 15:04:05") // for manager_reviewed_at
+
+			// Prepare the email data for the user and send it.
+			emailDataUser := email.EmailData{
+				Submitter:        submitterName,
+				Reviewer:         managerName,
+				SiteName:         site.SiteName,
+				CompletedDate:    completedDate,
+				VerificationLink: "",
+				PageLink:         os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(site.SiteID) + "/report?session_id=" + strconv.Itoa(sessionID),
+			}
+
+			// Send update notice email to user.
+			service.emailService.SendEmail(
+				submitter.Email,
+				submitter.Username,
+				fmt.Sprintf("Opname for %s approved by %s", site.SiteName, managerName),
+				"opname_escalated.html",
+				emailDataUser,
+				ccEmails,
+			)
+
+			// Prepare the email data for L1 SUPPORT and send it.
+			l1SupportEmails, _ := service.userRepo.GetL1SupportEmails()
+			opnameCompletedDateStr, _ := time.Parse(time.RFC3339, session.EndDate.String)
+			opnameCompletedDate := opnameCompletedDateStr.Format("Mon, 02 Jan 2006 15:04:05")
+			emailDataL1 := email.EmailData{
+				Submitter:        submitterName,
+				Reviewer:         managerName,
+				SiteName:         site.SiteName,
+				CompletedDate:    opnameCompletedDate,
+				VerificationLink: os.Getenv("FRONTEND_URL") + "/opname/" + strconv.Itoa(sessionID) + "/review",
+				PageLink:         "",
+			}
+
+			for _, emailAddr := range l1SupportEmails {
+				service.emailService.SendEmail(
+					emailAddr,
+					"L1 Support Team",
+					fmt.Sprintf("Opname for %s needs your verification!", site.SiteName),
+					"opname_verification_needed.html",
+					emailDataL1,
+					ccEmails,
+				)
+			}
+		}()
+
+		// If an L1 support user approves the session, send a notification email to the user who started the session and cc the area manager.
+	} else if strings.ToLower(reviewerPosition) == "l1 support" {
+		go func() {
+			submitter, _ := service.userRepo.GetUserByID(int64(session.UserID))
+			submitterName := cases.Title(language.English).String((submitter.FirstName + " " + submitter.LastName))
+			l1User, _ := service.userRepo.GetUserByID(int64(reviewerID))
+			l1Name := cases.Title(language.English).String((l1User.FirstName + " " + l1User.LastName))
+			site, _ := service.siteRepo.GetSiteByID(session.SiteID)
+			completedDate := time.Now().Format("Mon, 02 Jan 2006 15:04:05") // for l1_reviewed_at
+
+			// Prepare the email data for the user and send it.
+			emailDataUser := email.EmailData{
+				Submitter:        submitterName,
+				Reviewer:         l1Name,
+				SiteName:         site.SiteName,
+				CompletedDate:    completedDate,
+				VerificationLink: "",
+				PageLink:         os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(site.SiteID) + "/report?session_id=" + strconv.Itoa(sessionID),
+			}
+
+			service.emailService.SendEmail(
+				submitter.Email,
+				submitter.Username,
+				fmt.Sprintf("Opname for %s approved by L1 Support Team", site.SiteName),
+				"opname_verified.html",
+				emailDataUser,
+				ccEmails,
+			)
+		}()
+
 	}
 
 	log.Printf("✅ Opname session with ID %d verified successfully by user %d", sessionID, reviewerID)

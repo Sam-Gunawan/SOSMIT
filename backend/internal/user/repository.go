@@ -249,3 +249,25 @@ func (repo *Repository) GetL1SupportEmails() ([]string, error) {
 	log.Printf("✅ Successfully retrieved %d L1 support emails from the database\n", len(emails))
 	return emails, nil // Return the slice of emails found
 }
+
+// GetAreaManagerInfo retrieves the area manager's email and user ID for a given site.
+func (repo *Repository) GetAreaManagerInfo(siteID int64) (int64, string, error) {
+	var userID int64
+	var email string
+
+	query := `SELECT * FROM get_area_manager_info($1)`
+
+	err := repo.db.QueryRow(query, siteID).Scan(&userID, &email)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("⚠ No area manager found for site ID: %d\n", siteID)
+			return 0, "", nil // No area manager found
+		}
+
+		log.Printf("❌ Error retrieving area manager info for site ID: %d, error: %v\n", siteID, err)
+		return 0, "", err // Return the error for unexpected cases
+	}
+
+	log.Printf("✅ Successfully retrieved area manager info for site ID: %d\n", siteID)
+	return userID, email, nil
+}

@@ -1,7 +1,7 @@
 <!-- =================================================================================================================== -->
-<!-- TEMPLATE: OPNAME IN REVIEW (BY L1 SUPPORT)                                                                          -->
-<!-- PURPOSE: The notification email sent to L1 Support for final approval after the area manager has approved it.       -->
-<!-- FILENAME: opname_verification_needed.html                                                                           -->
+<!-- TEMPLATE: OPNAME IN REVIEW (BY MANAGER)                                                                             -->
+<!-- PURPOSE: The notification email sent to the area manager after a user has finished their opname                     -->
+<!-- FILENAME: opname_review_manager.html                                                                                -->
 <!-- =================================================================================================================== -->
 <!DOCTYPE html>
 <html lang="en">
@@ -99,14 +99,13 @@
         </div>
         <div class="content">
             <h1>Action Required: Review Opname</h1>
-            <p>Selamat Pagi L1 Support Team,</p>
+            <p>Selamat Pagi {{.Reviewer}},</p>
             <p>An opname session has been completed by <strong>{{.Submitter}}</strong> and is now ready for your verification.</p>
             
             <div class="details">
                 <strong>Site:</strong> {{.SiteName}}<br>
                 <strong>Submitted By:</strong> {{.Submitter}}<br>
-                <strong>Submitted On:</strong> {{.CompletedDate}}<br>
-                <strong>Approved By:</strong> {{.Reviewer}}
+                <strong>Submitted On:</strong> {{.CompletedDate}}
             </div>
 
             <p>Please review the changes and either approve or reject the submission in the SOSMIT application.</p>

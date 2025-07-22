@@ -1,0 +1,122 @@
+<!-- =================================================================================================================== -->
+<!-- TEMPLATE: OPNAME VERIFIED (FOR GA USER)                                                                             -->
+<!-- PURPOSE: The final confirmation email sent to the GA user after L1 Support has given the final approval.            -->
+<!-- FILENAME: opname_verified.html                                                                                      -->
+<!-- =================================================================================================================== -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Done: Opname Verified! | SOSMIT</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS is inlined for maximum email client compatibility */
+        body { 
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .header { 
+            padding: 30px; 
+            text-align: center; 
+            background-color: #f8f9fa; 
+        }
+        .logo { 
+            max-height: 40px; 
+        }
+        .hamster-img { 
+            width: 120px; 
+            height: 120px; 
+            margin: 0 auto; 
+        }
+        .content { 
+            padding: 30px 40px; 
+            color: #333; 
+            line-height: 1.6; 
+        }
+        .content h1 { 
+            font-size: 1.5rem; 
+            color: #2d3748; 
+            margin-top: 0; 
+            font-weight: 700; 
+        }
+        .content p { 
+            font-size: 16px; 
+            color: #4a5568; 
+        }
+        .details { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #ebf8ff; 
+            border-left: 4px solid #38b2ac; 
+            padding: 20px; 
+            margin: 20px 0; 
+            border-radius: 8px; 
+        }
+        .details strong { 
+            color: #2d3748; 
+        }
+        .footer { 
+            text-align: center; 
+            padding: 20px; 
+            font-size: 12px; 
+            color: #a0aec0; 
+        }
+        .view-report-btn { 
+            text-align: center; 
+            margin: 30px 0; 
+        }
+        .view-report-btn a { 
+            display: inline-block; 
+            background-color: #38b2ac; 
+            color: #ffffff !important; 
+            font-weight: 600; 
+            text-decoration: none; 
+            padding: 12px 24px; 
+            border-radius: 8px; 
+            font-size: 16px; 
+        }</style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://i.ibb.co/JFQFftMt/sm-logo-inline-text-no-bg.png" alt="PT SM Logo" class="logo">
+        </div>
+        <div class="content">
+            <h1>All Done, {{.Submitter}}!</h1>
+            <p>Amazing news! The opname session you submitted for <strong>{{.SiteName}}</strong> has been fully **verified** by L1 Support.</p>
+            <p>All the changes you recorded have now been updated in the master asset data. Your hard work has paid off!</p>
+            
+            <div class="details">
+                <strong>Site:</strong> {{.SiteName}}<br>
+                <strong>Final Verification By:</strong> {{.Reviewer}}<br>
+                <strong>Verified On:</strong> {{.CompletedDate}}
+            </div>
+            
+            <div class="view-report-btn">
+                <a href="{{.PageLink}}" target="_blank">View Final Report</a>
+            </div>
+
+            <p>Thank you for your diligence!</p>
+            <p>— The SOSMIT Team</p>
+        </div>
+        <div class="footer">
+            <p>This is an automated notification from the SOSMIT Application.</p>
+            <p>&copy; 2025 Samuel Theodore Gunawan and Priska Aimee Likarsa.<br>All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

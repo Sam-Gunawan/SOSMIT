@@ -245,7 +245,7 @@ func (repo *Repository) FinishOpnameSession(sessionID int) error {
 
 // ApproveOpnameSession sets the status of an opname session to "escalated" by an area manager or "verified" by an L1 support.
 func (repo *Repository) ApproveOpnameSession(sessionID int, reviewerID int) error {
-	query := `CALL verify_opname_session($1, $2)`
+	query := `CALL approve_opname_session($1, $2)`
 	_, err := repo.db.Exec(query, sessionID, reviewerID)
 	if err != nil {
 		log.Printf("❌ Error verifying opname session with ID %d by approver %d: %v", sessionID, reviewerID, err)

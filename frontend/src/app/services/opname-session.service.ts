@@ -244,4 +244,26 @@ export class OpnameSessionService {
       })
     );
   }
+
+  approveOpnameSession(sessionID: number): Observable<any> {
+    // This method will approve the current opname session.
+    console.log('[OpnameService] Approving opname session:', sessionID);
+    return this.http.put(`${this.opnameApiUrl}/${sessionID}/approve`, {}).pipe(
+      tap((response: any) => {
+        // Log the response for debugging purposes.
+        console.log('[OpnameService] Approved opname session:', response);
+      })
+    );
+  }
+
+  rejectOpnameSession(sessionID: number): Observable<any> {
+    // This method will reject the current opname session.
+    console.log('[OpnameService] Rejecting opname session:', sessionID);
+    return this.http.put(`${this.opnameApiUrl}/${sessionID}/reject`, {}).pipe(
+      tap((response: any) => {
+        // Log the response for debugging purposes.
+        console.log('[OpnameService] Rejected opname session:', response);
+      })
+    );
+  }
 }

@@ -47,7 +47,7 @@ func (service *Service) Login(username, password string) (string, error) {
 
 	// Check if the user has access to the system.
 	// Only ADMIN STAFF GENERAL AFFAIRS and L1 SUPPORT positions are allowed.
-	if userCredentials.Position != "ADMIN STAFF GENERAL AFFAIRS" && userCredentials.Position != "L1 SUPPORT" {
+	if userCredentials.Position != "ADMIN STAFF GENERAL AFFAIRS" && userCredentials.Position != "L1 SUPPORT" && userCredentials.Position != "AREA MANAGER" {
 		// User does not have the required position to access the system.
 		return "", errors.New("user does not have access to the system")
 	}

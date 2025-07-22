@@ -4,7 +4,7 @@ DROP FUNCTION IF EXISTS public.get_user_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_user_by_username(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_user_site_cards(INT);
 DROP FUNCTION IF EXISTS public.get_l1_support_emails();
-DROP FUNCTION IF EXISTS public.get_area_manager_email(INT);
+DROP FUNCTION IF EXISTS public.get_area_manager_info(INT);
 DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_asset_by_serial_number(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
@@ -220,15 +220,16 @@ AS $$
 $$;
 
 -- get_area_manager_email retrieves the email of the area manager for a given site
-CREATE OR REPLACE FUNCTION public.get_area_manager_email(_site_id INT)
+CREATE OR REPLACE FUNCTION public.get_area_manager_info(_site_id INT)
 	RETURNS TABLE (
+		user_id INT,
 		email VARCHAR(255)
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-			SELECT u.email
+			SELECT u.user_id, u.email
 			FROM "User" AS u
 			INNER JOIN "Site" AS s ON u.site_id = s.id
 			WHERE LOWER(u.position) = 'area manager'
@@ -474,113 +475,115 @@ AS $$
 $$;
 
 -- approve_opname_session verifies an opname session by session ID
-CREATE OR REPLACE PROCEDURE public.approve_opname_session(_reviewer_id INT, _session_id INT)
-	LANGUAGE plpgsql
+CREATE OR REPLACE PROCEDURE public.approve_opname_session(_session_id INT, _reviewer_id INT)
+    LANGUAGE plpgsql
 AS $$
-	DECLARE _user_position VARCHAR;
-	BEGIN
-		-- Check if the opname session exists and is currently completed
-		IF NOT EXISTS (
-			SELECT 1
-			FROM "OpnameSession"
-			WHERE id = _session_id AND "status" IN ('Submitted', 'Escalated')
-		) THEN
-			RAISE EXCEPTION 'No submitted opname session found with ID: %', _session_id;
-		END IF;
+    DECLARE 
+        _user_position VARCHAR;
+        _current_status VARCHAR;
+    BEGIN
+        -- Check if the opname session exists and get its current status
+        SELECT "status" INTO _current_status
+        FROM "OpnameSession"
+        WHERE id = _session_id AND "status" IN ('Submitted', 'Escalated');
+        
+        IF _current_status IS NULL THEN
+            RAISE EXCEPTION 'No submitted or escalated opname session found with ID: %', _session_id;
+        END IF;
 
-		-- Get the user's position
-		SELECT LOWER(u.position) FROM "User" AS u WHERE u.user_id = _reviewer_id
-		INTO _user_position;
+        -- Get the user's position
+        SELECT LOWER(u.position) INTO _user_position
+        FROM "User" AS u 
+        WHERE u.user_id = _reviewer_id;
 
-		-- If the session is already submitted, only the area manager can escalate it.
-		IF EXISTS (
-			SELECT 1
-			FROM "OpnameSession"
-			WHERE id = _session_id AND "status" = 'Submitted'
-			AND manager_reviewer_id IS NULL
-		) AND LOWER(_user_position) != 'area manager' THEN
-			RAISE EXCEPTION 'Opname session with ID: % is not yet approved by an area manager.', _session_id;
-		ELSE
-			UPDATE "OpnameSession"
-			SET manager_reviewer_id = _reviewer_id,
-				"status" = 'Escalated',
-				manager_reviewed_at = NOW()
-			WHERE id = _session_id;
-			RAISE NOTICE 'Opname session with ID: % has been escalated by area manager.', _session_id;
-		END IF;
-
-		-- If the session is already escalated, only the L1 support can verify it.
-		IF EXISTS (
-			SELECT 1
-			FROM "OpnameSession"
-			WHERE id = _session_id AND "status" = 'Escalated'
-			AND l1_reviewer_id IS NULL
-		) AND LOWER(_user_position) != 'l1 support' THEN
-			RAISE EXCEPTION 'Opname session with ID: % is not yet approved by L1 support.', _session_id;
-		ELSE
-			UPDATE "OpnameSession"
-			SET l1_reviewer_id = _reviewer_id,
-				"status" = 'Verified',
-				l1_reviewed_at = NOW()
-			WHERE id = _session_id;
-			RAISE NOTICE 'Opname session with ID: % has been verified by L1 support.', _session_id;
-		END IF;
-	END;
+        -- Handle based on current session status
+        IF _current_status = 'Submitted' THEN
+            -- Only area manager can approve/escalate a submitted session
+            IF _user_position != 'area manager' THEN
+                RAISE EXCEPTION 'Only area manager can approve a submitted opname session. Session ID: %', _session_id;
+            END IF;
+            
+            -- Update session to escalated status
+            UPDATE "OpnameSession"
+            SET manager_reviewer_id = _reviewer_id,
+                "status" = 'Escalated',
+                manager_reviewed_at = NOW()
+            WHERE id = _session_id;
+            
+            RAISE NOTICE 'Opname session with ID: % has been escalated by area manager.', _session_id;
+            
+        ELSIF _current_status = 'Escalated' THEN
+            -- Only L1 support can verify an escalated session
+            IF _user_position != 'l1 support' THEN
+                RAISE EXCEPTION 'Only L1 support can verify an escalated opname session. Session ID: %', _session_id;
+            END IF;
+            
+            -- Update session to verified status
+            UPDATE "OpnameSession"
+            SET l1_reviewer_id = _reviewer_id,
+                "status" = 'Verified',
+                l1_reviewed_at = NOW()
+            WHERE id = _session_id;
+            
+            RAISE NOTICE 'Opname session with ID: % has been verified by L1 support.', _session_id;
+        END IF;
+    END;
 $$;
 
 -- reject_opname_session marks an opname session as rejected
-CREATE OR REPLACE PROCEDURE public.reject_opname_session(_reviewer_id INT, _session_id INT)
-	LANGUAGE plpgsql
+CREATE OR REPLACE PROCEDURE public.reject_opname_session(_session_id INT, _reviewer_id INT)
+    LANGUAGE plpgsql
 AS $$
-	DECLARE _user_position VARCHAR;
-	BEGIN
-		-- Check if the opname session exists and is currently completed
-		IF NOT EXISTS (
-			SELECT 1
-			FROM "OpnameSession"
-			WHERE id = _session_id AND "status" IN ('Submitted', 'Escalated')
-		) THEN
-			RAISE EXCEPTION 'No submitted opname session found with ID: %', _session_id;
-		END IF;
+    DECLARE 
+        _user_position VARCHAR;
+        _current_status VARCHAR;
+    BEGIN
+        -- Check if the opname session exists and get its current status
+        SELECT "status" INTO _current_status
+        FROM "OpnameSession"
+        WHERE id = _session_id AND "status" IN ('Submitted', 'Escalated');
+        
+        IF _current_status IS NULL THEN
+            RAISE EXCEPTION 'No submitted or escalated opname session found with ID: %', _session_id;
+        END IF;
 
-		-- Get the user's position
-		SELECT LOWER(u.position) FROM "User" AS u WHERE u.user_id = _reviewer_id
-		INTO _user_position;
+        -- Get the user's position
+        SELECT LOWER(u.position) INTO _user_position
+        FROM "User" AS u 
+        WHERE u.user_id = _reviewer_id;
 
-		-- If the session is already submitted, only the area manager can reject it.
-		IF EXISTS (
-			SELECT 1
-			FROM "OpnameSession"
-			WHERE id = _session_id AND "status" = 'Submitted'
-			AND manager_reviewer_id IS NULL
-		) AND LOWER(_user_position) != 'area manager' THEN
-			RAISE EXCEPTION 'Opname session with ID: % is not yet approved by an area manager.', _session_id;
-		ELSE
-			UPDATE "OpnameSession"
-			SET manager_reviewer_id = _reviewer_id,
-				"status" = 'Rejected',
-				manager_reviewed_at = NOW()
-			WHERE id = _session_id;
-			RAISE NOTICE 'Opname session with ID: % has been escalated by area manager.', _session_id;
-		END IF;
-
-		-- If the session is already escalated, only the L1 support can verify it.
-		IF EXISTS (
-			SELECT 1
-			FROM "OpnameSession"
-			WHERE id = _session_id AND "status" = 'Escalated'
-			AND l1_reviewer_id IS NULL
-		) AND LOWER(_user_position) != 'l1 support' THEN
-			RAISE EXCEPTION 'Opname session with ID: % is not yet approved by L1 support.', _session_id;
-		ELSE
-			UPDATE "OpnameSession"
-			SET l1_reviewer_id = _reviewer_id,
-				"status" = 'Rejected',
-				l1_reviewed_at = NOW()
-			WHERE id = _session_id;
-			RAISE NOTICE 'Opname session with ID: % has been verified by L1 support.', _session_id;
-		END IF;
-	END;
+        -- Handle based on current session status
+        IF _current_status = 'Submitted' THEN
+            -- Only area manager can reject a submitted session
+            IF _user_position != 'area manager' THEN
+                RAISE EXCEPTION 'Only area manager can reject a submitted opname session. Session ID: %', _session_id;
+            END IF;
+            
+            -- Update session to rejected status
+            UPDATE "OpnameSession"
+            SET manager_reviewer_id = _reviewer_id,
+                "status" = 'Rejected',
+                manager_reviewed_at = NOW()
+            WHERE id = _session_id;
+            
+            RAISE NOTICE 'Opname session with ID: % has been rejected by area manager.', _session_id;
+            
+        ELSIF _current_status = 'Escalated' THEN
+            -- Only L1 support can reject an escalated session
+            IF _user_position != 'l1 support' THEN
+                RAISE EXCEPTION 'Only L1 support can reject an escalated opname session. Session ID: %', _session_id;
+            END IF;
+            
+            -- Update session to rejected status
+            UPDATE "OpnameSession"
+            SET l1_reviewer_id = _reviewer_id,
+                "status" = 'Rejected',
+                l1_reviewed_at = NOW()
+            WHERE id = _session_id;
+            
+            RAISE NOTICE 'Opname session with ID: % has been rejected by L1 support.', _session_id;
+        END IF;
+    END;
 $$;
 
 -- record_asset_change records changes made to an asset during an opname session

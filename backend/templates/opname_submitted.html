@@ -1,3 +1,8 @@
+<!-- =================================================================================================================== -->
+<!-- TEMPLATE: OPNAME SUBMITTED (BY USER)                                                                                -->
+<!-- PURPOSE: The notification email sent to the user after they finished their opname.                                  -->
+<!-- FILENAME: opname_submitted.html                                                                                     -->
+<!-- =================================================================================================================== -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -65,22 +70,43 @@
             font-size: 12px;
             color: #a0aec0;
         }
+        .view-report-btn {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .view-report-btn a {
+            display: inline-block; 
+            background-color: #f6ad55;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            text-decoration: none;
+            padding: 14px 32px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(246,173,85,0.12);
+            font-size: 16px;
+            transition: background 0.2s;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <!-- TODO: CHANGE IMAGE URL SO THAT ITS A PUBLIC URL (use ngrok) -->
-            <img src="http://localhost:8080/uploads/server-assets/sm-logo-inline-text-no-bg.png" alt="PT SM Logo" class="logo">
+            <img src="https://i.ibb.co/JFQFftMt/sm-logo-inline-text-no-bg.png" alt="PT SM Logo" class="logo">
         </div>
         <div class="content">
             <h1>Selamat Pagi, {{.Submitter}}!</h1>
             <p>Your opname session for <strong>{{.SiteName}}</strong> has been successfully completed and submitted for verification.</p>
-            <p>We've notified the L1 Support team, and they'll review it shortly. You'll receive another notification once it has been verified.</p>
+            <p>We've notified Mr./Mrs. {{.Reviewer}}, and they'll review it shortly. You'll receive another notification once it has been approved.</p>
             
             <div class="details">
                 <strong>Site:</strong> {{.SiteName}}<br>
                 <strong>Submitted On:</strong> {{.CompletedDate}}
+            </div>
+            
+            <div class="view-report-btn">
+                <a href="{{.PageLink}}" target="_blank">View Report</a>
             </div>
 
             <p>Thank you for your cooperation!</p>
