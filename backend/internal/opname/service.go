@@ -218,15 +218,41 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 
 	// Send a notification email to the user who started the session using a Go routine.
 	go func() {
-		submitter, _ := service.userRepo.GetUserByID(requestingUserID)
-		session, _ := service.repo.GetSessionByID(sessionID)
-		site, _ := service.siteRepo.GetSiteByID(session.SiteID)
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("‼ Panic recovered in FinishOpnameSession goroutine: %v", r)
+			}
+		}()
+
+		submitter, err := service.userRepo.GetUserByID(requestingUserID)
+		if err != nil || submitter == nil {
+			log.Printf("❌ Error getting submitter: %v", err)
+			return
+		}
+		session, err := service.repo.GetSessionByID(sessionID)
+		if err != nil || session == nil {
+			log.Printf("❌ Error getting session: %v", err)
+			return
+		}
+		site, err := service.siteRepo.GetSiteByID(session.SiteID)
+		if err != nil || site == nil {
+			log.Printf("❌ Error getting site: %v", err)
+			return
+		}
 		completedDate := time.Now().Format("Mon, 02 Jan 2006 15:04:05")
 		submitterName := cases.Title(language.English).String((submitter.FirstName + " " + submitter.LastName))
 
 		// Area manager info
-		managerID, managerEmail, _ := service.userRepo.GetAreaManagerInfo(int64(site.SiteID))
-		manager, _ := service.userRepo.GetUserByID(managerID)
+		managerID, managerEmail, err := service.userRepo.GetAreaManagerInfo(int64(site.SiteID))
+		if err != nil {
+			log.Printf("❌ Error getting area manager info: %v", err)
+			return
+		}
+		manager, err := service.userRepo.GetUserByID(managerID)
+		if err != nil || manager == nil {
+			log.Printf("❌ Error getting manager: %v", err)
+			return
+		}
 		managerName := cases.Title(language.English).String((manager.FirstName + " " + manager.LastName))
 
 		// Prepare the email data for user who completed the session and send it.
@@ -239,14 +265,16 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 			PageLink:         os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(site.SiteID) + "/report?session_id=" + strconv.Itoa(sessionID),
 		}
 
-		service.emailService.SendEmail(
+		if err := service.emailService.SendEmail(
 			submitter.Email,
 			submitter.Username,
 			fmt.Sprintf("Opname for %s submitted", site.SiteName),
 			"opname_submitted.html",
 			emailDataUser,
 			nil,
-		)
+		); err != nil {
+			log.Printf("❌ Error sending email to submitter: %v", err)
+		}
 
 		// Prepare the email data for the area manager and send it.
 		emailDataAreaManager := email.EmailData{
@@ -258,14 +286,16 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 			PageLink:         "",
 		}
 
-		service.emailService.SendEmail(
+		if err := service.emailService.SendEmail(
 			managerEmail,
 			manager.Username,
 			fmt.Sprintf("Opname for %s completed by %s", site.SiteName, submitterName),
 			"opname_review_manager.html",
 			emailDataAreaManager,
 			nil,
-		)
+		); err != nil {
+			log.Printf("❌ Error sending email to manager: %v", err)
+		}
 	}()
 
 	log.Printf("✅ Opname session with ID %d finished successfully", sessionID)
@@ -333,15 +363,27 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 	// If a manager approves the session, send a notification email to the user who started the session and request verification from L1 support.
 	if strings.ToLower(reviewerPosition) == "area manager" {
 		go func() {
-			submitter, _ := service.userRepo.GetUserByID(int64(session.UserID))
-			submitterName := cases.Title(language.English).String((submitter.FirstName + " " + submitter.LastName))
-			managerName := cases.Title(language.English).String((reviewer.FirstName + " " + reviewer.LastName))
-			site, _ := service.siteRepo.GetSiteByID(session.SiteID)
-			completedDate := time.Now().Format("Mon, 02 Jan 2006 15:04:05") // for manager_reviewed_at
+			defer func() {
+				if r := recover(); r != nil {
+					log.Printf("‼ Panic recovered in ApproveOpnameSession (area manager) goroutine: %v", r)
+				}
+			}()
 
-			// Prepare the email data for the user and send it.
+			submitter, err := service.userRepo.GetUserByID(int64(session.UserID))
+			if err != nil || submitter == nil {
+				log.Printf("❌ Error getting submitter: %v", err)
+				return
+			}
+			managerName := cases.Title(language.English).String((reviewer.FirstName + " " + reviewer.LastName))
+			site, err := service.siteRepo.GetSiteByID(session.SiteID)
+			if err != nil || site == nil {
+				log.Printf("❌ Error getting site: %v", err)
+				return
+			}
+			completedDate := time.Now().Format("Mon, 02 Jan 2006 15:04:05")
+
 			emailDataUser := email.EmailData{
-				Submitter:        submitterName,
+				Submitter:        cases.Title(language.English).String(submitter.FirstName + " " + submitter.LastName),
 				Reviewer:         managerName,
 				SiteName:         site.SiteName,
 				CompletedDate:    completedDate,
@@ -349,22 +391,30 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 				PageLink:         os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(site.SiteID) + "/report?session_id=" + strconv.Itoa(sessionID),
 			}
 
-			// Send update notice email to user.
-			service.emailService.SendEmail(
+			if err := service.emailService.SendEmail(
 				submitter.Email,
 				submitter.Username,
 				fmt.Sprintf("Opname for %s approved by %s", site.SiteName, managerName),
 				"opname_escalated.html",
 				emailDataUser,
 				ccEmails,
-			)
+			); err != nil {
+				log.Printf("❌ Error sending email to submitter: %v", err)
+			}
 
-			// Prepare the email data for L1 SUPPORT and send it.
-			l1SupportEmails, _ := service.userRepo.GetL1SupportEmails()
-			opnameCompletedDateStr, _ := time.Parse(time.RFC3339, session.EndDate.String)
+			l1SupportEmails, err := service.userRepo.GetL1SupportEmails()
+			if err != nil {
+				log.Printf("❌ Error getting L1 support emails: %v", err)
+				return
+			}
+			opnameCompletedDateStr, err := time.Parse(time.RFC3339, session.EndDate.String)
+			if err != nil {
+				log.Printf("❌ Error parsing session end date: %v", err)
+				opnameCompletedDateStr = time.Now()
+			}
 			opnameCompletedDate := opnameCompletedDateStr.Format("Mon, 02 Jan 2006 15:04:05")
 			emailDataL1 := email.EmailData{
-				Submitter:        submitterName,
+				Submitter:        cases.Title(language.English).String(submitter.FirstName + " " + submitter.LastName),
 				Reviewer:         managerName,
 				SiteName:         site.SiteName,
 				CompletedDate:    opnameCompletedDate,
@@ -373,30 +423,46 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 			}
 
 			for _, emailAddr := range l1SupportEmails {
-				service.emailService.SendEmail(
+				if err := service.emailService.SendEmail(
 					emailAddr,
 					"L1 Support Team",
 					fmt.Sprintf("Opname for %s needs your verification!", site.SiteName),
 					"opname_verification_needed.html",
 					emailDataL1,
 					ccEmails,
-				)
+				); err != nil {
+					log.Printf("❌ Error sending email to L1 support (%s): %v", emailAddr, err)
+				}
 			}
 		}()
-
-		// If an L1 support user approves the session, send a notification email to the user who started the session and cc the area manager.
 	} else if strings.ToLower(reviewerPosition) == "l1 support" {
 		go func() {
-			submitter, _ := service.userRepo.GetUserByID(int64(session.UserID))
-			submitterName := cases.Title(language.English).String((submitter.FirstName + " " + submitter.LastName))
-			l1User, _ := service.userRepo.GetUserByID(int64(reviewerID))
-			l1Name := cases.Title(language.English).String((l1User.FirstName + " " + l1User.LastName))
-			site, _ := service.siteRepo.GetSiteByID(session.SiteID)
-			completedDate := time.Now().Format("Mon, 02 Jan 2006 15:04:05") // for l1_reviewed_at
+			defer func() {
+				if r := recover(); r != nil {
+					log.Printf("‼ Panic recovered in ApproveOpnameSession (l1 support) goroutine: %v", r)
+				}
+			}()
 
-			// Prepare the email data for the user and send it.
+			submitter, err := service.userRepo.GetUserByID(int64(session.UserID))
+			if err != nil || submitter == nil {
+				log.Printf("❌ Error getting submitter: %v", err)
+				return
+			}
+			l1User, err := service.userRepo.GetUserByID(int64(reviewerID))
+			if err != nil || l1User == nil {
+				log.Printf("❌ Error getting L1 user: %v", err)
+				return
+			}
+			l1Name := cases.Title(language.English).String((l1User.FirstName + " " + l1User.LastName))
+			site, err := service.siteRepo.GetSiteByID(session.SiteID)
+			if err != nil || site == nil {
+				log.Printf("❌ Error getting site: %v", err)
+				return
+			}
+			completedDate := time.Now().Format("Mon, 02 Jan 2006 15:04:05")
+
 			emailDataUser := email.EmailData{
-				Submitter:        submitterName,
+				Submitter:        cases.Title(language.English).String(submitter.FirstName + " " + submitter.LastName),
 				Reviewer:         l1Name,
 				SiteName:         site.SiteName,
 				CompletedDate:    completedDate,
@@ -404,16 +470,17 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 				PageLink:         os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(site.SiteID) + "/report?session_id=" + strconv.Itoa(sessionID),
 			}
 
-			service.emailService.SendEmail(
+			if err := service.emailService.SendEmail(
 				submitter.Email,
 				submitter.Username,
 				fmt.Sprintf("Opname for %s approved by L1 Support Team", site.SiteName),
 				"opname_verified.html",
 				emailDataUser,
 				ccEmails,
-			)
+			); err != nil {
+				log.Printf("❌ Error sending email to submitter: %v", err)
+			}
 		}()
-
 	}
 
 	log.Printf("✅ Opname session with ID %d verified successfully by user %d", sessionID, reviewerID)

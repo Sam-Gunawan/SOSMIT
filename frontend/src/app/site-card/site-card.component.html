@@ -55,10 +55,10 @@
                     <option value="Outdated">Outdated</option>
                 </select>
             </div>
-            <form class="d-flex search-bar" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search"  #filter (input)="filterSiteCards(filter.value)"/>
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </form>
+            <div class="d-flex search-bar" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search" #filter (input)="filterSiteCards(filter.value)"/>
+                <button class="btn btn-outline-success">Search</button>
+            </div>
             <div class="view-icon" *ngIf="!isMobile">
                 <img class="card-view" [class.active]="currentView === 'card'" src="assets/card.svg" alt="Card View" (click)="toggleView('card')"/>
                 <img class="list-view" [class.active]="currentView === 'list'" src="assets/list.svg" alt="List View" (click)="toggleView('list')"/>
@@ -115,6 +115,14 @@
                 {{ siteCard.opnameStatus }}
             </span>
         </div>
+    </div>
+</section>
+
+<!-- TODO: Design search not found display! -->
+<section class="empty-search" *ngIf="filteredSiteCardList && filteredSiteCardList.length === 0">
+    <div class="not-found-message">
+        <h4>No sites found</h4>
+        <p>Try adjusting your search or filter criteria.</p>
     </div>
 </section>
 

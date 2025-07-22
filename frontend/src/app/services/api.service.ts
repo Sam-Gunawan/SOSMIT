@@ -53,6 +53,32 @@
       return this.http.get(`${this.userApiUrl}/${username}`);
     }
 
+    getUserByID(userID: number): Observable<User> {
+      // This method will fetch a specific user by their ID.
+      return this.http.get<User>(`${this.userApiUrl}/${userID}`).pipe(
+        map((response: any) => {
+          // Map the response to the desired format.
+          return {
+            userID: response.user_id,
+            username: response.username,
+            email: response.email,
+            firstName: titleCase(response.first_name),
+            lastName: titleCase(response.last_name),
+            position: titleCase(response.position),
+            siteID: response.site_id,
+            siteName: response.site_name,
+            siteGroupName: response.site_group_name,
+            regionName: response.region_name,
+            costCenterID: response.cost_center_id
+          };
+        }),
+        tap((user: User) => {
+          // Log the fetched user for debugging purposes.
+          console.log('[ApiService] Fetched user:', user);
+        })
+      );
+    }
+
     getAllUsers(): Observable<User[]> {
       // This method will fetch all users from the database.
       return this.http.get<User[]>(`${this.userApiUrl}/all`).pipe(

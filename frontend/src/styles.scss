@@ -28,7 +28,10 @@ $filter-pill-colors: (
 $asset-pill-colors: (
     deployed: #C6EFCE,
     onloan: #CCCCFF,
-    disposed: #D9D9D9
+    inventory: #BBDEFB,
+    repair: #FFE0B2,
+    down: #FFCDD2,
+    disposed: #D9D9D9,
 );
 
 @use "bootstrap/scss/bootstrap" as bs;

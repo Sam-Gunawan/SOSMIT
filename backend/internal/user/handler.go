@@ -93,7 +93,7 @@ func (handler *Handler) GetAllUsersHandler(context *gin.Context) {
 // GetUserByIDHandler retrieves a user by their ID.
 func (handler *Handler) GetUserByIDHandler(context *gin.Context) {
 	// Get the user ID from the URL parameters
-	userIDParam := context.Param("user_id")
+	userIDParam := context.Param("user-id")
 	if userIDParam == "" {
 		context.JSON(http.StatusBadRequest, gin.H{
 			"error": "user_id parameter is required",
