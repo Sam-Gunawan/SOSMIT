@@ -183,7 +183,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
         // Navigate back to the site page
         console.log('[OpnamePage] Navigating to report page:', this.siteID);
         this.router.navigate(['/site', this.siteID, 'report'], {
-          queryParams: { session_id: this.sessionID }
+          queryParams: { session_id: this.sessionID, from: 'opname_page' }
         });
       },
       error: (error: any) => {

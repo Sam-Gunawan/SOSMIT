@@ -4,61 +4,23 @@ id;site_group_name;region_id
 3;RO Jakarta;2
 4;RO Lampung;3
 5;RO Semarang;4
-6;RO Semarang;5
-7;Pusat;6
-8;RO Jakarta;6
-9;RO Manado;8
-10;RO Palembang;10
-11;RO Pekanbaru;10
-12;Pusat;11
-13;RO Bandung;11
-14;RO Jakarta;11
-15;Pusat;12
-16;RO Manado;12
-17;RO Semarang;12
-18;RO Surabaya;12
-19;Gempol;13
-20;Kediri;13
-21;Pusat;13
-22;RO Semarang;13
-23;RO Surabaya;13
-24;Waru;13
-25;Operation RO Banjarmasin;14
-26;RO Banjarmasin;14
-27;Pusat;15
-28;RO Banjarmasin;15
-29;RO Banjarmasin;16
-30;RO Banjarmasin;17
-31;RO Banjarmasin;18
-32;RO Palembang;19
-33;RO Pekanbaru;20
-34;Pusat;21
-35;RO Lampung;21
-36;RO Makassar;22
-37;RO Manado;22
-38;RO Manado;24
-39;Operation RO Medan;25
-40;RO Medan;25
-41;RO Denpasar;26
-42;RO Denpasar;27
-43;RO Makassar;28
-44;RO Manado;28
-45;RO Makassar;29
-46;RO Manado;29
-47;Pusat;30
-48;RO Pekanbaru;30
-49;RO Makassar;31
-50;RO Banjarmasin;32
-51;RO Makassar;32
-52;RO Makassar;33
-53;RO Manado;33
-54;RO Makassar;34
-55;Operation RO Manado;35
-56;RO Manado;35
-57;RO Pekanbaru;36
-58;Pusat;37
-59;RO Lampung;37
-60;RO Palembang;37
-61;Pusat;38
-62;RO Medan;38
-63;RO Sumatera Bagian Utara;39
+6;Pusat;6
+7;RO Manado;8
+8;RO Palembang;10
+9;RO Pekanbaru;10
+10;RO Surabaya;12
+11;Gempol;13
+12;Kediri;13
+13;Waru;13
+14;Operation RO Banjarmasin ;14
+15;RO Banjarmasin;14
+16;RO Makassar;22
+17;Operation RO Medan;25
+18;RO Medan;25
+19;Operation RO Manado;35
+20;RO Sumatera Bagian Utara;39
+21;Gudang;6
+22;Jakarta;6
+23;RO Sumatera Bagian Tengah;36
+24;Surabaya;13
+25;RO Indonesia Bagian Timur;28

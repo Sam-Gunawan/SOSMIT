@@ -135,6 +135,7 @@ export class ReportComponent {
     // This is when a user was redirected after finishing an opname
     this.route.queryParams.subscribe(params => {
       const selectedSessionID = params['session_id'];
+      const from = params['from'];
 
       if (selectedSessionID) {
         this.sessionID = Number(selectedSessionID);
@@ -146,8 +147,10 @@ export class ReportComponent {
           this.selectedDate = session.endDate;
           console.log('[Report] Selected date from session:', this.selectedDate);
           this.onDateChange(); // Trigger date change logic
-          this.successMessage = 'Opname session finished successfully!';
-          this.showSuccessMessage();
+          if (from === 'opname_page') {
+            this.successMessage = 'Opname session finished successfully!';
+            this.showSuccessMessage();
+          }
         } else {
           console.warn('[Report] No session found for ID:', this.sessionID);
           this.errorMessage = 'Session not found.';

@@ -272,8 +272,8 @@
             room: response.room,
             equipments: response.equipments || '', // Default to empty string if equipments are not provided
             assetOwner: response.owner_id,
-            assetOwnerName: response.owner_name,
-            assetOwnerPosition: response.owner_position,
+            assetOwnerName: titleCase(response.owner_name) || '', // Fixed: Apply titleCase here
+            assetOwnerPosition: titleCase(response.owner_position),
             assetOwnerCostCenter: response.owner_cost_center,
             siteID: response.site_id,
             siteName: response.site_name,
