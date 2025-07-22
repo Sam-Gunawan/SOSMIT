@@ -113,6 +113,10 @@ export class OpnameReviewPageComponent implements OnInit{
   }
 
   goToReport() {
-    this.router.navigate(['/site', this.opnameSession.siteID, `report?session_id=${this.sessionID}`]);
+    const reportURL = this.router.createUrlTree(['/site', this.opnameSession.siteID, 'report'], {
+      queryParams: { session_id: this.sessionID }
+    }).toString();
+
+    window.open(reportURL, '_blank');
   }
 }
