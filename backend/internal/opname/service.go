@@ -161,9 +161,14 @@ func (service *Service) RemoveAssetChange(sessionID int, assetTag string) error 
 		return errors.New("asset change record not found")
 	}
 
-	// Call the file service to delete the old condition photo if it exists
-	if err := service.uploadService.DeleteConditionPhoto(newConditionPhotoURL); err != nil && newConditionPhotoURL != "" {
-		log.Printf("❌ Error deleting old condition photo for asset %s: %v", assetTag, err)
+	// Call the file service to delete the old condition photo if it exists and is not empty
+	if newConditionPhotoURL != "" {
+		if err := service.uploadService.DeleteConditionPhoto(newConditionPhotoURL); err != nil {
+			log.Printf("⚠ Error deleting condition photo %s: %v", newConditionPhotoURL, err)
+			// Continue with deletion even if photo deletion fails
+		} else {
+			log.Printf("✅ Successfully deleted condition photo: %s", newConditionPhotoURL)
+		}
 	}
 
 	// Call the repository to delete the asset change
