@@ -30,7 +30,7 @@
         </div>
 
         <!-- Action Section -->
-        <div class="card-footer p-4">
+        <div class="card-footer p-4" *ngIf="needsReview">
             <!-- This is the container for the action buttons -->
             <div id="action-container">
                     <p class="text-muted mb-3 small">Please review the report above. Once approved, the changes will be escalated for final L1 verification. If rejected, the session will be returned to the submitter.</p>
@@ -51,17 +51,36 @@
             </div>
 
             <!-- This is the container for the rejection reason, hidden by default -->
+            <!-- TODO: Yet to be implemented! -->
             <div id="rejection-container" class="d-none">
-                    <label for="rejection-reason" class="form-label fw-semibold">Reason for Rejection</label>
-                    <textarea id="rejection-reason" rows="3" class="form-control" placeholder="Please provide a clear reason..."></textarea>
-                    <div class="d-flex gap-3 mt-3">
+                <label for="rejection-reason" class="form-label fw-semibold">Reason for Rejection</label>
+                <textarea id="rejection-reason" rows="3" class="form-control" placeholder="Please provide a clear reason..."></textarea>
+                <div class="d-flex gap-3 mt-3">
                     <button id="cancel-rejection-btn" class="btn btn-secondary w-100">
                         Cancel
                     </button>
                     <button id="confirm-rejection-btn" class="btn btn-danger w-100">
                         Confirm Rejection
                     </button>
-                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Replaces Action Section if the opname is already reviewed -->
+        <div class="card-footer p-4" *ngIf="!needsReview">
+            <p class="mb-3 small text-center">
+                This opname session has already been
+                <span [class.text-success]="isAlreadyApproved" [class.text-danger]="isAlreadyRejected" >{{ isAlreadyApproved ? 'approved' : 'rejected' }}</span> by
+                <span class="fw-semibold text-dark">{{ reviewedBy }}</span>.
+            </p>
+            <div class="d-flex flex-column flex-sm-row gap-3">
+                <button id="view-web-btn" class="btn btn-secondary w-100" (click)="goToReport()">
+                    View Interactive Report
+                </button>
+                <!-- TODO: Implement this -->
+                <button id="view-pdf-btn" class="btn btn-primary w-100" (click)="downloadPDF()">
+                    Download PDF Report
+                </button>
             </div>
         </div>
     </div>
