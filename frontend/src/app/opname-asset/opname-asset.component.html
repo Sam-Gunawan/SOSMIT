@@ -13,8 +13,8 @@
                 [disabled]="isSearching"
             />
             <button class="btn btn-outline-success" type="submit" [disabled]="isSearching">
-                <span *ngIf="isSearching" class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                Search
+                <span *ngIf="isSearching" class="spinner-border spinner-border-sm mx-1" role="status" aria-hidden="true"></span>
+                <span *ngIf="!isSearching">Search</span>
             </button>
         </form>
     </div>
@@ -102,7 +102,7 @@
                 </section>
 
                 <!-- Card view for displaying latest changes -->
-                <section class="asset-card-layout changed" [ngClass]="variant" *ngIf="currentView === 'card' && result.assetProcessed">
+                <section class="asset-card-layout" [ngClass]="variant" [class.changed]="result.processingStatus === 'edited'" *ngIf="currentView === 'card' && result.assetProcessed">
                     <div class="asset-card" [ngClass]="variant"> 
                         <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="isInReport ? '#pending-modal-' + result.existingAsset.assetTag : '#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
                             <div class="main-info">
@@ -140,7 +140,6 @@
                     </div>
                 </section>
 
-                <!-- ! STILL NOT WORKING -->
                 <app-asset-page [assetTag]="result.pendingAsset.assetTag" [assetPage]="result.pendingAsset" [isPending]="true" *ngIf="isInReport"></app-asset-page>
 
                 <div class="modal fade" [id]="'edit-modal-' + result.existingAsset.assetTag" tabindex="-1" aria-hidden="true" *ngIf="!isInReport">
@@ -156,11 +155,6 @@
                             </div>
                             
                             <div class="modal-body">
-                                <!-- Success Message Alert -->
-                                <div class="alert alert-success" role="alert" *ngIf="successMessage">
-                                    {{ successMessage }}
-                                </div>
-
                                 <!-- Error Message Alert -->
                                 <!-- <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
                                     {{ errorMessage }}
@@ -190,13 +184,13 @@
                                                     <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
                                                         [(ngModel)]="result.pendingAsset.assetOwnerName" name="newOwnerName" 
                                                         list="all-users" (input)="onOwnerInputChange(i)"
-                                                        [class.is-invalid]="result.pendingAsset.assetOwner === 0 && !result.pendingAsset.assetOwnerName" 
+                                                        [class.is-invalid]="(result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName) || !result.pendingAsset.assetOwnerName" 
                                                         required>
                                                     <label [for]="'owner-name-' + result.pendingAsset.assetTag">User</label>
                                                     <datalist id="all-users">
                                                         <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
                                                     </datalist>
-                                                    <div *ngIf="result.pendingAsset.assetOwner === 0 && !result.pendingAsset.assetOwnerName" class="invalid-feedback">
+                                                    <div *ngIf="(result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName) || !result.pendingAsset.assetOwnerName" class="invalid-feedback">
                                                         Please select a valid user from the list.
                                                     </div>
                                                 </div>
@@ -443,11 +437,6 @@
                                 </div>
                                 
                                 <div class="modal-body">
-                                    <!-- Success Message Alert -->
-                                    <div class="alert alert-success" role="alert" *ngIf="successMessage">
-                                        {{ successMessage }}
-                                    </div>
-
                                     <!-- Error Message Alert -->
                                     <!-- <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
                                         {{ errorMessage }}
@@ -513,7 +502,7 @@
                                                 <div class="form-floating mb-2">
                                                     <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
                                                         [(ngModel)]="result.pendingAsset.assetOwnerName" name="newOwnerName" 
-                                                        [class.is-invalid]="result.pendingAsset.assetOwner === 0 && !result.pendingAsset.assetOwnerName" 
+                                                        [class.is-invalid]="(result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName) || !result.pendingAsset.assetOwnerName" 
                                                         (input)="onOwnerInputChange(i)"
                                                         required
                                                         list="all-users">
@@ -523,7 +512,7 @@
                                                             <option [value]="user.firstName + ' ' + user.lastName">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
                                                         </select>
                                                     </datalist>
-                                                    <div *ngIf="result.pendingAsset.assetOwner === 0 && !result.pendingAsset.assetOwnerName" class="invalid-feedback">
+                                                    <div *ngIf="(result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName) || !result.pendingAsset.assetOwnerName" class="invalid-feedback">
                                                         Please select a valid user from the list.
                                                     </div>
                                                 </div>

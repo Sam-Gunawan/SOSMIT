@@ -164,8 +164,8 @@ func (repo *Repository) GetAssetChangePhoto(sessionID int, assetTag string) (str
 
 	row := repo.db.QueryRow(query, sessionID, assetTag)
 
-	var newConditionPhotoURL string
-	err := row.Scan(&newConditionPhotoURL)
+	var conditionPhotoURL sql.NullString // Use sql.NullString to handle NULL values
+	err := row.Scan(&conditionPhotoURL)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("⚠ No asset change found for asset %s in session %d", assetTag, sessionID)
@@ -175,7 +175,11 @@ func (repo *Repository) GetAssetChangePhoto(sessionID int, assetTag string) (str
 		return "", err // Other error.
 	}
 
-	return newConditionPhotoURL, nil
+	// Return the string value, or empty string if NULL
+	if conditionPhotoURL.Valid {
+		return conditionPhotoURL.String, nil
+	}
+	return "", nil
 }
 
 // GetPhotosBySessionID retrieves all photos associated with an opname session.
