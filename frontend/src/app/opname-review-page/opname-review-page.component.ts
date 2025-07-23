@@ -100,8 +100,11 @@ export class OpnameReviewPageComponent implements OnInit{
   }
 
   private fetchReviewerNames() {
-    this.isLoading = true;
-    if (this.opnameSession.l1ReviewerID.Valid) {
+    let pendingRequests = 0;
+
+    // Only fetch L1 reviewer if ID exists and is valid
+    if (this.opnameSession.l1ReviewerID != null && this.opnameSession.l1ReviewerID > 0) {
+      pendingRequests++;
       this.apiService.getUserByID(this.opnameSession.l1ReviewerID).subscribe({
         next: (user) => {
           this.reviewerNames.l1 = `${user.firstName} ${user.lastName}`;
@@ -111,13 +114,17 @@ export class OpnameReviewPageComponent implements OnInit{
           console.error('[OpnameReviewPage] Error:', error);
         },
         complete: () => {
-          this.isLoading = false;
+          pendingRequests--;
+          if (pendingRequests === 0) {
+            this.isLoading = false;
+          }
         }
       });
     }
 
-    this.isLoading = true;
-    if (this.opnameSession.managerReviewerID.Valid) {
+    // Only fetch manager reviewer if ID exists and is valid
+    if (this.opnameSession.managerReviewerID != null && this.opnameSession.managerReviewerID > 0) {
+      pendingRequests++;
       this.apiService.getUserByID(this.opnameSession.managerReviewerID).subscribe({
         next: (user) => {
           this.reviewerNames.manager = `${user.firstName} ${user.lastName}`;
@@ -127,9 +134,17 @@ export class OpnameReviewPageComponent implements OnInit{
           console.error('[OpnameReviewPage] Error:', error);
         },
         complete: () => {
-          this.isLoading = false;
+          pendingRequests--;
+          if (pendingRequests === 0) {
+            this.isLoading = false;
+          }
         }
       });
+    }
+
+    // If no requests were made, set loading to false
+    if (pendingRequests === 0) {
+      this.isLoading = false;
     }
   }
   
@@ -148,16 +163,16 @@ export class OpnameReviewPageComponent implements OnInit{
     // We check if the opnameSession has an l1ReviewerID first, then check for managerReviewerID.
     // Because if there's already an L1 reviewer, it means the session was already escalated to L1 support and thus reviewed by them.
     // Then, check if the logged in user is the one who reviewed the session.
-    if (this.opnameSession.l1ReviewerID.Valid) {
-      if (this.loggedInUser.userID == this.opnameSession.l1ReviewerID.String) {
+    if (this.opnameSession.l1ReviewerID != null) {
+      if (this.loggedInUser.userID === this.opnameSession.l1ReviewerID) {
         // If the logged-in user is the L1 reviewer, return 'You'
         return 'You';
       } else {
         // Return the L1 reviewer's full name with fallback to 'L1 Support'
         return this.reviewerNames.l1 || 'L1 Support';
       }
-    } else if (this.opnameSession.managerReviewerID.Valid) {
-      if (this.loggedInUser.userID == this.opnameSession.managerReviewerID.String) {
+    } else if (this.opnameSession.managerReviewerID != null) {
+      if (this.loggedInUser.userID === this.opnameSession.managerReviewerID) {
         // If the logged-in user is the manager reviewer, return 'You'
         return 'You';
       } else {
