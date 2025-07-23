@@ -15,13 +15,13 @@ export class AuthInterceptor implements HttpInterceptor {
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
         // Get auth token from local storage
         const auth_token = localStorage.getItem("auth_token")
-        console.log("[AuthInterceptor] Intercepting request:", req.url);
-        console.log("[AuthInterceptor] Auth token found:", auth_token);
+        // console.log("[AuthInterceptor] Intercepting request:", req.url);
+        // console.log("[AuthInterceptor] Auth token found:", auth_token);
 
         // If auth token exists, clone the request and add the Authorization header
         if (auth_token) {
             // Log the token for debugging purposes
-            console.log("[AuthInterceptor ] Adding Authorization header with token:", auth_token);
+            // console.log("[AuthInterceptor ] Adding Authorization header with token:", auth_token);
 
             // Clone the request to add the new header
             // This is necessary because HttpRequest is immutable, so we cannot modify it directly
