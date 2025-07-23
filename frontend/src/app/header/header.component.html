@@ -208,7 +208,13 @@
                             </div>
 
                             <div class="logout-container">
-                                <button class="logout-btn btn rounded btn-danger" (click)="logout()">Logout</button>
+                                <button class="logout-btn btn rounded btn-danger" (click)="showLogoutConfirmation = true" *ngIf="!showLogoutConfirmation">Logout</button>
+
+                                <div class="logout-confirmation" *ngIf="showLogoutConfirmation">
+                                    <p>Are you sure you want to logout?</p>
+                                    <button class="yes-logout btn btn-danger" (click)="logout()">Yes</button>
+                                    <button class="no-logout btn btn-secondary" (click)="showLogoutConfirmation = false">No</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -253,7 +259,13 @@
                             </div>
 
                             <div class="logout-container">
-                                <button class="logout-btn btn rounded btn-danger" (click)="logout()">Logout</button>
+                                <button class="logout-btn btn rounded btn-danger" (click)="showLogoutConfirmation = true" *ngIf="!showLogoutConfirmation">Logout</button>
+
+                                <div class="logout-confirmation" *ngIf="showLogoutConfirmation">
+                                    <p>Are you sure you want to logout?</p>
+                                    <button class="yes-logout btn btn-danger" (click)="logout()">Yes</button>
+                                    <button class="no-logout btn btn-secondary" (click)="showLogoutConfirmation = false">No</button>
+                                </div>
                             </div>
                         </div>
                     </div>

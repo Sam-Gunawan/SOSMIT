@@ -13,6 +13,7 @@ export class HeaderComponent {
   currentView: 'large' | 'small' = 'large';
   isMobile: boolean = false;
   notif!: OpnameSession;
+  showLogoutConfirmation = false;
 
   notifications = [
     { message: 'New Opname session created...', isRead: false},
