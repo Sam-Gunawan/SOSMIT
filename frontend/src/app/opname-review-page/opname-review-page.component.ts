@@ -151,7 +151,7 @@ export class OpnameReviewPageComponent implements OnInit{
   get isAlreadyApproved(): boolean {
     // An opname session is considered approved if its status is 'Verified' or 'Escalated' with a manager reviewer.
     // Gotcha: The session can be 'Escalated' and still needs review if the manager reviewer is not set.
-    return this.opnameSession.status === 'Verified' || Boolean(this.opnameSession.status === 'Escalated' && this.opnameSession.managerReviewerID);
+    return this.opnameSession.status === 'Verified' || Boolean(this.opnameSession.status === 'Escalated' && this.opnameSession.managerReviewerID != null && this.opnameSession.managerReviewerID > 0);
   }
 
   get isAlreadyRejected(): boolean {
@@ -163,7 +163,7 @@ export class OpnameReviewPageComponent implements OnInit{
     // We check if the opnameSession has an l1ReviewerID first, then check for managerReviewerID.
     // Because if there's already an L1 reviewer, it means the session was already escalated to L1 support and thus reviewed by them.
     // Then, check if the logged in user is the one who reviewed the session.
-    if (this.opnameSession.l1ReviewerID != null) {
+    if (this.opnameSession.l1ReviewerID != null && this.opnameSession.l1ReviewerID > 0) {
       if (this.loggedInUser.userID === this.opnameSession.l1ReviewerID) {
         // If the logged-in user is the L1 reviewer, return 'You'
         return 'You';
@@ -171,7 +171,7 @@ export class OpnameReviewPageComponent implements OnInit{
         // Return the L1 reviewer's full name with fallback to 'L1 Support'
         return this.reviewerNames.l1 || 'L1 Support';
       }
-    } else if (this.opnameSession.managerReviewerID != null) {
+    } else if (this.opnameSession.managerReviewerID != null && this.opnameSession.managerReviewerID > 0) {
       if (this.loggedInUser.userID === this.opnameSession.managerReviewerID) {
         // If the logged-in user is the manager reviewer, return 'You'
         return 'You';
