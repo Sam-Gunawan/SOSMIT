@@ -137,6 +137,17 @@ CREATE TABLE "AssetChanges" (
     CONSTRAINT unique_session_asset UNIQUE (session_id, asset_tag) -- Ensure each asset can only have one change record per session
 );
 
+CREATE TABLE "Notification" {
+    "id" SERIAL PRIMARY KEY,
+    "message" TEXT NOT NULL,
+    "is_read" BOOLEAN NOT NULL DEFAULT FALSE,
+    "created_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    "updated_at" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+
+    -- user_id is a foreign key to User table, meaning each notification is associated with a user.
+    "user_id" INT NOT NULL REFERENCES "User"("user_id") ON DELETE CASCADE
+};
+
 -- == COMMENTS ==
 -- Add some comments to explain some design choices.
 COMMENT ON COLUMN "User"."password" IS 'For demo purposes, store in plain text for now.';
