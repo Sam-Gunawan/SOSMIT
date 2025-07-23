@@ -49,7 +49,7 @@ export class DashboardComponent {
     this.apiService.getUserProfile('me').subscribe({
       next: (user) => {
         // Update the logged-in user with the fetched profile.
-        this.loggedInUser.firstName = titleCase(user["first_name"]);
+        this.loggedInUser = user;
         this.isLoading = false; // Set loading state to false
         // TODO: Fetch and store more necessary data later on...
       },

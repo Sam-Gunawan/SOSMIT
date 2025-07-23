@@ -50,7 +50,28 @@
     getUserProfile(username: string): Observable<any> {
       // This method will fetch the user profile data.
       // Authorization header is already handled by AuthInterceptor at ../services/auth.interceptor.ts
-      return this.http.get(`${this.userApiUrl}/${username}`);
+      return this.http.get<User>(`${this.userApiUrl}/${username}`).pipe(
+        map((response: any) => {
+          // Map the response to the desired format.
+          return {
+            userID: response.user_id,
+            username: response.username,
+            email: response.email,
+            firstName: titleCase(response.first_name),
+            lastName: titleCase(response.last_name),
+            position: titleCase(response.position),
+            siteID: response.site_id,
+            siteName: response.site_name,
+            siteGroupName: response.site_group_name,
+            regionName: response.region_name,
+            costCenterID: response.cost_center_id
+          };
+        }),
+        tap((userProfile: User) => {
+          // Log the fetched user profile for debugging purposes.
+          console.log('[ApiService] Fetched user profile:', userProfile);
+        })
+      );
     }
 
     getUserByID(userID: number): Observable<User> {

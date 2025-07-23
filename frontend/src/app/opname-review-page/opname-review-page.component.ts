@@ -16,7 +16,8 @@ import { CommonModule } from '@angular/common';
 export class OpnameReviewPageComponent implements OnInit{
   sessionID: number = -1;
   opnameSession: OpnameSession = {} as OpnameSession;
-  submittedUser: User & { fullName: any } = {} as User & { fullName: any }; // User who submitted the opname session
+  submittedUser: User & { fullName: string } = {} as User & { fullName: string }; // User who submitted the opname session
+  loggedInUser: User = {} as User; // Currently logged-in user
   opnameSite: SiteInfo = {} as SiteInfo;
   isLoading: boolean = true;
   errorMessage: string = '';
@@ -76,6 +77,21 @@ export class OpnameReviewPageComponent implements OnInit{
       console.error('[OpnameReviewPage] Error:', this.errorMessage);
       this.isLoading = false;
     }
+  }
+
+  fetchLoggedInUser() {
+    this.apiService.getUserProfile('me').subscribe({
+      next: (user) => {
+        this.loggedInUser = user;
+      },
+      error: (error) => {
+        this.errorMessage = 'Error fetching logged-in user: ' + error.message;
+        console.error('[OpnameReviewPage] Error:', error);
+      },
+      complete: () => {
+        this.isLoading = false;
+      }
+    });
   }
 
   approveOpname() {
