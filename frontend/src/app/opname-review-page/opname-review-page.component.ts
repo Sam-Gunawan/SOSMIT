@@ -171,6 +171,9 @@ export class OpnameReviewPageComponent implements OnInit{
     return !this.isAlreadyApproved && !this.isAlreadyRejected;
   }
 
+  // TODO: Implement PDF download functionality
+  downladPDF() {}
+
   approveOpname() {
     this.isLoading = true;
     this.opnameSessionService.approveOpnameSession(this.sessionID).subscribe({
