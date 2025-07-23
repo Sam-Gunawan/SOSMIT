@@ -136,7 +136,7 @@ export class OpnameReviewPageComponent implements OnInit{
   get isAlreadyApproved(): boolean {
     // An opname session is considered approved if its status is 'Verified' or 'Escalated' with a manager reviewer.
     // Gotcha: The session can be 'Escalated' and still needs review if the manager reviewer is not set.
-    return this.opnameSession.status === 'Verified' || (this.opnameSession.status === 'Escalated' && this.opnameSession.managerReviewerID);
+    return this.opnameSession.status === 'Verified' || Boolean(this.opnameSession.status === 'Escalated' && this.opnameSession.managerReviewerID);
   }
 
   get isAlreadyRejected(): boolean {
@@ -165,6 +165,8 @@ export class OpnameReviewPageComponent implements OnInit{
         return this.reviewerNames.manager || 'Area Manager';
       }
     }
+
+    return ''; // If no reviewers are set, return an empty string
   }
 
   get needsReview(): boolean {
@@ -172,7 +174,7 @@ export class OpnameReviewPageComponent implements OnInit{
   }
 
   // TODO: Implement PDF download functionality
-  downladPDF() {}
+  downloadPDF() {}
 
   approveOpname() {
     this.isLoading = true;
