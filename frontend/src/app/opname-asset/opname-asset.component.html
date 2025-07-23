@@ -66,11 +66,11 @@
                                 <div class="asset-name">
                                     {{ result.existingAsset.assetName }}
                                 </div>
-                                <p>{{ result.existingAsset.assetOwnerName }}</p>
+                                <p class="owner-name">{{ result.existingAsset.assetOwnerName }}</p>
                             </div>
                     
                             <div class="opname-card" *ngIf="actualShowLocation">
-                                <p class="asset-location">{{ result.existingAsset.location }}</p>
+                                <p class="location-display">{{ result.existingAsset.location }}</p>
                                 <p class="asset-room">{{ result.existingAsset.room }}</p>
                                 <p class="asset-site">{{ result.existingAsset.siteGroupName}}</p>
                             </div>
@@ -126,11 +126,11 @@
                                 <div class="asset-name">
                                     {{ result.pendingAsset.assetName }}
                                 </div>
-                                <p>{{ result.pendingAsset.assetOwnerName }}</p>
+                                <p class="owner-name">{{ result.pendingAsset.assetOwnerName }}</p>
                             </div>
                     
                             <div class="opname-card" *ngIf="actualShowLocation">
-                                <p class="asset-location">{{ result.pendingAsset.location }}</p>
+                                <p class="location-display">{{ result.pendingAsset.location }}</p>
                                 <p class="asset-room">{{ result.pendingAsset.room }}</p>
                                 <p class="asset-site">{{ result.pendingAsset.siteGroupName}}</p>
                             </div>
@@ -399,7 +399,7 @@
                 
                         <div class="second-column">
                             <p class="asset-tag">{{ result.pendingAsset.assetTag }}</p>
-                            <p>{{ result.pendingAsset.assetOwnerName }}</p>
+                            <p class="owner-name">{{ result.pendingAsset.assetOwnerName }}</p>
                         </div>
                 
                         <div class="third-column">

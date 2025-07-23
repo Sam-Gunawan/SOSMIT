@@ -200,13 +200,13 @@ p {
   justify-content: end;
   margin: 0px 5px;
   border-left: 1px solid styles.$primary-text-color;
-  padding-left: 50px;
+  padding-left: 20px;
 }
 
 .card-body {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  gap: 50px;
 }
 
 .verify-body {
@@ -250,7 +250,7 @@ p {
   margin: 0px 5px;
 }
 
-.asset-name {
+.asset-name, .owner-name, .location-display, .asset-room, .asset-site {
   font-size: 12px;
   margin: 5px;
   max-width: 110px;
