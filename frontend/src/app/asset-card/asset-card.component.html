@@ -32,7 +32,7 @@
 
 <!-- LIST VIEW -->
 <section class="asset-list-layout">
-    <div class="asset-list" [ngClass]="variant" *ngFor="let assetCard of filteredAssetsOnSite">
+    <div class="asset-list" *ngFor="let assetCard of filteredAssetsOnSite">
         <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
             <div class="first-column">
                 <img class="asset-icon" [src]="assetCard.assetIcon" [alt]="assetCard.assetName"/>
