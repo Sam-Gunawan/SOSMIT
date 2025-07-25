@@ -12,16 +12,7 @@ import { AssetPageComponent } from '../asset-page/asset-page.component';
   styleUrl: './asset-card.component.scss'
 })
 export class AssetCardComponent {
-  @Input() variant: 'default' | 'compact' = 'default';
-  @Input() showLocation: boolean = false;
   @Input() showHeader: boolean = true;
-
-  currentView: 'card' | 'list' = 'card';
-  screenSize: 'large' | 'small' = 'large';
-  isMobile: boolean = false;
-
-  actualVariant: 'default' | 'compact' = 'default';
-  actualShowLocation: boolean = false;
 
   assetsOnSite: AssetInfo[] = [];
   isLoading: boolean = true;
@@ -36,45 +27,7 @@ export class AssetCardComponent {
   constructor(private apiService: ApiService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.checkScreenSize();
     this.fetchAssetsOnSite(); // Fetch assets when the component initializes
-    this.updateResponsiveSettings();
-  }
-
-  @HostListener('window:resize', ['$event'])
-  onResize(event: any) {
-    this.checkScreenSize();
-    this.updateResponsiveSettings();
-  }
-
-  private checkScreenSize() {
-    this.isMobile = window.innerWidth < 768; // Define mobile breakpoint
-    
-    if (this.isMobile) {
-      this.currentView = 'list'; // Force list view on mobile
-      this.screenSize = 'small';
-    } else {
-      this.currentView = 'card'; // Default to card view on desktop
-      this.screenSize = 'large';
-    }
-  }
-
-  toggleView(view: 'card' | 'list') {
-    if (!this.isMobile) { // Only allow toggle on desktop
-      this.currentView = view;
-    }
-  }
-
-  private updateResponsiveSettings() {
-    if (window.innerWidth >= 1000) {
-      // Large screens: use the passed variant and showLocation
-      this.actualVariant = this.variant;
-      this.actualShowLocation = this.showLocation;
-    } else {
-      // Small screens: force default variant and hide location
-      this.actualVariant = 'default';
-      this.actualShowLocation = false;
-    }
   }
 
   fetchAssetsOnSite(): void {

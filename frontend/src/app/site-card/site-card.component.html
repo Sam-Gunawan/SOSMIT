@@ -5,37 +5,7 @@
                 <h5>Your Sites:</h5>
             </div>
     
-            <div class="filter-pills" *ngIf="currentView === 'card'">
-                <span 
-                    class="site-status filter-pill filter-active" 
-                    [class.selected]="selectedFilter === 'Active'"
-                    (click)="filterByStatus('Active')">Active</span>
-                <span 
-                    class="site-status filter-pill filter-submitted" 
-                    [class.selected]="selectedFilter === 'Submitted'"
-                    (click)="filterByStatus('Submitted')">Submitted</span>
-                <span 
-                    class="site-status filter-pill filter-escalated" 
-                    [class.selected]="selectedFilter === 'Escalated'"
-                    (click)="filterByStatus('Escalated')">Escalated</span>
-                <span 
-                    class="site-status filter-pill filter-verified" 
-                    [class.selected]="selectedFilter === 'Verified'"
-                    (click)="filterByStatus('Verified')">Verified</span>
-                <span 
-                    class="site-status filter-pill filter-rejected" 
-                    [class.selected]="selectedFilter === 'Rejected'"
-                    (click)="filterByStatus('Rejected')">Rejected</span>
-                <span 
-                    class="site-status filter-pill filter-outdated" 
-                    [class.selected]="selectedFilter === 'Outdated'"
-                    (click)="filterByStatus('Outdated')">Outdated</span>
-                <span 
-                    class="clear-filter" 
-                    (click)="clearAllFilters()">Clear All</span>
-            </div>
-    
-            <div class="filter-pills" *ngIf="currentView === 'list'">
+            <div class="filter-pills">
                 <span 
                     class="clear-filter" 
                     (click)="clearAllFilters()">Clear All
@@ -44,7 +14,7 @@
         </div>
     
         <div class="search-view">
-            <div class="filter-dropdown" *ngIf="currentView === 'list'">
+            <div class="filter-dropdown">
                 <select class="form-select" aria-label="Small select example" [value]="selectedFilter" #statusSelect (change)="filterByDropdown(statusSelect.value)">
                     <option value="">All Status</option>
                     <option value="Active">Active</option>
@@ -59,42 +29,11 @@
                 <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search" #filter (input)="filterSiteCards(filter.value)"/>
                 <button class="btn btn-outline-success">Search</button>
             </div>
-            <div class="view-icon" *ngIf="!isMobile">
-                <img class="card-view" [class.active]="currentView === 'card'" src="assets/card.svg" alt="Card View" (click)="toggleView('card')"/>
-                <img class="list-view" [class.active]="currentView === 'list'" src="assets/list.svg" alt="List View" (click)="toggleView('list')"/>
-            </div>
         </div>
     </div>
 </div>
 
-<section class="site-card-layout" *ngIf="filteredSiteCardList && filteredSiteCardList.length > 0 && currentView === 'card'">
-    <div class="site-card" *ngFor="let siteCard of filteredSiteCardList" (click)="goToSite(siteCard.siteID)">
-        <div class="card-header">
-            <h6 class="site-name">{{ siteCard.siteName }}</h6>
-            <span
-                class="site-status"
-                [ngClass]="{
-                    'status-active': siteCard.opnameStatus === 'Active',
-                    'status-submitted': siteCard.opnameStatus === 'Submitted',
-                    'status-escalated': siteCard.opnameStatus === 'Escalated',
-                    'status-verified': siteCard.opnameStatus === 'Verified',
-                    'status-rejected': siteCard.opnameStatus === 'Rejected',
-                    'status-outdated': siteCard.opnameStatus === 'Outdated'
-                }">
-                {{ siteCard.opnameStatus }}
-            </span>
-        </div>
-        <hr class="card-divider">
-        <div class="card-body">
-            <p class="site-location">{{ siteCard.siteGroup }}, {{ siteCard.siteRegion }}</p>
-            <div class="last-opname">
-                <p>Last Opname on {{ siteCard.opnameDate }}</p>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="site-list-layout" *ngIf="filteredSiteCardList && filteredSiteCardList.length > 0 && currentView === 'list'">
+<section class="site-list-layout" *ngIf="filteredSiteCardList && filteredSiteCardList.length > 0">
     <div class="site-list" *ngFor="let siteCard of filteredSiteCardList" (click)="goToSite(siteCard.siteID)">
         <div class="first-column">
             <h6 class="site-name">{{ siteCard.siteName }}</h6>

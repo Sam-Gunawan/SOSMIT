@@ -40,36 +40,6 @@ p {
 	margin-bottom: 10px;
 }
 
-.site-card-layout {
-    display: grid;
-	column-gap: 10px;
-	row-gap: 10px;
-	grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-	margin-top: 20px;
-	justify-content: space-around;
-}
-
-.site-card {
-    border-radius: 20px;
-    padding: 20px;
-    background-color: styles.$secondary-background-color;
-    color: styles.$primary-text-color;
-
-    // kiw kiw. change hover style here!!
-    &:hover {
-        background-color: color.scale(styles.$secondary-background-color, $lightness: -5%);
-        cursor: pointer;
-		box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-    }
-}
-
-.card-header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-}
-
 .site-name {
     font-weight: bold;
 }
@@ -85,15 +55,6 @@ p {
 			border: 1px solid color.adjust($color, $lightness: -20%);
 		}
 	}
-}
-
-.card-divider {
-    margin: 10px 0px 15px 0px;
-}
-
-.last-opname {
-    display: flex;
-    flex-direction: row;
 }
 
 .search-view {
@@ -166,33 +127,6 @@ p {
 			background-color: color.adjust(#dc3545, $lightness: -10%);
 		}
 	}
-}
-
-.view-icon {
-	flex-shrink: 0;
-	
-	img {
-		width: 35px;
-		height: 35px;
-	}
-	
-	.card-view, .list-view {
-		cursor: pointer;
-		opacity: 0.6;
-		transition: opacity 0.2s;
-		
-		&.active {
-		opacity: 1;
-		}
-		
-		&:hover {
-		opacity: 0.8;
-		}
-  	}
-
-	@media (max-width: 767px) {
-        display: none !important; // Force hide on mobile
-    }
 }
 
 .site-list-layout {
