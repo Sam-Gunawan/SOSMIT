@@ -95,6 +95,7 @@
                         <p class="notif-text">Notification</p>
                     </button>
 
+                    <!-- NOTIFICATIONS -->
                     <div class="offcanvas offcanvas-top" *ngIf="currentView === 'small'" data-bs-backdrop="static" tabindex="-1" id="offcanvasNotifSmall" aria-labelledby="offcanvasWithBothOptionsLabel">
                         <div class="offcanvas-header">
                             <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Notification</h5>
@@ -174,9 +175,10 @@
                         <img class="profile-logo" src="assets/profile.svg" alt="Profile"/>
                     </button>
                     
+                    <!-- PROFILE / SETTINGS -->
                     <div class="offcanvas offcanvas-end" *ngIf="currentView === 'large'" data-bs-scroll="true" data-bs-backdrop="true" tabindex="-1" id="offcanvasProfileLarge" aria-labelledby="offcanvasWithBothOptionsLabel">
                         <div class="offcanvas-header">
-                            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">[user name]</h5>
+                            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">{{ loggedInUser.fullName }}</h5>
                         </div>
                         <div class="offcanvas-body">
                             <div class="reminder-container">
@@ -226,7 +228,7 @@
 
                     <div class="offcanvas offcanvas-top" *ngIf="currentView === 'small'" data-bs-backdrop="static" tabindex="-1" id="offcanvasProfileSmall" aria-labelledby="offcanvasWithBothOptionsLabel">
                         <div class="offcanvas-header">
-                            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">[user name]</h5>
+                            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">{{ loggedInUser.fullName }}</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                         </div>
                         <div class="offcanvas-body">
