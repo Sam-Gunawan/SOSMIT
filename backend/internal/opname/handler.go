@@ -101,16 +101,36 @@ func (handler *Handler) GetSessionByIDHandler(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"session_id":          session.ID,
-		"start_date":          session.StartDate,
-		"end_date":            session.EndDate,
-		"status":              session.Status,
-		"user_id":             session.UserID,
-		"manager_reviewer_id": session.ManagerReviewerID,
-		"manager_reviewed_at": session.ManagerReviewedAt,
-		"l1_reviewer_id":      session.L1ReviewerID,
-		"l1_reviewed_at":      session.L1ReviewedAt,
-		"site_id":             session.SiteID,
+		"session_id": session.ID,
+		"start_date": session.StartDate,
+		"end_date":   session.EndDate,
+		"status":     session.Status,
+		"user_id":    session.UserID,
+		"manager_reviewer_id": func() interface{} {
+			if session.ManagerReviewerID.Valid {
+				return session.ManagerReviewerID.Int64
+			}
+			return nil
+		}(),
+		"manager_reviewed_at": func() interface{} {
+			if session.ManagerReviewedAt.Valid {
+				return session.ManagerReviewedAt.String
+			}
+			return nil
+		}(),
+		"l1_reviewer_id": func() interface{} {
+			if session.L1ReviewerID.Valid {
+				return session.L1ReviewerID.Int64
+			}
+			return nil
+		}(),
+		"l1_reviewed_at": func() interface{} {
+			if session.L1ReviewedAt.Valid {
+				return session.L1ReviewedAt.String
+			}
+			return nil
+		}(),
+		"site_id": session.SiteID,
 	})
 }
 
