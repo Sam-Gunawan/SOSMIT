@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
@@ -21,6 +21,7 @@ import { OpnameSession } from '../model/opname-session.model';
     opnameLoading: boolean = false; // Loading state for starting a new opname session
     opnameSession?: OpnameSession; // Optional opname session to hold the current session data
     showToast: boolean = false;
+    floatingMenuExpanded: boolean = false; // Track floating menu expanded state
 
     constructor(private route: ActivatedRoute, private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService) {
       this.sitePage = {
@@ -68,6 +69,21 @@ import { OpnameSession } from '../model/opname-session.model';
           setTimeout(() => this.showToast = false, 3000);
         }
       });
+    }
+
+    toggleFloatingMenu(): void {
+      this.floatingMenuExpanded = !this.floatingMenuExpanded;
+    }
+
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(event: MouseEvent): void {
+      const target = event.target as HTMLElement;
+      const floatingContainer = document.getElementById('container-floating');
+      
+      // Check if the clicked element is outside the floating menu container
+      if (this.floatingMenuExpanded && floatingContainer && !floatingContainer.contains(target)) {
+        this.floatingMenuExpanded = false;
+      }
     }
 
     startNewOpname(): void {

@@ -55,11 +55,21 @@
   width: 100%;
 }
 
-h2 {
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: styles.$primary-text-color;
-  margin-bottom: 2.5rem;
+.login-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 0.5rem;
+  }
+
+  .login-title {
+    font-weight: bold;
+    color: styles.$primary-text-color;
+  }
 }
 
 .form-group {
