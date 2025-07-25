@@ -42,7 +42,7 @@
             </div>
         </section>
 
-        <div id="container-floating">
+        <div id="container-floating" [class.expanded]="floatingMenuExpanded">
             <div class="nd2 nds my-tooltip">
                 <img class="report" src="assets/report.svg" (click)="goToReport()">
                 <span class="tooltiptext">See opname report</span>
@@ -53,7 +53,7 @@
                 <span class="tooltiptext">Continue opname</span>
             </div>
             
-            <div id="floating-button">
+            <div id="floating-button" (click)="floatingMenuExpanded ? null : toggleFloatingMenu()">
                 <img class="more" src="assets/more.svg">
                 <div class="my-tooltip">
                     <img class="add" src="assets/add.svg" (click)="startNewOpname()"/>

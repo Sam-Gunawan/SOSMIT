@@ -161,7 +161,7 @@ p {
     z-index: 50px;
 }
 
-#container-floating:hover {
+#container-floating.expanded {
     height: 175px;
     width: 55px;
 }
@@ -190,11 +190,13 @@ p {
     line-height: 55px;
     animation: more-out 0.3s;
     transition: all 0.3s;
+    opacity: 1;
 }
 
-#container-floating:hover .more {
+#container-floating.expanded .more {
     animation: more-in 0.15s linear;
     animation-fill-mode: forwards;
+    pointer-events: none; /* Disable clicks when hidden */
 }
 
 @keyframes more-in {
@@ -221,12 +223,14 @@ p {
     transform: rotateZ(-70deg);
     transition: all 0.3s;
     animation: add-out 0.3s;
+    pointer-events: none; /* Disable clicks when hidden */
 }
 
-#container-floating:hover .add {
+#container-floating.expanded .add {
     animation: add-in 0.2s;
     animation-delay: 0.1s;
     animation-fill-mode: forwards;
+    pointer-events: auto; /* Enable clicks when visible */
 }
 
 @keyframes add-in {
@@ -278,12 +282,12 @@ p {
     to {opacity: 0; transform: scale(0);}
 }
 
-#container-floating:hover .nds {
+#container-floating.expanded .nds {
     animation: bounce-nds 0.1s linear;
     animation-fill-mode:  forwards;
 }
 
-#container-floating:hover .nd2 {
+#container-floating.expanded .nd2 {
     animation-delay: 0.08s;
 }
 
