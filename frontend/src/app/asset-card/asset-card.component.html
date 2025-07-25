@@ -4,24 +4,14 @@
             <div class="asset-info">
                 <h5>Asset Info:</h5>
             </div>
-    
-            <div class="filter-pills" *ngIf="currentView ==='card'">
-                <span class="asset-filter filter-deployed" [class.selected]="selectedFilter === 'Deployed'" (click)="filterByStatus('Deployed')">Deployed</span>
-                <span class="asset-filter filter-onloan" [class.selected]="selectedFilter === 'On Loan'" (click)="filterByStatus('On Loan')">On Loan</span>
-                <span class="asset-filter filter-inventory" [class.selected]="selectedFilter === 'In Inventory'" (click)="filterByStatus('In Inventory')">In Inventory</span>
-                <span class="asset-filter filter-repair" [class.selected]="selectedFilter === 'In Repair'" (click)="filterByStatus('In Repair')">In Repair</span>
-                <span class="asset-filter filter-down" [class.selected]="selectedFilter === 'Down'" (click)="filterByStatus('Down')">Down</span>
-                <span class="asset-filter filter-disposed" [class.selected]="selectedFilter === 'Disposed'" (click)="filterByStatus('Disposed')">Disposed</span>
-                <span class="clear-filter" (click)="clearAllFilters()">Clear All</span>
-            </div>
 
-            <div class="filter-pills" *ngIf="currentView === 'list'">
+            <div class="filter-pills">
                 <span class="clear-filter" (click)="clearAllFilters()">Clear All</span>
             </div>
         </div>
     
         <div class="search-view">
-            <div class="filter-dropdown" *ngIf="currentView === 'list'">
+            <div class="filter-dropdown">
                 <select class="form-select" aria-label="Small select example" [value]="selectedFilter" #selectedStatus (change)="filterByStatus(selectedStatus.value)">
                     <option value="">All Status</option>
                     <option value="Deployed">Deployed</option>
@@ -36,56 +26,12 @@
                 <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search" #filter (input)="filterAssetCards(filter.value)"/>
                 <button class="btn btn-outline-success">Search</button>
             </div>
-            <div class="view-icon" *ngIf="!isMobile">
-                <img class="card-view" [class.active]="currentView === 'card'" src="assets/card.svg" alt="Card View" (click)="toggleView('card')"/>
-                <img class="list-view" [class.active]="currentView === 'list'" src="assets/list.svg" alt="List View" (click)="toggleView('list')"/>
-            </div>
         </div>
     </div>
 </div>
 
-
-
-<section class="asset-card-layout" [ngClass]="variant" *ngIf="currentView === 'card'">
-    <div class="asset-card" [ngClass]="variant" *ngFor="let assetCard of filteredAssetsOnSite">
-        <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
-            <div class="main-info">
-                <img class="asset-icon" [src]="assetCard.assetIcon" [alt]="assetCard.assetName"/>
-                <span 
-                    class="asset-status"
-                    [ngClass]="{
-                        'status-deployed': assetCard.assetStatus === 'Deployed',
-                        'status-onloan': assetCard.assetStatus === 'On Loan',
-                        'status-inventory': assetCard.assetStatus === 'In Inventory',
-                        'status-repair': assetCard.assetStatus === 'In Repair',
-                        'status-down': assetCard.assetStatus === 'Down',
-                        'status-disposed': assetCard.assetStatus === 'Disposed'
-                    }">
-                    {{ assetCard.assetStatus.replace('In ', '') }}
-                </span>
-            </div>
-    
-            <div class="additional-info">
-                <p class="asset-tag">{{ assetCard.assetTag }}</p>
-                <div class="asset-name">
-                    {{ assetCard.assetName }}
-                </div>
-                <p>{{ assetCard.assetOwnerName }}</p>
-            </div>
-    
-            <div class="opname-card" *ngIf="actualShowLocation">
-                <p class="asset-location">{{ assetCard.location }}</p>
-                <p class="asset-room">{{ assetCard.room }}</p>
-                <p class="asset-site">{{ assetCard.siteGroupName}}</p>
-            </div>
-        </div>
-    
-        <app-asset-page [assetTag]="assetCard.assetTag"></app-asset-page>
-    </div>
-</section>
-
 <!-- LIST VIEW -->
-<section class="asset-list-layout" *ngIf="currentView === 'list'">
+<section class="asset-list-layout">
     <div class="asset-list" [ngClass]="variant" *ngFor="let assetCard of filteredAssetsOnSite">
         <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
             <div class="first-column">

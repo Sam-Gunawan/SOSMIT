@@ -44,34 +44,6 @@ p {
 	margin-bottom: 10px;
 }
 
-.asset-filter {
-    font-size: 12px;
-    border-radius: 15px;
-    padding: 5px 10px;
-
-	@each $name, $color in styles.$asset-pill-colors {
-		&.filter-#{$name} {
-			background-color: $color;
-			color: color.adjust($color, $lightness: -55%);
-			cursor: pointer;
-			border: 1px solid color.adjust($color, $lightness: -10%);
-	
-			&:hover {
-				background-color: color.adjust($color, $lightness: -10%);
-			}
-	
-			&:active {
-				background-color: color.adjust($color, $lightness: -30%);
-			}
-	
-			&.selected {
-				background-color: color.adjust($color, $lightness: -25%);
-				color: color.adjust($color, $lightness: -75%);
-				transform: scale(1.05);
-			}
-		}
-	}
-}
 
 .search-view {
 	display: flex;
@@ -121,108 +93,6 @@ p {
 	}
 }
 
-.view-icon {
-	flex-shrink: 0;
-	
-	img {
-		width: 35px;
-		height: 35px;
-	}
-	
-	.card-view, .list-view {
-		cursor: pointer;
-		opacity: 0.6;
-		transition: opacity 0.2s;
-		
-		&.active {
-		opacity: 1;
-		}
-		
-		&:hover {
-		opacity: 0.8;
-		}
-  	}
-
-	@media (max-width: 767px) {
-        display: none !important; // Force hide on mobile
-    }
-}
-
-.asset-card-layout.default {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 10px;
-    margin-top: 20px;
-    transition: transform 0.2s ease-in-out;
-}
-
-.asset-card.default {
-    border-radius: 20px;
-    padding: 10px;
-    background-color: styles.$tertiary-color;
-    color: styles.$primary-text-color;
-    height: 8rem; //temporary
-    display: flex;
-    align-items: center;
-
-    .additional-info {
-        justify-items: right;
-    }
-
-    &:hover {
-        background-color: color.scale(styles.$tertiary-color, $lightness: -3%);
-        cursor: pointer;
-		box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-    }
-}
-
-.asset-card.compact {
-    border-radius: 20px;
-    padding: 10px;
-    background-color: styles.$tertiary-color;
-    color: styles.$primary-text-color;
-    height: 8rem; //temporary
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-
-    .additional-info {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: flex-start;
-    }
-
-    &:hover {
-        background-color: color.scale(styles.$tertiary-color, $lightness: -3%);
-        cursor: pointer;
-		box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-    }
-}
-
-.opname-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: end;
-    margin: 0px 5px;
-    border-left: 1px solid styles.$primary-text-color;
-    padding-left: 50px;
-}
-
-.card-body {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-}
-
-.main-info {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    margin: 0px 5px;
-}
-
 .asset-icon {
     height: 100%;
     object-fit: cover;
@@ -257,20 +127,6 @@ p {
     overflow: hidden;
     text-overflow: ellipsis;
     display: block;
-}
-
-@media (max-width: 768px) {
-    .asset-card {
-        font-size: 0.85rem;
-        
-        .asset-tag {
-            font-size: 0.8rem;
-        }
-        
-        .asset-name {
-            font-size: 0.8rem;
-        }
-    }
 }
 
 .asset-list-layout {
