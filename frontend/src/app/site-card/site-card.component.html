@@ -1,43 +1,113 @@
+<!-- Font Awesome CDN for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <div class="sticky-top">
-    <div class="user-site-header">
-        <div class="site-search">
-            <div class="your-site">
-                <h5>Your Sites:</h5>
+    <!-- Mobile search toggle button -->
+    <div class="mobile-search-toggle" (click)="toggleSearchForm()">
+        <button class="btn btn-outline-primary toggle-btn">
+            <i class="fas fa-search"></i>
+            {{ showSearchForm ? 'Hide Search' : 'Show Search' }}
+        </button>
+    </div>
+
+    <!-- Search form container -->
+    <div class="search-form-container" [ngClass]="{'mobile-hidden': !showSearchForm}">
+        <h6 class="search-title">Site Search</h6>
+        
+        <form class="compact-search-form" (ngSubmit)="performAdvancedSearch()">
+            <div class="form-grid">
+                <div class="form-item">
+                    <label>Site Name</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="searchCriteria.siteName"
+                        name="siteName"
+                        placeholder="Site name">
+                </div>
+                
+                <div class="form-item">
+                    <label>Site Group</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="searchCriteria.siteGroup"
+                        name="siteGroup"
+                        placeholder="Site group">
+                </div>
+                
+                <div class="form-item">
+                    <label>Region</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="searchCriteria.siteRegion"
+                        name="siteRegion"
+                        placeholder="Region">
+                </div>
+                
+                <div class="form-item">
+                    <label>Status</label>
+                    <select 
+                        class="form-select" 
+                        [(ngModel)]="searchCriteria.opnameStatus"
+                        name="opnameStatus">
+                        <option value="">All Status</option>
+                        <option value="Active">Active</option>
+                        <option value="Submitted">Submitted</option>
+                        <option value="Escalated">Escalated</option>
+                        <option value="Verified">Verified</option>
+                        <option value="Rejected">Rejected</option>
+                        <option value="Outdated">Outdated</option>
+                    </select>
+                </div>
+                
+                <div class="form-item">
+                    <label>From Date</label>
+                    <input 
+                        type="date" 
+                        class="form-control" 
+                        [(ngModel)]="searchCriteria.opnameFromDate"
+                        name="opnameFromDate">
+                </div>
+                
+                <div class="form-item">
+                    <label>To Date</label>
+                    <input 
+                        type="date" 
+                        class="form-control" 
+                        [(ngModel)]="searchCriteria.opnameToDate"
+                        name="opnameToDate">
+                </div>
             </div>
-    
-            <div class="filter-pills">
-                <span 
-                    class="clear-filter" 
-                    (click)="clearAllFilters()">Clear All
-                </span>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary search-btn">Search</button>
+                <button type="button" class="btn btn-secondary reset-btn" (click)="resetSearchForm()">Reset</button>
             </div>
-        </div>
-    
-        <div class="search-view">
-            <div class="filter-dropdown">
-                <select class="form-select" aria-label="Small select example" [value]="selectedFilter" #statusSelect (change)="filterByDropdown(statusSelect.value)">
-                    <option value="">All Status</option>
-                    <option value="Active">Active</option>
-                    <option value="Submitted">Submitted</option>
-                    <option value="Escalated">Escalated</option>
-                    <option value="Verified">Verified</option>
-                    <option value="Rejected">Rejected</option>
-                    <option value="Outdated">Outdated</option>
-                </select>
-            </div>
-            <div class="d-flex search-bar" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search" #filter (input)="filterSiteCards(filter.value)"/>
-                <button class="btn btn-outline-success">Search</button>
-            </div>
-        </div>
+        </form>
     </div>
 </div>
 
-<section class="site-list-layout" *ngIf="filteredSiteCardList && filteredSiteCardList.length > 0">
+<!-- Loading state -->
+<section *ngIf="isLoading" class="loading-container">
+    <div class="loading-message">
+        <h4>Searching sites...</h4>
+        <p>Please wait while we fetch your results.</p>
+    </div>
+</section>
+
+<!-- Search results -->
+<section class="site-list-layout" *ngIf="!isLoading && hasSearched && filteredSiteCardList && filteredSiteCardList.length > 0">
+    <div class="results-header">
+        <h6>Search Results ({{ filteredSiteCardList.length }} site{{ filteredSiteCardList.length !== 1 ? 's' : '' }} found)</h6>
+    </div>
+    
     <div class="site-list" *ngFor="let siteCard of filteredSiteCardList" (click)="goToSite(siteCard.siteID)">
         <div class="first-column">
             <h6 class="site-name">{{ siteCard.siteName }}</h6>
-            <p>Last Opname on {{ siteCard.opnameDate }}</p>
+            <p class="site-details">{{ siteCard.siteGroup }} • {{ siteCard.siteRegion }}</p>
+            <p class="opname-date">Last Opname: {{ siteCard.opnameDate }}</p>
         </div>
 
         <div class="second-column">
@@ -57,11 +127,19 @@
     </div>
 </section>
 
-<!-- TODO: Design search not found display! -->
-<section class="empty-search" *ngIf="filteredSiteCardList && filteredSiteCardList.length === 0">
+<!-- No results found -->
+<section class="empty-search" *ngIf="!isLoading && hasSearched && filteredSiteCardList && filteredSiteCardList.length === 0">
     <div class="not-found-message">
         <h4>No sites found</h4>
-        <p>Try adjusting your search or filter criteria.</p>
+        <p>No sites match your search criteria. Try adjusting your filters and search again.</p>
+    </div>
+</section>
+
+<!-- Initial state - no search performed -->
+<section class="initial-state" *ngIf="!isLoading && !hasSearched">
+    <div class="welcome-message">
+        <h4>Ready to search</h4>
+        <p>Use the search form above to find sites. You can search with any combination of criteria, or leave all fields empty to see all sites.</p>
     </div>
 </section>
 
