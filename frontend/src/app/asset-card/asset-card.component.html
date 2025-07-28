@@ -35,15 +35,11 @@
     <div class="asset-list" *ngFor="let assetCard of filteredAssetsOnSite">
         <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
             <div class="first-column">
-                <img class="asset-icon" [src]="assetCard.assetIcon" [alt]="assetCard.assetName"/>
-            </div>
-    
-            <div class="second-column">
                 <p class="asset-tag">{{ assetCard.assetTag }}</p>
                 <p>{{ assetCard.assetOwnerName }}</p>
             </div>
     
-            <div class="third-column">
+            <div class="second-column">
                 <span 
                     class="asset-status"
                     [ngClass]="{
