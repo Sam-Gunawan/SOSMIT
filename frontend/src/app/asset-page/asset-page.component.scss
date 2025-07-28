@@ -11,8 +11,13 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
 
-p {
+h5 {
   font-size: 15px;
+  font-weight: bold;
+}
+
+p {
+  font-size: 12px;
   margin: 0px;
 }
 
@@ -46,13 +51,6 @@ p {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-}
-
-.asset-icon {
-  height: 100%;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto;
 }
 
 .user-info { 
