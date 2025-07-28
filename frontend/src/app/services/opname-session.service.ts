@@ -266,4 +266,25 @@ export class OpnameSessionService {
       })
     );
   }
+
+  getUserFromOpnameSession(sessionID: number): Observable<any> {
+    // This method will fetch the user associated with a specific opname session.
+    console.log('[OpnameService] Fetching user from opname session:', sessionID);
+    return this.http.get(`${this.opnameApiUrl}/${sessionID}/user-info`).pipe(
+      map((response: any) => {
+        return {
+          userID: response.user_id,
+          username: response.username,
+          email: response.email,
+          firstName: response.first_name,
+          lastName: response.last_name,
+          position: response.position
+        };
+      }),
+      tap((response: any) => {
+        // Log the response for debugging purposes.
+        console.log('[OpnameService] Fetched user from opname session:', response);
+      })
+    );
+  }
 }

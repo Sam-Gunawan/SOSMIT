@@ -10,6 +10,7 @@ DROP FUNCTION IF EXISTS public.get_asset_by_serial_number(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
 DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT);
 DROP FUNCTION IF EXISTS public.get_opname_session_by_id(INT);
+DROP FUNCTION IF EXISTS public.get_user_from_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.finish_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.approve_opname_session(INT, INT);
@@ -420,6 +421,27 @@ AS $$
 		 	os.manager_reviewer_id, os.manager_reviewed_at, os.l1_reviewer_id, os.l1_reviewed_at,
 			os.site_id
 		FROM "OpnameSession" AS os
+		WHERE os.id = _session_id;
+	END;
+$$;
+
+-- get_user_from_opname_session retrieves the user details that created the opname session
+CREATE OR REPLACE FUNCTION public.get_user_from_opname_session(_session_id INT)
+	RETURNS TABLE (
+		user_id INT,
+		username VARCHAR(255),
+		email VARCHAR(255),
+		first_name VARCHAR(255),
+		last_name VARCHAR(255),
+		"position" VARCHAR(100)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position"
+		FROM "User" AS u
+		INNER JOIN "OpnameSession" AS os ON u.user_id = os.user_id
 		WHERE os.id = _session_id;
 	END;
 $$;

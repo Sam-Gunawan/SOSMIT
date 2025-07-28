@@ -292,6 +292,13 @@ p {
     font-style: italic;
     font-size: 8px;
   }
+
+  .opname-user {
+    color: styles.$quaternary-text-color;
+    font-style: italic;
+    font-size: 8px;
+    font-weight: 400;
+  }
 }
 
 .second-column {

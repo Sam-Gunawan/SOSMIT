@@ -26,9 +26,7 @@
                         placeholder="Site name"
                         list="siteNames">
                     <datalist id="siteNames">
-                        <select>
-                            <option *ngFor="let site of originalSiteCardList" [value]="site.siteName"></option>
-                        </select>
+                        <option *ngFor="let site of originalSiteCardList" [value]="site.siteName"></option>
                     </datalist>
                 </div>
                 
@@ -42,9 +40,7 @@
                         placeholder="Site group"
                         list="siteGroups">
                     <datalist id="siteGroups">
-                        <select>
-                            <option *ngFor="let group of siteGroupList" [value]="group"></option>
-                        </select>
+                        <option *ngFor="let group of siteGroupList" [value]="group"></option>
                     </datalist>
                 </div>
                 
@@ -58,9 +54,7 @@
                         placeholder="Region"
                         list="regions">
                     <datalist id="regions">
-                        <select>
-                            <option *ngFor="let region of regionList" [value]="region"></option>
-                        </select>
+                        <option *ngFor="let region of regionList" [value]="region"></option>
                     </datalist>
                 </div>
                 
@@ -96,6 +90,22 @@
                         class="form-control" 
                         [(ngModel)]="searchCriteria.opnameToDate"
                         name="opnameToDate">
+                </div>
+                
+                <div class="form-item">
+                    <label>Created By</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="searchCriteria.opnameByName"
+                        name="opnameByName"
+                        placeholder="Search by user name"
+                        list="users">
+                    <datalist id="users">
+                        <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">
+                            {{ user.firstName }} {{ user.lastName }} ({{ user.username }})
+                        </option>
+                    </datalist>
                 </div>
             </div>
             
@@ -137,6 +147,9 @@
             <h6 class="site-name">{{ siteCard.siteName }}</h6>
             <p class="site-details">{{ siteCard.siteGroup }} • {{ siteCard.siteRegion }}</p>
             <p class="opname-date">Last Opname: {{ siteCard.opnameDate }}</p>
+            <p class="opname-user">
+                Created by: {{ getUserDisplayName(siteCard.opnameUserID) }}
+            </p>
         </div>
 
         <div class="second-column">

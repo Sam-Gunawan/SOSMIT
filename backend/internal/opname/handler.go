@@ -499,3 +499,42 @@ func (handler *Handler) RejectOpnameSessionHandler(context *gin.Context) {
 		"message": fmt.Sprintf("Opname session %d rejected successfully", sessionID),
 	})
 }
+
+// GetUserFromOpnameSessionHandler retrieves the user associated with a specific opname session.
+func (handler *Handler) GetUserFromOpnameSessionHandler(context *gin.Context) {
+	// Get the session ID from the URL parameter
+	sessionIDstr := context.Param("session-id")
+	sessionID, err := validateSessionID(sessionIDstr)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid session_id, must be a positive integer",
+		})
+		return
+	}
+
+	// Call the service to get the user associated with the opname session
+	user, err := handler.service.GetUserFromOpnameSession(sessionID)
+	if err != nil {
+		log.Printf("❌ Error retrieving user for opname session %d: %v", sessionID, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to retrieve user: " + err.Error(),
+		})
+		return
+	}
+	if user == nil {
+		log.Printf("⚠ No user found for opname session ID: %d", sessionID)
+		context.JSON(http.StatusNotFound, gin.H{
+			"error": "user not found for this opname session",
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"user_id":    user.UserID,
+		"username":   user.Username,
+		"email":      user.Email,
+		"first_name": user.FirstName,
+		"last_name":  user.LastName,
+		"position":   user.Position,
+	})
+}
