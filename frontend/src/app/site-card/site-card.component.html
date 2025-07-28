@@ -98,12 +98,23 @@
 </section>
 
 <!-- Search results -->
-<section class="site-list-layout" *ngIf="!isLoading && hasSearched && filteredSiteCardList && filteredSiteCardList.length > 0">
+<section class="site-list-layout" *ngIf="!isLoading && hasSearched && paginatedSiteCardList && paginatedSiteCardList.length > 0">
     <div class="results-header">
-        <h6>Search Results ({{ filteredSiteCardList.length }} site{{ filteredSiteCardList.length !== 1 ? 's' : '' }} found)</h6>
+        <h6>Search Results ({{ totalItems }} site{{ totalItems !== 1 ? 's' : '' }} found)</h6>
+        <!-- Pagination -->
+        <div class="pagination-container">
+            <mat-paginator
+                [length]="totalItems"
+                [pageSize]="pageSize"
+                [pageIndex]="pageIndex"
+                [pageSizeOptions]="[5, 10, 25, 50]"
+                (page)="onPageChange($event)"
+                showFirstLastButtons="true">
+            </mat-paginator>
+        </div>
     </div>
     
-    <div class="site-list" *ngFor="let siteCard of filteredSiteCardList" (click)="goToSite(siteCard.siteID)">
+    <div class="site-list" *ngFor="let siteCard of paginatedSiteCardList" (click)="goToSite(siteCard.siteID)">
         <div class="first-column">
             <h6 class="site-name">{{ siteCard.siteName }}</h6>
             <p class="site-details">{{ siteCard.siteGroup }} • {{ siteCard.siteRegion }}</p>
@@ -124,6 +135,18 @@
                 {{ siteCard.opnameStatus }}
             </span>
         </div>
+    </div>
+
+    <!-- Bottom Pagination -->
+    <div class="pagination-container">
+        <mat-paginator
+            [length]="totalItems"
+            [pageSize]="pageSize"
+            [pageIndex]="pageIndex"
+            (page)="onPageChange($event)"
+            [showFirstLastButtons]="true"
+            [hidePageSize]="true">
+        </mat-paginator>
     </div>
 </section>
 

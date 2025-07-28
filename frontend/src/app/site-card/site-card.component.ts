@@ -4,17 +4,18 @@ import { FormsModule } from '@angular/forms';
 import { SiteCardInfo } from '../model/site-card-info.model';
 import { ApiService } from '../services/api.service';
 import { Router } from '@angular/router';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 
 @Component({
   selector: 'app-site-card',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatPaginatorModule],
   templateUrl: './site-card.component.html',
   styleUrl: './site-card.component.scss'
 })
 export class SiteCardComponent {
   siteCardList: SiteCardInfo[] = [];
   filteredSiteCardList: SiteCardInfo[] = []; 
+  paginatedSiteCardList: SiteCardInfo[] = []; // For displaying paginated results
   originalSiteCardList: SiteCardInfo[] = []; // Keep original data
   isLoading: boolean = false;
   errorMessage: string = '';
@@ -22,6 +23,11 @@ export class SiteCardComponent {
   showToast: boolean = false;
   hasSearched: boolean = false; // Track if user has performed a search
   showSearchForm: boolean = false; // Track if search form is visible on mobile
+
+  // Pagination properties
+  pageSize: number = 1;
+  pageIndex: number = 0;
+  totalItems: number = 0;
 
   // Advanced search form fields
   searchCriteria = {
@@ -146,11 +152,26 @@ export class SiteCardComponent {
     // Currently the SiteCardInfo model doesn't include this information
 
     this.filteredSiteCardList = filteredList;
+    this.totalItems = filteredList.length;
+    this.pageIndex = 0; // Reset to first page
+    this.updatePaginatedList();
     
     // Hide search form on mobile after search
     if (window.innerWidth <= 768) {
       this.showSearchForm = false;
     }
+  }
+
+  updatePaginatedList(): void {
+    const startIndex = this.pageIndex * this.pageSize;
+    const endIndex = startIndex + this.pageSize;
+    this.paginatedSiteCardList = this.filteredSiteCardList.slice(startIndex, endIndex);
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
+    this.updatePaginatedList();
   }
 
   toggleSearchForm(): void {
@@ -168,7 +189,10 @@ export class SiteCardComponent {
       opnameBy: ''
     };
     this.filteredSiteCardList = [];
+    this.paginatedSiteCardList = [];
     this.hasSearched = false;
+    this.pageIndex = 0;
+    this.totalItems = 0;
   }
 
   goToSite(id: number): void {
