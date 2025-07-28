@@ -17,6 +17,9 @@ export class SiteCardComponent {
   filteredSiteCardList: SiteCardInfo[] = []; 
   paginatedSiteCardList: SiteCardInfo[] = []; // For displaying paginated results
   originalSiteCardList: SiteCardInfo[] = []; // Keep original data
+  siteGroupList: string[] = [];
+  regionList: string[] = [];
+  allUsers: string[] = []; // List of all users for filtering
   isLoading: boolean = false;
   errorMessage: string = '';
   filter = input<string>(''); // Input property to filter site cards
@@ -25,7 +28,7 @@ export class SiteCardComponent {
   showSearchForm: boolean = false; // Track if search form is visible on mobile
 
   // Pagination properties
-  pageSize: number = 1;
+  pageSize: number = 5;
   pageIndex: number = 0;
   totalItems: number = 0;
 
@@ -54,6 +57,8 @@ export class SiteCardComponent {
       next: (siteCardsList) => {
         this.originalSiteCardList = [...siteCardsList];
         this.siteCardList = siteCardsList;
+        this.siteGroupList = Array.from(new Set(siteCardsList.map(site => site.siteGroup)));
+        this.regionList = Array.from(new Set(siteCardsList.map(site => site.siteRegion)));
         this.isLoading = false;
         console.log('[SiteCard] Site cards fetched successfully:', this.siteCardList);
         this.performAdvancedSearch(); // Apply search criteria after fetching

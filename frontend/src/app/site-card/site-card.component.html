@@ -23,7 +23,13 @@
                         class="form-control" 
                         [(ngModel)]="searchCriteria.siteName"
                         name="siteName"
-                        placeholder="Site name">
+                        placeholder="Site name"
+                        list="siteNames">
+                    <datalist id="siteNames">
+                        <select>
+                            <option *ngFor="let site of originalSiteCardList" [value]="site.siteName"></option>
+                        </select>
+                    </datalist>
                 </div>
                 
                 <div class="form-item">
@@ -33,7 +39,13 @@
                         class="form-control" 
                         [(ngModel)]="searchCriteria.siteGroup"
                         name="siteGroup"
-                        placeholder="Site group">
+                        placeholder="Site group"
+                        list="siteGroups">
+                    <datalist id="siteGroups">
+                        <select>
+                            <option *ngFor="let group of siteGroupList" [value]="group"></option>
+                        </select>
+                    </datalist>
                 </div>
                 
                 <div class="form-item">
@@ -43,7 +55,13 @@
                         class="form-control" 
                         [(ngModel)]="searchCriteria.siteRegion"
                         name="siteRegion"
-                        placeholder="Region">
+                        placeholder="Region"
+                        list="regions">
+                    <datalist id="regions">
+                        <select>
+                            <option *ngFor="let region of regionList" [value]="region"></option>
+                        </select>
+                    </datalist>
                 </div>
                 
                 <div class="form-item">
