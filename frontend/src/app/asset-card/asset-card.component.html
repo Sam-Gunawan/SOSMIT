@@ -1,42 +1,209 @@
+<!-- Font Awesome CDN for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
 <div class="sticky-top">
     <div class="assets-info-header" *ngIf="showHeader">
-        <div class="asset-search">
-            <div class="asset-info">
-                <h5>Asset Info:</h5>
-            </div>
+        <!-- Mobile search toggle button -->
+        <div class="mobile-search-toggle" (click)="toggleSearchForm()">
+            <button class="btn btn-outline-primary toggle-btn">
+                <i class="fas fa-search"></i>
+                {{ showSearchForm ? 'Hide Search' : 'Show Search' }}
+            </button>
+        </div>
 
-            <div class="filter-pills">
-                <span class="clear-filter" (click)="clearAllFilters()">Clear All</span>
-            </div>
+        <!-- Search form container -->
+        <div class="search-form-container" [ngClass]="{'mobile-hidden': !showSearchForm}">
+            <h6 class="search-title">Asset Search</h6>
+            
+            <form class="compact-search-form" (ngSubmit)="performAdvancedSearch()">
+                <div class="form-grid">
+                    <div class="form-item">
+                        <label>Asset Tag</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            [(ngModel)]="searchCriteria.assetTag"
+                            name="assetTag"
+                            placeholder="Asset tag">
+                    </div>
+                    
+                    <div class="form-item">
+                        <label>Serial No</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            [(ngModel)]="searchCriteria.serialNumber"
+                            name="serialNumber"
+                            placeholder="Serial number">
+                    </div>
+                    
+                    <div class="form-item">
+                        <label>Owner</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            [(ngModel)]="searchCriteria.assetOwnerName"
+                            name="assetOwnerName"
+                            placeholder="Owner name"
+                            list="owners">
+                        <datalist id="owners">
+                            <option *ngFor="let ownerName of uniqueOwnerNames" [value]="ownerName"></option>
+                        </datalist>
+                    </div>
+                    
+                    <div class="form-item">
+                        <label>Status</label>
+                        <select 
+                            class="form-select" 
+                            [(ngModel)]="searchCriteria.assetStatus"
+                            name="assetStatus">
+                            <option value="">All Status</option>
+                            <option value="Deployed">Deployed</option>
+                            <option value="On Loan">On Loan</option>
+                            <option value="In Inventory">In Inventory</option>
+                            <option value="In Repair">In Repair</option>
+                            <option value="Down">Down</option>
+                            <option value="Disposed">Disposed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-item">
+                        <label>Condition</label>
+                        <select 
+                            class="form-select" 
+                            [(ngModel)]="searchCriteria.condition"
+                            name="condition">
+                            <option value="">All Conditions</option>
+                            <option value="Good">Good</option>
+                            <option value="Bad">Bad</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-item">
+                        <label>Brand</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            [(ngModel)]="searchCriteria.assetBrand"
+                            name="assetBrand"
+                            placeholder="Asset brand"
+                            list="brands">
+                        <datalist id="brands">
+                            <option *ngFor="let brand of uniqueBrands" [value]="brand"></option>
+                        </datalist>
+                    </div>
+
+                    <div class="form-item">
+                        <label>Asset Name</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            [(ngModel)]="searchCriteria.assetName"
+                            name="assetName"
+                            placeholder="Asset name">
+                    </div>
+                    
+                    <div class="form-item">
+                        <label>Category</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            [(ngModel)]="searchCriteria.category"
+                            name="category"
+                            placeholder="Category"
+                            list="categories">
+                        <datalist id="categories">
+                            <option *ngFor="let category of uniqueCategories" [value]="category"></option>
+                        </datalist>
+                    </div>
+                    
+                    <div class="form-item">
+                        <label>Sub Category</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            [(ngModel)]="searchCriteria.subCategory"
+                            name="subCategory"
+                            placeholder="Sub category"
+                            list="subCategories">
+                        <datalist id="subCategories">
+                            <option *ngFor="let subCategory of uniqueSubCategories" [value]="subCategory"></option>
+                        </datalist>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary search-btn">Search</button>
+                    <button type="button" class="btn btn-secondary reset-btn" (click)="resetSearchForm()">Reset</button>
+                </div>
+            </form>
         </div>
-    
-        <div class="search-view">
-            <div class="filter-dropdown">
-                <select class="form-select" aria-label="Small select example" [value]="selectedFilter" #selectedStatus (change)="filterByStatus(selectedStatus.value)">
-                    <option value="">All Status</option>
-                    <option value="Deployed">Deployed</option>
-                    <option value="On Loan">On Loan</option>
-                    <option value="In Inventory">In Inventory</option>
-                    <option value="In Repair">In Repair</option>
-                    <option value="Down">Down</option>
-                    <option value="Disposed">Disposed</option>
-                </select>
+
+        <!-- <div class="simple-search" *ngIf="!hasSearched">
+            <div class="asset-search">
+                <div class="asset-info">
+                    <h5>Asset Info:</h5>
+                </div>
+
+                <div class="filter-pills">
+                    <span class="clear-filter" (click)="clearAllFilters()">Clear All</span>
+                </div>
             </div>
-            <div class="d-flex search-bar" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search" #filter (input)="filterAssetCards(filter.value)"/>
-                <button class="btn btn-outline-success">Search</button>
+        
+            <div class="search-view">
+                <div class="filter-dropdown">
+                    <select class="form-select" aria-label="Small select example" [value]="selectedFilter" #selectedStatus (change)="filterByStatus(selectedStatus.value)">
+                        <option value="">All Status</option>
+                        <option value="Deployed">Deployed</option>
+                        <option value="On Loan">On Loan</option>
+                        <option value="In Inventory">In Inventory</option>
+                        <option value="In Repair">In Repair</option>
+                        <option value="Down">Down</option>
+                        <option value="Disposed">Disposed</option>
+                    </select>
+                </div>
+                <div class="d-flex search-bar" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search here!" aria-label="Search" #filter (input)="filterAssetCards(filter.value)"/>
+                    <button class="btn btn-outline-success">Search</button>
+                </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </div>
 
-<!-- LIST VIEW -->
-<section class="asset-list-layout">
-    <div class="asset-list" *ngFor="let assetCard of filteredAssetsOnSite">
+<!-- Loading state -->
+<section *ngIf="isLoading" class="loading-container">
+    <div class="loading-message">
+        <h4>Loading assets...</h4>
+        <p>Please wait while we fetch your results.</p>
+    </div>
+</section>
+
+<!-- Search results -->
+<section class="asset-list-layout" *ngIf="!isLoading && hasSearched && paginatedAssetsOnSite && paginatedAssetsOnSite.length > 0">
+    <div class="results-header">
+        <h6>Search Results ({{ totalItems }} asset{{ totalItems !== 1 ? 's' : '' }} found)</h6>
+        <!-- Pagination -->
+        <div class="pagination-container">
+            <mat-paginator
+                [length]="totalItems"
+                [pageSize]="pageSize"
+                [pageIndex]="pageIndex"
+                [pageSizeOptions]="[5, 10, 25, 50]"
+                (page)="onPageChange($event)"
+                showFirstLastButtons="true">
+            </mat-paginator>
+        </div>
+    </div>
+    
+    <div class="asset-list" *ngFor="let assetCard of paginatedAssetsOnSite">
         <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
             <div class="first-column">
-                <p class="asset-tag">{{ assetCard.assetTag }}</p>
-                <p>{{ assetCard.assetOwnerName }}</p>
+                <h6 class="asset-tag">{{ assetCard.assetTag }}</h6>
+                <p class="asset-name">{{ assetCard.assetName }}</p>
+                <p class="asset-details">{{ assetCard.assetBrand }} • {{ assetCard.category }}</p>
+                <p class="serial-number">S/N: {{ assetCard.serialNumber }}</p>
+                <p class="asset-owner">Owner: {{ assetCard.assetOwnerName }}</p>
             </div>
     
             <div class="second-column">
@@ -52,16 +219,86 @@
                     }">
                     {{ assetCard.assetStatus.replace('In ', '') }}
                 </span>
+                <span 
+                    class="asset-condition"
+                    [ngClass]="{
+                        'condition-good': assetCard.condition === true,
+                        'condition-bad': assetCard.condition === false
+                    }">
+                    {{ assetCard.condition ? 'Good' : 'Bad' }}
+                </span>
             </div>
         </div>
     
         <app-asset-page [assetTag]="assetCard.assetTag"></app-asset-page>
     </div>
+
+    <!-- Bottom Pagination -->
+    <div class="pagination-container">
+        <mat-paginator
+            [length]="totalItems"
+            [pageSize]="pageSize"
+            [pageIndex]="pageIndex"
+            (page)="onPageChange($event)"
+            [showFirstLastButtons]="true"
+            [hidePageSize]="true">
+        </mat-paginator>
+    </div>
 </section>
 
-<!-- NO ASSETS FOUND FROM SEARCH -->
-<section *ngIf="filteredAssetsOnSite.length === 0 && !isLoading && assetsOnSite && assetsOnSite.length > 0" class="no-assets-search-message">
-    <p>No assets match your search or filter.</p>
+<!-- <section class="asset-list-layout" *ngIf="!isLoading && !hasSearched && filteredAssetsOnSite && filteredAssetsOnSite.length > 0">
+    <div class="asset-list" *ngFor="let assetCard of filteredAssetsOnSite">
+        <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
+            <div class="first-column">
+                <h6 class="asset-tag">{{ assetCard.assetTag }}</h6>
+                <p class="asset-name">{{ assetCard.assetName }}</p>
+                <p class="asset-details">{{ assetCard.assetBrand }} • {{ assetCard.category }}</p>
+                <p class="serial-number">S/N: {{ assetCard.serialNumber }}</p>
+                <p class="asset-owner">Owner: {{ assetCard.assetOwnerName }}</p>
+            </div>
+    
+            <div class="second-column">
+                <span 
+                    class="asset-status"
+                    [ngClass]="{
+                        'status-deployed': assetCard.assetStatus === 'Deployed',
+                        'status-onloan': assetCard.assetStatus === 'On Loan',
+                        'status-inventory': assetCard.assetStatus === 'In Inventory',
+                        'status-repair': assetCard.assetStatus === 'In Repair',
+                        'status-down': assetCard.assetStatus === 'Down',
+                        'status-disposed': assetCard.assetStatus === 'Disposed'
+                    }">
+                    {{ assetCard.assetStatus.replace('In ', '') }}
+                </span>
+                <span 
+                    class="asset-condition"
+                    [ngClass]="{
+                        'condition-good': assetCard.condition === true,
+                        'condition-bad': assetCard.condition === false
+                    }">
+                    {{ assetCard.condition ? 'Good' : 'Bad' }}
+                </span>
+            </div>
+        </div>
+    
+        <app-asset-page [assetTag]="assetCard.assetTag"></app-asset-page>
+    </div>
+</section> -->
+
+<!-- No results found -->
+<section class="empty-search" *ngIf="!isLoading && hasSearched && filteredAssetsOnSite && filteredAssetsOnSite.length === 0">
+    <div class="not-found-message">
+        <h4>No assets found</h4>
+        <p>No assets match your search criteria. Please adjust your filters and try again.</p>
+    </div>
+</section>
+
+<!-- Initial state - no search performed -->
+<section class="initial-state" *ngIf="!isLoading && !hasSearched && originalAssetsOnSite && originalAssetsOnSite.length > 0">
+    <div class="welcome-message">
+        <h4>Ready to search</h4>
+        <p>Use the search form above to find specific assets. You can search by any combination of criteria, or leave all fields empty to see all assets.</p>
+    </div>
 </section>
 
 <!-- NO ASSETS FOUND FOR THE SITE MESSAGE -->
