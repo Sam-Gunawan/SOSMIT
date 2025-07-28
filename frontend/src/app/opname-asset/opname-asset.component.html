@@ -28,361 +28,300 @@
 <div class="opname-asset-info" *ngIf="!isLoading && searchResults.length > 0">
     <!-- For large device screen, i.e. desktop/tablet -->
     <div class="container" *ngIf="screenSize === 'large'">
-        <!-- Row for data headers -->
-        <div class="row data-header-r">
-            <div class="col">
-                <h5 class="data-header">Existing Data</h5> 
-            </div>
-            <div class="col">
-                <h5 class="data-header">Scanned Asset</h5>
-            </div>
-        </div>
-
-        <div class="row row-cols-2" *ngFor="let result of searchResults; let i = index">
-            <!-- Left column, for user to view the existing asset info -->
-            <div class="col card-1">
+        <h5 class="data-header">Scanned Asset</h5>
+        <div class="col" *ngFor="let result of searchResults; let i = index">
+            <section class="asset-list-layout">
+                <div class="asset-list">
+                    <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="isInReport ? '#pending-modal-' + result.existingAsset.assetTag : '#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
+                        <div class="first-column">
+                            <img class="asset-icon" [src]="result.existingAsset.assetIcon" [alt]="result.existingAsset.assetName"/>
+                        </div>
                 
-                <section class="asset-card-layout" [ngClass]="variant" *ngIf="currentView === 'card'">
-                    <div class="asset-card" [ngClass]="variant"> 
-                        <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + result.existingAsset.assetTag">
-                            <div class="main-info">
-                                <img class="asset-icon" [src]="result.existingAsset.assetIcon" [alt]="result.existingAsset.assetName"/>
-                                <span 
-                                    class="asset-status"
-                                    [ngClass]="{
-                                        'status-deployed': result.existingAsset.assetStatus === 'Deployed',
-                                        'status-onLoan': result.existingAsset.assetStatus === 'On loan',
-                                        'status-inventory': result.existingAsset.assetStatus === 'In Inventory',
-                                        'status-repair': result.existingAsset.assetStatus === 'In Repair',
-                                        'status-down': result.existingAsset.assetStatus === 'Down',
-                                        'status-disposed': result.existingAsset.assetStatus === 'Disposed'
-                                    }">
-                                    {{ result.existingAsset.assetStatus }}
-                                </span>
-                            </div>
+                        <div class="second-column">
+                            <p class="asset-tag">{{ result.pendingAsset.assetTag }}</p>
+                            <p class="owner-name">{{ result.pendingAsset.assetOwnerName }}</p>
+                        </div>
+                
+                        <div class="third-column">
+                            <span 
+                                class="asset-status"
+                                [ngClass]="{
+                                    'status-deployed': result.pendingAsset.assetStatus === 'Deployed',
+                                    'status-onLoan': result.pendingAsset.assetStatus === 'On Loan',
+                                    'status-inventory': result.pendingAsset.assetStatus === 'In Inventory',
+                                    'status-repair': result.pendingAsset.assetStatus === 'In Repair',
+                                    'status-down': result.pendingAsset.assetStatus === 'Down',
+                                    'status-disposed': result.pendingAsset.assetStatus === 'Disposed'
+                                }">
+                                {{ result.pendingAsset.assetStatus }}
+                            </span>
+                        </div>
+                    </div>
                     
-                            <div class="additional-info">
-                                <p class="asset-tag">{{ result.existingAsset.assetTag }}</p>
-                                <div class="asset-name">
-                                    {{ result.existingAsset.assetName }}
+                    <span class="delete-icon-mobile material-symbols-outlined" *ngIf="!isInReport" (click)="removeAsset(i)">delete</span>
+                    
+                    <app-asset-page [assetTag]="result.pendingAsset.assetTag" [assetPage]="result.pendingAsset" [isPending]="true"></app-asset-page>
+
+                    <div class="modal fade" [id]="'edit-modal-' + result.existingAsset.assetTag" tabindex="-1" aria-hidden="true" *ngIf="!isInReport">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header"> 
+                                    <section class="asset-header">
+                                        <h5 class="modal-title">Edit Asset - {{ result.pendingAsset.assetTag }}</h5>
+                                        <p class="serial-number">{{ result.pendingAsset.serialNumber }}</p>
+                                    </section>
+                                    
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                                <p class="owner-name">{{ result.existingAsset.assetOwnerName }}</p>
-                            </div>
-                    
-                            <div class="opname-card" *ngIf="actualShowLocation">
-                                <p class="location-display">{{ result.existingAsset.location }}</p>
-                                <p class="asset-room">{{ result.existingAsset.room }}</p>
-                                <p class="asset-site">{{ result.existingAsset.siteGroupName}}</p>
-                            </div>
-                        </div>
-                    
-                        <app-asset-page [assetTag]="result.existingAsset.assetTag"></app-asset-page>
-                    </div>
-                </section>
-            </div>
-
-            <!-- Right column, for user to verify scanned assets. Latest changes will be reflected here. -->
-            <div class="col">
-                <!-- Card view for pending user actions -->
-                <section class="asset-card-layout" [ngClass]="variant" *ngIf="currentView === 'card' && !result.assetProcessed && result.processingStatus === 'pending'">
-                    <div class="asset-card verify-body" [ngClass]="variant"> 
-                        <div class="verify-body">
-                            <div class="pending-action mb-2">
-                                <p>Pending action</p>
-                            </div>
-                            <div class="opname-action-buttons">
-                                <button class="verify-asset-btn btn btn-outline-secondary btn-sm" data-bs-toggle="modal" [attr.data-bs-target]="'#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
-                                    Verify Asset
-                                </button>
-                            </div>
-                        </div>
-
-                        <span class="delete-icon material-symbols-outlined" *ngIf="!isInReport" (click)="removeAsset(i)">delete</span>
-                    </div>
-                </section>
-
-                <!-- Card view for displaying latest changes -->
-                <section class="asset-card-layout" [ngClass]="variant" [class.changed]="result.processingStatus === 'edited'" *ngIf="currentView === 'card' && result.assetProcessed">
-                    <div class="asset-card" [ngClass]="variant"> 
-                        <div class="card-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="isInReport ? '#pending-modal-' + result.existingAsset.assetTag : '#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
-                            <div class="main-info">
-                                <img class="asset-icon" [src]="result.existingAsset.assetIcon" [alt]="result.existingAsset.assetName"/>
-                                <span 
-                                    class="asset-status"
-                                    [ngClass]="{
-                                        'status-deployed': result.pendingAsset.assetStatus === 'Deployed',
-                                        'status-onLoan': result.pendingAsset.assetStatus === 'On Loan',
-                                        'status-inventory': result.pendingAsset.assetStatus === 'In Inventory',
-                                        'status-repair': result.pendingAsset.assetStatus === 'In Repair',
-                                        'status-down': result.pendingAsset.assetStatus === 'Down',
-                                        'status-disposed': result.pendingAsset.assetStatus === 'Disposed'
-                                    }">
-                                    {{ result.pendingAsset.assetStatus }}
-                                </span>
-                            </div>
-                    
-                            <div class="additional-info">
-                                <p class="asset-tag">{{ result.pendingAsset.assetTag }}</p>
-                                <div class="asset-name">
-                                    {{ result.pendingAsset.assetName }}
-                                </div>
-                                <p class="owner-name">{{ result.pendingAsset.assetOwnerName }}</p>
-                            </div>
-                    
-                            <div class="opname-card" *ngIf="actualShowLocation">
-                                <p class="location-display">{{ result.pendingAsset.location }}</p>
-                                <p class="asset-room">{{ result.pendingAsset.room }}</p>
-                                <p class="asset-site">{{ result.pendingAsset.siteGroupName}}</p>
-                            </div>
-                        </div>
-
-                        <span class="delete-icon material-symbols-outlined" *ngIf="!isInReport" (click)="removeAsset(i)">delete</span>
-                    </div>
-                </section>
-
-                <app-asset-page [assetTag]="result.pendingAsset.assetTag" [assetPage]="result.pendingAsset" [isPending]="true" *ngIf="isInReport"></app-asset-page>
-
-                <div class="modal fade" [id]="'edit-modal-' + result.existingAsset.assetTag" tabindex="-1" aria-hidden="true" *ngIf="!isInReport">
-                    <div class="modal-dialog modal-lg">
-                        <div class="modal-content">
-                            <div class="modal-header"> 
-                                <section class="asset-header">
-                                    <h5 class="modal-title">Edit Asset - {{ result.pendingAsset.assetTag }}</h5>
-                                    <p class="serial-number">{{ result.pendingAsset.serialNumber }}</p>
-                                </section>
                                 
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            
-                            <div class="modal-body">
-                                <!-- Error Message Alert -->
-                                <!-- <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
-                                    {{ errorMessage }}
-                                </div> -->
+                                <div class="modal-body">
+                                    <!-- Error Message Alert -->
+                                    <!-- <div class="alert alert-danger" role="alert" *ngIf="errorMessage">
+                                        {{ errorMessage }}
+                                    </div> -->
 
-                                <!-- ERROR MESSAGE -->
-                                <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
-                                    <div class="d-flex">
-                                        <div class="toast-body">
-                                            <p>{{ errorMessage }}</p>
-                                            <p>Please try again later.</p>
+                                    <!-- ERROR MESSAGE -->
+                                    <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
+                                        <div class="d-flex">
+                                            <div class="toast-body">
+                                                <p>{{ errorMessage }}</p>
+                                                <p>Please try again later.</p>
+                                            </div>
+                                            <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
                                         </div>
-                                        <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
                                     </div>
-                                </div>
 
-                                <form (ngSubmit)="processAssetChange(i)">
-                                    <div class="asset-information">
-                                        <div class="custom-grid">
-                                            <div class="asset-main-info">
-                                                <img class="asset-icon" [src]="result.pendingAsset.assetIcon" [alt]="result.pendingAsset.assetName"/>
-                                                <h5 class="asset-name">{{ result.pendingAsset.assetName }}</h5>
-                                            </div>
-                                            
-                                            <div class="user-info">
-                                                <div class="form-floating mb-3">
-                                                    <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
-                                                        [(ngModel)]="result.pendingAsset.assetOwnerName" name="newOwnerName" 
-                                                        list="all-users" (input)="onOwnerInputChange(i)"
-                                                        [class.is-invalid]="(result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName) || !result.pendingAsset.assetOwnerName" 
-                                                        required>
-                                                    <label [for]="'owner-name-' + result.pendingAsset.assetTag">User</label>
-                                                    <datalist id="all-users">
-                                                        <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
-                                                    </datalist>
-                                                    <div *ngIf="(result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName) || !result.pendingAsset.assetOwnerName" class="invalid-feedback">
-                                                        Please select a valid user from the list.
+                                    <form (ngSubmit)="processAssetChange(i)">
+                                        <div class="asset-information">
+                                            <div class="custom-grid">
+                                                <div class="asset-main-info">
+                                                    <img class="asset-icon" [src]="result.pendingAsset.assetIcon" [alt]="result.pendingAsset.assetName"/>
+                                                    <h5 class="asset-name">{{ result.pendingAsset.assetName }}</h5>
+                                                </div>
+                                                
+                                                <div class="user-info">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" class="form-control" [id]="'owner-name-' + result.pendingAsset.assetTag" 
+                                                            [(ngModel)]="result.pendingAsset.assetOwnerName" name="newOwnerName" 
+                                                            list="all-users" (input)="onOwnerInputChange(i)"
+                                                            [class.is-invalid]="(result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName) || !result.pendingAsset.assetOwnerName" 
+                                                            required>
+                                                        <label [for]="'owner-name-' + result.pendingAsset.assetTag">User</label>
+                                                        <datalist id="all-users">
+                                                            <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
+                                                        </datalist>
+                                                        <div *ngIf="(result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName) || !result.pendingAsset.assetOwnerName" class="invalid-feedback">
+                                                            Please select a valid user from the list.
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-floating mb-2">
+                                                        <input type="text" class="form-control" 
+                                                            [id]="'owner-position-' + result.pendingAsset.assetTag" 
+                                                            [(ngModel)]="result.pendingAsset.assetOwnerPosition" name="newOwnerPosition"
+                                                            [placeholder]="result.pendingAsset.assetOwnerPosition || 'Position'">
+                                                        <label [for]="'owner-position-' + result.pendingAsset.assetTag">Position</label>
+                                                    </div>
+
+                                                    <div class="form-floating mb-2">
+                                                        <input type="number" class="form-control" 
+                                                            [id]="'cost-center-' + result.pendingAsset.assetTag" 
+                                                            [(ngModel)]="result.pendingAsset.assetOwnerCostCenter" name="newCostCenter"
+                                                            [placeholder]="result.pendingAsset.assetOwnerCostCenter?.toString() || 'Cost Center'">
+                                                        <label [for]="'cost-center-' + result.pendingAsset.assetTag">Cost Center</label>
                                                     </div>
                                                 </div>
-                    
-                                                <p class="user-position">{{ result.pendingAsset.assetOwnerPosition }}</p>
-                                                <p class="cost-center">Cost Center: {{ result.pendingAsset.assetOwnerCostCenter }}</p>
-                                            </div>
-                            
-                                            <div class="left-top">
-                                                <div class="form-floating">
-                                                    <select class="form-select" [id]="'asset-status-' + result.pendingAsset.assetTag" 
-                                                        [(ngModel)]="result.pendingAsset.assetStatus" name="newStatus"
-                                                        (change)="onStatusChange()" aria-label="Asset Status">
-                                                        <option value="">Select status</option>
-                                                        <option value="Deployed">Deployed</option>
-                                                        <option value="On Loan">On Loan</option>
-                                                        <option value="In Inventory">In Inventory</option>
-                                                        <option value="In Repair">In Repair</option>
-                                                        <option value="Down">Down</option>
-                                                        <option value="Disposed">Disposed</option>
-                                                    </select>
-                                                    <label [for]="'asset-status-' + result.pendingAsset.assetTag">Asset Status</label>
-                                                </div>
-                    
-                                                <div class="pick-status-reason" *ngIf="result.pendingAsset.assetStatus === 'Disposed'">
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio" 
-                                                            [id]="'loss-' + result.pendingAsset.assetTag" 
-                                                            name="statusReason" 
-                                                            [value]="'Loss'" 
-                                                            [(ngModel)]="result.pendingAsset.statusReason">
-                                                        <label class="form-check-label" [for]="'loss-' + result.pendingAsset.assetTag">
-                                                            Loss
-                                                        </label>
+                                
+                                                <div class="left-top">
+                                                    <div class="form-floating">
+                                                        <select class="form-select" [id]="'asset-status-' + result.pendingAsset.assetTag" 
+                                                            [(ngModel)]="result.pendingAsset.assetStatus" name="newStatus"
+                                                            (change)="onStatusChange()" aria-label="Asset Status">
+                                                            <option value="">Select status</option>
+                                                            <option value="Deployed">Deployed</option>
+                                                            <option value="On Loan">On Loan</option>
+                                                            <option value="In Inventory">In Inventory</option>
+                                                            <option value="In Repair">In Repair</option>
+                                                            <option value="Down">Down</option>
+                                                            <option value="Disposed">Disposed</option>
+                                                        </select>
+                                                        <label [for]="'asset-status-' + result.pendingAsset.assetTag">Asset Status</label>
                                                     </div>
-                                                    
-                                                    <div class="form-check form-check-inline">
-                                                        <input class="form-check-input" type="radio" 
-                                                            [id]="'obsolete-' + result.pendingAsset.assetTag" 
-                                                            name="statusReason" 
-                                                            [value]="'Obsolete'" 
-                                                            [(ngModel)]="result.pendingAsset.statusReason">
-                                                        <label class="form-check-label" [for]="'obsolete-' + result.pendingAsset.assetTag">
-                                                            Obsolete
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                            </div>
-                            
-                                            <div class="left-bottom">
-                                                <div class="asset-condition">  
-                                                    <div class="rating">
-                                                        <p class="condition">Condition</p>
-                                                        <span class="like grow" [class.active]="isLiked" (click)="setLike()">
-                                                            <i class="fa fa-thumbs-up like" aria-hidden="true"></i>
-                                                        </span>
-                                                        <span class="dislike grow" [class.active]="isDisliked" (click)="setDislike()">
-                                                            <i class="fa fa-thumbs-down dislike" aria-hidden="true"></i>
-                                                        </span>
-                                                    </div>
-                            
-                                                    <div *ngIf="isDisliked">                                                            
-                                                        <div class="form-floating mb-3">
-                                                                <textarea class="form-control" 
-                                                                    [id]="'condition-notes-' + result.pendingAsset.assetTag" 
-                                                                    [(ngModel)]="result.pendingAsset.conditionNotes" name="newConditionNotes"
-                                                                    [placeholder]="result.pendingAsset.conditionNotes || 'Describe the condition issue'"
-                                                                    style="height: 100px"></textarea>
-                                                            <label [for]="'condition-notes-' + result.pendingAsset.assetTag">Notes</label>
+                        
+                                                    <div class="pick-status-reason" *ngIf="result.pendingAsset.assetStatus === 'Disposed'">
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" 
+                                                                [id]="'loss-' + result.pendingAsset.assetTag" 
+                                                                name="statusReason" 
+                                                                [value]="'Loss'" 
+                                                                [(ngModel)]="result.pendingAsset.statusReason">
+                                                            <label class="form-check-label" [for]="'loss-' + result.pendingAsset.assetTag">
+                                                                Loss
+                                                            </label>
                                                         </div>
                                                         
-                                                        <!-- File input for condition photo -->
-                                                        <div class="mb-3">
-                                                            <label [for]="'condition-photo-' + result.pendingAsset.assetTag" class="form-label">
-                                                                Condition Photo
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input" type="radio" 
+                                                                [id]="'obsolete-' + result.pendingAsset.assetTag" 
+                                                                name="statusReason" 
+                                                                [value]="'Obsolete'" 
+                                                                [(ngModel)]="result.pendingAsset.statusReason">
+                                                            <label class="form-check-label" [for]="'obsolete-' + result.pendingAsset.assetTag">
+                                                                Obsolete
                                                             </label>
-
-                                                            <!-- Display condition photo if any -->
-                                                            <div class="mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== ''">
-                                                                <img [src]="serverURL + result.pendingAsset.conditionPhotoURL" 
-                                                                    [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
-                                                                    class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                
+                                                <div class="left-bottom">
+                                                    <div class="asset-condition">  
+                                                        <div class="rating">
+                                                            <p class="condition">Condition</p>
+                                                            <span class="like grow" [class.active]="isLiked" (click)="setLike()">
+                                                                <i class="fa fa-thumbs-up like" aria-hidden="true"></i>
+                                                            </span>
+                                                            <span class="dislike grow" [class.active]="isDisliked" (click)="setDislike()">
+                                                                <i class="fa fa-thumbs-down dislike" aria-hidden="true"></i>
+                                                            </span>
+                                                        </div>
+                                
+                                                        <div *ngIf="isDisliked">                                                            
+                                                            <div class="form-floating mb-3">
+                                                                    <textarea class="form-control" 
+                                                                        [id]="'condition-notes-' + result.pendingAsset.assetTag" 
+                                                                        [(ngModel)]="result.pendingAsset.conditionNotes" name="newConditionNotes"
+                                                                        [placeholder]="result.pendingAsset.conditionNotes || 'Describe the condition issue'"
+                                                                        style="height: 100px"></textarea>
+                                                                <label [for]="'condition-notes-' + result.pendingAsset.assetTag">Notes</label>
                                                             </div>
+                                                            
+                                                            <!-- File input for condition photo -->
+                                                            <div class="mb-3">
+                                                                <label [for]="'condition-photo-' + result.pendingAsset.assetTag" class="form-label">
+                                                                    Condition Photo
+                                                                </label>
 
-                                                            <input type="file" class="form-control" 
-                                                                [id]="'condition-photo-' + result.pendingAsset.assetTag" 
-                                                                name="conditionPhoto"
-                                                                (change)="onFileSelected($event)"
-                                                                accept="image/*" capture="camera">
+                                                                <!-- Display condition photo if any -->
+                                                                <div class="mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== ''">
+                                                                    <img [src]="serverURL + result.pendingAsset.conditionPhotoURL" 
+                                                                        [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
+                                                                        class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
+                                                                </div>
+
+                                                                <input type="file" class="form-control" 
+                                                                    [id]="'condition-photo-' + result.pendingAsset.assetTag" 
+                                                                    name="conditionPhoto"
+                                                                    (change)="onFileSelected($event)"
+                                                                    accept="image/*" capture="camera">
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
 
-                                            <div class="right-top">
-                                                <h5>Equipments</h5>
-                                                <div class="form-floating mb-2">
-                                                    <input type="text" class="form-control" 
-                                                        [id]="'equipments-' + result.pendingAsset.assetTag" 
-                                                        [(ngModel)]="result.pendingAsset.equipments" name="newEquipments"
-                                                        [placeholder]="result.pendingAsset.equipments || 'Equipments'">
-                                                    <label [for]="'equipments-' + result.pendingAsset.assetTag">Equipments</label>
-                                                </div>
-                                            </div>
-                            
-                                            <div class="right-bottom">
-                                                <div class="asset-location">
-                                                    <h5>Location</h5>
-                                                    <p>Region - {{ result.pendingAsset.regionName }}</p>
-                                                    <div class="form-floating mb-2">
-                                                        <input type="text" class="form-control" 
-                                                            [id]="'sitqe-name-' + result.pendingAsset.assetTag" 
-                                                            [(ngModel)]="result.pendingAsset.siteName" name="siteName"
-                                                            (input)="onSiteInputChange(i)"
-                                                            list="all-sites"
-                                                            [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName" >
-                                                        <label [for]="'site-name-' + result.pendingAsset.assetTag">Site Name</label>
-                                                        <datalist id="all-sites">
-                                                            <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
-                                                        </datalist>
-                                                        <div *ngIf="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName" class="invalid-feedback">
-                                                            Please select a valid site from the list.
+                                                <div class="right-top">
+                                                    <h5>Equipments</h5>
+                                                    <div class="equipment-checkboxes">
+                                                        <div class="form-check" *ngFor="let equipment of availableEquipments">
+                                                            <input class="form-check-input" type="checkbox" 
+                                                                [id]="'equipment-' + equipment + '-' + result.pendingAsset.assetTag"
+                                                                [checked]="isEquipmentSelected(i, equipment)"
+                                                                (change)="toggleEquipment(i, equipment)">
+                                                            <label class="form-check-label" 
+                                                                [for]="'equipment-' + equipment + '-' + result.pendingAsset.assetTag">
+                                                                {{ equipment }}
+                                                            </label>
                                                         </div>
                                                     </div>
-                                                    <div class="form-floating mb-2">
-                                                        <input type="text" class="form-control" 
-                                                            [id]="'location-' + result.pendingAsset.assetTag" 
-                                                            [(ngModel)]="result.pendingAsset.location" name="newLocation"
-                                                            [placeholder]="result.pendingAsset.location || 'Location'">
-                                                        <label [for]="'location-' + result.pendingAsset.assetTag">Location</label>
-                                                    </div>
-                                                    <div class="form-floating mb-2">
-                                                        <input type="text" class="form-control" 
-                                                            [id]="'room-' + result.pendingAsset.assetTag" 
-                                                            [(ngModel)]="result.pendingAsset.room" name="newRoom"
-                                                            [placeholder]="result.pendingAsset.room || 'Room'">
-                                                        <label [for]="'room-' + result.pendingAsset.assetTag">Room</label>
+                                                </div>
+                                
+                                                <div class="right-bottom">
+                                                    <div class="asset-location">
+                                                        <h5>Location</h5>
+                                                        <p>Region - {{ result.pendingAsset.regionName }}</p>
+                                                        <div class="form-floating mb-2">
+                                                            <input type="text" class="form-control" 
+                                                                [id]="'sitqe-name-' + result.pendingAsset.assetTag" 
+                                                                [(ngModel)]="result.pendingAsset.siteName" name="siteName"
+                                                                (input)="onSiteInputChange(i)"
+                                                                list="all-sites"
+                                                                [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName" >
+                                                            <label [for]="'site-name-' + result.pendingAsset.assetTag">Site Name</label>
+                                                            <datalist id="all-sites">
+                                                                <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
+                                                            </datalist>
+                                                            <div *ngIf="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName" class="invalid-feedback">
+                                                                Please select a valid site from the list.
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-floating mb-2">
+                                                            <input type="text" class="form-control" 
+                                                                [id]="'location-' + result.pendingAsset.assetTag" 
+                                                                [(ngModel)]="result.pendingAsset.location" name="newLocation"
+                                                                [placeholder]="result.pendingAsset.location || 'Location'">
+                                                            <label [for]="'location-' + result.pendingAsset.assetTag">Location</label>
+                                                        </div>
+                                                        <div class="form-floating mb-2">
+                                                            <input type="text" class="form-control" 
+                                                                [id]="'room-' + result.pendingAsset.assetTag" 
+                                                                [(ngModel)]="result.pendingAsset.room" name="newRoom"
+                                                                [placeholder]="result.pendingAsset.room || 'Room'">
+                                                            <label [for]="'room-' + result.pendingAsset.assetTag">Room</label>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                        
+                                        <div class="form-floating mt-3" *ngIf="hasFormChangesForAsset(result)">
+                                            <textarea class="form-control" 
+                                                [id]="'change-reason-' + result.pendingAsset.assetTag" 
+                                                [(ngModel)]="result.changeReason" name="changeReason"
+                                                placeholder="Please provide a reason for these changes"
+                                                style="height: 100px" required></textarea>
+                                            <label [for]="'change-reason-' + result.pendingAsset.assetTag">Reason for Changes</label>
+                                        </div>
                                     
-                                    <div class="form-floating mt-3" *ngIf="hasFormChangesForAsset(result)">
-                                        <textarea class="form-control" 
-                                            [id]="'change-reason-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.changeReason" name="changeReason"
-                                            placeholder="Please provide a reason for these changes"
-                                            style="height: 100px" required></textarea>
-                                        <label [for]="'change-reason-' + result.pendingAsset.assetTag">Reason for Changes</label>
-                                    </div>
-                                
-                                    <div class="modal-footer">
-                                        <button type="submit" class="btn btn-primary" [disabled]="isLoading || !result.changeReason || !hasFormChangesForAsset(result)">
-                                            <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                            Save Changes
-                                        </button>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-primary" [disabled]="isLoading || !result.changeReason || !hasFormChangesForAsset(result)">
+                                                <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                Save Changes
+                                            </button>
 
-                                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal" [attr.data-bs-target]="'#assetAllGood-' + i">
-                                            All good
-                                        </button>
-                                    </div>
-                                </form>
+                                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" [attr.data-bs-target]="'#assetAllGood-' + i">
+                                                All good
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal fade" [attr.id]="'assetAllGood-' + i" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Asset Data correct?</h1>
+                                </div>
+                                <div class="modal-body">
+                                    This will confirm that the asset data is correct.
+                                    <br>
+                                    <br>
+                                    <strong>Note:</strong> If you have changed the asset data, please keep in mind that this action will <strong class="text-danger">delete the changes you make</strong> and <strong>revert back to the original data</strong>.
+                                    <br>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="button" class="btn btn-secondary" [disabled]="isLoading" (click)="markAsAllGood(i)">
+                                        <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                        All good
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="modal fade" [attr.id]="'assetAllGood-' + i" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="staticBackdropLabel">Asset Data correct?</h1>
-                            </div>
-                            <div class="modal-body">
-                                This will confirm that the asset data is correct.
-                                <br>
-                                <br>
-                                <strong>Note:</strong> If you have changed the asset data, please keep in mind that this action will <strong class="text-danger">delete the changes you make</strong> and <strong>revert back to the original data</strong>.
-                                <br>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-secondary" [disabled]="isLoading" (click)="markAsAllGood(i)">
-                                    <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    All good
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            </section>
         </div>
     </div>
 
@@ -516,9 +455,22 @@
                                                         Please select a valid user from the list.
                                                     </div>
                                                 </div>
-                    
-                                                <p class="user-position">{{ result.pendingAsset.assetOwnerPosition }}</p>
-                                                <p class="cost-center">Cost Center: {{ result.pendingAsset.assetOwnerCostCenter }}</p>
+
+                                                <div class="form-floating mb-2">
+                                                    <input type="text" class="form-control" 
+                                                        [id]="'owner-position-mobile-' + result.pendingAsset.assetTag" 
+                                                        [(ngModel)]="result.pendingAsset.assetOwnerPosition" name="newOwnerPositionMobile"
+                                                        [placeholder]="result.pendingAsset.assetOwnerPosition || 'Position'">
+                                                    <label [for]="'owner-position-mobile-' + result.pendingAsset.assetTag">Position</label>
+                                                </div>
+
+                                                <div class="form-floating mb-2">
+                                                    <input type="number" class="form-control" 
+                                                        [id]="'cost-center-mobile-' + result.pendingAsset.assetTag" 
+                                                        [(ngModel)]="result.pendingAsset.assetOwnerCostCenter" name="newCostCenterMobile"
+                                                        [placeholder]="result.pendingAsset.assetOwnerCostCenter?.toString() || 'Cost Center'">
+                                                    <label [for]="'cost-center-mobile-' + result.pendingAsset.assetTag">Cost Center</label>
+                                                </div>
                                             </div>
                                                 
                                             <div class="asset-location-mobile">
@@ -561,12 +513,17 @@
                                             <!-- TODO: style asset equipment display! -->
                                             <div class="asset-equipments-mobile">
                                                 <h5>Equipments</h5>
-                                                <div class="form-floating mb-2">
-                                                    <input type="text" class="form-control" 
-                                                        [id]="'equipments-' + result.pendingAsset.assetTag" 
-                                                        [(ngModel)]="result.pendingAsset.equipments" name="newEquipments"
-                                                        [placeholder]="result.pendingAsset.equipments || 'Equipments'">
-                                                    <label [for]="'equipments-' + result.pendingAsset.assetTag">Equipments</label>
+                                                <div class="equipment-checkboxes">
+                                                    <div class="form-check" *ngFor="let equipment of availableEquipments">
+                                                        <input class="form-check-input" type="checkbox" 
+                                                            [id]="'equipment-mobile-' + equipment + '-' + result.pendingAsset.assetTag"
+                                                            [checked]="isEquipmentSelected(i, equipment)"
+                                                            (change)="toggleEquipment(i, equipment)">
+                                                        <label class="form-check-label" 
+                                                            [for]="'equipment-mobile-' + equipment + '-' + result.pendingAsset.assetTag">
+                                                            {{ equipment }}
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
 

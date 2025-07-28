@@ -76,6 +76,18 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
   actualVariant: 'default' | 'compact' = 'default';
   actualShowLocation: boolean = true;
 
+  // Equipment options based on seed data
+  availableEquipments: string[] = [
+    'Kabel power',
+    'Adaptor',
+    'Tas',
+    'Kabel VGA',
+    'Kabel USB', 
+    'Simcard',
+    'Handstrap',
+    'Tali tas'
+  ];
+
   // Other properties
   opnameSession: OpnameSession = {} as OpnameSession;
   allUsers: User[] = []; // List of all users in the company
@@ -526,6 +538,40 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
     }
   }
 
+  // Check if equipment is selected for a specific asset
+  isEquipmentSelected(index: number, equipment: string): boolean {
+    const result = this.searchResults[index];
+    if (!result || !result.pendingAsset.equipments) return false;
+    
+    const equipmentList = result.pendingAsset.equipments.split(',').map(item => item.trim());
+    return equipmentList.includes(equipment);
+  }
+
+  // Toggle equipment selection for a specific asset
+  toggleEquipment(index: number, equipment: string): void {
+    const result = this.searchResults[index];
+    if (!result) return;
+
+    let currentEquipments = result.pendingAsset.equipments || '';
+    let equipmentList = currentEquipments ? currentEquipments.split(',').map(item => item.trim()) : [];
+
+    const equipmentIndex = equipmentList.indexOf(equipment);
+    
+    if (equipmentIndex > -1) {
+      // Remove equipment
+      equipmentList.splice(equipmentIndex, 1);
+    } else {
+      // Add equipment
+      equipmentList.push(equipment);
+    }
+
+    // Update the equipment string
+    result.pendingAsset.equipments = equipmentList.filter(item => item).join(', ');
+    
+    // Force change detection
+    this.cdr.detectChanges();
+  }
+
   // Handle status changes
   onStatusChange(): void {
     if (this.currentActiveIndex >= 0) {
@@ -557,6 +603,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
            pending.room !== existing.room ||
            pending.equipments !== existing.equipments ||
            pending.assetOwner !== existing.assetOwner ||
+           pending.assetOwnerPosition !== existing.assetOwnerPosition ||
+           pending.assetOwnerCostCenter !== existing.assetOwnerCostCenter ||
            pending.siteID !== existing.siteID;
 
     // Auto-clear change reason if no changes exist
@@ -655,6 +703,12 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
     if (pending.assetOwner !== existing.assetOwner) {
       assetChanges.newOwnerID = pending.assetOwner;
     }
+    if (pending.assetOwnerPosition !== existing.assetOwnerPosition) {
+      assetChanges.newOwnerPosition = pending.assetOwnerPosition;
+    }
+    if (pending.assetOwnerCostCenter !== existing.assetOwnerCostCenter) {
+      assetChanges.newOwnerCostCenter = pending.assetOwnerCostCenter;
+    }
     if (pending.siteID !== existing.siteID) {
       assetChanges.newSiteID = pending.siteID;
     }
@@ -736,6 +790,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
       newRoom: existing.room,
       newEquipments: existing.equipments,
       newOwnerID: existing.assetOwner,
+      newOwnerPosition: existing.assetOwnerPosition,
+      newOwnerCostCenter: existing.assetOwnerCostCenter,
       newSiteID: existing.siteID,
       changeReason: "No changes. Asset verified on " + this.opnameSession?.startDate
     }

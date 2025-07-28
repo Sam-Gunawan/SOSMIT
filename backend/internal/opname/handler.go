@@ -178,6 +178,8 @@ type AssetChangeRequest struct {
 	NewRoom              *string `json:"new_room"`
 	NewEquipments        *string `json:"new_equipments"`
 	NewOwnerID           *int    `json:"new_owner_id"`
+	NewOwnerPosition     *string `json:"new_owner_position"`
+	NewOwnerCostCenter   *int    `json:"new_owner_cost_center"`
 	NewSiteID            *int    `json:"new_site_id"`
 	ChangeReason         string  `json:"change_reason"`
 }
@@ -226,6 +228,8 @@ func (handler *Handler) ProcessAssetChangesHandler(context *gin.Context) {
 		NewRoom:              assetChangeRequest.NewRoom,
 		NewEquipments:        assetChangeRequest.NewEquipments,
 		NewOwnerID:           assetChangeRequest.NewOwnerID,
+		NewOwnerPosition:     assetChangeRequest.NewOwnerPosition,
+		NewOwnerCostCenter:   assetChangeRequest.NewOwnerCostCenter,
 		NewSiteID:            assetChangeRequest.NewSiteID,
 		ChangeReason:         assetChangeRequest.ChangeReason,
 	}

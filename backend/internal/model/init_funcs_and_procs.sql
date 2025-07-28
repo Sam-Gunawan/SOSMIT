@@ -599,6 +599,8 @@ CREATE OR REPLACE FUNCTION public.record_asset_change(
 	_new_room VARCHAR(255),
 	_new_equipments TEXT,
 	_new_owner_id INT,
+	_new_owner_position VARCHAR(255),
+	_new_owner_cost_center INT,
 	_new_site_id INT,
 	_change_reason TEXT
 ) RETURNS JSONB
@@ -645,6 +647,12 @@ AS $$
 		END IF;
 		IF _new_owner_id IS NOT NULL AND _new_owner_id IS DISTINCT FROM _old_data.owner_id THEN
 			_changes := jsonb_set(_changes, '{newOwnerID}', to_jsonb(_new_owner_id));
+		END IF;
+		IF _new_owner_position IS NOT NULL THEN
+			_changes := jsonb_set(_changes, '{newOwnerPosition}', to_jsonb(_new_owner_position));
+		END IF;
+		IF _new_owner_cost_center IS NOT NULL THEN
+			_changes := jsonb_set(_changes, '{newOwnerCostCenter}', to_jsonb(_new_owner_cost_center));
 		END IF;
 		IF _new_site_id IS NOT NULL AND _new_site_id IS DISTINCT FROM _old_data.site_id THEN
 			_changes := jsonb_set(_changes, '{newSiteID}', to_jsonb(_new_site_id));
