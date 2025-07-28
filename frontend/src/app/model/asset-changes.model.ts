@@ -9,6 +9,8 @@ export interface AssetChange {
     newRoom?: string;
     newEquipments?: string;
     newOwnerID?: number;
+    newOwnerPosition?: string;
+    newOwnerCostCenter?: number;
     newSiteID?: number;
     changeReason?: string;
 }

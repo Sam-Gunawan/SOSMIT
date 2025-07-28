@@ -532,6 +532,39 @@ p {
   }
 }
 
+.equipment-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+
+  .form-check {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0;
+
+    .form-check-input {
+      margin-right: 8px;
+      margin-top: 0;
+    }
+
+    .form-check-label {
+      font-size: 14px;
+      margin-bottom: 0;
+      cursor: pointer;
+    }
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+
+    .form-check-label {
+      font-size: 13px;
+    }
+  }
+}
+
 .my-toast {
     display: block;
     position: fixed;
