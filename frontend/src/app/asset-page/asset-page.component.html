@@ -14,7 +14,6 @@
                 <div class="asset-information">
                     <div class="custom-grid">
                         <div class="asset-main-info">
-                            <img class="asset-icon" [src]="assetPage?.assetIcon" [alt]="assetPage?.assetName"/>
                             <h5 class="asset-name">{{ assetPage?.assetName }}</h5>
                         </div>
         
@@ -66,7 +65,6 @@
                         </div>
 
                         <div class="right-top">
-                            <!-- TODO: style asset equipment display! -->
                             <div class="asset-equipments">
                                 <h5>Equipments</h5>
                                 <p *ngIf="assetPage?.equipments">{{ assetPage?.equipments }}</p>
@@ -75,12 +73,11 @@
                         </div>
         
                         <div class="right-bottom">
-                            <!-- <hr class="vertical"> -->
                             <div class="asset-location">
-                                <h5>Location - {{ assetPage?.regionName }}</h5>
-                                <p>{{ assetPage?.location }}</p>
-                                <p>{{ assetPage?.room }}</p>
-                                <p>{{ assetPage?.siteGroupName }}</p>
+                                <h5>Location - {{ assetPage?.siteName }}</h5>
+                                <p>Room: {{ assetPage?.room }}</p>
+                                <p>RO: {{ assetPage?.siteGroupName }}</p>
+                                <p>Region: {{ assetPage?.regionName }}</p>
                             </div>
                         </div>
                     </div>
