@@ -101,9 +101,13 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
   // Search parameters
   searchQuery: string = '';
+  assetTagQuery: string = '';
+  serialNumberQuery: string = '';
+  activeInputField: 'assetTag' | 'serialNumber' | null = null;
   searchType: 'asset_tag' | 'serial_number' = 'asset_tag'; // Default search type
   isSearching: boolean = false;
   showToast: boolean = false;
+  showSearchForm: boolean = false; // Track if search form is visible on mobile
 
   // Assets - Each search result is stored as an object in this array (it is appended to the array)
   searchResults: Array<{
@@ -171,10 +175,17 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     private apiService: ApiService,
     private opnameSessionService: OpnameSessionService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) {
+    // Explicitly initialize search fields to ensure they're empty
+    this.assetTagQuery = '';
+    this.serialNumberQuery = '';
+    this.searchQuery = '';
+    this.activeInputField = null;
+  }
 
   ngOnInit(): void {
     this.isLoading = true;
+        
     this.checkScreenSize();
     this.updateResponsiveSettings();
     this.getAllUsers();
@@ -419,24 +430,37 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }
   }
 
-  setSearchType(type: 'asset_tag' | 'serial_number') {
-    this.searchType = type;
-  }  
+  // Getter methods for disabled states
+  get isAssetTagDisabled(): boolean {
+    return !!(this.serialNumberQuery && this.serialNumberQuery.trim().length > 0);
+  }
+
+  get isSerialNumberDisabled(): boolean {
+    return !!(this.assetTagQuery && this.assetTagQuery.trim().length > 0);
+  }
 
   // Handle the search action
   onSearch(): void {
-    if (!this.searchQuery.trim()) {
-      this.errorMessage = 'Please type something into the search bar.';
+    // Determine which input field has data and set the search query
+    let searchValue = '';
+    if (this.assetTagQuery && this.assetTagQuery.trim().length > 0) {
+      searchValue = this.assetTagQuery.trim();
+      this.searchType = 'asset_tag';
+    } else if (this.serialNumberQuery && this.serialNumberQuery.trim().length > 0) {
+      searchValue = this.serialNumberQuery.trim();
+      this.searchType = 'serial_number';
+    }
+
+    if (!searchValue) {
+      this.errorMessage = 'Please enter either an asset tag or serial number to search.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       return;
     }
 
-    this.searchQuery = this.searchQuery.trim().toUpperCase(); // Normalize search query
+    this.searchQuery = searchValue.toUpperCase(); // Normalize search query
     this.isSearching = true;
     this.errorMessage = ''; // Clear previous error message
-    this.showToast = true;
-    setTimeout(() => this.showToast = false, 3000);
 
     console.log('[OpnameAsset] Starting search for:', this.searchQuery, 'by', this.searchType);
 
@@ -474,7 +498,13 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
         this.updateTableDataSource(); // Update table with new search result
         this.isSearching = false;
-        this.searchQuery = ''; // Clear the search input after successful search
+        // Clear the appropriate input field after successful search
+        if (this.searchType === 'asset_tag') {
+          this.assetTagQuery = '';
+        } else {
+          this.serialNumberQuery = '';
+        }
+        this.searchQuery = '';
       },
       error: (error) => {
         console.error('[OpnameAsset] Error during search:', error);
@@ -951,6 +981,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }
   }
 
+  toggleSearchForm(): void {
+    this.showSearchForm = !this.showSearchForm;
+  }
 
   private checkScreenSize() {
     const newIsMobile = window.innerWidth < 768; // Define mobile breakpoint
