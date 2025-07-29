@@ -958,6 +958,23 @@ th.mat-sort-header-sorted {
 // Pagination styles
 @include styles.mat-paginator-styles;
 
+// ===================================================
+// Specific paginator background for this component
+::ng-deep .mat-mdc-paginator {
+  background-color: transparent !important;
+  margin: 8px 0;
+  
+  .mat-mdc-paginator-container {
+    background-color: transparent !important;
+  }
+  
+  .mat-mdc-paginator-page-size-select,
+  .mat-mdc-paginator-range-actions {
+    background-color: transparent !important;
+  }
+}
+// ===================================================
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .assets-table {
