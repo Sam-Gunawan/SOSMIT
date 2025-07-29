@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, ChangeDetectorRef, OnDestroy, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, HostListener, Input, ChangeDetectorRef, OnDestroy, OnChanges, SimpleChanges, AfterViewInit, ViewChild } from '@angular/core';
 import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { AssetInfo } from '../model/asset-info.model';
@@ -11,15 +11,32 @@ import { User } from '../model/user.model';
 import { SiteInfo } from '../model/site-info.model';
 import { OpnameSessionProgress } from '../model/opname-session-progress.model';
 import { environment } from '../../environments/environments';
+import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+
+export interface AssetTableData {
+  assetTag: string;
+  assetName: string;
+  serialNumber: string;
+  ownerName: string;
+  costCenter: number;
+  condition: boolean | null;
+  status: string;
+  index: number; // To track the original search results index
+}
 
 @Component({
   selector: 'app-opname-asset',
-  imports: [CommonModule, FormsModule, AssetPageComponent],
+  imports: [CommonModule, FormsModule, AssetPageComponent, MatTableModule, MatSortModule, MatPaginatorModule],
   templateUrl: './opname-asset.component.html',
   styleUrl: './opname-asset.component.scss'
 })
-export class OpnameAssetComponent implements OnDestroy, OnChanges {
+export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit {
   public readonly serverURL = environment.serverURL; // Expose environment for use in the template
+
+  displayedColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'ownerName', 'costCenter', 'condition', 'status', 'actions'];
+  dataSource = new MatTableDataSource<AssetTableData>([]);
 
   @Input() isInReport: boolean = false; // Flag to check if in report view
   @Input() variant: 'default' | 'compact' = 'default';
@@ -27,6 +44,60 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
   @Input() sessionID: number = -1; // Session ID for the current opname session
   @Input() siteID: number = -1; // Site ID for the current opname session
   @Input() currentView: 'card' | 'list' = 'card';
+  @ViewChild(MatSort) sort!: MatSort;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  
+  ngAfterViewInit() {
+    console.log('[OpnameAsset] ngAfterViewInit called');
+    console.log('[OpnameAsset] MatSort found:', this.sort);
+    console.log('[OpnameAsset] MatPaginator found:', this.paginator);
+    console.log('[OpnameAsset] DataSource:', this.dataSource);
+    
+    if (this.sort) {
+      this.dataSource.sort = this.sort;
+      console.log('[OpnameAsset] Sort connected successfully');
+    } else {
+      console.error('[OpnameAsset] MatSort not found!');
+    }
+
+    if (this.paginator) {
+      this.dataSource.paginator = this.paginator;
+      console.log('[OpnameAsset] Paginator connected successfully');
+    } else {
+      console.error('[OpnameAsset] MatPaginator not found!');
+    }
+  }
+
+  /** Update the table data source when search results change */
+  updateTableDataSource(): void {
+    const tableData: AssetTableData[] = this.searchResults.map((result, index) => ({
+      assetTag: result.pendingAsset.assetTag,
+      assetName: result.pendingAsset.assetName,
+      serialNumber: result.pendingAsset.serialNumber || 'N/A',
+      ownerName: result.pendingAsset.assetOwnerName,
+      costCenter: result.pendingAsset.assetOwnerCostCenter,
+      condition: result.pendingAsset.condition,
+      status: result.pendingAsset.assetStatus,
+      index: index
+    }));
+    
+    this.dataSource.data = tableData;
+    console.log('[OpnameAsset] Table data updated:', tableData);
+  }
+
+  /** Handle row click to open edit modal */
+  onRowClick(row: AssetTableData): void {
+    console.log('[OpnameAsset] Row clicked:', row);
+    this.initPendingAssetForEdit(row.index);
+    
+    // Trigger modal opening using pendingAsset assetTag
+    const result = this.searchResults[row.index];
+    const modalElement = document.getElementById(`edit-modal-${result.pendingAsset.assetTag}`);
+    if (modalElement) {
+      const modal = new (window as any).bootstrap.Modal(modalElement);
+      modal.show();
+    }
+  }
 
   // Search parameters
   searchQuery: string = '';
@@ -270,6 +341,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
           // When all API calls are complete, update searchResults in the correct order
           if (completedCount === progress.length) {
             this.searchResults = orderedResults;
+            this.updateTableDataSource(); // Update table with loaded data
             
             // Set as current asset if it's the first one
             if (this.searchResults.length > 0) {
@@ -291,6 +363,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
           if (completedCount === progress.length) {
             // Filter out any undefined entries caused by errors
             this.searchResults = orderedResults.filter(result => result !== undefined);
+            this.updateTableDataSource(); // Update table even after errors
             this.isLoading = false; // Loading complete even with errors
             this.cdr.detectChanges();
           }
@@ -397,6 +470,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
           changeReason: ''
         });
 
+        this.updateTableDataSource(); // Update table with new search result
         this.isSearching = false;
         this.searchQuery = ''; // Clear the search input after successful search
       },
@@ -841,6 +915,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
     console.log('[OpnameAsset] Removing asset at index:', index);
     const asset = this.searchResults[index]
     this.searchResults.splice(index, 1); // Remove the asset from the search results
+    this.updateTableDataSource(); // Update the table after removal
+    
     if (asset.assetProcessed) {
       // If the asset was processed, remove it from the session
       this.opnameSessionService.removeAssetFromSession(this.sessionID, asset.existingAsset.assetTag).subscribe({

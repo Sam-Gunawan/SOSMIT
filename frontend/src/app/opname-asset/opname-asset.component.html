@@ -25,52 +25,118 @@
     </div>
 </div>
 
-<div class="opname-asset-info" *ngIf="!isLoading && searchResults.length > 0">
-    <!-- For large device screen, i.e. desktop/tablet -->
-    <div class="container" *ngIf="screenSize === 'large'">
-        <h5 class="data-header">Scanned Asset</h5>
-        <div class="col" *ngFor="let result of searchResults; let i = index">
-            <section class="asset-list-layout">
-                <div class="asset-list">
-                    <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="isInReport ? '#pending-modal-' + result.existingAsset.assetTag : '#edit-modal-' + result.existingAsset.assetTag" (click)="initPendingAssetForEdit(i)">
-                        <div class="first-column">
-                            <p class="asset-tag">{{ result.pendingAsset.assetTag }}</p>
-                            <p class="owner-name">{{ result.pendingAsset.assetOwnerName }}</p>
-                        </div>
-                
-                        <div class="second-column">
-                            <span 
-                                class="asset-status"
-                                [ngClass]="{
-                                    'status-deployed': result.pendingAsset.assetStatus === 'Deployed',
-                                    'status-onLoan': result.pendingAsset.assetStatus === 'On Loan',
-                                    'status-inventory': result.pendingAsset.assetStatus === 'In Inventory',
-                                    'status-repair': result.pendingAsset.assetStatus === 'In Repair',
-                                    'status-down': result.pendingAsset.assetStatus === 'Down',
-                                    'status-disposed': result.pendingAsset.assetStatus === 'Disposed'
-                                }">
-                                {{ result.pendingAsset.assetStatus }}
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <span class="delete-icon-mobile material-symbols-outlined" *ngIf="!isInReport" (click)="removeAsset(i)">delete</span>
-                    
-                    <app-asset-page [assetTag]="result.pendingAsset.assetTag" [assetPage]="result.pendingAsset" [isPending]="true"></app-asset-page>
+<!-- Assets Table -->
+<div class="assets-table-container" *ngIf="searchResults.length > 0">
+    <div class="table-header">  
+        <h5>Assets Found ({{ searchResults.length }})</h5>
+    </div>
+    
+    <table mat-table [dataSource]="dataSource" matSort class="assets-table">
+        <!-- Asset Tag Column -->
+        <ng-container matColumnDef="assetTag">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Asset Tag</th>
+            <td mat-cell *matCellDef="let element" class="asset-tag-cell">{{ element.assetTag }}</td>
+        </ng-container>
 
-                    <div class="modal fade" [id]="'edit-modal-' + result.existingAsset.assetTag" tabindex="-1" aria-hidden="true" *ngIf="!isInReport">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content">
-                                <div class="modal-header"> 
-                                    <section class="asset-header">
-                                        <h6 class="modal-title">Edit Asset</h6>
-                                    </section>
-                                    
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
+        <!-- Asset Name Column -->
+        <ng-container matColumnDef="assetName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Asset Name</th>
+            <td mat-cell *matCellDef="let element" class="asset-name-cell" [title]="element.assetName">
+                {{ element.assetName }}
+            </td>
+        </ng-container>
+
+        <!-- Serial Number Column -->
+        <ng-container matColumnDef="serialNumber">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Serial Number</th>
+            <td mat-cell *matCellDef="let element">{{ element.serialNumber }}</td>
+        </ng-container>
+
+        <!-- Owner Name Column -->
+        <ng-container matColumnDef="ownerName">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Owner</th>
+            <td mat-cell *matCellDef="let element" class="owner-name-cell" [title]="element.ownerName">
+                {{ element.ownerName }}
+            </td>
+        </ng-container>
+
+        <!-- Cost Center Column -->
+        <ng-container matColumnDef="costCenter">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Cost Center</th>
+            <td mat-cell *matCellDef="let element">{{ element.costCenter }}</td>
+        </ng-container>
+
+        <!-- Condition Column -->
+        <ng-container matColumnDef="condition">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Condition</th>
+            <td mat-cell *matCellDef="let element">
+                <span class="condition-badge" [ngClass]="{
+                    'condition-good': element.condition === true,
+                    'condition-bad': element.condition === false,
+                    'condition-unknown': element.condition === null
+                }">
+                    {{ element.condition === true ? 'Good' : element.condition === false ? 'Bad' : 'Unknown' }}
+                </span>
+            </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Status</th>
+            <td mat-cell *matCellDef="let element">
+                <span class="asset-status" [ngClass]="{
+                    'status-deployed': element.status === 'Deployed',
+                    'status-onloan': element.status === 'On Loan',
+                    'status-inventory': element.status === 'In Inventory',
+                    'status-repair': element.status === 'In Repair',
+                    'status-down': element.status === 'Down',
+                    'status-disposed': element.status === 'Disposed'
+                }">
+                    {{ element.status }}
+                </span>
+            </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let element" class="actions-cell">
+                <button type="button" class="btn-remove" (click)="removeAsset(element.index); $event.stopPropagation()" 
+                        title="Remove asset from list">
+                    <span class="material-symbols-outlined">delete</span>
+                </button>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
+            (click)="onRowClick(row)" 
+            class="clickable-row"></tr>
+    </table>
+
+    <!-- Pagination -->
+    <mat-paginator 
+        [pageSizeOptions]="[5, 10, 20]" 
+        [pageSize]="10"
+        showFirstLastButtons>
+    </mat-paginator>
+</div>
+
+<!-- Asset Modals Container -->
+<div class="modals-container" *ngFor="let result of searchResults; let i = index">
+    <!-- Desktop Edit Modal -->
+    <div class="modal fade" [id]="'edit-modal-' + result.pendingAsset.assetTag" tabindex="-1" aria-hidden="true" *ngIf="!isInReport">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header"> 
+                    <section class="asset-header">
+                        <h6 class="modal-title">Edit Asset - {{ result.pendingAsset.assetTag }}</h6>
+                    </section>
+                    
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
                                 
                                 <div class="modal-body">
-                                    <!-- ERROR MESSAGE -->
                                     <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
                                         <div class="d-flex">
                                             <div class="toast-body">
@@ -151,48 +217,6 @@
                                                     </div>
                                                 </div>
                                 
-                                                <!-- dropdown asset status -->
-                                                <!-- <div class="left-top">
-                                                    <div class="form-floating">
-                                                        <select class="form-select" [id]="'asset-status-' + result.pendingAsset.assetTag" 
-                                                            [(ngModel)]="result.pendingAsset.assetStatus" name="newStatus"
-                                                            (change)="onStatusChange()" aria-label="Asset Status">
-                                                            <option value="">Select status</option>
-                                                            <option value="Deployed">Deployed</option>
-                                                            <option value="On Loan">On Loan</option>
-                                                            <option value="In Inventory">In Inventory</option>
-                                                            <option value="In Repair">In Repair</option>
-                                                            <option value="Down">Down</option>
-                                                            <option value="Disposed">Disposed</option>
-                                                        </select>
-                                                        <label [for]="'asset-status-' + result.pendingAsset.assetTag">Asset Status</label>
-                                                    </div>
-                        
-                                                    <div class="pick-status-reason" *ngIf="result.pendingAsset.assetStatus === 'Disposed'">
-                                                        <div class="form-check form-check-inline">
-                                                            <input class="form-check-input" type="radio" 
-                                                                [id]="'loss-' + result.pendingAsset.assetTag" 
-                                                                name="statusReason" 
-                                                                [value]="'Loss'" 
-                                                                [(ngModel)]="result.pendingAsset.statusReason">
-                                                            <label class="form-check-label" [for]="'loss-' + result.pendingAsset.assetTag">
-                                                                Loss
-                                                            </label>
-                                                        </div>
-                                                        
-                                                        <div class="form-check form-check-inline">
-                                                            <input class="form-check-input" type="radio" 
-                                                                [id]="'obsolete-' + result.pendingAsset.assetTag" 
-                                                                name="statusReason" 
-                                                                [value]="'Obsolete'" 
-                                                                [(ngModel)]="result.pendingAsset.statusReason">
-                                                            <label class="form-check-label" [for]="'obsolete-' + result.pendingAsset.assetTag">
-                                                                Obsolete
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div> -->
-                                
                                                 <div class="left-top">
                                                     <h6>Equipments</h6>
                                                     <div class="equipment-checkboxes">
@@ -259,13 +283,11 @@
                                                                     style="height: 80px"></textarea>
                                                             </div>
                                                             
-                                                            <!-- File input for condition photo -->
                                                             <div class="mb-3">
                                                                 <label [for]="'condition-photo-' + result.pendingAsset.assetTag" class="form-label">
                                                                     Condition Photo
                                                                 </label>
 
-                                                                <!-- Display condition photo if any -->
                                                                 <div class="photo-input mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== ''">
                                                                     <img [src]="serverURL + result.pendingAsset.conditionPhotoURL" 
                                                                         [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
@@ -365,13 +387,9 @@
                         </div>
                     </div>
                 </div>
-            </section>
-        </div>
-    </div>
 
     <!-- For small device screen, i.e. mobile -->
      <div class="container" *ngIf="screenSize === 'small'">
-        <h5 class="data-header">Scanned Asset</h5>
         <div class="col" *ngFor="let result of searchResults; let i = index">
             <section class="asset-list-layout" *ngIf="currentView === 'list'">
                 <div class="asset-list" [ngClass]="variant">
@@ -747,9 +765,6 @@
                 </div>
             </section>
         </div>
-     </div>
-
-</div>
 
 <!-- Session error message -->
 <!-- <div class="alert alert-danger" *ngIf="errorMessage">
