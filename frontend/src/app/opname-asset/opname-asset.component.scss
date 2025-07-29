@@ -349,13 +349,35 @@ p {
 
   .custom-grid {
     display: grid;
-    grid-template-columns: auto auto;
-    grid-template-rows: auto auto auto auto;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto 1fr auto auto;
     grid-template-areas: 
       "main-info user-info"
       "left-top right-top"
       "left-bottom right-bottom"
       "location tbd";
+    min-height: 0; // Prevents grid from growing beyond container
+    
+    // Responsive design for smaller screens
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto auto auto auto;
+      grid-template-areas: 
+        "main-info"
+        "left-top"
+        "left-bottom"
+        "location"
+        "user-info"
+        "right-top";
+
+      .location {
+        border-bottom: 1px solid styles.$quaternary-text-color;
+      }
+
+      .right-top {
+        border-bottom: none;
+      }
+    }
   }
 
   .asset-main-info {
@@ -364,14 +386,19 @@ p {
     justify-items: left;
     display: flex;
     flex-direction: column;
+    align-self: stretch;
     border-bottom: 1px solid styles.$quaternary-text-color;
     border-right: 1px solid styles.$quaternary-text-color;
+    
+    @media (max-width: 768px) {
+      border-right: none;
+    }
   }
   
   .user-info { 
     grid-area: user-info;
     padding: 10px;
-    align-self: start;
+    align-self: stretch;
     justify-items: left;
     display: flex;
     flex-direction: column;
@@ -405,7 +432,7 @@ p {
 
       @media (max-width: 768px) {
         font-size: 8px;
-        text-align: right;
+        text-align: left;
       }
     }
 
@@ -449,6 +476,27 @@ p {
       height: auto;
       resize: vertical;
     }
+    
+    // Readonly input styling
+    .form-control[readonly] {
+      background-color: #f5f5f5;
+      color: #6c757d;
+      cursor: not-allowed;
+    }
+  }
+
+  // Invalid feedback styling - keep it below input but display text horizontally
+  .invalid-feedback {
+    font-size: 8px;
+    color: #dc3545;
+    margin-top: 2px;
+    margin-bottom: 0;
+    white-space: nowrap;
+    display: block;
+    
+    @media (max-width: 768px) {
+      font-size: 7px;
+    }
   }
 
   .left-top { 
@@ -456,10 +504,15 @@ p {
     display: flex;
     padding: 10px;
     flex-direction: column;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: flex-start;
+    align-self: stretch;
     border-bottom: 1px solid styles.$quaternary-text-color;
     border-right: 1px solid styles.$quaternary-text-color;
+    
+    @media (max-width: 768px) {
+      border-right: none;
+    }
 
     .equipment-checkboxes {
       display: flex;
@@ -511,8 +564,13 @@ p {
     display: flex;
     flex-direction: column;
     padding: 10px;
+    align-self: stretch;
     border-bottom: 1px solid styles.$quaternary-text-color;
     border-right: 1px solid styles.$quaternary-text-color;
+    
+    @media (max-width: 768px) {
+      border-right: none;
+    }
   }
 
   .right-top { 
@@ -520,6 +578,7 @@ p {
     display: flex;
     flex-direction: column;
     padding: 10px;
+    align-self: stretch;
     border-bottom: 1px solid styles.$quaternary-text-color;
 
     h5 {
@@ -532,7 +591,12 @@ p {
     display: flex;
     flex-direction: column;
     padding: 10px;
+    align-self: stretch;
     border-right: 1px solid styles.$quaternary-text-color;
+    
+    @media (max-width: 768px) {
+      border-right: none;
+    }
 
     h5 {
       margin-bottom: 10px;
@@ -544,18 +608,12 @@ p {
     }
   }
 
-  .left-bottom { 
-    grid-area: left-bottom;
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    }
-
   .right-bottom {
     grid-area: right-bottom;
     display: flex;
     flex-direction: column;
     padding: 10px;
+    align-self: stretch;
     border-bottom: 1px solid styles.$quaternary-text-color;
   }
 
@@ -859,7 +917,7 @@ th.mat-sort-header-sorted {
   padding: 4px 8px;
   border-radius: 12px;
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: capitalize;
   
   &.condition-good {
     background-color: #d4edda;
@@ -886,7 +944,7 @@ th.mat-sort-header-sorted {
   padding: 4px 8px;
   border-radius: 12px;
   font-weight: 600;
-  text-transform: uppercase;
+  text-transform: capitalize;
 
   @each $name, $color in styles.$asset-pill-colors {
     &.status-#{$name} {
