@@ -11,8 +11,12 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
 
+h6 {
+  font-size: 14px;
+}
+
 p {
-  font-size: 15px;
+  font-size: 9px;
   margin: 0px;
 }
 
@@ -89,10 +93,6 @@ p {
   align-items: center;
 }
 
-.card-1 {
-  border-right: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 30%);
-}
-
 .assets-info-header {
   display: flex;
   flex-direction: row;
@@ -101,133 +101,11 @@ p {
   justify-content: space-between;
 }
 
-.view-icon {
-	flex-shrink: 0;
-	
-	img {
-		width: 35px;
-		height: 35px;
-	}
-	
-	.card-view, .list-view {
-		cursor: pointer;
-		  opacity: 0.6;
-		  transition: opacity 0.2s;
-		
-		&.active {
-		  opacity: 1;
-		}
-		
-		&:hover {
-      opacity: 0.8;
-		}
-  }
-
-	@media (max-width: 767px) {
-    display: none !important; // Force hide on mobile
-  }
-}
-
-.changed {
-  .asset-card {
-    background-color: styles.$secondary-background-color;
-  }
-}
-
-.asset-card-layout.default {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px;
-  margin-top: 20px;
-  transition: transform 0.2s ease-in-out;
-}
-
-.asset-card.default {
-  position: relative; // Added for absolute positioning of child elements
-  border-radius: 20px;
-  padding: 10px;
-  background-color: styles.$tertiary-color;
-  color: styles.$primary-text-color;
-  height: 8rem; //temporary
-  display: flex;
-  align-items: center;
-
-  .additional-info {
-    justify-items: right;
-  }
-}
-
-.asset-card.compact {
-  position: relative; // Added for absolute positioning of child elements
-  border-radius: 20px;
-  padding: 10px;
-  background-color: styles.$tertiary-color;
-  color: styles.$primary-text-color;
-  height: 8rem; //temporary
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-
-  .additional-info {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-  }
-}
-
-.asset-card {
-  &:hover {
-    background-color: color.scale(styles.$tertiary-color, $lightness: -3%);
-    cursor: pointer;
-		box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-  }
-
-  .delete-icon {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 20px;
-    z-index: 99;
-    cursor: pointer;
-    color: rgb(243, 131, 131);
-    transition: 0.05s;
-    
-    &:hover {
-      color: #e72323;
-      transform: scale(1.1);
-    }
-  }
-}
-
-.opname-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: end;
-  margin: 0px 5px;
-  border-left: 1px solid styles.$primary-text-color;
-  padding-left: 20px;
-}
-
-.card-body {
-  display: flex;
-  flex-direction: row;
-  gap: 50px;
-}
-
 .verify-body {
   align-items: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-
-.main-info {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  margin: 0px 5px;
 }
 
 .asset-icon {
@@ -251,33 +129,16 @@ p {
 }
 
 .asset-tag {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: bold;
-  margin: 0px 5px;
 }
 
-.asset-name, .owner-name, .location-display, .asset-room, .asset-site {
-  font-size: 12px;
-  margin: 5px;
+.owner-name {
   max-width: 110px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
-}
-
-@media (max-width: 768px) {
-  .asset-card {
-    font-size: 0.85rem;
-    
-    .asset-tag {
-      font-size: 0.8rem;
-    }
-    
-    .asset-name {
-      font-size: 0.8rem;
-    }
-  }
 }
 
 .asset-list {
@@ -322,20 +183,7 @@ p {
   }
 }
 
-.first-column{
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-  justify-content: center;
-
-  img {
-    width: 50px;
-    height: 50px;
-    object-fit: cover;
-  }
-}
-
-.second-column {
+.first-column {
   margin-left: 10px;
   flex-grow: 1;
   display: flex;
@@ -343,7 +191,7 @@ p {
 	align-items: start;
 }
 
-.third-column {
+.second-column {
 	display: flex;
 	flex-direction: column;
 	align-items: start;
@@ -354,8 +202,20 @@ p {
 }
 
 .modal {
+  p, input, label {
+    margin: 0;
+    font-size: 9px;
+    padding: 5px 0px;
+  }
+
+  input {
+    margin: 0;
+    font-size: 9px;
+    padding: 5px 8px;
+  }
+
   .modal-header {
-    padding: 20px;
+    padding: 10px;
   }
 
   .serial-number {
@@ -364,38 +224,112 @@ p {
 
   .modal-body {
     position: relative;
-    padding: 30px;
+    padding: 20px;
     color: styles.$primary-text-color;
   }
 
   .custom-grid {
     display: grid;
-    grid-template-columns: 369px 369px 1fr;
-    grid-template-rows: auto auto auto;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto auto auto;
     grid-template-areas: 
-      "icon user-info"
+      "main-info user-info"
       "left-top right-top"
-      "left-bottom right-bottom";
+      "left-bottom right-bottom"
+      "location tbd";
   }
 
   .asset-main-info {
-    grid-area: icon;
+    grid-area: main-info;
+    padding: 10px;
+    justify-items: left;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    border-bottom: 1px solid styles.$quaternary-text-color;
+    border-right: 1px solid styles.$quaternary-text-color;
   }
-
-  .asset-icon {
-    height: 100%;
-    object-fit: contain;
-    display: block;
-    margin: 0 auto;
-  }
-
+  
   .user-info { 
     grid-area: user-info;
     padding: 10px;
+    align-self: start;
+    justify-items: left;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid styles.$quaternary-text-color;
+  }
+
+  .serial-number-container, .user-name, .user-position, .user-cost-center, .user-location, .form-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 5px 0px;
+  }
+
+  .form-item {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 8px;
+    align-items: center;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 70px 1fr;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 9px;
+      font-weight: 600;
+      color: styles.$primary-text-color;
+      margin: 0;
+      text-align: left;
+
+      @media (max-width: 768px) {
+        font-size: 8px;
+        text-align: right;
+      }
+    }
+
+    .form-control, .form-select {
+      font-size: 9px;
+      padding: 5px 8px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+      background-color: white;
+      color: styles.$primary-text-color;
+      height: 28px;
+
+      @media (max-width: 768px) {
+        font-size: 8px;
+        padding: 4px 6px;
+        height: 26px;
+      }
+
+      &:focus {
+        border-color: styles.$primary-color;
+        box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.2);
+        outline: 0;
+      }
+
+      &::placeholder {
+        color: #999;
+        font-style: italic;
+        font-size: 8px;
+
+        @media (max-width: 768px) {
+          font-size: 7px;
+        }
+      }
+    }
+
+    .form-select {
+      cursor: pointer;
+    }
+
+    textarea.form-control {
+      height: auto;
+      resize: vertical;
+    }
   }
 
   .left-top { 
@@ -406,12 +340,51 @@ p {
     justify-content: center;
     align-items: flex-start;
     border-bottom: 1px solid styles.$quaternary-text-color;
+    border-right: 1px solid styles.$quaternary-text-color;
+
+    .equipment-checkboxes {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+      
+      .form-check {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 0;
+        padding-left: 0px;
+        
+        .form-check-input {
+          margin: 0;
+          flex-shrink: 0;
+          width: 16px;
+          height: 16px;
+        }
+        
+        .form-check-label {
+          font-size: 9px;
+          font-weight: 500;
+          color: styles.$primary-text-color;
+          margin: 0;
+          line-height: 1.2;
+          cursor: pointer;
+        }
+      }
+    }
   }
 
-  .asset-status{
-    background-color: styles.$button-color;
+  .asset-status {
+    font-size: 10px !important;
     border-radius: 15px;
     padding: 5px 10px;
+
+    @each $name, $color in styles.$asset-pill-colors {
+      &.status-#{$name} {
+        background-color: $color;
+              border: 1px solid color.adjust($color, $lightness: -10%);
+      }
+    }
   }
 
   .left-bottom { 
@@ -419,6 +392,8 @@ p {
     display: flex;
     flex-direction: column;
     padding: 10px;
+    border-bottom: 1px solid styles.$quaternary-text-color;
+    border-right: 1px solid styles.$quaternary-text-color;
   }
 
   .right-top { 
@@ -427,86 +402,97 @@ p {
     flex-direction: column;
     padding: 10px;
     border-bottom: 1px solid styles.$quaternary-text-color;
-    border-left: 1px solid styles.$quaternary-text-color;
 
     h5 {
       margin-bottom: 10px;
     }
   }
 
-  .right-bottom { 
+  .location { 
+    grid-area: location;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    border-right: 1px solid styles.$quaternary-text-color;
+
+    h5 {
+      margin-bottom: 10px;
+    }
+
+    .asset-location {
+      display: flex;
+      flex-direction: column;
+    }
+  }
+
+  .left-bottom { 
+    grid-area: left-bottom;
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    }
+
+  .right-bottom {
     grid-area: right-bottom;
     display: flex;
     flex-direction: column;
     padding: 10px;
-    border-left: 1px solid styles.$quaternary-text-color;
-
-    h5 {
-      margin-bottom: 10px;
-    }
+    border-bottom: 1px solid styles.$quaternary-text-color;
   }
 
-  .user-info {
-    align-self: center;
-    justify-items: left;
-  }
-
-  .user-position {
-    color: styles.$quaternary-text-color;
-  }
-
-  .asset-status {
-    font-size: 15px;
-  }
-
-  hr {
-    margin: 15px 0px 0px 0px;
-  }
-
-  .rating {
-    display: flex;
-    flex-direction: row;
-    text-align: center;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-
-  .condition {
-    padding-right: 5px;
-  }
-
-  .like,
-  .dislike {
-    display: inline-block;
-    cursor: pointer;
-    margin: 0px 5px;
-  }
-
-  .like:hover,
-  .like.active {
-    color: #2EBDD1;
-    transition: all .2s ease-in-out;
-    transform: scale(1.1);
-  }
-
-  .dislike:hover,
-  .dislike.active {
-    color: #d12e2e;
-    transition: all .2s ease-in-out;
-    transform: scale(1.1);
-  }
-
-  .pick-status-reason {
-    display: flex;
-    padding-top: 10px;
-    flex-direction: row;
-    gap: 10px;
-  }
-
-  .form-floating {
-    font-size: 15px;
+  .reason-changes {
+    padding: 10px;
   }
 }
+
+.rating {
+  display: flex;
+  flex-direction: row;
+  text-align: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.condition {
+  padding-right: 5px;
+}
+
+.photo-input {
+  font-size: 9px;
+}
+
+.like,
+.dislike {
+  display: inline-block;
+  cursor: pointer;
+  margin: 0px 5px;
+}
+
+.like:hover,
+.like.active {
+  color: #2EBDD1;
+  transition: all .2s ease-in-out;
+  transform: scale(1.1);
+}
+
+.dislike:hover,
+.dislike.active {
+  color: #d12e2e;
+  transition: all .2s ease-in-out;
+  transform: scale(1.1);
+}
+
+.pick-status-reason {
+  display: flex;
+  padding-top: 10px;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.form-floating {
+  font-size: 15px;
+}
+
 
 .mobile {
   padding-top: 20px;
@@ -530,37 +516,35 @@ p {
   h5 {
     margin-bottom: 10px;
   }
-}
 
-.equipment-checkboxes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 10px;
-  margin-top: 10px;
-
-  .form-check {
+  .equipment-checkboxes {
     display: flex;
-    align-items: center;
-    margin-bottom: 0;
-
-    .form-check-input {
-      margin-right: 8px;
-      margin-top: 0;
-    }
-
-    .form-check-label {
-      font-size: 14px;
-      margin-bottom: 0;
-      cursor: pointer;
-    }
-  }
-
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    flex-direction: column;
     gap: 8px;
-
-    .form-check-label {
-      font-size: 13px;
+    margin-top: 10px;
+    
+    .form-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 0;
+      padding-left: 0px;
+      
+      .form-check-input {
+        margin: 0;
+        flex-shrink: 0;
+        width: 16px;
+        height: 16px;
+      }
+      
+      .form-check-label {
+        font-size: 9px;
+        font-weight: 500;
+        color: styles.$primary-text-color;
+        margin: 0;
+        line-height: 1.2;
+        cursor: pointer;
+      }
     }
   }
 }

@@ -2,6 +2,7 @@ export interface AssetChange {
     assetTag: string;
     newStatus: string;
     newStatusReason?: string;
+    newSerialNumber?: string;
     newCondition?: boolean;
     newConditionNotes?: string;
     newConditionPhotoURL?: string;

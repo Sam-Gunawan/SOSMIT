@@ -596,6 +596,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
     
     const hasChanges = pending.assetStatus !== existing.assetStatus ||
            pending.statusReason !== existing.statusReason ||
+           pending.serialNumber !== existing.serialNumber ||
            pending.condition !== existing.condition ||
            pending.conditionNotes !== existing.conditionNotes ||
            pending.conditionPhotoURL !== existing.conditionPhotoURL ||
@@ -681,6 +682,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
     }
     if (pending.statusReason !== existing.statusReason) {
       assetChanges.newStatusReason = pending.statusReason;
+    }
+    if (pending.serialNumber !== existing.serialNumber) {
+      assetChanges.newSerialNumber = pending.serialNumber;
     }
     if (pending.condition !== existing.condition) {
       assetChanges.newCondition = pending.condition;
@@ -783,6 +787,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
       assetTag: existing.assetTag,
       newStatus: existing.assetStatus,
       newStatusReason: existing.statusReason,
+      newSerialNumber: existing.serialNumber,
       newCondition: existing.condition,
       newConditionNotes: existing.conditionNotes,
       newConditionPhotoURL: existing.conditionPhotoURL,
