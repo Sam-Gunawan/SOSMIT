@@ -129,6 +129,28 @@ p {
 
 @include styles.search-form-styles;
 
+// ===============================================
+// Specific styling for opname asset scan form     
+.search-form-container {                           
+  border: none;
+  border-radius: 0;
+}
+
+.compact-search-form {
+  .form-grid {
+    grid-template-columns: 1fr 1fr 100px;
+    margin: 0;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    border: none;
+    padding-top: 0;
+  }
+}
+// ===============================================
+
 .buttons {
   display: flex;
   flex-direction: row;
