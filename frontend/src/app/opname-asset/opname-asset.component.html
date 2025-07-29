@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=delete" />
 
-<div class="opname-sticky-top" *ngIf="!isInReport">
+<!-- <div class="opname-sticky-top" *ngIf="!isInReport">
     <div class="search-bar">
         <form class="d-flex" role="search" (ngSubmit)="onSearch()">
             <input
@@ -23,8 +23,54 @@
         <span (click)="setSearchType('asset_tag')" class="by-tag" [class.selected]="searchType === 'asset_tag'">Asset Tag</span>
         <span (click)="setSearchType('serial_number')" class="by-SN" [class.selected]="searchType === 'serial_number'">Serial Number</span>
     </div>
-</div>
+</div> -->
 
+<div class="sticky-top">
+    <!-- Mobile search toggle button -->
+    <div class="mobile-search-toggle" (click)="toggleSearchForm()">
+        <button class="btn btn-outline-primary toggle-btn">
+            <i class="fas fa-search"></i>
+            {{ showSearchForm ? 'Hide Search' : 'Show Search' }}
+        </button>
+    </div>
+
+    <!-- Search form container -->
+    <div class="search-form-container" [ngClass]="{'mobile-hidden': !showSearchForm}">
+        <h6 class="search-title">Asset Search</h6>
+        
+        <form class="compact-search-form" (ngSubmit)="onSearch()">
+            <div class="form-grid">
+                <div class="form-item">
+                    <label>Asset Tag</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="assetTagQuery"
+                        name="assetTag"
+                        placeholder="Asset tag"
+                        [disabled]="isAssetTagDisabled">
+                </div>
+                
+                <div class="form-item">
+                    <label>Serial Number</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="serialNumberQuery"
+                        name="serialNumber"
+                        placeholder="Serial number"
+                        [disabled]="isSerialNumberDisabled">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary search-btn">
+                    <i class="fas fa-search"></i>
+                    Search
+                </button>
+            </div>
+        </form>
+</div>
 <div class="opname-asset-info" *ngIf="!isLoading && searchResults.length > 0">
     <!-- For large device screen, i.e. desktop/tablet -->
     <div class="container" *ngIf="screenSize === 'large'">

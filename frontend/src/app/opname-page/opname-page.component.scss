@@ -26,8 +26,39 @@ p {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+  padding: 0.75rem 0; // Reduced padding to make it more compact
+  position: sticky;
+  top: 0;
+  background-color: white;
+  z-index: 100;
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 1rem;
+
+  .opname-details {
+    h2 {
+      font-size: 1.25rem; // Reduced from default size
+      margin-bottom: 0.25rem; // Reduced margin
+    }
+    
+    p {
+      font-size: 0.875rem; // Slightly larger than default 12px
+      margin: 0;
+    }
+  }
 
   @media (max-width: 768px) {
+    padding: 0.5rem 0;
+    
+    .opname-details {
+      h2 {
+        font-size: 1.1rem;
+      }
+      
+      p {
+        font-size: 0.75rem;
+      }
+    }
+    
     .buttons {
       flex-direction: column;
       align-items: center;
@@ -35,6 +66,7 @@ p {
     .btn {
       font-size: 0.75rem;
       width: 113px;
+      padding: 0.375rem 0.5rem;
     }
   }
 }
