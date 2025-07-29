@@ -8,17 +8,6 @@
 // Global search form styles
 @include styles.search-form-styles;
 
-// Search container sticky positioning
-.search-container {
-  position: sticky;
-  top: 80px; // Offset for the opname header
-  background-color: white;
-  z-index: 50;
-  padding: 1rem 0;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
 // Mobile search toggle
 .mobile-search-toggle {
   display: none; // Hidden by default on desktop
@@ -128,7 +117,6 @@ p {
 }
 
 @include styles.search-form-styles;
-
 // ===============================================
 // Specific styling for opname asset scan form     
 .search-form-container {                           
@@ -151,89 +139,6 @@ p {
 }
 // ===============================================
 
-.buttons {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-}
-
-// .opname-sticky-top {
-//   // margin-top: 20px !important;
-//   padding-top: 30px;
-//   padding-bottom: 15px;
-//   position: sticky;
-//   top: 42px !important;
-//   z-index: 10;
-//   background-color: styles.$background-color !important;
-//   align-content: center;
-//   justify-content: center;
-// }
-
-// .search-bar {
-//   margin-bottom: 10px;
-// }
-
-// .by-tag, .by-SN {
-//   font-size: 12px;
-//   color: styles.$primary-text-color;
-//   padding: 5px 10px;
-//   border-radius: 15px;
-//   background-color: styles.$secondary-background-color;
-//   margin-right: 5px;
-
-//   &:hover {
-//     cursor: pointer;
-//     background-color: color.adjust(styles.$secondary-background-color, $lightness: -10%);
-//   }
-  
-//   &.selected {
-//     color: color.adjust(styles.$primary-text-color, $lightness: -15%);
-//     background-color: color.adjust(styles.$secondary-background-color, $lightness: -20%);
-//   }
-  
-//   &:active {
-//     background-color: color.adjust(styles.$secondary-background-color, $lightness: -30%);
-//   }
-// }
-
-.opname-asset-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.row {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-}
-
-.assets-info-header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 20px;
-  justify-content: space-between;
-}
-
-.verify-body {
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.asset-icon {
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  // padding: 5px 0px;
-}
-
 .asset-status {
   font-size: 9px;
   border-radius: 15px;
@@ -247,81 +152,8 @@ p {
   }
 }
 
-.asset-tag {
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.owner-name {
-  max-width: 110px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: block;
-}
-
-.asset-list {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-
-  .delete-icon-mobile {
-  margin-left: 10px;
-  font-size: 20px;
-  z-index: 99;
-  cursor: pointer;
-  color: rgb(243, 131, 131);
-  transition: 0.05s;
-    
-    &:hover {
-      color: #e72323;
-      transform: scale(1.1);
-    }
-  }
-}
-
-.asset-list-layout {
-	padding-top: 10px;
-}
-
-.list-body {
-	position: relative; // Added for absolute positioning of child elements
-	padding: 10px;
-	border-bottom: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 40%);
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: center;
-  flex-grow: 1;
-	border-radius: 20px;
-
-  &:hover {
-    background-color: color.scale(styles.$quaternary-text-color, $lightness: 95%);
-    cursor: pointer;
-		box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-  }
-}
-
-.first-column {
-  margin-left: 10px;
-  flex-grow: 1;
-  display: flex;
-	flex-direction: column;
-	align-items: start;
-}
-
-.second-column {
-	display: flex;
-	flex-direction: column;
-	align-items: start;
-
-	p {
-		margin: 5px 0px;
-	}
-}
-
 .modal {
-  p, input, label {
+  p, label {
     margin: 0;
     font-size: 9px;
     padding: 5px 0px;
@@ -335,10 +167,6 @@ p {
 
   .modal-header {
     padding: 10px;
-  }
-
-  .serial-number {
-    color: styles.$quaternary-text-color;
   }
 
   .modal-body {
@@ -369,14 +197,6 @@ p {
         "location"
         "user-info"
         "right-top";
-
-      .location {
-        border-bottom: 1px solid styles.$quaternary-text-color;
-      }
-
-      .right-top {
-        border-bottom: none;
-      }
     }
   }
 
@@ -405,18 +225,12 @@ p {
     border-bottom: 1px solid styles.$quaternary-text-color;
   }
 
-  .serial-number-container, .user-name, .user-position, .user-cost-center, .user-location, .form-item {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    padding: 5px 0px;
-  }
-
   .form-item {
     display: grid;
     grid-template-columns: 80px 1fr;
     gap: 8px;
     align-items: center;
+    padding: 5px 0px;
 
     @media (max-width: 768px) {
       grid-template-columns: 70px 1fr;
@@ -546,19 +360,6 @@ p {
     }
   }
 
-  .asset-status {
-    font-size: 9px;
-    border-radius: 15px;
-    padding: 5px 10px;
-
-    @each $name, $color in styles.$asset-pill-colors {
-      &.status-#{$name} {
-        background-color: $color;
-              border: 1px solid color.adjust($color, $lightness: -10%);
-      }
-    }
-  }
-
   .left-bottom { 
     grid-area: left-bottom;
     display: flex;
@@ -584,6 +385,10 @@ p {
     h5 {
       margin-bottom: 10px;
     }
+
+    @media (max-width: 768px) {
+      border-bottom: none;
+    }
   }
 
   .location { 
@@ -594,17 +399,13 @@ p {
     align-self: stretch;
     border-right: 1px solid styles.$quaternary-text-color;
     
-    @media (max-width: 768px) {
-      border-right: none;
-    }
-
     h5 {
       margin-bottom: 10px;
     }
 
-    .asset-location {
-      display: flex;
-      flex-direction: column;
+    @media (max-width: 768px) {
+      border-right: none;
+      border-bottom: 1px solid styles.$quaternary-text-color;
     }
   }
 
@@ -678,73 +479,6 @@ p {
   color: white;
 }
 
-.pick-status-reason {
-  display: flex;
-  padding-top: 10px;
-  flex-direction: row;
-  gap: 10px;
-}
-
-.form-floating {
-  font-size: 15px;
-}
-
-
-.mobile {
-  padding-top: 20px;
-}
-
-.main-info-mobile {
-  margin-bottom: 20px;
-  align-items: center;
-}
-
-.asset-name-mobile {
-  margin-bottom: 10px;
-}
-
-.user-info-mobile, .asset-location-mobile, .asset-condition-mobile, .asset-equipments-mobile {
-  border-top: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 30%);
-  padding-top: 10px;
-  margin-bottom: 20px;
-  align-items: center;
-
-  h5 {
-    margin-bottom: 10px;
-  }
-
-  .equipment-checkboxes {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
-    
-    .form-check {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 0;
-      padding-left: 0px;
-      
-      .form-check-input {
-        margin: 0;
-        flex-shrink: 0;
-        width: 16px;
-        height: 16px;
-      }
-      
-      .form-check-label {
-        font-size: 9px;
-        font-weight: 500;
-        color: styles.$primary-text-color;
-        margin: 0;
-        line-height: 1.2;
-        cursor: pointer;
-      }
-    }
-  }
-}
-
 .my-toast {
     display: block;
     position: fixed;
@@ -760,13 +494,13 @@ p {
     box-shadow: 0px 10px 16px rgba(0, 0, 0, 0.1);
 
     .toast-body {
-        padding-right: 5px;
+      padding-right: 5px;
     }
     
     p {
-        margin: 0;
-        font-size: 14px;
-        color: rgb(51, 3, 3);
+      margin: 0;
+      font-size: 14px;
+      color: rgb(51, 3, 3);
     }
 }
 
