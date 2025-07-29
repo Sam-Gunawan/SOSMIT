@@ -228,22 +228,13 @@
 
                                     <div class="form-item">
                                         <label [for]="'owner-position-' + result.pendingAsset.assetTag" class="form-label mb-0">Position</label>
-                                    <div class="form-item">
-                                        <label [for]="'owner-position-' + result.pendingAsset.assetTag" class="form-label mb-0">Position</label>
 
                                         <input type="text" class="form-control" 
                                             [id]="'owner-position-' + result.pendingAsset.assetTag" 
                                             [(ngModel)]="result.pendingAsset.assetOwnerPosition" name="newOwnerPosition"
                                             [placeholder]="result.pendingAsset.assetOwnerPosition || 'Enter position'">
                                     </div>
-                                        <input type="text" class="form-control" 
-                                            [id]="'owner-position-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.pendingAsset.assetOwnerPosition" name="newOwnerPosition"
-                                            [placeholder]="result.pendingAsset.assetOwnerPosition || 'Enter position'">
-                                    </div>
 
-                                    <div class="form-item">
-                                        <label [for]="'cost-center-' + result.pendingAsset.assetTag" class="form-label mb-0">Cost Center</label>
                                     <div class="form-item">
                                         <label [for]="'cost-center-' + result.pendingAsset.assetTag" class="form-label mb-0">Cost Center</label>
 
@@ -305,41 +296,7 @@
                                             [placeholder]="result.pendingAsset.regionName || 'Enter region'">
                                     </div>
                                 </div>
-                                    <div class="form-item">
-                                        <label [for]="'user-region-' + result.pendingAsset.assetTag" class="form-label mb-0">Region</label>
-                                        <input type="text" class="form-control" 
-                                            [id]="'user-region-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.pendingAsset.regionName" name="newUserRegion"
-                                            [placeholder]="result.pendingAsset.regionName || 'Enter region'">
-                                    </div>
-                                </div>
 
-                                <div class="left-bottom">
-                                    <div class="asset-condition">  
-                                        <div class="rating">
-                                            <h6 class="condition">Condition</h6>
-                                            <span class="like-btn" [class.active]="isLiked" (click)="setLike()">
-                                                Good
-                                            </span>
-                                            <span class="dislike-btn" [class.active]="isDisliked" (click)="setDislike()">
-                                                Bad
-                                            </span>
-                                        </div>
-                
-                                        <div *ngIf="isDisliked">                                                            
-                                            <div class="form-item">
-                                                <label [for]="'condition-notes-' + result.pendingAsset.assetTag" class="form-label mb-0">Notes</label>
-                                                <textarea class="form-control" 
-                                                    [id]="'condition-notes-' + result.pendingAsset.assetTag" 
-                                                    [(ngModel)]="result.pendingAsset.conditionNotes" name="newConditionNotes"
-                                                    [placeholder]="result.pendingAsset.conditionNotes || 'Describe the condition issue'"
-                                                    style="height: 80px"></textarea>
-                                            </div>
-                                            
-                                            <div class="mb-3">
-                                                <label [for]="'condition-photo-' + result.pendingAsset.assetTag" class="form-label">
-                                                    Condition Photo
-                                                </label>
                                 <div class="left-bottom">
                                     <div class="asset-condition">  
                                         <div class="rating">
@@ -372,21 +329,7 @@
                                                         [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
                                                         class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
                                                 </div>
-                                                <div class="photo-input mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== ''">
-                                                    <img [src]="serverURL + result.pendingAsset.conditionPhotoURL" 
-                                                        [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
-                                                        class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
-                                                </div>
 
-                                                <input type="file" class="form-control" 
-                                                    [id]="'condition-photo-' + result.pendingAsset.assetTag" 
-                                                    name="conditionPhoto"
-                                                    (change)="onFileSelected($event)"
-                                                    accept="image/*" capture="camera">
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                                                 <input type="file" class="form-control" 
                                                     [id]="'condition-photo-' + result.pendingAsset.assetTag" 
                                                     name="conditionPhoto"
@@ -419,54 +362,7 @@
                                                 Please select a valid site from the list.
                                             </div>
                                         </div>
-                                        <div class="form-item">
-                                            <label [for]="'room-' + result.pendingAsset.assetTag" class="form-label mb-0">Room</label>
-                                            <input type="text" class="form-control" 
-                                                [id]="'room-' + result.pendingAsset.assetTag" 
-                                                [(ngModel)]="result.pendingAsset.room" name="newRoom"
-                                                [placeholder]="result.pendingAsset.room || 'Enter room'">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="reason-changes form-item" *ngIf="hasFormChangesForAsset(result)">
-                            <label [for]="'change-reason-' + result.pendingAsset.assetTag" class="form-label mb-0">Reason for Changes</label>
-                            <textarea class="form-control" 
-                                [id]="'change-reason-' + result.pendingAsset.assetTag" 
-                                [(ngModel)]="result.changeReason" name="changeReason"
-                                placeholder="Please provide a reason for these changes"
-                                style="height: 80px" required></textarea>
-                        </div>
-                    
-                        <div class="modal-footer">
-                            <button type="submit" class="btn btn-primary" [disabled]="isLoading || !result.changeReason || !hasFormChangesForAsset(result)">
-                                <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                Save Changes
-                            </button>
-                                <div class="right-bottom"></div>
-                
-                                <div class="location">
-                                    <div class="asset-location">
-                                        <h6>Asset Location</h6>
-                                        <p>Region - {{ result.pendingAsset.regionName }}</p>
-                                        <div class="form-item">
-                                            <label [for]="'site-name-' + result.pendingAsset.assetTag" class="form-label mb-0">Site Name</label>
-                                            <input type="text" class="form-control" 
-                                                [id]="'site-name-' + result.pendingAsset.assetTag" 
-                                                [(ngModel)]="result.pendingAsset.siteName" name="siteName"
-                                                (input)="onSiteInputChange(i)"
-                                                list="all-sites"
-                                                [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName"
-                                                [placeholder]="result.pendingAsset.siteName || 'Select site'">
-                                            <datalist id="all-sites">
-                                                <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
-                                            </datalist>
-                                            <div *ngIf="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName" class="invalid-feedback">
-                                                Please select a valid site from the list.
-                                            </div>
-                                        </div>
+
                                         <div class="form-item">
                                             <label [for]="'room-' + result.pendingAsset.assetTag" class="form-label mb-0">Room</label>
                                             <input type="text" class="form-control" 
@@ -494,15 +390,6 @@
                                 Save Changes
                             </button>
 
-                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" [attr.data-bs-target]="'#assetAllGood-' + i">
-                                All good
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
                             <button type="button" class="btn btn-secondary" data-bs-toggle="modal" [attr.data-bs-target]="'#assetAllGood-' + i">
                                 All good
                             </button>
@@ -537,6 +424,8 @@
         </div>
     </div>
 </div>
+
+
 
 <!-- Session error message -->
 <!-- <div class="alert alert-danger" *ngIf="errorMessage">
