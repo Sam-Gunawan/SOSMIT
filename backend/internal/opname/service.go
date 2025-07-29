@@ -590,3 +590,27 @@ func (service *Service) RejectOpnameSession(sessionID int, reviewerID int) error
 	log.Printf("✅ Opname session with ID %d rejected successfully by user %d", sessionID, reviewerID)
 	return nil
 }
+
+// GetUserFromOpnameSession retrieves the user who started an opname session.
+func (service *Service) GetUserFromOpnameSession(sessionID int) (*user.User, error) {
+	// Validate sessionID
+	if sessionID <= 0 {
+		log.Printf("⚠ Invalid sessionID: %d", sessionID)
+		return nil, errors.New("invalid sessionID")
+	}
+
+	// Call the repository to get the user from the session
+	user, err := service.repo.GetUserFromOpnameSession(sessionID)
+	if err != nil {
+		log.Printf("❌ Error retrieving user from opname session %d: %v", sessionID, err)
+		return nil, err
+	}
+
+	if user == nil {
+		log.Printf("⚠ No user found for opname session %d", sessionID)
+		return nil, errors.New("user not found for this opname session")
+	}
+
+	log.Printf("✅ User retrieved successfully for opname session %d", sessionID)
+	return user, nil
+}

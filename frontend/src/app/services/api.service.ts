@@ -3,11 +3,10 @@
   import { Router } from '@angular/router';
   import { Observable } from 'rxjs';
   import { tap, map } from 'rxjs/operators';
-  import { SiteCardInfo } from '../model/site-card-info.model';
+  import { SiteInfo } from '../model/site-info.model';
   import { AssetInfo } from '../model/asset-info.model';
   import { User } from '../model/user.model';
   import { formatDate, titleCase } from '../reusable_functions';
-  import { SiteInfo } from '../model/site-info.model';
   import { environment } from '../../environments/environments';
 
   @Injectable({
@@ -134,11 +133,17 @@
           return response.sites.map((site: any) => ({
             siteID: site.SiteID,
             siteName: site.SiteName,
-            siteGroupName: site.SiteGroupName,
-            regionName: site.RegionName,
+            siteGroup: site.SiteGroupName,
+            siteRegion: site.RegionName,
             siteGaID: site.SiteGaID,
             siteGaName: titleCase(site.SiteGaName),
-            siteGaEmail: site.SiteGaEmail
+            siteGaEmail: site.SiteGaEmail,
+            // Default opname fields for sites list
+            opnameSessionID: 0,
+            opnameUserID: 0,
+            opnameUserName: '',
+            opnameStatus: '',
+            opnameDate: ''
           }));
         }),
         tap((sites: SiteInfo[]) => {
@@ -148,22 +153,26 @@
       )
     }
 
-    getUserSiteCards(): Observable<SiteCardInfo[]> {
+    getUserSiteCards(): Observable<SiteInfo[]> {
       // This method will fetch the site cards that the user has access to.
-      return this.http.get<SiteCardInfo[]>(`${this.userApiUrl}/site-cards`).pipe(
+      return this.http.get<SiteInfo[]>(`${this.userApiUrl}/site-cards`).pipe(
         map((response: any) => {
           return response.site_cards.map((site: any) => ({
             siteID: site.SiteID,
             siteName: site.SiteName,
             siteGroup: site.SiteGroupName,
             siteRegion: site.RegionName,
-            siteGA: site.SiteGaID,
+            siteGaID: site.SiteGaID || 0, // Default to 0 if not provided
+            siteGaName: site.SiteGaName || '',
+            siteGaEmail: site.SiteGaEmail || '',
             opnameSessionID: site.OpnameSessionID,
+            opnameUserID: site.OpnameUserID || 0,
+            opnameUserName: site.OpnameUserName || '',
             opnameStatus: site.OpnameStatus,
             opnameDate: formatDate(new Date(site.OpnameDate))
           }))
         }), // Extract site cards from the response
-        tap((siteCards: SiteCardInfo[]) => {
+        tap((siteCards: SiteInfo[]) => {
           // Log the fetched site cards for debugging purposes.
           console.log('[ApiService] Fetched site cards:', siteCards);
         })
@@ -178,11 +187,17 @@
           return {
             siteID: response.site_id,
             siteName: response.site_name,
-            siteGroupName: response.site_group_name,
-            regionName: response.region_name,
+            siteGroup: response.site_group_name,
+            siteRegion: response.region_name,
             siteGaID: response.site_ga_id,
             siteGaName: titleCase(response.site_ga_name),
-            siteGaEmail: response.site_ga_email
+            siteGaEmail: response.site_ga_email,
+            // Default opname fields for individual site fetch
+            opnameSessionID: 0,
+            opnameUserID: 0,
+            opnameUserName: '',
+            opnameStatus: '',
+            opnameDate: ''
           };
         }),
         tap((siteInfo: SiteInfo) => {

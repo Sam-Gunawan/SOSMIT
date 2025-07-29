@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { SiteCardInfo } from '../model/site-card-info.model';
+import { SiteInfo } from '../model/site-info.model';
 import { AssetCardComponent } from '../asset-card/asset-card.component';
 import { OpnameSession } from '../model/opname-session.model';
 
@@ -14,8 +14,8 @@ import { OpnameSession } from '../model/opname-session.model';
     styleUrl: './site-page.component.scss'
   })
   export class SitePageComponent {
-    sitePage: SiteCardInfo;
-    siteList?: SiteCardInfo[] = []; // Initialize siteList as an empty array
+    sitePage: SiteInfo;
+    siteList?: SiteInfo[] = []; // Initialize siteList as an empty array
     isLoading: boolean = true; // Loading state to show a spinner or loading indicator
     errorMessage: string = '';
     opnameLoading: boolean = false; // Loading state for starting a new opname session
@@ -29,8 +29,12 @@ import { OpnameSession } from '../model/opname-session.model';
         siteName: '',
         siteGroup: '',
         siteRegion: '',
-        siteGA: -1,
+        siteGaID: -1,
+        siteGaName: '',
+        siteGaEmail: '',
         opnameSessionID: -1,
+        opnameUserID: -1,
+        opnameUserName: '',
         opnameStatus: '',
         opnameDate: ''
       };
@@ -47,7 +51,7 @@ import { OpnameSession } from '../model/opname-session.model';
           this.siteList = siteCardsList; // Update the siteList with the fetched data
           console.log('[SitePage] Site cards fetched successfully:', this.siteList);
           const id = Number(this.route.snapshot.paramMap.get('id'));
-          const fetchedSite = this.siteList?.find((site: SiteCardInfo) => site.siteID === id);
+          const fetchedSite = this.siteList?.find((site: SiteInfo) => site.siteID === id);
           this.isLoading = false; // Set loading state to false after data is fetched
           if (fetchedSite) {
             this.sitePage = fetchedSite; // Set the sitePage to the fetched site

@@ -217,8 +217,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
           // Find the site name based on the site ID
           const site = this.allSites.find(site => site.siteID === siteID);
           const siteName = site ? site.siteName : asset.siteName;
-          const siteGroupName = site ? site.siteGroupName : asset.siteGroupName;
-          const regionName = site ? site.regionName : asset.regionName;
+          const siteGroupName = site ? site.siteGroup : asset.siteGroupName;
+          const regionName = site ? site.siteRegion : asset.regionName;
           
           // Populate pending asset and apply changes from savedRecord
           const pendingAsset: AssetInfo = {
@@ -512,8 +512,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
     
     const matchedSite = this.allSites.find(site => (
       site.siteName.toLowerCase() === input ||
-      site.siteGroupName.toLowerCase() === input ||
-      site.regionName.toLowerCase() === input
+      site.siteGroup.toLowerCase() === input ||
+      site.siteRegion.toLowerCase() === input
     ));
 
     if (matchedSite) {
@@ -522,8 +522,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges {
         ...result.pendingAsset,
         siteID: matchedSite.siteID,
         siteName: matchedSite.siteName,
-        siteGroupName: matchedSite.siteGroupName,
-        regionName: matchedSite.regionName
+        siteGroupName: matchedSite.siteGroup,
+        regionName: matchedSite.siteRegion
       };
 
       // Force change detection to update the view

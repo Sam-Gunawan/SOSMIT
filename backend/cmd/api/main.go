@@ -142,6 +142,9 @@ func main() {
 			// GET /api/opname/:session-id/load-progress
 			opnameRoutes.GET("/:session-id/load-progress", opnameHandler.LoadOpnameProgressHandler)
 
+			// GET /api/opname/:session-id/user-info
+			opnameRoutes.GET("/:session-id/user-info", opnameHandler.GetUserFromOpnameSessionHandler)
+
 			// GET /api/opname/filter/site/:site_id
 			opnameRoutes.GET("/filter/site/:site_id", opnameHandler.GetOpnameOnSiteHandler)
 

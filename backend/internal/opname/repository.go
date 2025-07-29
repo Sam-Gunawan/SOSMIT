@@ -4,6 +4,8 @@ package opname
 import (
 	"database/sql"
 	"log"
+
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
 )
 
 type OpnameSession struct {
@@ -316,4 +318,23 @@ func (repo *Repository) GetOpnameOnSite(siteID int) ([]OpnameFilter, error) {
 
 	log.Printf("✅ Retrieved %d opname sessions for site %d", len(sessions), siteID)
 	return sessions, nil
+}
+
+// GetUserFromOpnameSession retrieves the user associated with a specific opname session.
+func (repo *Repository) GetUserFromOpnameSession(sessionID int) (*user.User, error) {
+	user := &user.User{}
+
+	query := `SELECT * FROM get_user_from_opname_session($1)`
+
+	err := repo.db.QueryRow(query, sessionID).Scan(&user.UserID, &user.Username, &user.Email, &user.FirstName, &user.LastName, &user.Position)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("⚠ No user found for opname session ID: %d", sessionID)
+			return nil, nil // No user found.
+		}
+		log.Printf("❌ Error retrieving user for opname session ID %d: %v", sessionID, err)
+		return nil, err // Other error.
+	}
+
+	return user, nil
 }
