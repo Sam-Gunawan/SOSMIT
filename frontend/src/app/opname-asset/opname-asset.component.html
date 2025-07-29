@@ -151,7 +151,7 @@
             <div class="modal-content">
                 <div class="modal-header"> 
                     <section class="asset-header">
-                        <h6 class="modal-title">Edit Asset - {{ result.pendingAsset.assetTag }}</h6>
+                        <h6 class="modal-title">Edit Asset</h6>
                     </section>
                     
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -214,8 +214,7 @@
                                             (input)="onOwnerInputChange(i)"
                                             list="all-users" 
                                             [class.is-invalid]="(result.pendingAsset.assetOwner === 0 && result.pendingAsset.assetOwnerName) || !result.pendingAsset.assetOwnerName" 
-                                            required
-                                            [placeholder]="result.pendingAsset.assetOwnerName || 'Select user'">
+                                            required>
                                         <datalist id="all-users">
                                             <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">{{ user.firstName }} {{ user.lastName }} ({{ user.email }})</option>
                                         </datalist>
@@ -229,8 +228,7 @@
 
                                         <input type="text" class="form-control" 
                                             [id]="'owner-position-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.pendingAsset.assetOwnerPosition" name="newOwnerPosition"
-                                            [placeholder]="result.pendingAsset.assetOwnerPosition || 'Enter position'">
+                                            [(ngModel)]="result.pendingAsset.assetOwnerPosition" name="newOwnerPosition">
                                     </div>
 
                                     <div class="form-item">
@@ -238,8 +236,7 @@
 
                                         <input type="text" class="form-control" 
                                             [id]="'cost-center-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.pendingAsset.assetOwnerCostCenter" name="newCostCenter"
-                                            [placeholder]="result.pendingAsset.assetOwnerCostCenter || 'Enter cost center'">
+                                            [(ngModel)]="result.pendingAsset.assetOwnerCostCenter" name="newCostCenter">
                                     </div>
                                 </div>
                 
@@ -268,8 +265,7 @@
                                             [id]="'user-site-' + result.pendingAsset.assetTag" 
                                             [(ngModel)]="result.pendingAsset.siteName" name="newUserSite"
                                             list="all-sites"
-                                            [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName"
-                                            [placeholder]="result.pendingAsset.siteName || 'Enter site'">
+                                            [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName">
                                         <datalist id="all-sites">
                                             <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
                                         </datalist>
@@ -283,7 +279,7 @@
                                         <input type="text" class="form-control" 
                                             [id]="'user-group-' + result.pendingAsset.assetTag" 
                                             [(ngModel)]="result.pendingAsset.siteGroupName" name="newUserGroup"
-                                            [placeholder]="result.pendingAsset.siteGroupName || 'Enter group'">
+                                            readonly>
                                     </div>
 
                                     <div class="form-item">
@@ -291,7 +287,7 @@
                                         <input type="text" class="form-control" 
                                             [id]="'user-region-' + result.pendingAsset.assetTag" 
                                             [(ngModel)]="result.pendingAsset.regionName" name="newUserRegion"
-                                            [placeholder]="result.pendingAsset.regionName || 'Enter region'">
+                                            readonly>
                                     </div>
                                 </div>
 
@@ -313,7 +309,6 @@
                                                 <textarea class="form-control" 
                                                     [id]="'condition-notes-' + result.pendingAsset.assetTag" 
                                                     [(ngModel)]="result.pendingAsset.conditionNotes" name="newConditionNotes"
-                                                    [placeholder]="result.pendingAsset.conditionNotes || 'Describe the condition issue'"
                                                     style="height: 80px"></textarea>
                                             </div>
                                             
@@ -351,8 +346,7 @@
                                                 [(ngModel)]="result.pendingAsset.siteName" name="siteName"
                                                 (input)="onSiteInputChange(i)"
                                                 list="all-sites"
-                                                [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName"
-                                                [placeholder]="result.pendingAsset.siteName || 'Select site'">
+                                                [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName">
                                             <datalist id="all-sites">
                                                 <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
                                             </datalist>
@@ -365,8 +359,7 @@
                                             <label [for]="'room-' + result.pendingAsset.assetTag" class="form-label mb-0">Room</label>
                                             <input type="text" class="form-control" 
                                                 [id]="'room-' + result.pendingAsset.assetTag" 
-                                                [(ngModel)]="result.pendingAsset.room" name="newRoom"
-                                                [placeholder]="result.pendingAsset.room || 'Enter room'">
+                                                [(ngModel)]="result.pendingAsset.room" name="newRoom">
                                         </div>
                                     </div>
                                 </div>
