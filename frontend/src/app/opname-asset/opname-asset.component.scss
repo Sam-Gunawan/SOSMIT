@@ -117,6 +117,27 @@ p {
 }
 
 @include styles.search-form-styles;
+// ===============================================
+// Specific styling for opname asset scan form     
+.search-form-container {                           
+  border: none;
+  border-radius: 0;
+}
+
+.compact-search-form {
+  .form-grid {
+    grid-template-columns: 1fr 1fr 100px;
+    margin: 0;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    border: none;
+    padding-top: 0;
+  }
+}
+// ===============================================
 
 .asset-status {
   font-size: 9px;
@@ -669,33 +690,7 @@ th.mat-sort-header-sorted {
 }
 
 // Pagination styles
-.mat-mdc-paginator {
-  background: transparent !important;
-  border-top: 1px solid #e5e5e5;
-  margin-top: 0;
-  
-  .mat-mdc-paginator-range-label {
-    color: styles.$primary-text-color;
-    font-size: 12px;
-  }
-  
-  .mat-mdc-paginator-page-size {
-    color: styles.$primary-text-color;
-    font-size: 12px;
-  }
-  
-  .mat-mdc-icon-button {
-    color: styles.$primary-color;
-    
-    &:hover {
-      background-color: rgba(2, 44, 88, 0.1);
-    }
-    
-    &[disabled] {
-      color: #999;
-    }
-  }
-}
+@include styles.mat-paginator-styles;
 
 /* Responsive Design */
 @media (max-width: 768px) {

@@ -11,8 +11,6 @@
 
     <!-- Search form container -->
     <div class="search-form-container" [ngClass]="{'mobile-hidden': !showSearchForm}">
-        <h6 class="search-title">Asset Search</h6>
-        
         <form class="compact-search-form" (ngSubmit)="onSearch()">
             <div class="form-grid">
                 <div class="form-item">
@@ -36,13 +34,13 @@
                         placeholder="Serial number"
                         [disabled]="isSerialNumberDisabled">
                 </div>
-            </div>
 
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary search-btn">
-                    <i class="fas fa-search"></i>
-                    Search
-                </button>
+                <div class="form-item form-actions">
+                    <button type="submit" class="btn btn-primary search-btn">
+                        <i class="fas fa-search"></i>
+                        Search
+                    </button>
+                </div>
             </div>
         </form>
     </div>
@@ -138,8 +136,8 @@
     </table>
 
     <!-- Pagination -->
-    <mat-paginator 
-        [pageSizeOptions]="[5, 10, 20]" 
+    <mat-paginator #paginator
+        [pageSizeOptions]="[5, 10, 25, 40]" 
         [pageSize]="10"
         showFirstLastButtons>
     </mat-paginator>

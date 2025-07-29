@@ -46,58 +46,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   @Input() currentView: 'card' | 'list' = 'card';
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
-  
-  ngAfterViewInit() {
-    console.log('[OpnameAsset] ngAfterViewInit called');
-    console.log('[OpnameAsset] MatSort found:', this.sort);
-    console.log('[OpnameAsset] MatPaginator found:', this.paginator);
-    console.log('[OpnameAsset] DataSource:', this.dataSource);
-    
-    if (this.sort) {
-      this.dataSource.sort = this.sort;
-      console.log('[OpnameAsset] Sort connected successfully');
-    } else {
-      console.error('[OpnameAsset] MatSort not found!');
-    }
-
-    if (this.paginator) {
-      this.dataSource.paginator = this.paginator;
-      console.log('[OpnameAsset] Paginator connected successfully');
-    } else {
-      console.error('[OpnameAsset] MatPaginator not found!');
-    }
-  }
-
-  /** Update the table data source when search results change */
-  updateTableDataSource(): void {
-    const tableData: AssetTableData[] = this.searchResults.map((result, index) => ({
-      assetTag: result.pendingAsset.assetTag,
-      assetName: result.pendingAsset.assetName,
-      serialNumber: result.pendingAsset.serialNumber || 'N/A',
-      ownerName: result.pendingAsset.assetOwnerName,
-      costCenter: result.pendingAsset.assetOwnerCostCenter,
-      condition: result.pendingAsset.condition,
-      status: result.pendingAsset.assetStatus,
-      index: index
-    }));
-    
-    this.dataSource.data = tableData;
-    console.log('[OpnameAsset] Table data updated:', tableData);
-  }
-
-  /** Handle row click to open edit modal */
-  onRowClick(row: AssetTableData): void {
-    console.log('[OpnameAsset] Row clicked:', row);
-    this.initPendingAssetForEdit(row.index);
-    
-    // Trigger modal opening using pendingAsset assetTag
-    const result = this.searchResults[row.index];
-    const modalElement = document.getElementById(`edit-modal-${result.pendingAsset.assetTag}`);
-    if (modalElement) {
-      const modal = new (window as any).bootstrap.Modal(modalElement);
-      modal.show();
-    }
-  }
 
   // Search parameters
   searchQuery: string = '';
@@ -122,27 +70,12 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   // Currently selected asset index for form editing
   currentActiveIndex: number = -1;
 
-  // Simplified form initialization - just set UI state based on pendingAsset
-  initPendingAssetForEdit(index: number): void {
-    if (index < 0 || index >= this.searchResults.length) return;
-    
-    this.currentActiveIndex = index;
-    const result = this.searchResults[index];
-    
-    // Set UI state based on current pendingAsset condition
-    this.isLiked = result.pendingAsset.condition === true;
-    this.isDisliked = result.pendingAsset.condition === false;
-    
-    this.cdr.detectChanges();
-  }
-
   // Form variables
   isLiked: boolean = true;
   isDisliked: boolean = false;
   successMessage: string = '';
 
   // File to upload for condition photo
-  // TODO: Implement actual file upload functionality
   conditionPhoto?: File;
 
   // Flags for responsive design
@@ -183,6 +116,34 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     this.activeInputField = null;
   }
 
+  ngAfterViewInit() {
+    // The table might not exist yet if searchResults is empty
+    // Connection will happen in updateTableDataSource when data is loaded
+    this.connectTableComponents();
+  }
+
+  private connectTableComponents(): void {
+    // Only try to connect if the table exists (searchResults.length > 0)
+    if (this.searchResults.length === 0) {
+      console.log('[OpnameAsset] Table not rendered yet, will connect when data is loaded');
+      return;
+    }
+
+    if (this.sort) {
+      this.dataSource.sort = this.sort;
+      console.log('[OpnameAsset] Sort connected successfully');
+    } else {
+      console.error('[OpnameAsset] MatSort not found!');
+    }
+
+    if (this.paginator) {
+      this.dataSource.paginator = this.paginator;
+      console.log('[OpnameAsset] Paginator connected successfully');
+    } else {
+      console.error('[OpnameAsset] MatPaginator not found!');
+    }
+  }
+
   ngOnInit(): void {
     this.isLoading = true;
         
@@ -219,6 +180,20 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     if (this.resizeCheckInterval) {
       clearInterval(this.resizeCheckInterval);
     }
+  }
+
+  // Simplified form initialization - just set UI state based on pendingAsset
+  initPendingAssetForEdit(index: number): void {
+    if (index < 0 || index >= this.searchResults.length) return;
+    
+    this.currentActiveIndex = index;
+    const result = this.searchResults[index];
+    
+    // Set UI state based on current pendingAsset condition
+    this.isLiked = result.pendingAsset.condition === true;
+    this.isDisliked = result.pendingAsset.condition === false;
+    
+    this.cdr.detectChanges();
   }
   
   getAllUsers(): void {
@@ -437,6 +412,49 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
   get isSerialNumberDisabled(): boolean {
     return !!(this.assetTagQuery && this.assetTagQuery.trim().length > 0);
+  }
+
+  // Update table data when search results are modified
+  updateTableDataSource(): void {
+    const tableData: AssetTableData[] = this.searchResults.map((result, index) => ({
+      assetTag: result.pendingAsset.assetTag,
+      assetName: result.pendingAsset.assetName,
+      serialNumber: result.pendingAsset.serialNumber || 'N/A',
+      ownerName: result.pendingAsset.assetOwnerName,
+      costCenter: result.pendingAsset.assetOwnerCostCenter,
+      condition: result.pendingAsset.condition,
+      status: result.pendingAsset.assetStatus,
+      index: index
+    }));
+    
+    this.dataSource.data = tableData;
+    
+    // Connect paginator and sort after data is set and DOM is updated
+    setTimeout(() => {
+      if (this.paginator && !this.dataSource.paginator) {
+        this.dataSource.paginator = this.paginator;
+        console.log('[OpnameAsset] Paginator connected after data update');
+      }
+      if (this.sort && !this.dataSource.sort) {
+        this.dataSource.sort = this.sort;
+        console.log('[OpnameAsset] Sort connected after data update');
+      }
+    }, 0);
+    
+    console.log('[OpnameAsset] Table data updated:', tableData);
+  }
+
+  onRowClick(row: AssetTableData): void {
+    console.log('[OpnameAsset] Row clicked:', row);
+    this.initPendingAssetForEdit(row.index);
+    
+    // Trigger modal opening using pendingAsset assetTag
+    const result = this.searchResults[row.index];
+    const modalElement = document.getElementById(`edit-modal-${result.pendingAsset.assetTag}`);
+    if (modalElement) {
+      const modal = new (window as any).bootstrap.Modal(modalElement);
+      modal.show();
+    }
   }
 
   // Handle the search action
