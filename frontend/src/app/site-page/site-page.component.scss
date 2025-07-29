@@ -158,7 +158,7 @@ p {
     height: 55px;
     bottom: 30px;
     right: 30px;
-    z-index: 50px;
+    z-index: 99; // Always stay on top
 }
 
 #container-floating.expanded {

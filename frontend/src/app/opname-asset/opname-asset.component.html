@@ -147,7 +147,7 @@
                                                         <input type="number" class="form-control" 
                                                             [id]="'cost-center-' + result.pendingAsset.assetTag" 
                                                             [(ngModel)]="result.pendingAsset.assetOwnerCostCenter" name="newCostCenter"
-                                                            [placeholder]="result.pendingAsset.assetOwnerCostCenter?.toString() || 'Enter cost center'">
+                                                            [placeholder]="result.pendingAsset.assetOwnerCostCenter.toString() || 'Enter cost center'">
                                                     </div>
                                                 </div>
                                 
@@ -549,7 +549,7 @@
                                                         <input type="number" class="form-control form-control-sm" 
                                                             [id]="'cost-center-mobile-' + result.pendingAsset.assetTag" 
                                                             [(ngModel)]="result.pendingAsset.assetOwnerCostCenter" name="newCostCenterMobile"
-                                                            [placeholder]="result.pendingAsset.assetOwnerCostCenter?.toString() || 'Enter cost center'">
+                                                            [placeholder]="result.pendingAsset.assetOwnerCostCenter.toString() || 'Enter cost center'">
                                                     </div>
                                                 </div>
 
