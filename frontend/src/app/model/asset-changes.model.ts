@@ -1,8 +1,8 @@
 export interface AssetChange {
     assetTag: string;
+    newSerialNumber?: string;
     newStatus: string;
     newStatusReason?: string;
-    newSerialNumber?: string;
     newCondition?: boolean;
     newConditionNotes?: string;
     newConditionPhotoURL?: string;

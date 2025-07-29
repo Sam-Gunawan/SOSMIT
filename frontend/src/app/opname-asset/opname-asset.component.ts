@@ -294,6 +294,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
           // Populate pending asset and apply changes from savedRecord
           const pendingAsset: AssetInfo = {
             ...JSON.parse(JSON.stringify(asset)), // Deep copy to avoid reference issues
+            serialNumber: savedRecord.assetChanges.newSerialNumber ?? asset.serialNumber,
             assetStatus: savedRecord.assetChanges.newStatus ?? asset.assetStatus,
             statusReason: savedRecord.assetChanges.newStatusReason ?? asset.statusReason,
             condition: savedRecord.assetChanges.newCondition ?? asset.condition,
@@ -313,7 +314,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
           };
 
           // Check if there are any meaningful changes (excluding changeReason)
-          const hasChanges = savedRecord.assetChanges.newStatus !== undefined ||
+          const hasChanges = savedRecord.assetChanges.newSerialNumber !== undefined ||
+                           savedRecord.assetChanges.newStatus !== undefined ||
                            savedRecord.assetChanges.newStatusReason !== undefined ||
                            savedRecord.assetChanges.newCondition !== undefined ||
                            savedRecord.assetChanges.newConditionNotes !== undefined ||
@@ -669,6 +671,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     const existing = result.existingAsset;
     
     const hasChanges = pending.assetStatus !== existing.assetStatus ||
+           pending.serialNumber !== existing.serialNumber ||
            pending.statusReason !== existing.statusReason ||
            pending.serialNumber !== existing.serialNumber ||
            pending.condition !== existing.condition ||
@@ -751,14 +754,14 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     // Build assetChanges object only with actual changes
     const assetChanges: AssetChange = {} as AssetChange;
     
+    if (pending.serialNumber !== existing.serialNumber) {
+      assetChanges.newSerialNumber = pending.serialNumber;
+    }
     if (pending.assetStatus !== existing.assetStatus) {
       assetChanges.newStatus = pending.assetStatus;
     }
     if (pending.statusReason !== existing.statusReason) {
       assetChanges.newStatusReason = pending.statusReason;
-    }
-    if (pending.serialNumber !== existing.serialNumber) {
-      assetChanges.newSerialNumber = pending.serialNumber;
     }
     if (pending.condition !== existing.condition) {
       assetChanges.newCondition = pending.condition;
@@ -858,10 +861,10 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     const existing = result.existingAsset;
     
     const assetChanges: AssetChange = {
+      newSerialNumber: existing.serialNumber,
       assetTag: existing.assetTag,
       newStatus: existing.assetStatus,
       newStatusReason: existing.statusReason,
-      newSerialNumber: existing.serialNumber,
       newCondition: existing.condition,
       newConditionNotes: existing.conditionNotes,
       newConditionPhotoURL: existing.conditionPhotoURL,
