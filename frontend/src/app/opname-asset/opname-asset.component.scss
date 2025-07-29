@@ -67,23 +67,11 @@ p {
   }
 }
 
-.data-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 15px;
-  padding: 5px;
-  border-bottom: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 30%);
-  // border-radius:10px;
-  // background-color: color.adjust(styles.$button-color, $lightness: 10%);
-}
-
 .opname-asset-info {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin: 15px 0px;
 }
 
 .row {
@@ -451,6 +439,7 @@ p {
   text-align: center;
   align-items: center;
   margin-bottom: 10px;
+  gap: 10px;
 }
 
 .condition {
@@ -461,25 +450,43 @@ p {
   font-size: 9px;
 }
 
-.like,
-.dislike {
+.like-btn,
+.dislike-btn {
   display: inline-block;
   cursor: pointer;
-  margin: 0px 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 600;
+  border: 1px solid #ccc;
+  background-color: #f8f9fa;
+  color: #6c757d;
+  transition: all 0.2s ease-in-out;
+  user-select: none;
 }
 
-.like:hover,
-.like.active {
-  color: #2EBDD1;
-  transition: all .2s ease-in-out;
-  transform: scale(1.1);
+.like-btn:hover {
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+  color: #155724;
 }
 
-.dislike:hover,
-.dislike.active {
-  color: #d12e2e;
-  transition: all .2s ease-in-out;
-  transform: scale(1.1);
+.like-btn.active {
+  background-color: #28a745;
+  border-color: #28a745;
+  color: white;
+}
+
+.dislike-btn:hover {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}
+
+.dislike-btn.active {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: white;
 }
 
 .pick-status-reason {
