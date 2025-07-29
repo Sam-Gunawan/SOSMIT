@@ -139,6 +139,7 @@ export class OpnameSessionService {
     // Mapping the request body to match the expected API format, which is using snake_case instead of camelCase.
     const payload = {
       asset_tag: assetChanges.assetTag,
+      new_serial_number: assetChanges.newSerialNumber,
       new_status: assetChanges.newStatus,
       new_status_reason: assetChanges.newStatusReason,
       new_condition: assetChanges.newCondition,
@@ -193,6 +194,7 @@ export class OpnameSessionService {
               id: progressItem.id,
               assetTag: progressItem.asset_tag,
               assetChanges: {
+              newSerialNumber: changes.newSerialNumber,
               newStatus: changes.newStatus,
               newStatusReason: changes.newStatusReason,
               newCondition: changes.newCondition,

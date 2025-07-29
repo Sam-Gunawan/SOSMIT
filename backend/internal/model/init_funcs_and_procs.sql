@@ -8,24 +8,8 @@ DROP FUNCTION IF EXISTS public.get_area_manager_info(INT);
 DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_asset_by_serial_number(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
-DROP FCREATE OR REPLACE FUNCTION public.record_asset_change(
-	_session_id INT,
-	_asset_tag VARCHAR(12),
-	_new_status VARCHAR(20),
-	_new_status_reason VARCHAR(20),
-	_new_serial_number VARCHAR(50),
-	_new_condition BOOLEAN,
-	_new_condition_notes TEXT,
-	_new_condition_photo_url TEXT,
-	_new_location VARCHAR(255),
-	_new_room VARCHAR(255),
-	_new_equipments TEXT,
-	_new_owner_id INT,
-	_new_owner_position VARCHAR(50),
-	_new_owner_cost_center INT,
-	_new_site_id INT,
-	_change_reason TEXT
-) RETURNS JSONB public.create_new_opname_session(INT, INT);
+DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(50), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, VARCHAR(255), INT, INT);
+DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT);
 DROP FUNCTION IF EXISTS public.get_opname_session_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_user_from_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.finish_opname_session(INT);
@@ -629,6 +613,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.record_asset_change(
 	_session_id INT,
 	_asset_tag VARCHAR(12),
+	_new_serial_number VARCHAR(50),
 	_new_status VARCHAR(20),
 	_new_status_reason VARCHAR(20),
 	_new_condition BOOLEAN,
@@ -660,14 +645,14 @@ AS $$
 
 		-- Compare the old and new values, and build the changes JSONB object
 		-- Only include changes that are different from the old data
+		IF _new_serial_number IS NOT NULL AND _new_serial_number IS DISTINCT FROM _old_data.serial_number THEN
+			_changes := jsonb_set(_changes, '{newSerialNumber}', to_jsonb(_new_serial_number));
+		END IF;
 		IF _new_status IS NOT NULL AND _new_status IS DISTINCT FROM _old_data.status THEN
 			_changes := jsonb_set(_changes, '{newStatus}', to_jsonb(_new_status));
 		END IF;
 		IF _new_status_reason IS NOT NULL AND _new_status_reason IS DISTINCT FROM _old_data.status_reason THEN
 			_changes := jsonb_set(_changes, '{newStatusReason}', to_jsonb(_new_status_reason));
-		END IF;
-		IF _new_serial_number IS NOT NULL AND _new_serial_number IS DISTINCT FROM _old_data.serial_number THEN
-			_changes := jsonb_set(_changes, '{newSerialNumber}', to_jsonb(_new_serial_number));
 		END IF;
 		IF _new_condition IS NOT NULL AND _new_condition IS DISTINCT FROM _old_data.condition THEN
 			_changes := jsonb_set(_changes, '{newCondition}', to_jsonb(_new_condition));
