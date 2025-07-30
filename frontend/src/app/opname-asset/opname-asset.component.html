@@ -54,11 +54,15 @@
     <!-- Filter Controls - now inside the unified container -->
     <div class="filter-section" *ngIf="searchResults.length > 0">
         <div class="table-header">  
-            <h5>
+            <h5 *ngIf="dataSource.filteredData.length || (searchResults.length && !hasActiveFilters)">
                 Assets Found ({{ dataSource.filteredData.length || searchResults.length }})
                 <span *ngIf="hasActiveFilters" class="filter-indicator">
                     - Filtered from {{ searchResults.length }}
                 </span>
+            </h5>
+
+            <h5 *ngIf="dataSource.filteredData.length === 0 && hasActiveFilters" class="text-danger">
+                Tidak ada aset yang cocok dengan filter saat ini.
             </h5>
         </div>
         
@@ -215,6 +219,14 @@
         showFirstLastButtons>
     </mat-paginator>
 </div>
+
+<!-- Initial state - no scan performed -->
+<section class="initial-state" *ngIf="!isLoading && searchResults.length <= 0">
+    <div class="welcome-message">
+        <h4>Ready to scan</h4>
+        <p>Gunakan formulir pencarian di atas untuk memulai opname asset.<br>Silakan isi <strong>Asset Tag</strong> atau <strong>Serial Number</strong>, dan gunakan fitur scan untuk mulai melakukan opname asset.</p>
+    </div>
+</section>
 
 <!-- Asset Details for Report View -->
 <div class="asset-pages-container" *ngIf="isInReport && searchResults.length > 0">

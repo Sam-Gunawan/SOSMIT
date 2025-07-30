@@ -183,13 +183,27 @@ body .offcanvas-backdrop {
       font-size: 10px;
       padding: 8px 16px;
       border-radius: 20px;
-      font-weight: 600;
       display: inline-flex;
       align-items: center;
       gap: 8px;
 
       i {
         font-size: 10px;
+      }
+
+      &.btn.btn-outline-primary {
+        border-color: $primary-color !important;
+        color: $primary-color !important;
+        
+        &:hover {
+          background-color: $primary-color !important;
+          border-color: $primary-color !important;
+          color: white !important;
+        }
+        
+        &:focus {
+          box-shadow: 0 0 0 0.2rem rgba(2, 44, 88, 0.25) !important;
+        }
       }
     }
   }
