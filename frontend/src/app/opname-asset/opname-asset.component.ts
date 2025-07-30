@@ -113,6 +113,29 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   errorMessage: string = ''; // Error message for fetching assets
   private resizeCheckInterval?: number; // Interval for periodic size checks
 
+  // Filter properties
+  filterText: string = '';
+  filterCondition: string = '';
+  filterStatus: string = '';
+  
+  // Available filter options
+  readonly conditionOptions = [
+    { value: '', label: 'All Conditions' },
+    { value: 'good', label: 'Good' },
+    { value: 'bad', label: 'Bad' },
+    { value: 'unknown', label: 'Unknown' }
+  ];
+  
+  readonly statusOptions = [
+    { value: '', label: 'All Status' },
+    { value: 'Deployed', label: 'Deployed' },
+    { value: 'On Loan', label: 'On Loan' },
+    { value: 'In Inventory', label: 'In Inventory' },
+    { value: 'In Repair', label: 'In Repair' },
+    { value: 'Down', label: 'Down' },
+    { value: 'Disposed', label: 'Disposed' }
+  ];
+
   constructor(
     private apiService: ApiService,
     private opnameSessionService: OpnameSessionService,
@@ -451,6 +474,79 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }, 0);
     
     console.log('[OpnameAsset] Table data updated:', tableData);
+    
+    // Apply current filters
+    this.applyFilters();
+  }
+
+  // Apply filters to the table data
+  applyFilters(): void {
+    if (!this.dataSource) return;
+    
+    this.dataSource.filterPredicate = (data: AssetTableData, filter: string) => {
+      const filters = JSON.parse(filter);
+      
+      // Text filter - search across multiple fields
+      const textMatch = !filters.text || 
+        data.assetTag.toLowerCase().includes(filters.text) ||
+        data.assetName.toLowerCase().includes(filters.text) ||
+        data.serialNumber.toLowerCase().includes(filters.text) ||
+        data.ownerName.toLowerCase().includes(filters.text) ||
+        data.costCenter.toString().includes(filters.text);
+      
+      // Condition filter
+      let conditionMatch = true;
+      if (filters.condition) {
+        const conditionValue = data.condition === true ? 'good' : 
+                              data.condition === false ? 'bad' : 'unknown';
+        conditionMatch = conditionValue === filters.condition;
+      }
+      
+      // Status filter
+      const statusMatch = !filters.status || data.status === filters.status;
+      
+      return textMatch && conditionMatch && statusMatch;
+    };
+    
+    // Create filter object
+    const filterObject = {
+      text: this.filterText.toLowerCase(),
+      condition: this.filterCondition,
+      status: this.filterStatus
+    };
+    
+    this.dataSource.filter = JSON.stringify(filterObject);
+    
+    // Reconnect table components after filtering
+    setTimeout(() => {
+      this.connectTableComponents();
+    }, 0);
+  }
+
+  // Filter methods
+  onFilterTextChange(): void {
+    this.applyFilters();
+  }
+
+  onFilterConditionChange(): void {
+    this.applyFilters();
+  }
+
+  onFilterStatusChange(): void {
+    this.applyFilters();
+  }
+
+  // Reset all filters
+  resetFilters(): void {
+    this.filterText = '';
+    this.filterCondition = '';
+    this.filterStatus = '';
+    this.applyFilters();
+  }
+
+  // Check if any filters are active
+  get hasActiveFilters(): boolean {
+    return !!(this.filterText || this.filterCondition || this.filterStatus);
   }
 
   onRowClick(row: AssetTableData): void {

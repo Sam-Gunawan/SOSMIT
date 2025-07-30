@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=delete" />
 
-<div class="sticky-top" *ngIf="!isInReport">
+<div class="search-container sticky-container" *ngIf="!isInReport">
     <!-- Mobile search toggle button -->
     <div class="mobile-search-toggle" (click)="toggleSearchForm()">
         <button class="btn btn-outline-primary toggle-btn">
@@ -48,8 +48,74 @@
 
 <!-- Assets Table -->
 <div class="assets-table-container" *ngIf="searchResults.length > 0">
-    <div class="table-header">  
-        <h5>Assets Found ({{ searchResults.length }})</h5>
+    <div class="table-controls sticky-controls sticky-container">
+        <div class="table-header">  
+            <h5>
+                Assets Found ({{ dataSource.filteredData.length || searchResults.length }})
+                <span *ngIf="hasActiveFilters" class="filter-indicator">
+                    - Filtered from {{ searchResults.length }}
+                </span>
+            </h5>
+        </div>
+        
+        <!-- Filter Controls -->
+        <div class="filter-container">
+            <div class="filter-form">
+                <div class="filter-grid">
+                    <div class="filter-title-inline">
+                        <i class="fas fa-filter filter-icon"></i>
+                        <span>Filter:</span>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <input 
+                            id="filter-text"
+                            type="text" 
+                            class="form-control filter-input" 
+                            [(ngModel)]="filterText"
+                            (input)="onFilterTextChange()"
+                            placeholder="Search in results..."
+                            name="filterText">
+                    </div>
+                    
+                    <div class="filter-item">
+                        <select 
+                            id="filter-condition"
+                            class="form-select filter-select" 
+                            [(ngModel)]="filterCondition"
+                            (change)="onFilterConditionChange()"
+                            name="filterCondition">
+                            <option *ngFor="let option of conditionOptions" [value]="option.value">
+                                {{ option.label }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item">
+                        <select 
+                            id="filter-status"
+                            class="form-select filter-select" 
+                            [(ngModel)]="filterStatus"
+                            (change)="onFilterStatusChange()"
+                            name="filterStatus">
+                            <option *ngFor="let option of statusOptions" [value]="option.value">
+                                {{ option.label }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                    <button 
+                        type="button" 
+                        class="btn btn-sm btn-outline-secondary reset-btn"
+                        (click)="resetFilters()"
+                        [disabled]="!hasActiveFilters"
+                        title="Clear all filters">
+                        <i class="fas fa-times"></i>
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
     
     <table mat-table [dataSource]="dataSource" matSort class="assets-table">
