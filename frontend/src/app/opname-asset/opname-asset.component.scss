@@ -12,7 +12,7 @@
 // Specific styling for opname asset scan form
 .search-container {
   position: sticky;
-  top: 126px; // Navbar height + opname header height: 52px + 74px
+  top: 120px; // Navbar height + opname header height: 52px + 68px
   z-index: 10; // Stay on top table elements
   background-color: white;
 }
@@ -521,7 +521,7 @@ th.mat-sort-header-sorted {
   .table-controls {
     &.sticky-controls {
       position: sticky;
-      top: 184px; // Navbar height + opname header height + search form height: 52px + 74px + 58px
+      top: 178px; // Navbar height + opname header height + search form height: 52px + 68px + 58px
       z-index: 30; // Lower than search container
       background-color: white;
       padding-top: 5px;

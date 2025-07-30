@@ -26,7 +26,8 @@ p {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 0; // Reduced padding to make it more compact
+  margin: 0 -30px;
+  padding: 0.75rem 30px; // Reduced padding to make it more compact
   position: sticky;
   top: 52px; // Height of fixed navbar: 52px
   background-color: white;
