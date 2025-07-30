@@ -65,6 +65,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   isSearching: boolean = false;
   showToast: boolean = false;
   showSearchForm: boolean = false; // Track if search form is visible on mobile
+  showFilterForm: boolean = false; // Track if filter form is visible on mobile
 
   // Assets - Each search result is stored as an object in this array (it is appended to the array)
   searchResults: Array<{
@@ -460,6 +461,11 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }));
     
     this.dataSource.data = tableData;
+    
+    // On mobile, automatically show filter form when search results are available
+    if (this.isMobile && this.searchResults.length > 0) {
+      this.showFilterForm = true;
+    }
     
     // Connect paginator and sort after data is set and DOM is updated
     setTimeout(() => {
@@ -1108,6 +1114,10 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     this.showSearchForm = !this.showSearchForm;
   }
 
+  toggleFilterForm(): void {
+    this.showFilterForm = !this.showFilterForm;
+  }
+
   private checkScreenSize() {
     const newIsMobile = window.innerWidth < 768; // Define mobile breakpoint
     const newScreenSize = newIsMobile ? 'small' : 'large';
@@ -1136,6 +1146,22 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   }
 
   private updateResponsiveSettings() {
+    const previousIsMobile = this.isMobile;
+    this.isMobile = window.innerWidth <= 768;
+    
+    // Handle form visibility based on screen size
+    if (!this.isMobile) {
+      // On desktop, always show both forms
+      this.showSearchForm = true;
+      this.showFilterForm = true;
+    } else {
+      // On mobile, manage form visibility intelligently
+      if (!previousIsMobile) { // Just switched to mobile
+        this.showSearchForm = false;
+        this.showFilterForm = this.searchResults.length > 0;
+      }
+    }
+    
     const newActualVariant = window.innerWidth >= 1000 ? this.variant : 'default';
     const newActualShowLocation = window.innerWidth >= 1000 ? this.showLocation : false;
     
