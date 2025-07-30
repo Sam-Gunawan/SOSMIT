@@ -1,12 +1,7 @@
 <div class="modal fade" [id]="isPending ? 'pending-modal-' + assetPage?.assetTag : 'modal-' + assetPage?.assetTag" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" [attr.aria-labelledby]="'modal-' + assetPage?.assetTag + '-label'" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" *ngIf="errorMessage === '' && !isLoading && screenSize === 'large'">
+        <div class="modal-content" *ngIf="errorMessage === '' && !isLoading">
             <div class="modal-header">
-                <section class="asset-header">
-                    <h2 class="modal-title fs-5 asset-tag">{{ assetPage?.assetTag }}</h2>
-                    <p class="serial-number">{{ assetPage?.serialNumber }}</p>
-                </section>
-        
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
         
@@ -14,42 +9,121 @@
                 <div class="asset-information">
                     <div class="custom-grid">
                         <div class="asset-main-info">
-                            <h5 class="asset-name">{{ assetPage?.assetName }}</h5>
-                        </div>
-        
-                        <div class="user-info">
-                            <h5 class="asset-owner">{{ assetPage?.assetOwnerName }}</h5>
-                            <p class="user-position">{{ assetPage?.assetOwnerPosition }}</p>
-                            <p class="cost-center">Cost Center: {{ assetPage?.assetOwnerCostCenter }}</p>
-                        </div>
-        
-                        <div class="left-top">
-                            <span 
-                                class="asset-status"
-                                [ngClass]="{
-                                    'status-deployed': assetPage?.assetStatus === 'Deployed',
-                                    'status-onloan': assetPage?.assetStatus === 'On Loan',
-                                    'status-inventory': assetPage?.assetStatus === 'In Inventory',
-                                    'status-repair': assetPage?.assetStatus === 'In Repair',
-                                    'status-down': assetPage?.assetStatus === 'Down',
-                                    'status-disposed': assetPage?.assetStatus === 'Disposed'
-                                }">
-                                {{ assetPage?.assetStatus }}
-                            </span>
+                            <h6 class="asset-name">{{ assetPage?.assetName }}</h6>
+
+                            <div class="form-item">
+                                <label [for]="'asset-tag-' + assetPage?.assetTag" class="form-label mb-0">Asset Tag</label>
+                                <input type="text" class="form-control" 
+                                    [id]="'asset-tag-' + assetPage?.assetTag" 
+                                    [value]="assetPage?.assetTag" 
+                                    readonly>
+                            </div>
+
+                            <div class="form-item">
+                                <label [for]="'serial-number-' + assetPage?.assetTag" class="form-label mb-0">Serial Number</label>
+                                <input type="text" class="form-control" 
+                                    [id]="'serial-number-' + assetPage?.assetTag" 
+                                    [value]="assetPage?.serialNumber" 
+                                    readonly>
+                            </div>
+
+                            <div class="form-item">
+                                <label [for]="'asset-status-' + assetPage?.assetTag" class="form-label mb-0">Asset Status</label>
+                                <input type="text" class="form-control" 
+                                    [id]="'asset-status-' + assetPage?.assetTag" 
+                                    [value]="assetPage?.assetStatus" 
+                                    readonly>
+                            </div>
+                            
                             <p class="status-reason" *ngIf="assetPage?.assetStatus === 'Disposed' && assetPage?.statusReason">
                                 Reason: {{ assetPage?.statusReason }}
                             </p>
                         </div>
         
+                        <div class="user-info">
+                            <h6>User Info</h6>
+
+                            <div class="form-item">
+                                <label [for]="'owner-name-' + assetPage?.assetTag" class="form-label mb-0">Owner Name</label>
+                                <input type="text" class="form-control" 
+                                    [id]="'owner-name-' + assetPage?.assetTag" 
+                                    [value]="assetPage?.assetOwnerName" 
+                                    readonly>
+                            </div>
+
+                            <div class="form-item">
+                                <label [for]="'owner-position-' + assetPage?.assetTag" class="form-label mb-0">Owner Position</label>
+                                <input type="text" class="form-control" 
+                                    [id]="'owner-position-' + assetPage?.assetTag" 
+                                    [value]="assetPage?.assetOwnerPosition" 
+                                    readonly>
+                            </div>
+                            
+                            <div class="form-item">
+                                <label [for]="'cost-center-' + assetPage?.assetTag" class="form-label mb-0">Cost Center</label>
+                                <input type="text" class="form-control" 
+                                    [id]="'cost-center-' + assetPage?.assetTag" 
+                                    [value]="assetPage?.assetOwnerCostCenter" 
+                                    readonly>
+                            </div>
+                        </div>
+        
+                        <div class="left-top">
+                            <h6>Equipments</h6>
+
+                            <div class="equipment-checkboxes readonly">
+                                <div class="form-check" *ngFor="let equipment of availableEquipments">
+                                    <input class="form-check-input" type="checkbox" 
+                                        [id]="'equipment-' + equipment + '-' + assetPage?.assetTag"
+                                        [checked]="isEquipmentSelected(equipment)"
+                                        disabled
+                                        readonly>
+                                    <label class="form-check-label" 
+                                        [for]="'equipment-' + equipment + '-' + assetPage?.assetTag">
+                                        {{ equipment }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="right-top">
+                            <h6>User Location</h6>
+
+                            <div class="form-item">
+                                <label [for]="'user-site-' + assetPage?.assetTag" class="form-label mb-0">Site</label>
+                                <input type="text" class="form-control" 
+                                    [id]="'user-site-' + assetPage?.assetTag" 
+                                    [value]="assetPage?.siteName" 
+                                    readonly>
+                            </div>
+
+                            <div class="form-item">
+                                <label [for]="'user-group-' + assetPage?.assetTag" class="form-label mb-0">Group</label>
+                                <input type="text" class="form-control" 
+                                    [id]="'user-group-' + assetPage?.assetTag" 
+                                    [value]="assetPage?.siteGroupName" 
+                                    readonly>
+                            </div>
+
+                            <div class="form-item">
+                                <label [for]="'user-region-' + assetPage?.assetTag" class="form-label mb-0">Region</label>
+                                <input type="text" class="form-control" 
+                                    [id]="'user-region-' + assetPage?.assetTag" 
+                                    [value]="assetPage?.regionName" 
+                                    readonly>
+                            </div>
+                        </div>
+        
                         <div class="left-bottom">
                             <div class="asset-condition">  
                                 <div class="rating">
-                                    <p class="condition">Condition</p>
-                                    <span class="like grow" [class.active]="isLiked">
-                                        <i class="fa fa-thumbs-up like" aria-hidden="true" *ngIf="assetPage?.condition"></i>
+                                    <h6 class="condition">Condition</h6>
+
+                                    <span class="like-btn" [class.active]="isLiked">
+                                        Good
                                     </span>
-                                    <span class="dislike grow" [class.active]="isDisliked" *ngIf="!assetPage?.condition">
-                                        <i class="fa fa-thumbs-down dislike" aria-hidden="true"></i>
+                                    <span class="dislike-btn" [class.active]="isDisliked" *ngIf="!assetPage?.condition">
+                                        Bad
                                     </span>
                                 </div>
         
@@ -63,21 +137,29 @@
                                 </div>
                             </div>
                         </div>
-
-                        <div class="right-top">
-                            <div class="asset-equipments">
-                                <h5>Equipments</h5>
-                                <p *ngIf="assetPage?.equipments">{{ assetPage?.equipments }}</p>
-                                <p *ngIf="!assetPage?.equipments">No equipments.</p>
-                            </div>
-                        </div>
         
-                        <div class="right-bottom">
+                        <div class="right-bottom"></div>
+
+                        <div class="location">
                             <div class="asset-location">
-                                <h5>Location - {{ assetPage?.siteName }}</h5>
-                                <p>Room: {{ assetPage?.room }}</p>
-                                <p>RO: {{ assetPage?.siteGroupName }}</p>
-                                <p>Region: {{ assetPage?.regionName }}</p>
+                                <h6>Asset Location</h6>
+                                <p>Region - {{ assetPage?.regionName }}</p>
+
+                                <div class="form-item">
+                                    <label [for]="'site-name-' + assetPage?.assetTag" class="form-label mb-0">Site Name</label>
+                                    <input type="text" class="form-control" 
+                                        [id]="'site-name-' + assetPage?.assetTag" 
+                                        [value]="assetPage?.siteName" 
+                                        readonly>
+                                </div>
+
+                                <div class="form-item">
+                                    <label [for]="'room-' + assetPage?.assetTag" class="form-label mb-0">Room</label>
+                                    <input type="text" class="form-control" 
+                                        [id]="'room-' + assetPage?.assetTag" 
+                                        [value]="assetPage?.room" 
+                                        readonly>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -89,88 +171,6 @@
             </div>
         </div>
 
-        <div class="modal-content" *ngIf="errorMessage === '' && !isLoading && screenSize === 'small'">
-            <div class="modal-header">
-                <section class="asset-header">
-                    <h2 class="modal-title fs-5 asset-tag">{{ assetPage?.assetTag }}</h2>
-                    <p class="serial-number">{{ assetPage?.serialNumber }}</p>
-                </section>
-        
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-        
-            <div class="modal-body mobile">
-                <div class="asset-information">
-                        <div class="main-info-mobile">
-                            <h5 class="asset-name-mobile">{{ assetPage?.assetName }}</h5>
-                            <div class="status-container">
-                                <span 
-                                    class="asset-status"
-                                    [ngClass]="{
-                                        'status-deployed': assetPage?.assetStatus === 'Deployed',
-                                        'status-onloan': assetPage?.assetStatus === 'On Loan',
-                                        'status-inventory': assetPage?.assetStatus === 'In Inventory',
-                                        'status-repair': assetPage?.assetStatus === 'In Repair',
-                                        'status-down': assetPage?.assetStatus === 'Down',
-                                        'status-disposed': assetPage?.assetStatus === 'Disposed'
-                                    }">
-                                    {{ assetPage?.assetStatus }}
-                                </span>
-                                <p class="status-reason" *ngIf="assetPage?.assetStatus === 'Disposed' && assetPage?.statusReason">
-                                    {{ assetPage?.statusReason }}
-                                </p>
-                            </div>
-                        </div>
-        
-                        <div class="user-info-mobile">
-                            <p>Owned by:</p>
-                            <h5 class="asset-owner">{{ assetPage?.assetOwnerName }}</h5>
-                            <p class="user-position">{{ assetPage?.assetOwnerPosition }}</p>
-                            <p class="cost-center">Cost Center: {{ assetPage?.assetOwnerCostCenter }}</p>
-                        </div>
-
-                        <div class="asset-location-mobile">
-                            <h5>Location - {{ assetPage?.regionName }}</h5>
-                            <p>{{ assetPage?.location }}</p>
-                            <p>{{ assetPage?.room }}</p>
-                            <p>{{ assetPage?.siteGroupName }}</p>
-                        </div>
-
-                        <!-- TODO: style asset equipment display! -->
-                        <div class="asset-equipments-mobile">
-                            <h5>Equipments</h5>
-                            <p *ngIf="assetPage?.equipments">{{ assetPage?.equipments }}</p>
-                            <p *ngIf="!assetPage?.equipments">No equipments.</p>
-                        </div>
-        
-                        <div class="asset-condition-mobile">  
-                            <div class="rating">
-                                <p class="condition">Condition</p>
-                                <span class="like grow" [class.active]="isLiked" (click)="setLike()">
-                                    <i class="fa fa-thumbs-up like" aria-hidden="true"></i>
-                                </span>
-                                <span class="dislike grow" [class.active]="isDisliked" (click)="setDislike()">
-                                    <i class="fa fa-thumbs-down dislike" aria-hidden="true"></i>
-                                </span>
-                            </div>
-    
-                            <div *ngIf="isDisliked">
-                                <p class="condition-notes">{{ assetPage?.conditionNotes }}</p>
-                                <div class="mb-3" *ngIf="assetPage?.conditionPhotoURL !== ''">
-                                    <img [src]="serverURL + assetPage?.conditionPhotoURL" 
-                                        [alt]="'Condition photo for ' + assetPage?.assetTag" 
-                                        class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
-                                </div>
-                            </div>
-                        </div>
-                </div>
-            </div>
-        
-            <div class="modal-footer">
-                <!-- Non-editable asset in opname session (left column) or Regular asset view -->
-                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
     </div>
 
     <!-- ERROR MESSAGE -->

@@ -242,6 +242,7 @@
                 
                                 <div class="left-top">
                                     <h6>Equipments</h6>
+
                                     <div class="equipment-checkboxes">
                                         <div class="form-check" *ngFor="let equipment of availableEquipments">
                                             <input class="form-check-input" type="checkbox" 
@@ -295,6 +296,7 @@
                                     <div class="asset-condition">  
                                         <div class="rating">
                                             <h6 class="condition">Condition</h6>
+
                                             <span class="like-btn" [class.active]="isLiked" (click)="setLike()">
                                                 Good
                                             </span>
@@ -339,6 +341,7 @@
                                     <div class="asset-location">
                                         <h6>Asset Location</h6>
                                         <p>Region - {{ result.pendingAsset.regionName }}</p>
+                                        
                                         <div class="form-item">
                                             <label [for]="'site-name-' + result.pendingAsset.assetTag" class="form-label mb-0">Site Name</label>
                                             <input type="text" class="form-control" 

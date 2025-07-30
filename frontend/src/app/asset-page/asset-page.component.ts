@@ -36,6 +36,18 @@ export class AssetPageComponent implements OnInit {
   // File to upload for condition photo
   conditionPhoto?: File;
 
+  // Equipment options based on seed data (same as opname-asset)
+  availableEquipments: string[] = [
+    'Kabel power',
+    'Adaptor',
+    'Tas',
+    'Kabel VGA',
+    'Kabel USB', 
+    'Simcard',
+    'Handstrap',
+    'Tali tas'
+  ];
+
   constructor(private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService, private route: ActivatedRoute) {
     // TODO: separate assetPage and assetCard sql function. make one for each and fetch only the displayed info.
     this.assetPage = {
@@ -128,5 +140,13 @@ export class AssetPageComponent implements OnInit {
     }
 
     this.isLoading = false;
+  }
+
+  // Check if equipment is selected for the current asset (readonly display)
+  isEquipmentSelected(equipment: string): boolean {
+    if (!this.assetPage?.equipments) return false;
+    
+    const equipmentList = this.assetPage.equipments.split(',').map(item => item.trim());
+    return equipmentList.includes(equipment);
   }
 }
