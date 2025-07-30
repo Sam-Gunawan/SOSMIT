@@ -24,7 +24,6 @@ export class SiteCardComponent {
   paginatedSiteCardList: SiteInfo[] = []; // For displaying paginated results
   originalSiteCardList: SiteInfo[] = []; // Keep original data
   siteGroupList: string[] = [];
-  regionList: string[] = [];
   allUsers: User[] = []; // List of all users for filtering
   isLoading: boolean = false;
   errorMessage: string = '';
@@ -42,7 +41,6 @@ export class SiteCardComponent {
   searchCriteria = {
     siteName: '',
     siteGroup: '',
-    siteRegion: '',
     opnameStatus: '',
     opnameFromDate: null as Date | null, // From date picker
     opnameToDate: null as Date | null,   // To date picker
@@ -84,7 +82,6 @@ export class SiteCardComponent {
         this.originalSiteCardList = [...siteCardsList];
         this.siteCardList = siteCardsList;
         this.siteGroupList = Array.from(new Set(siteCardsList.map(site => site.siteGroup)));
-        this.regionList = Array.from(new Set(siteCardsList.map(site => site.siteRegion)));
         this.isLoading = false;
         
         this.populateOpnameUserInfo();
@@ -210,17 +207,14 @@ export class SiteCardComponent {
         site.siteName.toLowerCase().includes(siteName)
       );
 
-      // Fill in the site group and region automatically based on site name (if applicable)
-      // Only do this if the resulting filtered list's site group and region are unique
+      // Fill in the site group automatically based on site name (if applicable)
+      // Only do this if the resulting filtered list's site group is unique
       if (filteredList.length > 0) {  
         const uniqueSiteGroups = Array.from(new Set(filteredList.map(site => site.siteGroup)));
-        const uniqueSiteRegions = Array.from(new Set(filteredList.map(site => site.siteRegion)));
 
         this.searchCriteria.siteGroup = uniqueSiteGroups.length === 1 ? uniqueSiteGroups[0] : '';
-        this.searchCriteria.siteRegion = uniqueSiteRegions.length === 1 ? uniqueSiteRegions[0] : '';
       } else {
         this.searchCriteria.siteGroup = '';
-        this.searchCriteria.siteRegion = '';
       }
     }
 
@@ -229,21 +223,6 @@ export class SiteCardComponent {
       const siteGroup = this.searchCriteria.siteGroup.toLowerCase().trim();
       filteredList = filteredList.filter(site => 
         site.siteGroup.toLowerCase().includes(siteGroup)
-      );
-
-      // Fill in the site region automatically based on site group
-      if (filteredList.length > 0) {
-        this.searchCriteria.siteRegion = filteredList[0].siteRegion;
-      } else {
-        this.searchCriteria.siteRegion = '';
-      }
-    }
-
-    // Filter by region
-    if (this.searchCriteria.siteRegion && this.searchCriteria.siteRegion.trim() !== '') {
-      const siteRegion = this.searchCriteria.siteRegion.toLowerCase().trim();
-      filteredList = filteredList.filter(site => 
-        site.siteRegion.toLowerCase().includes(siteRegion)
       );
     }
 
@@ -341,7 +320,6 @@ export class SiteCardComponent {
     this.searchCriteria = {
       siteName: '',
       siteGroup: '',
-      siteRegion: '',
       opnameStatus: '',
       opnameFromDate: null,
       opnameToDate: null,

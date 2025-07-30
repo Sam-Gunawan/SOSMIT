@@ -44,7 +44,7 @@
                     </datalist>
                 </div>
                 
-                <div class="form-item">
+                <!-- <div class="form-item">
                     <label>Region</label>
                     <input 
                         type="text" 
@@ -56,7 +56,7 @@
                     <datalist id="regions">
                         <option *ngFor="let region of regionList" [value]="region"></option>
                     </datalist>
-                </div>
+                </div> -->
                 
                 <div class="form-item">
                     <label>Status</label>
@@ -72,6 +72,22 @@
                         <option value="Rejected">Rejected</option>
                         <option value="Outdated">Outdated</option>
                     </select>
+                </div>
+
+                <div class="form-item">
+                    <label>Created By</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="searchCriteria.opnameByName"
+                        name="opnameByName"
+                        placeholder="Search by user name"
+                        list="users">
+                    <datalist id="users">
+                        <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">
+                            {{ user.firstName }} {{ user.lastName }} ({{ user.username }})
+                        </option>
+                    </datalist>
                 </div>
                 
                 <div class="form-item">
@@ -90,22 +106,6 @@
                         class="form-control" 
                         [(ngModel)]="searchCriteria.opnameToDate"
                         name="opnameToDate">
-                </div>
-                
-                <div class="form-item">
-                    <label>Created By</label>
-                    <input 
-                        type="text" 
-                        class="form-control" 
-                        [(ngModel)]="searchCriteria.opnameByName"
-                        name="opnameByName"
-                        placeholder="Search by user name"
-                        list="users">
-                    <datalist id="users">
-                        <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">
-                            {{ user.firstName }} {{ user.lastName }} ({{ user.username }})
-                        </option>
-                    </datalist>
                 </div>
             </div>
             
