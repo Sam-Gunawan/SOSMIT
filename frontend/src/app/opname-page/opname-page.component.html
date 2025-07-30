@@ -14,12 +14,14 @@
         <section class="opname-content">
             <div class="opname-header">
                 <div class="opname-details">
-                    <h2>Opname in progress...</h2>
+                    <h5>Opname in progress...</h5>
                     <p>Started on {{ opnameSession.startDate }}</p>
                 </div>
                 <div class="buttons">
                     <div class="finish-button">
-                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#opnameFinished">Finish Opname</button>
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#opnameFinished">
+                            Finish Opname
+                        </button>
                     </div>
 
                     <div class="modal fade" id="opnameFinished" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -43,9 +45,11 @@
                         </div>
                     </div>
 
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#opnameCanceled">
-                        Cancel Opname
-                    </button>
+                    <div class="cancel-button">
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#opnameCanceled">
+                            Cancel Opname
+                        </button>
+                    </div>
 
                     <div class="modal fade" id="opnameCanceled" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
