@@ -12,7 +12,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 p {
-  font-size: 12px;
+  font-size: 10px;
   margin: 0px;
   color: styles.$quaternary-text-color;
 }
@@ -34,30 +34,8 @@ p {
   border-bottom: 1px solid #e9ecef;
   margin-bottom: 1rem;
 
-  .opname-details {
-    h2 {
-      font-size: 1.25rem; // Reduced from default size
-      margin-bottom: 0.25rem; // Reduced margin
-    }
-    
-    p {
-      font-size: 0.875rem; // Slightly larger than default 12px
-      margin: 0;
-    }
-  }
-
   @media (max-width: 768px) {
     padding: 0.5rem 0;
-    
-    .opname-details {
-      h2 {
-        font-size: 1.1rem;
-      }
-      
-      p {
-        font-size: 0.75rem;
-      }
-    }
     
     .buttons {
       flex-direction: column;
@@ -81,6 +59,10 @@ p {
   justify-content: center;
   align-items: center;
   gap: 10px;
+
+  .btn {
+    font-size: 12px;
+  }
 }
 
 .search-bar {
