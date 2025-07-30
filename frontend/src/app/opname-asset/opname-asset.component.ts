@@ -6,14 +6,14 @@ import { AssetChange } from '../model/asset-changes.model';
 import { OpnameSession } from '../model/opname-session.model';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AssetPageComponent } from '../asset-page/asset-page.component';
 import { User } from '../model/user.model';
 import { SiteInfo } from '../model/site-info.model';
 import { OpnameSessionProgress } from '../model/opname-session-progress.model';
 import { environment } from '../../environments/environments';
-import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
+import { AssetPageComponent } from '../asset-page/asset-page.component';
 
 export interface AssetTableData {
   assetTag: string;
@@ -28,15 +28,24 @@ export interface AssetTableData {
 
 @Component({
   selector: 'app-opname-asset',
-  imports: [CommonModule, FormsModule, AssetPageComponent, MatTableModule, MatSortModule, MatPaginatorModule],
+  imports: [CommonModule, FormsModule, MatTableModule, MatSortModule, MatPaginatorModule, AssetPageComponent],
   templateUrl: './opname-asset.component.html',
   styleUrl: './opname-asset.component.scss'
 })
 export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit {
   public readonly serverURL = environment.serverURL; // Expose environment for use in the template
 
-  displayedColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'ownerName', 'costCenter', 'condition', 'status', 'actions'];
+  private allColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'ownerName', 'costCenter', 'condition', 'status', 'actions'];
   dataSource = new MatTableDataSource<AssetTableData>([]);
+
+  // Getter to return displayed columns based on report mode
+  get displayedColumns(): string[] {
+    if (this.isInReport) {
+      // Remove 'actions' column when in report view
+      return this.allColumns.filter(col => col !== 'actions');
+    }
+    return this.allColumns;
+  }
 
   @Input() isInReport: boolean = false; // Flag to check if in report view
   @Input() variant: 'default' | 'compact' = 'default';
@@ -229,7 +238,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       next: (progress: OpnameSessionProgress[]) => {
         this.populateSessionData(progress);
         console.log('[OpnameAsset] Opname session progress loaded:', progress);
-        // Don't set isLoading = false here - let populateSessionData handle it
+        this.connectTableComponents();
       },
       error: (error) => {
         console.error('[OpnameAsset] Error loading opname session progress:', error);
@@ -450,7 +459,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     
     // Trigger modal opening using pendingAsset assetTag
     const result = this.searchResults[row.index];
-    const modalElement = document.getElementById(`edit-modal-${result.pendingAsset.assetTag}`);
+    const modalId = this.isInReport ? `pending-modal-${result.pendingAsset.assetTag}` : `edit-modal-${result.pendingAsset.assetTag}`;
+    const modalElement = document.getElementById(modalId);
     if (modalElement) {
       const modal = new (window as any).bootstrap.Modal(modalElement);
       modal.show();
@@ -893,7 +903,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       }
     });
     
-    this.closeBootstrapModal(result);
+    this.closeBootstrapModal(`edit-modal-${result.existingAsset.assetTag}`);
     this.successMessage = 'Asset verification processed successfully.';
   }
 
@@ -947,12 +957,11 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         return;
       }
     });
-    
-    this.closeBootstrapModal(result);
+
+    this.closeBootstrapModal(`assetAllGood-${index}`);
   }
 
   // Remove a specific asset from the search results
-  // TODO: Implement this on a remove button click in the template
   removeAsset(index: number): void {
     // Validate the index to ensure it is within bounds of the search results array
     if (index < 0 || index >= this.searchResults.length) {
@@ -1042,14 +1051,14 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }
   }
 
-  private closeBootstrapModal(result: any): void {
+  private closeBootstrapModal(modalId: string): void {
     // Close the modal after a short delay to show the success message
     setTimeout(() => {
       // Clear success message
       this.successMessage = '';
 
       // Use vanilla JS to close the Bootstrap modal
-      const modalElement = document.getElementById(`edit-modal-${result.existingAsset.assetTag}`);
+      const modalElement = document.getElementById(modalId);
       if (modalElement) {
         // Access Bootstrap modal through the global window object
         const bsModal = (window as any).bootstrap;
