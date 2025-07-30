@@ -128,7 +128,7 @@
 <!-- Search results -->
 <section class="site-list-layout" *ngIf="!isLoading && hasSearched && paginatedSiteCardList && paginatedSiteCardList.length > 0">
     <div class="results-header">
-        <h6>Search Results ({{ totalItems }} site{{ totalItems !== 1 ? 's' : '' }} found)</h6>
+        <h6 class="header-title">Search Results ({{ totalItems }} site{{ totalItems !== 1 ? 's' : '' }} found)</h6>
         <!-- Pagination -->
         <div class="pagination-container">
             <mat-paginator
