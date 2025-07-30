@@ -134,6 +134,19 @@ p {
 	padding-top: 10px;
 }
 
+.results-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0px;
+  margin: 0px;
+}
+
+.header-title {
+  padding: 0px 12px;
+}
+
 .asset-list {
 	padding: 12px;
 	border-bottom: 1px solid color.adjust(styles.$quaternary-text-color, $lightness: 40%);
@@ -253,4 +266,45 @@ p {
         font-size: 10px;
         color: rgb(51, 3, 3);
     }
+}
+
+.pagination-container {
+  ::ng-deep .mat-mdc-paginator {
+    .mat-mdc-paginator-range-label {
+      color: styles.$primary-text-color;
+      margin: 0 10px; 
+    }
+    
+    .mat-mdc-form-field {
+      .mat-mdc-form-field-infix {
+        min-height: 20px;
+        padding: 2px 0;
+      }
+    }
+    
+    .mat-mdc-paginator-page-size {
+      margin-right: 0px;
+    }
+    
+    @media (max-width: 768px) {
+      font-size: 8px; // Even smaller on mobile
+      
+      .mat-mdc-paginator-range-label {
+        font-size: 8px;
+      }
+      
+      .mat-mdc-icon-button {
+        width: 20px;
+        height: 20px;
+        font-size: 8px;
+        margin: 0;
+        
+        .mat-icon {
+          font-size: 12px;
+          width: 12px;
+          height: 12px;
+        }
+      }
+    }
+  }
 }

@@ -182,7 +182,7 @@
 <!-- Search results -->
 <section class="asset-list-layout" *ngIf="!isLoading && hasSearched && paginatedAssetsOnSite && paginatedAssetsOnSite.length > 0">
     <div class="results-header">
-        <h6>Search Results ({{ totalItems }} asset{{ totalItems !== 1 ? 's' : '' }} found)</h6>
+        <h6 class="header-title">Search Results ({{ totalItems }} asset{{ totalItems !== 1 ? 's' : '' }} found)</h6>
         <!-- Pagination -->
         <div class="pagination-container">
             <mat-paginator
