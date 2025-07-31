@@ -1016,7 +1016,7 @@ th.mat-sort-header-sorted {
     // Hide less important columns on mobile
     .mat-column-serialNumber,
     .mat-column-costCenter,
-    .mat-column-ownerName {
+    .mat-column-assetName {
       display: none;
     }
   }
@@ -1024,13 +1024,42 @@ th.mat-sort-header-sorted {
 
 @media (max-width: 480px) {
   .assets-table {
-    .mat-column-assetName,
+    .mat-column-ownerName,
     .mat-column-condition {
       display: none;
     }
     
     .asset-name-cell {
       max-width: 100px;
+    }
+  }
+}
+
+.modal-footer {
+  .btn {
+    font-size: 9px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+    
+    &.btn-primary {
+      background-color: styles.$primary-color;
+      border-color: styles.$primary-color;
+      
+      &:hover {
+        background-color: color.adjust(styles.$primary-color, $lightness: -10%);
+        border-color: color.adjust(styles.$primary-color, $lightness: -10%);
+      }
+    }
+    
+    &.btn-secondary {
+      background-color: #6c757d;
+      border-color: #6c757d;
+      
+      &:hover {
+        background-color: #5c636a;
+        border-color: #565e64;
+      }
     }
   }
 }
