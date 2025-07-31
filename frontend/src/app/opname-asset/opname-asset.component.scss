@@ -812,18 +812,12 @@ table {
   width: 100%;
 }
 
-th.mat-sort-header-sorted {
-  color: black;
-}
-
 /* Assets Table Styles */
 .assets-table-container {
   margin: 10px 0;
   
-  // Remove the old sticky table controls since they're now in unified container
   .table-controls {
     &.sticky-controls {
-      // Remove sticky positioning - now handled by unified container
       position: static;
       top: auto;
       z-index: auto;
@@ -844,7 +838,7 @@ th.mat-sort-header-sorted {
     padding: 8px 0 6px 0;
     border-bottom: 2px solid styles.$primary-color;
     margin-bottom: 5px;
-    
+
     h5 {
       color: styles.$primary-text-color;
       font-size: 14px;
@@ -873,6 +867,12 @@ th.mat-sort-header-sorted {
   
   .mat-mdc-table {
     background: transparent !important;
+  }
+  
+  // Style the svg arrow sort icon on the table header
+  ::ng-deep .mat-sort-header-arrow svg {
+    fill: white !important;
+    color: white !important;
   }
   
   .mat-mdc-header-row {
