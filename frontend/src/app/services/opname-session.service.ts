@@ -149,6 +149,9 @@ export class OpnameSessionService {
       new_room: assetChanges.newRoom,
       new_equipments: assetChanges.newEquipments,
       new_owner_id: assetChanges.newOwnerID,
+      new_owner_position: assetChanges.newOwnerPosition,
+      new_owner_cost_center: assetChanges.newOwnerCostCenter,
+      new_owner_site_id: assetChanges.newOwnerSiteID,
       new_site_id: assetChanges.newSiteID,
       change_reason: assetChanges.changeReason,
     }
@@ -204,6 +207,9 @@ export class OpnameSessionService {
               newRoom: changes.newRoom,
               newEquipments: changes.newEquipments,
               newOwnerID: changes.newOwnerID,
+              newOwnerSiteID: changes.newOwnerSiteID,
+              newOwnerPosition: changes.newOwnerPosition,
+              newOwnerCostCenter: changes.newOwnerCostCenter,
               newSiteID: changes.newSiteID,
               changeReason: progressItem.change_reason
               }

@@ -297,15 +297,31 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
           
           // ...existing code...
           const ownerID = savedRecord.assetChanges.newOwnerID ?? asset.assetOwner;
+          const ownerSiteID = savedRecord.assetChanges.newOwnerSiteID ?? asset.assetOwnerSiteID;
           const siteID = savedRecord.assetChanges.newSiteID ?? asset.siteID;
+          
+          // Debug logging
+          console.log('[OpnameAsset] Asset Changes for', savedRecord.assetTag, ':', savedRecord.assetChanges);
+          console.log('[OpnameAsset] Original asset data:', asset);
           
           // Find the owner data based on the owner ID
           const owner = this.allUsers.find(user => user.userID === ownerID);
           const ownerName = owner ? `${owner.firstName} ${owner.lastName}` : asset.assetOwnerName;
-          const ownerPosition = owner ? owner.position : asset.assetOwnerPosition;
-          const ownerCostCenter = owner ? owner.costCenterID : asset.assetOwnerCostCenter;
           
-          // Find the site name based on the site ID
+          // Use saved position/cost center if available, otherwise fall back to owner data or original asset data
+          const ownerPosition = savedRecord.assetChanges.newOwnerPosition ?? 
+                               (owner ? owner.position : asset.assetOwnerPosition);
+          const ownerCostCenter = savedRecord.assetChanges.newOwnerCostCenter ?? 
+                                 (owner ? owner.costCenterID : asset.assetOwnerCostCenter);
+                                 
+          console.log('[OpnameAsset] Calculated ownerPosition:', ownerPosition, 'from saved:', savedRecord.assetChanges.newOwnerPosition, 'owner:', owner?.position, 'original:', asset.assetOwnerPosition);
+          console.log('[OpnameAsset] Calculated ownerCostCenter:', ownerCostCenter, 'from saved:', savedRecord.assetChanges.newOwnerCostCenter, 'owner:', owner?.costCenterID, 'original:', asset.assetOwnerCostCenter);
+          
+          // Find the owner site data based on the owner site ID
+          const ownerSite = this.allSites.find(site => site.siteID === ownerSiteID);
+          const ownerSiteName = ownerSite ? ownerSite.siteName : asset.assetOwnerSiteName;
+          
+          // Find the asset site name based on the asset site ID
           const site = this.allSites.find(site => site.siteID === siteID);
           const siteName = site ? site.siteName : asset.siteName;
           const siteGroupName = site ? site.siteGroup : asset.siteGroupName;
@@ -324,14 +340,20 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
             room: savedRecord.assetChanges.newRoom ?? asset.room,
             equipments: savedRecord.assetChanges.newEquipments ?? asset.equipments,
             assetOwner: ownerID,
-            siteID: siteID,
-            siteName: siteName,
             assetOwnerName: ownerName,
             assetOwnerPosition: ownerPosition,
             assetOwnerCostCenter: ownerCostCenter,
+            assetOwnerSiteID: ownerSiteID,
+            assetOwnerSiteName: ownerSiteName,
+            siteID: siteID,
+            siteName: siteName,
             siteGroupName: siteGroupName,
             regionName: regionName
           };
+
+          console.log('[OpnameAsset] Final pendingAsset:', pendingAsset);
+          console.log('[OpnameAsset] Position in final asset:', pendingAsset.assetOwnerPosition);
+          console.log('[OpnameAsset] Cost Center in final asset:', pendingAsset.assetOwnerCostCenter);
 
           // Check if there are any meaningful changes (excluding changeReason)
           const hasChanges = savedRecord.assetChanges.newSerialNumber !== undefined ||
@@ -344,6 +366,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
                            savedRecord.assetChanges.newRoom !== undefined ||
                            savedRecord.assetChanges.newEquipments !== undefined ||
                            savedRecord.assetChanges.newOwnerID !== undefined ||
+                           savedRecord.assetChanges.newOwnerPosition !== undefined ||
+                           savedRecord.assetChanges.newOwnerCostCenter !== undefined ||
+                           savedRecord.assetChanges.newOwnerSiteID !== undefined ||
                            savedRecord.assetChanges.newSiteID !== undefined;
 
           console.log("pending asset loaded: ", pendingAsset);
@@ -620,10 +645,20 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
         // Add the found asset to the search results, using deep copies to avoid reference issues
         const newAsset = JSON.parse(JSON.stringify(asset));
+        const pendingAsset = JSON.parse(JSON.stringify(asset)); // Deep copy for modifications
+        
+        // Ensure owner site information is properly set
+        // If no owner site info exists, default to the asset's current site
+        if (!pendingAsset.assetOwnerSiteID) {
+          pendingAsset.assetOwnerSiteID = pendingAsset.siteID;
+        }
+        if (!pendingAsset.assetOwnerSiteName) {
+          pendingAsset.assetOwnerSiteName = pendingAsset.siteName;
+        }
         
         this.searchResults.unshift({
           existingAsset: newAsset,
-          pendingAsset: JSON.parse(JSON.stringify(asset)), // Deep copy for modifications
+          pendingAsset: pendingAsset,
           assetProcessed: false,
           processingStatus: 'pending', // Initial processing status
           savedChangeReason: '',
@@ -721,10 +756,12 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         assetOwnerName: `${matchedUser.firstName} ${matchedUser.lastName}`,
         assetOwnerPosition: matchedUser.position,
         assetOwnerCostCenter: matchedUser.costCenterID,
-        siteID: matchedUser.siteID,
-        siteName: matchedUser.siteName,
-        siteGroupName: matchedUser.siteGroupName,
-        regionName: matchedUser.regionName
+        assetOwnerSiteID: matchedUser.siteID,
+        assetOwnerSiteName: matchedUser.siteName,
+        assetOwnerSiteGroupName: matchedUser.siteGroupName,
+        assetOwnerRegionName: matchedUser.regionName
+        // Note: Asset location (siteID, siteName, siteGroupName, regionName) remains unchanged
+        // when changing owner - only owner location changes
       };
 
       // Force change detection to update the view
@@ -733,6 +770,45 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       // Invalid user - explicitly set ID to 0 to trigger validation
       console.error('[OpnameAsset] No matching user found for input:', input);
       result.pendingAsset.assetOwner = 0;
+      
+      // Force change detection to update validation state
+      this.cdr.detectChanges();
+    }
+  }
+
+  // Handle owner site name input change
+  onOwnerSiteInputChange(index: number): void {
+    const result = this.searchResults[index];
+    const input = result.pendingAsset.assetOwnerSiteName?.trim().toLowerCase() || '';
+    
+    if (!input) {
+      result.pendingAsset.assetOwnerSiteID = undefined; // Clear owner site ID if input is empty
+      result.pendingAsset.assetOwnerSiteName = '';
+      return;
+    }
+    
+    const matchedSite = this.allSites.find(site => (
+      site.siteName.toLowerCase() === input ||
+      site.siteGroup.toLowerCase() === input ||
+      site.siteRegion.toLowerCase() === input
+    ));
+
+    if (matchedSite) {
+      // Update pendingAsset directly with matched owner site data
+      result.pendingAsset = {
+        ...result.pendingAsset,
+        assetOwnerSiteID: matchedSite.siteID,
+        assetOwnerSiteName: matchedSite.siteName,
+        assetOwnerSiteGroupName: matchedSite.siteGroup,
+        assetOwnerRegionName: matchedSite.siteRegion
+      };
+
+      // Force change detection to update the view
+      this.cdr.detectChanges();
+    } else {
+      // Invalid site - explicitly set ID to undefined to trigger validation
+      console.error('[OpnameAsset] No matching site found for owner site input:', input);
+      result.pendingAsset.assetOwnerSiteID = undefined;
       
       // Force change detection to update validation state
       this.cdr.detectChanges();
@@ -847,6 +923,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
            pending.assetOwner !== existing.assetOwner ||
            pending.assetOwnerPosition !== existing.assetOwnerPosition ||
            pending.assetOwnerCostCenter !== existing.assetOwnerCostCenter ||
+           pending.assetOwnerSiteID !== existing.assetOwnerSiteID ||
            pending.siteID !== existing.siteID;
 
     // Auto-clear change reason if no changes exist
@@ -954,6 +1031,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     if (pending.assetOwnerCostCenter !== existing.assetOwnerCostCenter) {
       assetChanges.newOwnerCostCenter = pending.assetOwnerCostCenter;
     }
+    if (pending.assetOwnerSiteID !== existing.assetOwnerSiteID) {
+      assetChanges.newOwnerSiteID = pending.assetOwnerSiteID;
+    }
     if (pending.siteID !== existing.siteID) {
       assetChanges.newSiteID = pending.siteID;
     }
@@ -991,6 +1071,14 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
           result.processingStatus = 'all_good';
           // Create a deep copy of existingAsset to avoid reference issues
           result.pendingAsset = JSON.parse(JSON.stringify(result.existingAsset));
+          
+          // Ensure owner site information is properly set
+          if (!result.pendingAsset.assetOwnerSiteID) {
+            result.pendingAsset.assetOwnerSiteID = result.pendingAsset.siteID;
+          }
+          if (!result.pendingAsset.assetOwnerSiteName) {
+            result.pendingAsset.assetOwnerSiteName = result.pendingAsset.siteName;
+          }
         }
 
         console.log('[OpnameAsset] Updated asset:', result.pendingAsset);
@@ -1042,6 +1130,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       newOwnerID: existing.assetOwner,
       newOwnerPosition: existing.assetOwnerPosition,
       newOwnerCostCenter: existing.assetOwnerCostCenter,
+      newOwnerSiteID: existing.assetOwnerSiteID,
       newSiteID: existing.siteID,
       changeReason: "No changes. Asset verified on " + this.opnameSession?.startDate
     }
@@ -1051,6 +1140,15 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       next: () => {
         // Deep copy the existingAsset to ensure no shared references
         result.pendingAsset = JSON.parse(JSON.stringify(result.existingAsset));
+        
+        // Ensure owner site information is properly set
+        if (!result.pendingAsset.assetOwnerSiteID) {
+          result.pendingAsset.assetOwnerSiteID = result.pendingAsset.siteID;
+        }
+        if (!result.pendingAsset.assetOwnerSiteName) {
+          result.pendingAsset.assetOwnerSiteName = result.pendingAsset.siteName;
+        }
+        
         result.assetProcessed = true;
         result.processingStatus = 'all_good';
         result.savedChangeReason = assetChanges.changeReason || '';

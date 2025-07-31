@@ -233,6 +233,10 @@
             assetOwnerName: titleCase(response.owner_name) || '', // Default to empty string if owner name is not provided
             assetOwnerPosition: titleCase(response.owner_position),
             assetOwnerCostCenter: response.owner_cost_center,
+            assetOwnerSiteID: response.owner_site_id,
+            assetOwnerSiteName: response.owner_site_name,
+            assetOwnerSiteGroupName: response.owner_site_group_name,
+            assetOwnerRegionName: response.owner_region_name,
             siteID: response.site_id,
             siteName: response.site_name,
             siteGroupName: response.site_group_name,
@@ -311,6 +315,10 @@
             assetOwnerName: titleCase(response.owner_name) || '', // Fixed: Apply titleCase here
             assetOwnerPosition: titleCase(response.owner_position),
             assetOwnerCostCenter: response.owner_cost_center,
+            assetOwnerSiteID: response.owner_site_id,
+            assetOwnerSiteName: response.owner_site_name,
+            assetOwnerSiteGroupName: response.owner_site_group_name,
+            assetOwnerRegionName: response.owner_region_name,
             siteID: response.site_id,
             siteName: response.site_name,
             siteGroupName: response.site_group_name,

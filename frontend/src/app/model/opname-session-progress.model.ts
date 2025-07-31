@@ -12,6 +12,9 @@ export interface OpnameSessionProgress {
         newRoom?: string;
         newEquipments?: string;
         newOwnerID?: number;
+        newOwnerSiteID?: number;
+        newOwnerPosition?: string;
+        newOwnerCostCenter?: number;
         newSiteID?: number;
         changeReason?: string;
     };

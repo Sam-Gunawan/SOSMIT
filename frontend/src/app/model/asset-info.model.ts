@@ -19,9 +19,13 @@ export interface AssetInfo {
     assetOwnerName: string;
     assetOwnerPosition: string;
     assetOwnerCostCenter: number;
-    siteID: number | undefined; // Allow undefined for editing validation
-    siteName: string;
-    siteGroupName: string;
-    regionName: string;
+    assetOwnerSiteID: number | undefined; // Site where the owner is located
+    assetOwnerSiteName: string; // Name of the site where the owner is located
+    assetOwnerSiteGroupName: string; // Site group where the owner is located
+    assetOwnerRegionName: string; // Region where the owner is located
+    siteID: number | undefined; // Site where the asset is physically located
+    siteName: string; // Name of the site where the asset is physically located
+    siteGroupName: string; // Site group where the asset is physically located
+    regionName: string; // Region where the asset is physically located
     changeReason?: string; // Only used during editing
 }

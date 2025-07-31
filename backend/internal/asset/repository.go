@@ -26,10 +26,14 @@ type Asset struct {
 	OwnerName          string // Owner's full name, can be a combination of first and last name
 	OwnerPosition      string
 	OwnerCostCenter    int64
-	SiteID             int64
-	SiteName           string
-	SiteGroupName      string
-	RegionName         string
+	OwnerSiteID        int64  // Site where the owner is located
+	OwnerSiteName      string // Name of the site where the owner is located
+	OwnerSiteGroupName string // Site group where the owner is located
+	OwnerRegionName    string // Region where the owner is located
+	SiteID             int64  // Site where the asset is physically located
+	SiteName           string // Name of the site where the asset is physically located
+	SiteGroupName      string // Site group where the asset is physically located
+	RegionName         string // Region where the asset is physically located
 }
 
 type Repository struct {
@@ -68,6 +72,10 @@ func (repo *Repository) GetAssetByTag(assetTag string) (*Asset, error) {
 		&asset.OwnerName,
 		&asset.OwnerPosition,
 		&asset.OwnerCostCenter,
+		&asset.OwnerSiteID,
+		&asset.OwnerSiteName,
+		&asset.OwnerSiteGroupName,
+		&asset.OwnerRegionName,
 		&asset.SiteID,
 		&asset.SiteName,
 		&asset.SiteGroupName,
@@ -114,6 +122,10 @@ func (repo *Repository) GetAssetBySerialNumber(serialNumber string) (*Asset, err
 		&asset.OwnerName,
 		&asset.OwnerPosition,
 		&asset.OwnerCostCenter,
+		&asset.OwnerSiteID,
+		&asset.OwnerSiteName,
+		&asset.OwnerSiteGroupName,
+		&asset.OwnerRegionName,
 		&asset.SiteID,
 		&asset.SiteName,
 		&asset.SiteGroupName,
