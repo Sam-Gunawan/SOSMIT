@@ -12,6 +12,7 @@ export interface AssetChange {
     newOwnerID?: number;
     newOwnerPosition?: string;
     newOwnerCostCenter?: number;
+    newOwnerSiteID?: number;
     newSiteID?: number;
     changeReason?: string;
 }

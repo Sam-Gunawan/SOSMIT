@@ -36,6 +36,7 @@ type AssetChange struct {
 	NewOwnerID           *int    `json:"new_owner_id"`
 	NewOwnerPosition     *string `json:"new_owner_position"`
 	NewOwnerCostCenter   *int    `json:"new_owner_cost_center"`
+	NewOwnerSiteID       *int    `json:"new_owner_site_id"`
 	NewSiteID            *int    `json:"new_site_id"`
 	ChangeReason         string  `json:"change_reason"`
 }
@@ -122,7 +123,7 @@ func (repo *Repository) DeleteSession(sessionID int) error {
 func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, error) {
 	var changesJSON []byte // Use []byte to receive raw JSON data.
 
-	query := `SELECT record_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`
+	query := `SELECT record_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`
 
 	err := repo.db.QueryRow(query,
 		changedAsset.SessionID,
@@ -141,6 +142,7 @@ func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, err
 		changedAsset.NewOwnerCostCenter,
 		changedAsset.NewSiteID,
 		changedAsset.ChangeReason,
+		changedAsset.NewOwnerSiteID,
 	).Scan(&changesJSON)
 	if err != nil {
 		log.Printf("❌ Error recording asset change for asset %s: %v", changedAsset.AssetTag, err)

@@ -331,9 +331,10 @@
                                     <div class="form-item">
                                         <label [for]="'cost-center-' + result.pendingAsset.assetTag" class="form-label mb-0">Cost Center</label>
 
-                                        <input type="text" class="form-control" 
+                                        <input type="number" class="form-control" 
                                             [id]="'cost-center-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.pendingAsset.assetOwnerCostCenter" name="newCostCenter">
+                                            [(ngModel)]="result.pendingAsset.assetOwnerCostCenter" 
+                                            name="newCostCenter">
                                     </div>
                                 </div>
                 
@@ -355,20 +356,20 @@
                                 </div>
 
                                 <div class="right-top">
-                                    <h6>User Location</h6>
+                                    <h6>Owner Location</h6>
                                     
                                     <div class="form-item">
-                                        <label [for]="'user-site-' + result.pendingAsset.assetTag" class="form-label mb-0">Site</label>
+                                        <label [for]="'owner-site-' + result.pendingAsset.assetTag" class="form-label mb-0">Owner Site</label>
                                         <input type="text" class="form-control" 
-                                            [id]="'user-site-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.pendingAsset.siteName" name="newUserSite"
-                                            (input)="onSiteInputChange(i)"
-                                            list="all-sites"
-                                            [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName">
-                                        <datalist id="all-sites">
+                                            [id]="'owner-site-' + result.pendingAsset.assetTag" 
+                                            [(ngModel)]="result.pendingAsset.assetOwnerSiteName" name="newOwnerSite"
+                                            (input)="onOwnerSiteInputChange(i)"
+                                            list="all-sites-owner"
+                                            [class.is-invalid]="(result.pendingAsset.assetOwnerSiteID === undefined && result.pendingAsset.assetOwnerSiteName) || !result.pendingAsset.assetOwnerSiteName">
+                                        <datalist id="all-sites-owner">
                                             <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
                                         </datalist>
-                                        <div *ngIf="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName" class="invalid-feedback">
+                                        <div *ngIf="(result.pendingAsset.assetOwnerSiteID === undefined && result.pendingAsset.assetOwnerSiteName) || !result.pendingAsset.assetOwnerSiteName" class="invalid-feedback">
                                             Please select a valid site from the list.
                                         </div>
                                     </div>
@@ -377,7 +378,7 @@
                                         <label [for]="'user-group-' + result.pendingAsset.assetTag" class="form-label mb-0">Group</label>
                                         <input type="text" class="form-control" 
                                             [id]="'user-group-' + result.pendingAsset.assetTag" 
-                                            [value]="result.pendingAsset.siteGroupName"
+                                            [value]="result.pendingAsset.assetOwnerSiteGroupName"
                                             readonly>
                                     </div>
 
@@ -385,7 +386,7 @@
                                         <label [for]="'user-region-' + result.pendingAsset.assetTag" class="form-label mb-0">Region</label>
                                         <input type="text" class="form-control" 
                                             [id]="'user-region-' + result.pendingAsset.assetTag" 
-                                            [value]="result.pendingAsset.regionName"
+                                            [value]="result.pendingAsset.assetOwnerRegionName"
                                             readonly>
                                     </div>
                                 </div>
@@ -438,6 +439,7 @@
                                 <div class="location">
                                     <div class="asset-location">
                                         <h6>Asset Location</h6>
+                                        <p>Site Group - {{ result.pendingAsset.siteGroupName }}</p>
                                         <p>Region - {{ result.pendingAsset.regionName }}</p>
                                         
                                         <div class="form-item">

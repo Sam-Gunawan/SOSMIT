@@ -138,6 +138,7 @@ CREATE TABLE "AssetChanges" (
     CONSTRAINT unique_session_asset UNIQUE (session_id, asset_tag) -- Ensure each asset can only have one change record per session
 );
 
+-- ! NOT IMPLEMENTED YET !
 CREATE TABLE "Notification" (
     "id" SERIAL PRIMARY KEY,
     "message" TEXT NOT NULL,

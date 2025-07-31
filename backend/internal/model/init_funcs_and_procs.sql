@@ -8,7 +8,6 @@ DROP FUNCTION IF EXISTS public.get_area_manager_info(INT);
 DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_asset_by_serial_number(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
-DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(50), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, VARCHAR(255), INT, INT);
 DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT);
 DROP FUNCTION IF EXISTS public.get_opname_session_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_user_from_opname_session(INT);
@@ -16,7 +15,7 @@ DROP PROCEDURE IF EXISTS public.finish_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.approve_opname_session(INT, INT);
 DROP PROCEDURE IF EXISTS public.reject_opname_session(INT, INT);
-DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, INT, TEXT);
+DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(50), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, VARCHAR(255), INT, INT, TEXT, INT);
 DROP PROCEDURE IF EXISTS public.delete_asset_change(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_asset_change_photo(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
@@ -24,10 +23,6 @@ DROP FUNCTION IF EXISTS public.get_all_sites();
 DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
 DROP FUNCTION IF EXISTS public.get_opname_by_site_id(INT);
-
--- TODO: IMPLEMENT VERIFY/REJECT OPNAME SESSION IN EMAIL
--- TODO: SEND EMAIL TO MANAGER BEFORE L1 SUPPORT!
--- ! Email goes to area manager once completed, then to L1 support after verified by manager.
 
 -- get_credentials retrieves user credentials by username (for login auth)
 -- ! email not implemented yet
@@ -261,6 +256,10 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_tag(_asset_tag VARCHAR(12))
 		owner_name VARCHAR(510),
 		owner_position VARCHAR(100),
 		owner_cost_center INT,
+		owner_site_id INT,
+		owner_site_name VARCHAR(100),
+		owner_site_group_name VARCHAR(100),
+		owner_region_name VARCHAR(100),
 		site_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
@@ -279,6 +278,10 @@ AS $$
 				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
 				u.position AS owner_position,
 				u.cost_center_id AS owner_cost_center,
+				u.site_id AS owner_site_id,
+				owner_site.site_name AS owner_site_name,
+				owner_sg.site_group_name AS owner_site_group_name,
+				owner_r.region_name AS owner_region_name,
 				a.site_id,
 				s.site_name AS site_name,
 				sg.site_group_name AS site_group_name,
@@ -286,8 +289,11 @@ AS $$
 			FROM "Asset" AS a
 			LEFT JOIN "User" AS u ON a.owner_id = u.user_id
 			LEFT JOIN "Site" AS s ON a.site_id = s.id
+			LEFT JOIN "Site" AS owner_site ON u.site_id = owner_site.id
 			LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+			LEFT JOIN "SiteGroup" AS owner_sg ON owner_site.site_group_id = owner_sg.id
 			LEFT JOIN "Region" AS r ON sg.region_id = r.id
+			LEFT JOIN "Region" AS owner_r ON owner_sg.region_id = owner_r.id
 			WHERE a.asset_tag = _asset_tag;
 	END;
 $$;
@@ -314,6 +320,10 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_serial_number(_serial_number VARC
 		owner_name VARCHAR(510),
 		owner_position VARCHAR(100),
 		owner_cost_center INT,
+		owner_site_id INT,
+		owner_site_name VARCHAR(100),
+		owner_site_group_name VARCHAR(100),
+		owner_region_name VARCHAR(100),
 		site_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
@@ -332,6 +342,10 @@ AS $$
 				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
 				u.position AS owner_position,
 				u.cost_center_id AS owner_cost_center,
+				u.site_id AS owner_site_id,
+				owner_site.site_name AS owner_site_name,
+				owner_sg.site_group_name AS owner_site_group_name,
+				owner_r.region_name AS owner_region_name,
 				a.site_id,
 				s.site_name AS site_name,
 				sg.site_group_name AS site_group_name,
@@ -339,8 +353,11 @@ AS $$
 			FROM "Asset" AS a
 			LEFT JOIN "User" AS u ON a.owner_id = u.user_id
 			LEFT JOIN "Site" AS s ON a.site_id = s.id
+			LEFT JOIN "Site" AS owner_site ON u.site_id = owner_site.id
 			LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+			LEFT JOIN "SiteGroup" AS owner_sg ON owner_site.site_group_id = owner_sg.id
 			LEFT JOIN "Region" AS r ON sg.region_id = r.id
+			LEFT JOIN "Region" AS owner_r ON owner_sg.region_id = owner_r.id
 			WHERE a.serial_number = _serial_number;
 	END;
 $$;
@@ -626,12 +643,14 @@ CREATE OR REPLACE FUNCTION public.record_asset_change(
 	_new_owner_position VARCHAR(255),
 	_new_owner_cost_center INT,
 	_new_site_id INT,
-	_change_reason TEXT
+	_change_reason TEXT,
+	_new_owner_site_id INT
 ) RETURNS JSONB
 	LANGUAGE plpgsql
 AS $$
 	DECLARE
 		_old_data RECORD;
+		_old_owner_data RECORD;
 		_changes JSONB := '{}'::JSONB; -- Initialize an empty JSONB object to store changes
 	BEGIN
 		-- Fetch the current state of the asset before making changes
@@ -642,6 +661,11 @@ AS $$
 		IF NOT FOUND THEN
 			RAISE EXCEPTION 'Asset with tag % not found', _asset_tag;
 		END IF;
+
+		-- Fetch the current owner's site information for comparison
+		SELECT u.site_id, u.cost_center_id, u.position INTO _old_owner_data
+		FROM "User" AS u
+		WHERE u.user_id = _old_data.owner_id;
 
 		-- Compare the old and new values, and build the changes JSONB object
 		-- Only include changes that are different from the old data
@@ -675,14 +699,17 @@ AS $$
 		IF _new_owner_id IS NOT NULL AND _new_owner_id IS DISTINCT FROM _old_data.owner_id THEN
 			_changes := jsonb_set(_changes, '{newOwnerID}', to_jsonb(_new_owner_id));
 		END IF;
-		IF _new_owner_position IS NOT NULL THEN
+		IF _new_owner_position IS NOT NULL AND _new_owner_position IS DISTINCT FROM _old_owner_data.position THEN
 			_changes := jsonb_set(_changes, '{newOwnerPosition}', to_jsonb(_new_owner_position));
 		END IF;
-		IF _new_owner_cost_center IS NOT NULL THEN
+		IF _new_owner_cost_center IS NOT NULL AND _new_owner_cost_center IS DISTINCT FROM _old_owner_data.cost_center_id THEN
 			_changes := jsonb_set(_changes, '{newOwnerCostCenter}', to_jsonb(_new_owner_cost_center));
 		END IF;
 		IF _new_site_id IS NOT NULL AND _new_site_id IS DISTINCT FROM _old_data.site_id THEN
 			_changes := jsonb_set(_changes, '{newSiteID}', to_jsonb(_new_site_id));
+		END IF;
+		IF _new_owner_site_id IS NOT NULL AND _new_owner_site_id IS DISTINCT FROM _old_owner_data.site_id THEN
+			_changes := jsonb_set(_changes, '{newOwnerSiteID}', to_jsonb(_new_owner_site_id));
 		END IF;
 
 		-- Regardless of whether changes were made, we will insert a record of the changes.
