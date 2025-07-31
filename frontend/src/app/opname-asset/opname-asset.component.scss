@@ -1002,17 +1002,56 @@ th.mat-sort-header-sorted {
 
 // ===================================================
 // Specific paginator background for this component
-::ng-deep .mat-mdc-paginator {
-  background-color: transparent !important;
-  margin: 8px 0;
-  
-  .mat-mdc-paginator-container {
+.pagination-container {
+  ::ng-deep .mat-mdc-paginator {
     background-color: transparent !important;
-  }
-  
-  .mat-mdc-paginator-page-size-select,
-  .mat-mdc-paginator-range-actions {
-    background-color: transparent !important;
+    margin: 8px 0;
+    
+    .mat-mdc-paginator-container {
+      background-color: transparent !important;
+    }
+    
+    .mat-mdc-paginator-page-size-select,
+    .mat-mdc-paginator-range-actions {
+      background-color: transparent !important;
+    }
+
+    .mat-mdc-paginator-range-label {
+      color: styles.$primary-text-color;
+      margin: 0 10px; 
+    }
+    
+    .mat-mdc-form-field {
+      .mat-mdc-form-field-infix {
+        min-height: 20px;
+        padding: 2px 0;
+      }
+    }
+    
+    .mat-mdc-paginator-page-size {
+      margin-right: 0px;
+    }
+    
+    @media (max-width: 768px) {
+      font-size: 8px; // Even smaller on mobile
+      
+      .mat-mdc-paginator-range-label {
+        font-size: 8px;
+      }
+      
+      .mat-mdc-icon-button {
+        width: 20px;
+        height: 20px;
+        font-size: 8px;
+        margin: 0;
+        
+        .mat-icon {
+          font-size: 12px;
+          width: 12px;
+          height: 12px;
+        }
+      }
+    }
   }
 }
 // ===================================================
