@@ -844,6 +844,22 @@ th.mat-sort-header-sorted {
     &:active {
       background-color: #e9ecef !important;
     }
+
+    &.pending-row {
+      background-color: #fffbe66f !important; // Soft pastel yellow for pending rows
+
+      &:hover {
+        background-color: #fcf7c9 !important; // Slightly brighter on hover
+      }
+
+      &:active {
+        background-color: #fff3b2 !important; // Darker on active
+      }
+
+      .mat-mdc-cell:first-child {
+        border-left: 4px solid #ffe066; // Soft yellow for pending, good UX contrast
+      }
+    }
   }
   
   .mat-mdc-header-cell {

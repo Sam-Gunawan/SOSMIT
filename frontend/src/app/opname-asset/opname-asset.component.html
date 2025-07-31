@@ -209,7 +209,8 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
             (click)="onRowClick(row)" 
-            class="clickable-row"></tr>
+            class="clickable-row"
+            [class.pending-row]="!row.isProcessed"></tr>
     </table>
 
     <!-- Pagination -->
@@ -361,6 +362,7 @@
                                         <input type="text" class="form-control" 
                                             [id]="'user-site-' + result.pendingAsset.assetTag" 
                                             [(ngModel)]="result.pendingAsset.siteName" name="newUserSite"
+                                            (input)="onSiteInputChange(i)"
                                             list="all-sites"
                                             [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName">
                                         <datalist id="all-sites">
@@ -375,7 +377,7 @@
                                         <label [for]="'user-group-' + result.pendingAsset.assetTag" class="form-label mb-0">Group</label>
                                         <input type="text" class="form-control" 
                                             [id]="'user-group-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.pendingAsset.siteGroupName" name="newUserGroup"
+                                            [value]="result.pendingAsset.siteGroupName"
                                             readonly>
                                     </div>
 
@@ -383,7 +385,7 @@
                                         <label [for]="'user-region-' + result.pendingAsset.assetTag" class="form-label mb-0">Region</label>
                                         <input type="text" class="form-control" 
                                             [id]="'user-region-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.pendingAsset.regionName" name="newUserRegion"
+                                            [value]="result.pendingAsset.regionName"
                                             readonly>
                                     </div>
                                 </div>

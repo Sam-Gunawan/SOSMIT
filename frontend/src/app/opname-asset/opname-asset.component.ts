@@ -23,6 +23,7 @@ export interface AssetTableData {
   costCenter: number;
   condition: boolean | null;
   status: string;
+  isProcessed: boolean;
   index: number; // To track the original search results index
 }
 
@@ -457,9 +458,10 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       costCenter: result.pendingAsset.assetOwnerCostCenter,
       condition: result.pendingAsset.condition,
       status: result.pendingAsset.assetStatus,
+      isProcessed: result.assetProcessed,
       index: index
     }));
-    
+
     this.dataSource.data = tableData;
     
     // On mobile, automatically show filter form when search results are available
@@ -483,6 +485,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     
     // Apply current filters
     this.applyFilters();
+
+    this.cdr.detectChanges();
   }
 
   // Apply filters to the table data
@@ -991,6 +995,10 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
         console.log('[OpnameAsset] Updated asset:', result.pendingAsset);
 
+        // Update table data source after processing is complete
+        this.updateTableDataSource();
+        this.cdr.detectChanges();
+
         this.isSearching = false;
         this.isLoading = false;
       },
@@ -1047,6 +1055,10 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         result.processingStatus = 'all_good';
         result.savedChangeReason = assetChanges.changeReason || '';
         result.changeReason = ''; // Clear current editing change reason
+        
+        // Update table data source after processing is complete
+        this.updateTableDataSource();
+        this.cdr.detectChanges();
         
         this.isLoading = false;
         this.successMessage = 'Asset marked as all good. No changes.';
