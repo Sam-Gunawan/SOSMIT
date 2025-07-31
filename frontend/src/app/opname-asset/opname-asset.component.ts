@@ -934,6 +934,27 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     return hasChanges;
   }
 
+  get isFormValid(): boolean {
+    return document.getElementsByClassName('is-invalid').length === 0;
+  }
+
+  // Get reason why save button is disabled for user feedback
+  getSaveDisabledReason(result: any): string {
+    if (!this.hasFormChangesForAsset(result)) {
+      return 'Tidak ada perubahan terdeteksi. Silakan lakukan perubahan jika ada.';
+    }
+    
+    if (!result.changeReason || result.changeReason === '') {
+      return 'Alasan perubahan wajib diisi. Mohon jelaskan alasan Anda melakukan perubahan ini.';
+    }
+    
+    if (!this.isFormValid) {
+      return 'Mohon perbaiki kesalahan pengisian sebelum menyimpan.';
+    }
+    
+    return 'Perubahan tidak dapat disimpan.';
+  }
+
   // Process the asset change from the edit modal
   processAssetChange(index: number): void {
     this.errorMessage = '';
@@ -1284,7 +1305,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   }
 
   private closeBootstrapModal(modalId: string): void {
-    // Close the modal after a short delay to show the success message
     setTimeout(() => {
       // Clear success message
       this.successMessage = '';
