@@ -81,7 +81,7 @@ CREATE TABLE "Asset" (
     "brand_name" VARCHAR(25) NOT NULL,
     "product_name" VARCHAR(50) NOT NULL,
     "condition" BOOLEAN NOT NULL DEFAULT TRUE, -- TRUE means the asset is in good condition, FALSE means it is not.
-    "condition_notes" TEXT DEFAULT 'No notes provided',
+    "condition_notes" TEXT DEFAULT '',
     "condition_photo_url" TEXT
     CHECK (
         ("condition" = TRUE AND ("condition_photo_url" = '' OR "condition_photo_url" IS NOT NULL))
