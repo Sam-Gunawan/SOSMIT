@@ -354,7 +354,8 @@
                                     <h6>Equipments</h6>
 
                                     <div class="equipment-checkboxes">
-                                        <div class="form-check" *ngFor="let equipment of availableEquipments">
+                                        <div class="form-check" *ngFor="let equipment of availableEquipments" 
+                                                [ngClass]="{'form-check-adaptor': equipment === 'Adaptor'}">
                                             <input class="form-check-input" type="checkbox" 
                                                 [id]="'equipment-' + equipment + '-' + result.pendingAsset.assetTag"
                                                 [checked]="isEquipmentSelected(i, equipment)"
@@ -363,6 +364,12 @@
                                                 [for]="'equipment-' + equipment + '-' + result.pendingAsset.assetTag">
                                                 {{ equipment }}
                                             </label>
+                                            <div class="form-item" *ngIf="equipment === 'Adaptor'">
+                                                <input type="text" class="form-control" 
+                                                    [id]="'serial-number-adaptor-' + result.pendingAsset.assetTag" 
+                                                    name="newSerialNumberAdaptor"
+                                                    placeholder="Adaptor Serial Number">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
