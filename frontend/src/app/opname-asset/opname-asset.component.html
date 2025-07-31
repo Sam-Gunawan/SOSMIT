@@ -1,11 +1,17 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=delete" />
 
-<div class="search-container sticky-container" *ngIf="!isInReport">
-    <!-- Mobile search toggle button -->
-    <div class="mobile-search-toggle" (click)="toggleSearchForm()">
-        <button class="btn btn-outline-primary toggle-btn">
+<!-- Unified Search and Filter Container -->
+<div class="unified-controls-container sticky-container" *ngIf="!isInReport">
+    <!-- Mobile toggle buttons -->
+    <div class="mobile-toggles">
+        <button class="btn btn-outline-primary toggle-btn" (click)="toggleSearchForm()">
             <i class="fas fa-search"></i>
             {{ showSearchForm ? 'Hide Search' : 'Show Search' }}
+        </button>
+        <button class="btn btn-outline-secondary toggle-btn" (click)="toggleFilterForm()" *ngIf="searchResults.length > 0" 
+                [ngClass]="{'filter-active': hasActiveFilters}">
+            <i class="fas fa-filter"></i>
+            {{ showFilterForm ? 'Hide Filters' : 'Show Filters' }}
         </button>
     </div>
 
@@ -44,22 +50,23 @@
             </div>
         </form>
     </div>
-</div>
 
-<!-- Assets Table -->
-<div class="assets-table-container" *ngIf="searchResults.length > 0">
-    <div class="table-controls sticky-controls sticky-container">
+    <!-- Filter Controls - now inside the unified container -->
+    <div class="filter-section" *ngIf="searchResults.length > 0">
         <div class="table-header">  
-            <h5>
+            <h5 *ngIf="dataSource.filteredData.length || (searchResults.length && !hasActiveFilters)">
                 Assets Found ({{ dataSource.filteredData.length || searchResults.length }})
                 <span *ngIf="hasActiveFilters" class="filter-indicator">
                     - Filtered from {{ searchResults.length }}
                 </span>
             </h5>
+
+            <h5 *ngIf="dataSource.filteredData.length === 0 && hasActiveFilters" class="text-danger">
+                Tidak ada aset yang cocok dengan filter saat ini.
+            </h5>
         </div>
         
-        <!-- Filter Controls -->
-        <div class="filter-container">
+        <div class="filter-container" [ngClass]="{'mobile-hidden': !showFilterForm}">
             <div class="filter-form">
                 <div class="filter-grid">
                     <div class="filter-title-inline">
@@ -74,7 +81,7 @@
                             class="form-control filter-input" 
                             [(ngModel)]="filterText"
                             (input)="onFilterTextChange()"
-                            placeholder="Search in results..."
+                            placeholder="Filter by A/T, asset name, S/N, owner, or cost center..."
                             name="filterText">
                     </div>
                     
@@ -117,6 +124,10 @@
             </div>
         </div>
     </div>
+</div>
+
+<!-- Assets Table -->
+<div class="assets-table-container" *ngIf="searchResults.length > 0">
     
     <table mat-table [dataSource]="dataSource" matSort class="assets-table">
         <!-- Asset Tag Column -->
@@ -198,7 +209,8 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
             (click)="onRowClick(row)" 
-            class="clickable-row"></tr>
+            class="clickable-row"
+            [class.pending-row]="!row.isProcessed"></tr>
     </table>
 
     <!-- Pagination -->
@@ -208,6 +220,14 @@
         showFirstLastButtons>
     </mat-paginator>
 </div>
+
+<!-- Initial state - no scan performed -->
+<section class="initial-state" *ngIf="!isLoading && searchResults.length <= 0">
+    <div class="welcome-message">
+        <h4>Ready to scan</h4>
+        <p>Gunakan formulir pencarian di atas untuk memulai opname asset.<br>Silakan isi <strong>Asset Tag</strong> atau <strong>Serial Number</strong>, dan gunakan fitur scan untuk mulai melakukan opname asset.</p>
+    </div>
+</section>
 
 <!-- Asset Details for Report View -->
 <div class="asset-pages-container" *ngIf="isInReport && searchResults.length > 0">
@@ -342,6 +362,7 @@
                                         <input type="text" class="form-control" 
                                             [id]="'user-site-' + result.pendingAsset.assetTag" 
                                             [(ngModel)]="result.pendingAsset.siteName" name="newUserSite"
+                                            (input)="onSiteInputChange(i)"
                                             list="all-sites"
                                             [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName">
                                         <datalist id="all-sites">
@@ -356,7 +377,7 @@
                                         <label [for]="'user-group-' + result.pendingAsset.assetTag" class="form-label mb-0">Group</label>
                                         <input type="text" class="form-control" 
                                             [id]="'user-group-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.pendingAsset.siteGroupName" name="newUserGroup"
+                                            [value]="result.pendingAsset.siteGroupName"
                                             readonly>
                                     </div>
 
@@ -364,7 +385,7 @@
                                         <label [for]="'user-region-' + result.pendingAsset.assetTag" class="form-label mb-0">Region</label>
                                         <input type="text" class="form-control" 
                                             [id]="'user-region-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.pendingAsset.regionName" name="newUserRegion"
+                                            [value]="result.pendingAsset.regionName"
                                             readonly>
                                     </div>
                                 </div>
