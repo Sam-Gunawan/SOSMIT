@@ -33,6 +33,34 @@ p {
     align-items: center;
 }
 
+.basic-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.export-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 5px;
+    border: 1px solid color.adjust(styles.$secondary-background-color, $lightness: -10%);
+    padding: 5px 10px;
+    width: fit-content;
+    background-color: color.adjust(styles.$secondary-background-color, $lightness: -5%);
+    gap: 5px;
+
+    i {
+        font-size: 10px;
+        color: styles.$primary-text-color;
+    }
+
+    &:hover {
+        background-color: color.adjust(styles.$secondary-background-color, $lightness: -15%);
+    }
+}
+
 .opname-info {
     display: flex;
     flex-direction: column;
