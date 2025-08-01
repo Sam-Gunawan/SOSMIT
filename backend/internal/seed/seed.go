@@ -48,6 +48,7 @@ func main() {
 	seedTable(db, "CostCenter", "internal/seed/seed_data/cost_center.csv", seedCostCenter)
 	seedTable(db, "User", "internal/seed/seed_data/user.csv", seedUser)
 	seedTable(db, "Asset", "internal/seed/seed_data/asset.csv", seedAsset)
+	seedTable(db, "AssetEquipments", "internal/seed/seed_data/asset_equipments.csv", seedAssetEquipments)
 }
 
 // -- SEEDING DATA FUNCTIONS --
@@ -241,6 +242,23 @@ func seedAsset(db *sql.DB, record []string) error {
 	if err != nil {
 		log.Fatalf("Error inserting record into Asset table: %v\n", err)
 
+		return err
+	}
+
+	return nil
+}
+
+// Exported CSV format for asset_equipments.csv:
+// id [PK], product_variety, equipments
+func seedAssetEquipments(db *sql.DB, record []string) error {
+	product_variety := record[0]
+	equipments := record[1]
+
+	query := `INSERT INTO "AssetEquipments" (product_variety, equipments) VALUES ($1, $2) ON CONFLICT (product_variety) DO NOTHING`
+
+	_, err := db.Exec(query, product_variety, equipments)
+	if err != nil {
+		log.Fatalf("Error inserting record into AssetEquipments table: %v\n", err)
 		return err
 	}
 

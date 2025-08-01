@@ -132,6 +132,9 @@ func main() {
 
 			// GET /api/asset/serial/:serial_number
 			assetRoutes.GET("/serial/:serial_number", assetHandler.GetAssetBySerialNumberHandler)
+
+			// GET /api/asset/:product-variety/equipments
+			assetRoutes.GET("/:product-variety/equipments", assetHandler.GetAssetEquipmentsHandler)
 		}
 
 		opnameRoutes := api.Group("/opname").Use(auth.AuthMiddleware())

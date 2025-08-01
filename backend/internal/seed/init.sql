@@ -5,6 +5,7 @@
 -- Drop tables in reverse order to avoid foreign key constraint violations.
 DROP TABLE IF EXISTS "AssetChanges" CASCADE;
 DROP TABLE IF EXISTS "OpnameSession" CASCADE;
+DROP TABLE IF EXISTS "AssetEquipments" CASCADE;
 DROP TABLE IF EXISTS "Asset" CASCADE;
 DROP TABLE IF EXISTS "User" CASCADE;
 DROP TABLE IF EXISTS "CostCenter" CASCADE;
@@ -98,6 +99,11 @@ CREATE TABLE "Asset" (
     "site_id" INT NOT NULL REFERENCES "Site"("id") ON DELETE CASCADE
 );
 
+-- Asset Equipment Relationship
+CREATE TABLE "AssetEquipments" (
+    "product_variety" VARCHAR(50) NOT NULL PRIMARY KEY CHECK ("product_variety" IN ('Laptop', 'Desktop', 'Monitor', 'Uninterrupted Power Supply', 'Personal Digital Assistant', 'Printer/Multifunction')),
+    "equipments" TEXT NOT NULL DEFAULT 'Unit'
+);
 
 -- == TRANSCATIONAL TABLES ==
 -- Transactional means these tables record actions or events that happen to the entities.

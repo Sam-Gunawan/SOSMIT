@@ -167,3 +167,33 @@ func (handler *Handler) GetAssetsOnSiteHandler(context *gin.Context) {
 		"assets_on_site": assetsOnSite,
 	})
 }
+
+// GetAssetEquipmentsHandler retrieves all equipments for a given product variety.
+func (handler *Handler) GetAssetEquipmentsHandler(context *gin.Context) {
+	productVariety := context.Param("product-variety")
+	if productVariety == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "product-variety is required"})
+		log.Printf("⚠ product-variety is required but not provided")
+		return
+	}
+
+	// Call the service to get equipments for the product variety
+	equipments, err := handler.service.GetAssetEquipments(productVariety)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch equipments: " + err.Error()})
+		log.Printf("❌ Error fetching equipments for product variety %s: %v", productVariety, err)
+		return
+	}
+	if equipments == "" {
+		// If no equipments are found, return an empty string
+		log.Printf("⚠ No equipments found for product variety: %s", productVariety)
+		context.JSON(http.StatusOK, gin.H{"equipments": ""})
+		return
+	}
+
+	// Return the equipments
+	context.JSON(http.StatusOK, gin.H{
+		"product_variety": productVariety,
+		"equipments":      equipments,
+	})
+}

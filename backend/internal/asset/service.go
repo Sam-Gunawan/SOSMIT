@@ -88,3 +88,22 @@ func (service *Service) GetAssetsOnSite(siteID int64) ([]*Asset, error) {
 	log.Printf("Successfully retrieved %d assets for site_id: %d", len(assetsOnSite), siteID)
 	return assetsOnSite, nil
 }
+
+// GetAssetEquipments retrieves all equipments for a given product variety.
+func (service *Service) GetAssetEquipments(productVariety string) (string, error) {
+	equipments, err := service.repo.GetAssetEquipments(productVariety)
+	if err != nil {
+		// Log the error and return it
+		log.Printf("Error fetching equipments for product variety %s: %v", productVariety, err)
+		return "", err
+	}
+
+	if equipments == "" {
+		// If no equipments are found, return an empty string
+		log.Printf("No equipments found for product variety: %s", productVariety)
+		return "", nil // No equipments found
+	}
+
+	log.Printf("Successfully retrieved equipments for product variety: %s", productVariety)
+	return equipments, nil
+}

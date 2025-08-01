@@ -23,6 +23,7 @@ DROP FUNCTION IF EXISTS public.get_all_sites();
 DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
 DROP FUNCTION IF EXISTS public.get_opname_by_site_id(INT);
+DROP FUNCTION IF EXISTS public.get_asset_equipments(VARCHAR(50));
 
 -- get_credentials retrieves user credentials by username (for login auth)
 -- ! email not implemented yet
@@ -879,5 +880,20 @@ AS $$
 		SELECT os.id, DATE(os.end_date) AS completed_date
 		FROM "OpnameSession" AS os
 		WHERE os.site_id = _site_id AND os.status != 'Active';
+	END;
+$$;
+
+-- get_asset_equipments retrieves all equipments associated with an asset by its type (product_variety)
+CREATE OR REPLACE FUNCTION public.get_asset_equipments(_product_variety VARCHAR(50))
+	RETURNS TABLE (
+		equipments TEXT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT ae.equipments
+		FROM "AssetEquipments" AS ae
+		WHERE ae.product_variety = _product_variety;
 	END;
 $$;

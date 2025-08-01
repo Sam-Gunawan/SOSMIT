@@ -177,3 +177,20 @@ func (repo *Repository) GetAssetsOnSite(siteID int64) ([]*string, error) {
 	log.Printf("✅ Successfully retrieved %d assets for site ID: %d", len(assets), siteID)
 	return assets, nil // Return the slice of asset tags found
 }
+
+// GetAssetEquipments retrieves all equipments for a given product variety.
+func (repo *Repository) GetAssetEquipments(productVariety string) (string, error) {
+	var equipments string
+
+	query := `SELECT equipments FROM get_asset_equipments($1)`
+
+	if err := repo.db.QueryRow(query, productVariety).Scan(&equipments); err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("⚠ No equipments found for product variety: %s", productVariety)
+			return "", nil // No equipments found for the given product variety
+		}
+	}
+
+	log.Printf("✅ Successfully retrieved equipments for product variety: %s", productVariety)
+	return equipments, nil // Return the string of equipments found
+}
