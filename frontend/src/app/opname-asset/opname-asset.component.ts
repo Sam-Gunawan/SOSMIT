@@ -934,8 +934,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     return hasChanges;
   }
 
-  get isFormValid(): boolean {
-    return document.getElementsByClassName('is-invalid').length === 0;
+  get invalidForms(): number {
+    return document.getElementsByClassName('is-invalid').length;
   }
 
   // Get reason why save button is disabled for user feedback
@@ -944,11 +944,10 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       return 'Tidak ada perubahan terdeteksi. Silakan lakukan perubahan jika ada.';
     }
     
-    if (!result.changeReason || result.changeReason === '') {
-      return 'Alasan perubahan wajib diisi. Mohon jelaskan alasan Anda melakukan perubahan ini.';
-    }
-    
-    if (!this.isFormValid) {
+    if (this.invalidForms > 0) {
+      if (this.invalidForms === 1 && (!result.changeReason || result.changeReason === '')) {
+        return 'Alasan perubahan wajib diisi. Mohon jelaskan alasan Anda melakukan perubahan ini.';
+      }
       return 'Mohon perbaiki kesalahan pengisian sebelum menyimpan.';
     }
     

@@ -432,7 +432,7 @@
                                                     style="height: 80px"
                                                     [class.is-invalid]="!result.pendingAsset.conditionNotes || result.pendingAsset.conditionNotes === ''"></textarea>
                                                 <div *ngIf="!result.pendingAsset.conditionNotes || result.pendingAsset.conditionNotes === ''" class="invalid-feedback">
-                                                    Condition notes are required if the asset is marked is in bad condition.
+                                                    Catatan kondisi wajib diisi jika aset dalam kondisi buruk.
                                                 </div>
                                             </div>
                                             
@@ -441,7 +441,7 @@
                                                     Condition Photo
                                                 </label>
 
-                                                <div class="photo-input mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== ''">
+                                                <div class="photo-input mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== '-1'">
                                                     <img [src]="serverURL + result.pendingAsset.conditionPhotoURL" 
                                                         [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
                                                         class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
@@ -451,7 +451,11 @@
                                                     [id]="'condition-photo-' + result.pendingAsset.assetTag" 
                                                     name="conditionPhoto"
                                                     (change)="onFileSelected($event)"
-                                                    accept="image/*" capture="camera">
+                                                    accept="image/*" capture="camera"
+                                                    [class.is-invalid]="!result.pendingAsset.conditionPhotoURL || result.pendingAsset.conditionPhotoURL === '-1'">
+                                                <div *ngIf="!result.pendingAsset.conditionPhotoURL || result.pendingAsset.conditionPhotoURL === '-1'" class="invalid-feedback">
+                                                    Foto aset diperlukan jika dalam kondisi buruk.
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -505,7 +509,7 @@
                         <div class="modal-footer">
                             <!-- Warning visual cue when save is disabled -->
                             <div class="save-warning-container" 
-                                 *ngIf="(isLoading || !result.changeReason || !hasFormChangesForAsset(result) || !isFormValid) && !isLoading">
+                                 *ngIf="(isLoading || !result.changeReason || !hasFormChangesForAsset(result) || invalidForms > 0) && !isLoading">
                                 <div class="save-warning-tooltip" 
                                      [title]="getSaveDisabledReason(result)">
                                     <i class="fas fa-exclamation-triangle text-warning me-1"></i>
@@ -513,7 +517,7 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary" [disabled]="isLoading || !result.changeReason || !hasFormChangesForAsset(result) || !isFormValid">
+                            <button type="submit" class="btn btn-primary" [disabled]="isLoading || !result.changeReason || !hasFormChangesForAsset(result) || invalidForms > 0">
                                 <span *ngIf="isLoading">Saving...</span>
                                 <span *ngIf="!isLoading">Save Changes</span>
                             </button>
