@@ -214,11 +214,13 @@
     </table>
 
     <!-- Pagination -->
-    <mat-paginator #paginator
-        [pageSizeOptions]="[5, 10, 25, 40]" 
-        [pageSize]="10"
-        showFirstLastButtons>
-    </mat-paginator>
+    <div class="pagination-container">
+        <mat-paginator #paginator
+            [pageSizeOptions]="[5, 10, 25, 40]" 
+            [pageSize]="10"
+            showFirstLastButtons>
+        </mat-paginator>
+    </div>
 </div>
 
 <!-- Initial state - no scan performed -->
