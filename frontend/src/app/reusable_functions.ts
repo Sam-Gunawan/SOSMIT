@@ -48,3 +48,12 @@ export function formatDate(dateInput: Date | string | null | undefined): string 
 
     return new Intl.DateTimeFormat('en-US', options).format(date);
 }
+
+export function parseAdaptorSN(equipments: string): string | null {
+    // Regular expression to match the serial number in the format "(s/n: SERIAL_NUMBER)"
+    const regex = /\(s\/n: (\w+)\)/g;
+    const match = regex.exec(equipments);
+
+    // If a match is found, return the serial number; otherwise, return null
+    return match? match[1] : null;
+}

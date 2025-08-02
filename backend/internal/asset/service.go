@@ -1,7 +1,10 @@
 // == Handles all logical operations related to Asset ==
 package asset
 
-import "log"
+import (
+	"log"
+	"net/url"
+)
 
 type Service struct {
 	repo *Repository
@@ -91,19 +94,26 @@ func (service *Service) GetAssetsOnSite(siteID int64) ([]*Asset, error) {
 
 // GetAssetEquipments retrieves all equipments for a given product variety.
 func (service *Service) GetAssetEquipments(productVariety string) (string, error) {
-	equipments, err := service.repo.GetAssetEquipments(productVariety)
+	// Decode the product variety
+	decodedVariety, err := url.QueryUnescape(productVariety)
+	if err != nil {
+		log.Printf("Error decoding product variety %s: %v", productVariety, err)
+		return "", err // Return the error if decoding fails
+	}
+
+	equipments, err := service.repo.GetAssetEquipments(decodedVariety)
 	if err != nil {
 		// Log the error and return it
-		log.Printf("Error fetching equipments for product variety %s: %v", productVariety, err)
+		log.Printf("Error fetching equipments for product variety %s: %v", decodedVariety, err)
 		return "", err
 	}
 
 	if equipments == "" {
 		// If no equipments are found, return an empty string
-		log.Printf("No equipments found for product variety: %s", productVariety)
+		log.Printf("No equipments found for product variety: %s", decodedVariety)
 		return "", nil // No equipments found
 	}
 
-	log.Printf("Successfully retrieved equipments for product variety: %s", productVariety)
+	log.Printf("Successfully retrieved equipments for product variety: %s", decodedVariety)
 	return equipments, nil
 }
