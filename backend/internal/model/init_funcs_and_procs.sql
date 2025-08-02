@@ -700,7 +700,7 @@ AS $$
 		IF _new_owner_id IS NOT NULL AND _new_owner_id IS DISTINCT FROM _old_data.owner_id THEN
 			_changes := jsonb_set(_changes, '{newOwnerID}', to_jsonb(_new_owner_id));
 		END IF;
-		IF _new_owner_position IS NOT NULL AND _new_owner_position IS DISTINCT FROM _old_owner_data.position THEN
+		IF _new_owner_position IS NOT NULL AND LOWER(_new_owner_position) IS DISTINCT FROM LOWER(_old_owner_data.position) THEN
 			_changes := jsonb_set(_changes, '{newOwnerPosition}', to_jsonb(_new_owner_position));
 		END IF;
 		IF _new_owner_cost_center IS NOT NULL AND _new_owner_cost_center IS DISTINCT FROM _old_owner_data.cost_center_id THEN
