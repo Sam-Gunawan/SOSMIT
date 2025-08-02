@@ -1,27 +1,27 @@
-asset_tag;serial_number;status;status_reason;product_category;product_subcategory;product_variety;brand_name;product_name;condition;condition_photo_url;location;room;equipment;owner_id;site_id
-SMPC00000001;SGH7J2L9Q4M;Deployed;;Hardware;Processing Unit;Desktop;HP;HP ProDesk 400 G4 SFF;1;;Shelf A.1;16th floor storage room;Kabel power, Adaptor;1223;25
-SMLT00000003;5CD2597SON;Deployed;;Hardware;Processing Unit;Laptop;HP;HP Notebook;1;;Shelf A.1;16th floor storage room;Tas;1224;1
-SMLT00000012;5CD3009LBE;On Loan;;Hardware;Processing Unit;Laptop;HP;HP Zbook Power G8;1;;Shelf A.1;16th floor storage room;Tas;1225;2
-SMLT00000002;5CD19R0NVT;Deployed;;Hardware;Processing Unit;Laptop;HP;HP Zbook Power G8;1;;Shelf A.1;16th floor storage room;Tas;1225;2
-SMLT00000004;5CD1842KTY;Deployed;;Hardware;Processing Unit;Laptop;HP;HP Zbook Power G8;1;;Shelf A.1;16th floor storage room;Tas;1227;2
-SMLT00000001;5CD1849NVT;On Loan;;Hardware;Processing Unit;Laptop;HP;HP Zbook Power G8;1;;Shelf A.1;16th floor storage room;Tas;1226;2
-SMMN00000001;3CQ9175CNT;Deployed;;Hardware;Peripheral;Monitor;HP;HP LE1901w 19-inch Widescreen LCD;1;;Shelf A.1;16th floor storage room;Kabel power;1223;25
-SMPU00000001;3B3455X20483;Deployed;;Hardware;Power Supply;Uninterrupted Power Supply;APC;APC Back-UPS Pro 550 VA;1;;Shelf A.1;16th floor storage room;Kabel power;1223;25
-SMMN00000002;3CQ9175DFF;Deployed;;Hardware;Peripheral;Monitor;HP;HP LE1901w 19-inch Widescreen LCD;1;;Shelf A.1;16th floor storage room;Kabel power, Adaptor;1226;25
-SMPU00000002;3B3455X20123;Deployed;;Hardware;Power Supply;Uninterrupted Power Supply;APC;APC Back-UPS Pro 550 VA;1;;Shelf A.1;16th floor storage room;Kabel power;1226;25
-SMPC00000002;SGH7J2L9G7Y;Deployed;;Hardware;Processing Unit;Desktop;HP;HP ProDesk 400 G4 SFF;1;;Shelf A.1;16th floor storage room;Kabel power, Kabel VGA;1226;25
-SMTP00000001;S20254578225064;Deployed;;Hardware;Processing Unit;Personal Digital Assistant;Zebra;Zebra TC26;1;;Shelf A.1;16th floor storage room;Simcard, Handstrap, Adaptor, Kabel USB;1229;1
-SMTP00000002;S20258520047193;Deployed;;Hardware;Processing Unit;Personal Digital Assistant;Zebra;Zebra TC26;1;;Shelf A.1;16th floor storage room;Simcard, Handstrap, Adaptor, Kabel USB;1230;1
-SMTP00000003;S23152459887275;Deployed;;Hardware;Processing Unit;Personal Digital Assistant;Zebra;Zebra TC15;1;;Shelf A.1;16th floor storage room;Simcard, Adaptor, Kabel USB;1231;1
-SMPR00000001;XXZFJ183307632;Deployed;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320;1;;Shelf A.1;16th floor storage room;Tas, Tali tas, Adaptor, Kabel USB;1231;1
-SMPR00000002;XXZFJ183208946;Deployed;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320;1;;Shelf A.1;16th floor storage room;Tas, Tali tas, Adaptor, Kabel USB;1224;1
-SMPR00000003;XXZHJ231947513;Disposed;Obsolete;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Tas, Tali tas, Adaptor, Kabel USB;1225;1
-SMPR00000004;XXZHJ231945357;Disposed;Lost;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Tas, Tali tas, Adaptor, Kabel USB;1226;1
-SMPR00000005;XXZHJ231945846;Deployed;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Tas, Tali tas, Adaptor, Kabel USB;1223;2
-SMPR00000006;XXZHJ231935678;Deployed;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Tas, Tali tas, Adaptor, Kabel USB;1229;2
-SMPR00000007;XXZHJ231298358;Deployed;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Tas, Tali tas, Adaptor, Kabel USB;1228;2
-SMPR00000008;XXZHJ231536587;Deployed;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Tas, Tali tas, Adaptor, Kabel USB;1227;2
-SMPR00000009;XXZHJ225436587;In Inventory;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Tas, Tali tas, Adaptor, Kabel USB;1227;2
-SMPR00000010;XXZHJ231525344;Down;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Tas, Tali tas, Adaptor, Kabel USB;1227;25
-SMPR00000011;XXZWS48F95H39;Down;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Tas, Tali tas, Adaptor, Kabel USB;1227;25
-SMPR00000012;XXZHJ23DFV3445;In Inventory;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Tas, Tali tas, Adaptor, Kabel USB;1227;25
+asset_tag;serial_number;status;status_reason;product_category;product_subcategory;product_variety;brand_name;product_name;condition;condition_photo_url;location;room;equipments;owner_id;site_id
+SMPC00000001;SGH7J2L9Q4M;Deployed;;Hardware;Processing Unit;Desktop;HP;HP ProDesk 400 G4 SFF;1;;Shelf A.1;16th floor storage room;Unit, Kabel power, Keyboard, Mouse;1223;25
+SMLT00000003;5CD2597SON;Deployed;;Hardware;Processing Unit;Laptop;HP;HP Notebook;1;;Shelf A.1;16th floor storage room;Unit, Tas;1224;1
+SMLT00000012;5CD3009LBE;On Loan;;Hardware;Processing Unit;Laptop;HP;HP Zbook Power G8;1;;Shelf A.1;16th floor storage room;Unit, Tas;1225;2
+SMLT00000002;5CD19R0NVT;Deployed;;Hardware;Processing Unit;Laptop;HP;HP Zbook Power G8;1;;Shelf A.1;16th floor storage room;Unit, Tas;1225;2
+SMLT00000004;5CD1842KTY;Deployed;;Hardware;Processing Unit;Laptop;HP;HP Zbook Power G8;1;;Shelf A.1;16th floor storage room;Unit, Tas;1227;2
+SMLT00000001;5CD1849NVT;On Loan;;Hardware;Processing Unit;Laptop;HP;HP Zbook Power G8;1;;Shelf A.1;16th floor storage room;Unit, Tas;1226;2
+SMMN00000001;3CQ9175CNT;Deployed;;Hardware;Peripheral;Monitor;HP;HP LE1901w 19-inch Widescreen LCD;1;;Shelf A.1;16th floor storage room;Unit, Kabel power;1223;25
+SMPU00000001;3B3455X20483;Deployed;;Hardware;Power Supply;Uninterrupted Power Supply;APC;APC Back-UPS Pro 550 VA;1;;Shelf A.1;16th floor storage room;Unit, Kabel power;1223;25
+SMMN00000002;3CQ9175DFF;Deployed;;Hardware;Peripheral;Monitor;HP;HP LE1901w 19-inch Widescreen LCD;1;;Shelf A.1;16th floor storage room;Unit, Kabel power, Adaptor (s/n: ADQ9175G32);1226;25
+SMPU00000002;3B3455X20123;Deployed;;Hardware;Power Supply;Uninterrupted Power Supply;APC;APC Back-UPS Pro 550 VA;1;;Shelf A.1;16th floor storage room;Unit, Kabel power;1226;25
+SMPC00000002;SGH7J2L9G7Y;Deployed;;Hardware;Processing Unit;Desktop;HP;HP ProDesk 400 G4 SFF;1;;Shelf A.1;16th floor storage room;Unit, Kabel power, Keyboard;1226;25
+SMTP00000001;S20254578225064;Deployed;;Hardware;Processing Unit;Personal Digital Assistant;Zebra;Zebra TC26;1;;Shelf A.1;16th floor storage room;Unit, Simcard, Handstrap, Adaptor (s/n: ADQ917YY54), Kabel USB;1229;1
+SMTP00000002;S20258520047193;Deployed;;Hardware;Processing Unit;Personal Digital Assistant;Zebra;Zebra TC26;1;;Shelf A.1;16th floor storage room;Unit, Simcard, Handstrap, Adaptor (s/n: ADQ9172P1O), Kabel USB;1230;1
+SMTP00000003;S23152459887275;Deployed;;Hardware;Processing Unit;Personal Digital Assistant;Zebra;Zebra TC15;1;;Shelf A.1;16th floor storage room;Unit, Simcard, Adaptor (s/n: ADQ902DFG4), Kabel USB;1231;1
+SMPR00000001;XXZFJ183307632;Deployed;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320;1;;Shelf A.1;16th floor storage room;Unit, Tas, Tali tas, Adaptor (s/n: ADQ917645D), Kabel USB;1231;1
+SMPR00000002;XXZFJ183208946;Deployed;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320;1;;Shelf A.1;16th floor storage room;Unit, Tas, Tali tas, Adaptor (s/n: ADQ9176222), Kabel USB;1224;1
+SMPR00000003;XXZHJ231947513;Disposed;Obsolete;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Unit, Tas, Tali tas, Adaptor (s/n: ADQ917345D), Kabel USB;1225;1
+SMPR00000004;XXZHJ231945357;Disposed;Lost;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Unit, Tas, Tali tas, Adaptor (s/n: ADQ2FR645D), Kabel USB;1226;1
+SMPR00000005;XXZHJ231945846;Deployed;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Unit, Tas, Tali tas, Adaptor (s/n: ADQ9175KJT), Kabel USB;1223;2
+SMPR00000006;XXZHJ231935678;Deployed;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Unit, Tas, Tali tas, Adaptor (s/n: ADQ917SF54), Kabel USB;1229;2
+SMPR00000007;XXZHJ231298358;Deployed;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Unit, Tas, Tali tas, Adaptor (s/n: ADQ91764G6), Kabel USB;1228;2
+SMPR00000008;XXZHJ231536587;Deployed;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Unit, Tas, Tali tas, Adaptor (s/n: ADQ9174444), Kabel USB;1227;2
+SMPR00000009;XXZHJ225436587;In Inventory;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Unit, Tas, Tali tas, Adaptor (s/n: ADQ13F45D), Kabel USB;1227;2
+SMPR00000010;XXZHJ231525344;Down;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Unit, Tas, Tali tas, Adaptor (s/n: ADQ91778KL), Kabel USB;1227;25
+SMPR00000011;XXZWS48F95H39;Down;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Unit, Tas, Tali tas, Adaptor (s/n: ADQ91721ER), Kabel USB;1227;25
+SMPR00000012;XXZHJ23DFV3445;In Inventory;;Hardware;Peripheral;Printer/Multifunction;Zebra;Thermal Printer Zebra ZQ320 Plus;1;;Shelf A.1;16th floor storage room;Unit, Tas, Tali tas, Adaptor (s/n: ADY97O645D), Kabel USB;1227;25
