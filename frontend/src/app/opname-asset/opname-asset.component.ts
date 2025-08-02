@@ -14,6 +14,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { AssetPageComponent } from '../asset-page/asset-page.component';
+import { parseAdaptorSN } from '../reusable_functions';
 
 export interface AssetTableData {
   assetTag: string;
@@ -23,6 +24,7 @@ export interface AssetTableData {
   costCenter: number;
   condition: boolean | null;
   status: string;
+  processingStatus: 'pending' | 'all_good' | 'edited';
   isProcessed: boolean;
   index: number; // To track the original search results index
 }
@@ -36,7 +38,7 @@ export interface AssetTableData {
 export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit {
   public readonly serverURL = environment.serverURL; // Expose environment for use in the template
 
-  private allColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'ownerName', 'costCenter', 'condition', 'status', 'actions'];
+  private allColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'ownerName', 'costCenter', 'condition', 'status', 'processingStatus', 'actions'];
   dataSource = new MatTableDataSource<AssetTableData>([]);
 
   // Getter to return displayed columns based on report mode
@@ -72,6 +74,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   searchResults: Array<{
     existingAsset: AssetInfo,
     pendingAsset: AssetInfo,
+    availableEquipments: string[], // List of equipments for the current asset product variety
+    adaptorSN: string | null,
     assetProcessed: boolean,
     processingStatus: 'pending' | 'all_good' | 'edited',
     savedChangeReason: string,
@@ -95,18 +99,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   actualVariant: 'default' | 'compact' = 'default';
   actualShowLocation: boolean = true;
 
-  // Equipment options based on seed data
-  availableEquipments: string[] = [
-    'Kabel power',
-    'Adaptor',
-    'Tas',
-    'Kabel VGA',
-    'Kabel USB', 
-    'Simcard',
-    'Handstrap',
-    'Tali tas'
-  ];
-
   // Other properties
   opnameSession: OpnameSession = {} as OpnameSession;
   allUsers: User[] = []; // List of all users in the company
@@ -119,13 +111,13 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   filterText: string = '';
   filterCondition: string = '';
   filterStatus: string = '';
+  filterProcessingStatus: string = '';
   
   // Available filter options
   readonly conditionOptions = [
     { value: '', label: 'All Conditions' },
     { value: 'good', label: 'Good' },
-    { value: 'bad', label: 'Bad' },
-    { value: 'unknown', label: 'Unknown' }
+    { value: 'bad', label: 'Bad' }
   ];
   
   readonly statusOptions = [
@@ -136,6 +128,13 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     { value: 'In Repair', label: 'In Repair' },
     { value: 'Down', label: 'Down' },
     { value: 'Disposed', label: 'Disposed' }
+  ];
+
+  readonly processingStatusOptions = [
+    { value: '', label: 'All Process' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'edited', label: 'Diperbarui' },
+    { value: 'all_good', label: 'Sesuai' }
   ];
 
   constructor(
@@ -202,7 +201,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   ngOnChanges(changes: SimpleChanges): void {
     // React to sessionID changes after initial setup
     if (changes['sessionID'] && !changes['sessionID'].firstChange && this.sessionID !== -1) {
-      console.log('[OpnameAsset] Session ID changed from', changes['sessionID'].previousValue, 'to', changes['sessionID'].currentValue);
       this.isLoading = true;
       this.errorMessage = '';
       this.initOpnameData();
@@ -257,7 +255,31 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       }
     })
   }
-  
+
+  private getAvailableEquipments(result: any): void {
+    this.apiService.getAssetEquipments(result.pendingAsset.productVariety).subscribe({
+      next: (equipmentsString: string) => {
+        console.log('[OpnameAsset] Raw equipment response:', equipmentsString);
+        console.log('[OpnameAsset] Equipment string type:', typeof equipmentsString);
+        
+        // Parse the comma-separated string into an array
+        if (equipmentsString && typeof equipmentsString === 'string' && equipmentsString.trim() !== '') {
+          result.availableEquipments = equipmentsString.split(',').map((e: string) => e.trim()).filter((e: string) => e !== '');
+        } else {
+          result.availableEquipments = []; // No equipments available for this product variety
+        }
+        
+        console.log('[OpnameAsset] Available equipments for', result.pendingAsset.productVariety, ':', result.availableEquipments);
+        this.cdr.detectChanges(); // Trigger change detection to update the UI
+      },
+      error: (error) => {
+        console.error('[OpnameAsset] Error fetching equipments for', result.pendingAsset.productVariety, ':', error);
+        result.availableEquipments = []; // Fallback to empty array on error
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   loadOpnameProgress(sessionID: number): void {
     this.opnameSessionService.loadOpnameProgress(sessionID).subscribe({
       next: (progress: OpnameSessionProgress[]) => {
@@ -300,10 +322,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
           const ownerSiteID = savedRecord.assetChanges.newOwnerSiteID ?? asset.assetOwnerSiteID;
           const siteID = savedRecord.assetChanges.newSiteID ?? asset.siteID;
           
-          // Debug logging
-          console.log('[OpnameAsset] Asset Changes for', savedRecord.assetTag, ':', savedRecord.assetChanges);
-          console.log('[OpnameAsset] Original asset data:', asset);
-          
           // Find the owner data based on the owner ID
           const owner = this.allUsers.find(user => user.userID === ownerID);
           const ownerName = owner ? `${owner.firstName} ${owner.lastName}` : asset.assetOwnerName;
@@ -313,10 +331,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
                                (owner ? owner.position : asset.assetOwnerPosition);
           const ownerCostCenter = savedRecord.assetChanges.newOwnerCostCenter ?? 
                                  (owner ? owner.costCenterID : asset.assetOwnerCostCenter);
-                                 
-          console.log('[OpnameAsset] Calculated ownerPosition:', ownerPosition, 'from saved:', savedRecord.assetChanges.newOwnerPosition, 'owner:', owner?.position, 'original:', asset.assetOwnerPosition);
-          console.log('[OpnameAsset] Calculated ownerCostCenter:', ownerCostCenter, 'from saved:', savedRecord.assetChanges.newOwnerCostCenter, 'owner:', owner?.costCenterID, 'original:', asset.assetOwnerCostCenter);
-          
+
           // Find the owner site data based on the owner site ID
           const ownerSite = this.allSites.find(site => site.siteID === ownerSiteID);
           const ownerSiteName = ownerSite ? ownerSite.siteName : asset.assetOwnerSiteName;
@@ -351,10 +366,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
             regionName: regionName
           };
 
-          console.log('[OpnameAsset] Final pendingAsset:', pendingAsset);
-          console.log('[OpnameAsset] Position in final asset:', pendingAsset.assetOwnerPosition);
-          console.log('[OpnameAsset] Cost Center in final asset:', pendingAsset.assetOwnerCostCenter);
-
           // Check if there are any meaningful changes (excluding changeReason)
           const hasChanges = savedRecord.assetChanges.newSerialNumber !== undefined ||
                            savedRecord.assetChanges.newStatus !== undefined ||
@@ -370,18 +381,23 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
                            savedRecord.assetChanges.newOwnerCostCenter !== undefined ||
                            savedRecord.assetChanges.newOwnerSiteID !== undefined ||
                            savedRecord.assetChanges.newSiteID !== undefined;
-
-          console.log("pending asset loaded: ", pendingAsset);
           
           // Store in the correct position to preserve order
-          orderedResults[index] = {
+          const resultItem = {
             existingAsset: existingAsset,
             pendingAsset: pendingAsset,
+            availableEquipments: [] as string[], // Initialize as empty, will be loaded asynchronously
+            adaptorSN: parseAdaptorSN(pendingAsset.equipments), // Extract adaptor serial number
             assetProcessed: true,
-            processingStatus: hasChanges ? 'edited' : 'all_good',
+            processingStatus: hasChanges ? 'edited' as const : 'all_good' as const,
             savedChangeReason: savedRecord.assetChanges.changeReason || '',
             changeReason: savedRecord.assetChanges.changeReason || ''
           };
+          
+          orderedResults[index] = resultItem;
+
+          // Load available equipments for this asset
+          this.getAvailableEquipments(resultItem);
 
           completedCount++;
           
@@ -428,7 +444,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         
         // Load progress and then initialize form data when done
         this.loadOpnameProgress(this.sessionID);
-        console.log('[OpnameAsset] Opname session loaded:', session);
       },
       error: (error) => {
         console.error('[OpnameAsset] Error loading opname session:', error);
@@ -483,6 +498,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       costCenter: result.pendingAsset.assetOwnerCostCenter,
       condition: result.pendingAsset.condition,
       status: result.pendingAsset.assetStatus,
+      processingStatus: result.processingStatus,
       isProcessed: result.assetProcessed,
       index: index
     }));
@@ -532,22 +548,25 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       // Condition filter
       let conditionMatch = true;
       if (filters.condition) {
-        const conditionValue = data.condition === true ? 'good' : 
-                              data.condition === false ? 'bad' : 'unknown';
+        const conditionValue = data.condition === true ? 'good' : 'bad';
         conditionMatch = conditionValue === filters.condition;
       }
       
       // Status filter
       const statusMatch = !filters.status || data.status === filters.status;
-      
-      return textMatch && conditionMatch && statusMatch;
+
+      // Processing status filter
+      const processingStatusMatch = !filters.processingStatus || data.processingStatus === filters.processingStatus;
+
+      return textMatch && conditionMatch && statusMatch && processingStatusMatch;
     };
     
     // Create filter object
     const filterObject = {
       text: this.filterText.toLowerCase(),
       condition: this.filterCondition,
-      status: this.filterStatus
+      status: this.filterStatus,
+      processingStatus: this.filterProcessingStatus
     };
     
     this.dataSource.filter = JSON.stringify(filterObject);
@@ -558,30 +577,18 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }, 0);
   }
 
-  // Filter methods
-  onFilterTextChange(): void {
-    this.applyFilters();
-  }
-
-  onFilterConditionChange(): void {
-    this.applyFilters();
-  }
-
-  onFilterStatusChange(): void {
-    this.applyFilters();
-  }
-
   // Reset all filters
   resetFilters(): void {
     this.filterText = '';
     this.filterCondition = '';
     this.filterStatus = '';
+    this.filterProcessingStatus = '';
     this.applyFilters();
   }
 
   // Check if any filters are active
   get hasActiveFilters(): boolean {
-    return !!(this.filterText || this.filterCondition || this.filterStatus);
+    return !!(this.filterText || this.filterCondition || this.filterStatus || this.filterProcessingStatus);
   }
 
   onRowClick(row: AssetTableData): void {
@@ -655,16 +662,25 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         if (!pendingAsset.assetOwnerSiteName) {
           pendingAsset.assetOwnerSiteName = pendingAsset.siteName;
         }
+
+        // Set empty equipments by default
+        pendingAsset.equipments = "";
         
-        this.searchResults.unshift({
+        const newResult = {
           existingAsset: newAsset,
           pendingAsset: pendingAsset,
+          availableEquipments: [] as string[], // Initialize as empty array, will be loaded asynchronously
+          adaptorSN: parseAdaptorSN(newAsset.equipments), // Parse from existing asset, not pending
           assetProcessed: false,
-          processingStatus: 'pending', // Initial processing status
+          processingStatus: 'pending' as 'pending' | 'all_good' | 'edited', // Initial processing status
           savedChangeReason: '',
           changeReason: ''
-        });
+        };
+        
+        this.searchResults.unshift(newResult);
 
+        // Load available equipments for this specific asset
+        this.getAvailableEquipments(newResult);
         this.updateTableDataSource(); // Update table with new search result
         this.isSearching = false;
         // Clear the appropriate input field after successful search
@@ -860,6 +876,12 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     if (!result || !result.pendingAsset.equipments) return false;
     
     const equipmentList = result.pendingAsset.equipments.split(',').map(item => item.trim());
+    
+    // For adaptor, check if any equipment starts with "Adaptor"
+    if (equipment === 'Adaptor') {
+      return equipmentList.some(item => item.startsWith('Adaptor'));
+    }
+    
     return equipmentList.includes(equipment);
   }
 
@@ -871,21 +893,61 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     let currentEquipments = result.pendingAsset.equipments || '';
     let equipmentList = currentEquipments ? currentEquipments.split(',').map(item => item.trim()) : [];
 
-    const equipmentIndex = equipmentList.indexOf(equipment);
-    
-    if (equipmentIndex > -1) {
-      // Remove equipment
-      equipmentList.splice(equipmentIndex, 1);
+    if (equipment === 'Adaptor') {
+      // Handle adaptor specially
+      const hasAdaptor = equipmentList.some(item => item.startsWith('Adaptor'));
+
+      if (hasAdaptor) {
+        // Remove all adaptor entries
+        equipmentList = equipmentList.filter(item => !item.startsWith('Adaptor'));
+      } else {
+        // Add adaptor with current serial number from ngModel
+        const adaptorSN = result.adaptorSN?.trim().toUpperCase() || 'N/A';
+        equipmentList.push(`Adaptor (s/n: ${adaptorSN})`);
+      }
     } else {
-      // Add equipment
-      equipmentList.push(equipment);
+      // Handle other equipment normally
+      const equipmentIndex = equipmentList.indexOf(equipment);
+
+      if (equipmentIndex > -1) {
+        // Remove equipment
+        equipmentList.splice(equipmentIndex, 1);
+      } else {
+        // Add equipment
+        equipmentList.push(equipment);
+      }
     }
 
     // Update the equipment string
     result.pendingAsset.equipments = equipmentList.filter(item => item).join(', ');
-    
+
     // Force change detection
     this.cdr.detectChanges();
+  }
+
+  // Update adaptor serial number in equipment string (called on blur)
+  updateAdaptorInEquipments(index: number): void {
+    const result = this.searchResults[index];
+    if (!result) return;
+
+    // Only update if adaptor is currently selected
+    if (this.isEquipmentSelected(index, 'Adaptor')) {
+      let currentEquipments = result.pendingAsset.equipments || '';
+      let equipmentList = currentEquipments ? currentEquipments.split(',').map(item => item.trim()) : [];
+      
+      // Remove existing adaptor entries
+      equipmentList = equipmentList.filter(item => !item.startsWith('Adaptor'));
+      
+      // Add new adaptor with current serial number
+      const adaptorSN = result.adaptorSN?.trim().toUpperCase() || 'N/A';
+      equipmentList.push(`Adaptor (s/n: ${adaptorSN})`);
+      
+      // Update the equipment string
+      result.pendingAsset.equipments = equipmentList.filter(item => item).join(', ');
+      
+      // Force change detection
+      this.cdr.detectChanges();
+    }
   }
 
   // Handle status changes
@@ -904,6 +966,60 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }
   }
 
+  // Helper function to normalize and compare equipment strings
+  private normalizeEquipmentString(equipmentString: string): string {
+    if (!equipmentString || equipmentString.trim() === '') return '';
+    
+    // Split, trim, filter empty
+    const equipmentList = equipmentString
+      .split(',')
+      .map(item => item.trim())
+      .filter(item => item !== '');
+    
+    // Normalize each equipment item
+    const normalizedList = equipmentList.map(item => {
+      // Handle adaptor entries specially to normalize the format
+      if (item.startsWith('Adaptor')) {
+        // Extract serial number if present
+        const snMatch = item.match(/\(s\/n:\s*([^)]+)\s*\)/);
+        if (snMatch) {
+          const serialNumber = snMatch[1].trim().toUpperCase();
+          return `Adaptor (s/n: ${serialNumber})`;
+        } else {
+          // If no serial number found, treat as plain adaptor
+          return 'Adaptor';
+        }
+      }
+      return item;
+    });
+    
+    // Sort and rejoin
+    return normalizedList.sort().join(', ');
+  }
+
+  // Check if equipments have actually changed (normalized comparison)
+  hasEquipmentChanges(result: any): boolean {
+    if (!result) return false;
+    
+    const normalizedPending = this.normalizeEquipmentString(result.pendingAsset.equipments || '');
+    const normalizedExisting = this.normalizeEquipmentString(result.existingAsset.equipments || '');
+    
+    return normalizedPending !== normalizedExisting;
+  }
+
+  // Get equipment status text in Bahasa Indonesia
+  getEquipmentStatus(result: any): string {
+    if (!result || !result.availableEquipments || result.availableEquipments.length === 0) {
+      return 'Memuat peralatan...'; // Loading equipments...
+    }
+    
+    if (this.hasEquipmentChanges(result)) {
+      return 'Terdapat perubahan dengan data master'; // There are changes
+    } else {
+      return 'Sesuai dengan data master'; // Matches master data
+    }
+  }
+
   // Check if there are any meaningful changes for a specific asset
   hasFormChangesForAsset(result: any): boolean {
     if (!result) return false;
@@ -919,7 +1035,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
            pending.conditionPhotoURL !== existing.conditionPhotoURL ||
            pending.location !== existing.location ||
            pending.room !== existing.room ||
-           pending.equipments !== existing.equipments ||
+           this.hasEquipmentChanges(result) || // Use normalized equipment comparison
            pending.assetOwner !== existing.assetOwner ||
            pending.assetOwnerPosition !== existing.assetOwnerPosition ||
            pending.assetOwnerCostCenter !== existing.assetOwnerCostCenter ||
@@ -1169,12 +1285,16 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
           result.pendingAsset.assetOwnerSiteName = result.pendingAsset.siteName;
         }
         
+        // Update the adaptor SN
+        result.adaptorSN = parseAdaptorSN(result.existingAsset.equipments);
+
         result.assetProcessed = true;
         result.processingStatus = 'all_good';
         result.savedChangeReason = assetChanges.changeReason || '';
         result.changeReason = ''; // Clear current editing change reason
         
         // Update table data source after processing is complete
+        this.updateAdaptorInEquipments(index);
         this.updateTableDataSource();
         this.cdr.detectChanges();
         

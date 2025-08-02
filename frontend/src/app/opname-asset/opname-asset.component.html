@@ -80,7 +80,7 @@
                             type="text" 
                             class="form-control filter-input" 
                             [(ngModel)]="filterText"
-                            (input)="onFilterTextChange()"
+                            (input)="applyFilters()"
                             placeholder="Filter by A/T, asset name, S/N, owner, or cost center..."
                             name="filterText">
                     </div>
@@ -90,7 +90,7 @@
                             id="filter-condition"
                             class="form-select filter-select" 
                             [(ngModel)]="filterCondition"
-                            (change)="onFilterConditionChange()"
+                            (change)="applyFilters()"
                             name="filterCondition">
                             <option *ngFor="let option of conditionOptions" [value]="option.value">
                                 {{ option.label }}
@@ -103,9 +103,22 @@
                             id="filter-status"
                             class="form-select filter-select" 
                             [(ngModel)]="filterStatus"
-                            (change)="onFilterStatusChange()"
+                            (change)="applyFilters()"
                             name="filterStatus">
                             <option *ngFor="let option of statusOptions" [value]="option.value">
+                                {{ option.label }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="filter-item">
+                        <select 
+                            id="filter-processing-status"
+                            class="form-select filter-select" 
+                            [(ngModel)]="filterProcessingStatus"
+                            (change)="applyFilters()"
+                            name="filterProcessingStatus">
+                            <option *ngFor="let option of processingStatusOptions" [value]="option.value">
                                 {{ option.label }}
                             </option>
                         </select>
@@ -170,10 +183,9 @@
             <td mat-cell *matCellDef="let element">
                 <span class="condition-badge" [ngClass]="{
                     'condition-good': element.condition === true,
-                    'condition-bad': element.condition === false,
-                    'condition-unknown': element.condition === null
+                    'condition-bad': element.condition === false
                 }">
-                {{ element.condition === true ? 'Good' : element.condition === false ? 'Bad' : 'Unknown' }}
+                {{ element.condition === true ? 'Good' : 'Bad' }}
                 </span>
             </td>
         </ng-container>
@@ -191,6 +203,20 @@
                     'status-disposed': element.status === 'Disposed'
                 }">
                 {{ element.status }}
+                </span>
+            </td>
+        </ng-container>
+
+        <!-- Asset Opname Status Column -->
+        <ng-container matColumnDef="processingStatus">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Process</th>
+            <td mat-cell *matCellDef="let element">
+                <span class="processing-status" [ngClass]="{
+                    'status-pending': element.processingStatus === 'pending',
+                    'status-edited': element.processingStatus === 'edited',
+                    'status-all-good': element.processingStatus === 'all_good',
+                }">
+                {{ element.processingStatus === 'pending' ? 'Pending' : element.processingStatus === 'edited' ? 'Diperbarui' : 'Sesuai' }}
                 </span>
             </td>
         </ng-container>
@@ -353,10 +379,32 @@
                                 </div>
                 
                                 <div class="left-top">
-                                    <h6>Equipments</h6>
+                                    <div class="equipment-header">
+                                        <h6>Peralatan</h6>
+                                        <div class="equipment-status" *ngIf="result.availableEquipments.length > 0">
+                                            <span class="status-indicator" 
+                                                  [ngClass]="{
+                                                    'status-changed': hasEquipmentChanges(result),
+                                                    'status-unchanged': !hasEquipmentChanges(result)
+                                                  }">
+                                                <i class="fas" 
+                                                   [ngClass]="{
+                                                     'fa-edit': hasEquipmentChanges(result),
+                                                     'fa-check': !hasEquipmentChanges(result)
+                                                   }"></i>
+                                                {{ getEquipmentStatus(result) }}
+                                            </span>
+                                        </div>
+                                    </div>
 
                                     <div class="equipment-checkboxes">
-                                        <div class="form-check" *ngFor="let equipment of availableEquipments" 
+                                        <!-- Loading state for equipments -->
+                                        <div *ngIf="result.availableEquipments.length === 0" class="equipment-loading">
+                                            <small class="text-muted">Memuat peralatan yang tersedia...</small>
+                                        </div>
+                                        
+                                        <!-- Equipment checkboxes -->
+                                        <div class="form-check" *ngFor="let equipment of result.availableEquipments" 
                                                 [ngClass]="{'form-check-adaptor': equipment === 'Adaptor'}">
                                             <input class="form-check-input" type="checkbox" 
                                                 [id]="'equipment-' + equipment + '-' + result.pendingAsset.assetTag"
@@ -368,7 +416,10 @@
                                             </label>
                                             <div class="form-item" *ngIf="equipment === 'Adaptor'">
                                                 <input type="text" class="form-control" 
-                                                    [id]="'serial-number-adaptor-' + result.pendingAsset.assetTag" 
+                                                    [id]="'serial-number-adaptor-' + result.pendingAsset.assetTag"
+                                                    [(ngModel)]="result.adaptorSN"
+                                                    (blur)="updateAdaptorInEquipments(i)"
+                                                    [disabled]="!isEquipmentSelected(i, 'Adaptor')"
                                                     name="newSerialNumberAdaptor"
                                                     placeholder="Adaptor Serial Number">
                                             </div>

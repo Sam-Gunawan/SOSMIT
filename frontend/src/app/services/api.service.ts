@@ -332,6 +332,22 @@
       );
     }
 
+    getAssetEquipments(productVariety: string): Observable<any> {
+      // This method will fetch the equipments related to a specific product variety.
+
+      // If the product variety consists of forward slashes (e.g. Printer/Multifunction), replace with %252F (double encoded forward slash)
+      productVariety = productVariety.replace(/\//g, '%252F');
+      return this.http.get<any>(`${this.assetApiUrl}/${productVariety}/equipments`).pipe(
+        map((response: any) => {
+          // Map the response to the desired format
+          return response.equipments || "";
+        }),
+        tap((response: any) => {
+          console.log('[ApiService] Fetched equipments for product variety:', response.product_variety, response.equipments);
+        })
+      );
+    }
+
     // Universal search for assets (by tag or serial number)
     searchAsset(searchTerm: string, searchType: 'asset_tag' | 'serial_number'): Observable<any> {
       // This is a wrapper that calls the appropriate search method based on the search type
