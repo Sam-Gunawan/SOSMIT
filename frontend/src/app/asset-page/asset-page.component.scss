@@ -50,8 +50,7 @@ p {
     grid-template-areas: 
       "main-info user-info"
       "left-top right-top"
-      "left-bottom right-bottom"
-      "location tbd";
+      "left-bottom right-bottom";
     min-height: 0; // Prevents grid from growing beyond container
     
     // Responsive design for smaller screens
@@ -62,7 +61,7 @@ p {
         "main-info"
         "left-top"
         "left-bottom"
-        "location"
+        "right-bottom"
         "user-info"
         "right-top";
     }
@@ -269,11 +268,11 @@ p {
     flex-direction: column;
     padding: 10px;
     align-self: stretch;
-    border-bottom: 1px solid styles.$quaternary-text-color;
     border-right: 1px solid styles.$quaternary-text-color;
     
     @media (max-width: 768px) {
       border-right: none;
+      border-bottom: 1px solid styles.$quaternary-text-color;
     }
   }
 
@@ -294,32 +293,30 @@ p {
     }
   }
 
-  .location { 
-    grid-area: location;
+  .right-bottom { 
+    grid-area: right-bottom;
     display: flex;
     flex-direction: column;
     padding: 10px;
     align-self: stretch;
-    border-right: 1px solid styles.$quaternary-text-color;
     
     h5 {
       margin-bottom: 10px;
     }
 
     @media (max-width: 768px) {
-      border-right: none;
       border-bottom: 1px solid styles.$quaternary-text-color;
     }
   }
 
-  .right-bottom {
-    grid-area: right-bottom;
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    align-self: stretch;
-    border-bottom: 1px solid styles.$quaternary-text-color;
-  }
+  // .right-bottom {
+  //   grid-area: right-bottom;
+  //   display: flex;
+  //   flex-direction: column;
+  //   padding: 10px;
+  //   align-self: stretch;
+  //   border-bottom: 1px solid styles.$quaternary-text-color;
+  // }
 
   .reason-changes {
     padding: 10px;

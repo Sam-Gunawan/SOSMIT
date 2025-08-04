@@ -17,20 +17,6 @@
         <form class="compact-search-form" (ngSubmit)="performAdvancedSearch()">
             <div class="form-grid">
                 <div class="form-item">
-                    <label>Site Name</label>
-                    <input 
-                        type="text" 
-                        class="form-control" 
-                        [(ngModel)]="searchCriteria.siteName"
-                        name="siteName"
-                        placeholder="Site name"
-                        list="siteNames">
-                    <datalist id="siteNames">
-                        <option *ngFor="let site of originalSiteCardList" [value]="site.siteName"></option>
-                    </datalist>
-                </div>
-                
-                <div class="form-item">
                     <label>Site Group</label>
                     <input 
                         type="text" 
@@ -41,6 +27,22 @@
                         list="siteGroups">
                     <datalist id="siteGroups">
                         <option *ngFor="let group of siteGroupList" [value]="group"></option>
+                    </datalist>
+                </div>
+
+                <div class="form-item">
+                    <label>Created By</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="searchCriteria.opnameByName"
+                        name="opnameByName"
+                        placeholder="Search by user name"
+                        list="users">
+                    <datalist id="users">
+                        <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">
+                            {{ user.firstName }} {{ user.lastName }} ({{ user.username }})
+                        </option>
                     </datalist>
                 </div>
                 
@@ -75,18 +77,16 @@
                 </div>
 
                 <div class="form-item">
-                    <label>Created By</label>
+                    <label>Owner Site</label>
                     <input 
                         type="text" 
                         class="form-control" 
-                        [(ngModel)]="searchCriteria.opnameByName"
-                        name="opnameByName"
-                        placeholder="Search by user name"
-                        list="users">
-                    <datalist id="users">
-                        <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">
-                            {{ user.firstName }} {{ user.lastName }} ({{ user.username }})
-                        </option>
+                        [(ngModel)]="searchCriteria.siteName"
+                        name="siteName"
+                        placeholder="Owner site"
+                        list="siteNames">
+                    <datalist id="siteNames">
+                        <option *ngFor="let site of originalSiteCardList" [value]="site.siteName"></option>
                     </datalist>
                 </div>
                 

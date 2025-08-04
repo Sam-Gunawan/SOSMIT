@@ -430,37 +430,23 @@
                                 </div>
 
                                 <div class="right-top">
-                                    <h6>Owner Location</h6>
-                                    
+                                    <h6>User Organization</h6>
+
+                                    <!-- will change to division -->
                                     <div class="form-item">
-                                        <label [for]="'owner-site-' + result.pendingAsset.assetTag" class="form-label mb-0">Owner Site</label>
+                                        <label [for]="'user-division-' + result.pendingAsset.assetTag" class="form-label mb-0">Division</label>
                                         <input type="text" class="form-control" 
-                                            [id]="'owner-site-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.pendingAsset.assetOwnerSiteName" name="newOwnerSite"
-                                            (input)="onOwnerSiteInputChange(i)"
-                                            list="all-sites-owner"
-                                            [class.is-invalid]="(result.pendingAsset.assetOwnerSiteID === undefined && result.pendingAsset.assetOwnerSiteName) || !result.pendingAsset.assetOwnerSiteName">
-                                        <datalist id="all-sites-owner">
-                                            <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
-                                        </datalist>
-                                        <div *ngIf="(result.pendingAsset.assetOwnerSiteID === undefined && result.pendingAsset.assetOwnerSiteName) || !result.pendingAsset.assetOwnerSiteName" class="invalid-feedback">
-                                            Please select a valid site from the list.
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="form-item">
-                                        <label [for]="'user-group-' + result.pendingAsset.assetTag" class="form-label mb-0">Group</label>
-                                        <input type="text" class="form-control" 
-                                            [id]="'user-group-' + result.pendingAsset.assetTag" 
-                                            [value]="result.pendingAsset.assetOwnerSiteGroupName"
+                                            [id]="'user-division-' + result.pendingAsset.assetTag" 
+                                            [value]="result.pendingAsset.assetOwnerName" 
                                             readonly>
                                     </div>
 
+                                    <!-- will change to department -->
                                     <div class="form-item">
-                                        <label [for]="'user-region-' + result.pendingAsset.assetTag" class="form-label mb-0">Region</label>
+                                        <label [for]="'user-department-' + result.pendingAsset.assetTag" class="form-label mb-0">Owner Dept.</label>
                                         <input type="text" class="form-control" 
-                                            [id]="'user-region-' + result.pendingAsset.assetTag" 
-                                            [value]="result.pendingAsset.assetOwnerRegionName"
+                                            [id]="'user-department-' + result.pendingAsset.assetTag" 
+                                            [value]="result.pendingAsset.assetOwnerName" 
                                             readonly>
                                     </div>
                                 </div>
@@ -516,16 +502,45 @@
                                     </div>
                                 </div>
 
-                                <div class="right-bottom"></div>
-                
-                                <div class="location">
+                                <div class="right-bottom">
                                     <div class="asset-location">
                                         <h6>Asset Location</h6>
-                                        <p>Site Group - {{ result.pendingAsset.siteGroupName }}</p>
-                                        <p>Region - {{ result.pendingAsset.regionName }}</p>
-                                        
+
                                         <div class="form-item">
-                                            <label [for]="'site-name-' + result.pendingAsset.assetTag" class="form-label mb-0">Site Name</label>
+                                            <label [for]="'user-region-' + result.pendingAsset.assetTag" class="form-label mb-0">Region</label>
+                                            <input type="text" class="form-control" 
+                                                [id]="'user-region-' + result.pendingAsset.assetTag" 
+                                                [value]="result.pendingAsset.regionName" 
+                                                readonly>
+                                        </div>
+
+                                        <div class="form-item">
+                                            <label [for]="'user-group-' + result.pendingAsset.assetTag" class="form-label mb-0">Group</label>
+                                            <input type="text" class="form-control" 
+                                                [id]="'user-group-' + result.pendingAsset.assetTag" 
+                                                [value]="result.pendingAsset.siteGroupName" 
+                                                readonly>
+                                        </div>
+                                        
+                                        <!-- need site list -->
+                                        <div class="form-item">
+                                            <label [for]="'site-name-' + result.pendingAsset.assetTag" class="form-label mb-0">Site</label>
+                                            <input type="text" class="form-control" 
+                                                [id]="'site-name-' + result.pendingAsset.assetTag" 
+                                                [(ngModel)]="result.pendingAsset.siteName" name="siteName"
+                                                (input)="onSiteInputChange(i)"
+                                                list="all-sites"
+                                                [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName">
+                                            <datalist id="all-sites">
+                                                <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
+                                            </datalist>
+                                            <div *ngIf="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName" class="invalid-feedback">
+                                                Please select a valid site from the list.
+                                            </div>
+                                        </div>
+
+                                        <div class="form-item">
+                                            <label [for]="'site-name-' + result.pendingAsset.assetTag" class="form-label mb-0">Owner Site</label>
                                             <input type="text" class="form-control" 
                                                 [id]="'site-name-' + result.pendingAsset.assetTag" 
                                                 [(ngModel)]="result.pendingAsset.siteName" name="siteName"
@@ -548,6 +563,10 @@
                                         </div>
                                     </div>
                                 </div>
+                
+                                <!-- <div class="location">
+                                    
+                                </div> -->
                             </div>
                         </div>
                         
