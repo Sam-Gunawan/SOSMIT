@@ -36,6 +36,16 @@
                             name="serialNumber"
                             placeholder="Serial number">
                     </div>
+
+                    <div class="form-item">
+                        <label>Asset Name</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            [(ngModel)]="searchCriteria.assetName"
+                            name="assetName"
+                            placeholder="Asset name">
+                    </div>
                     
                     <div class="form-item">
                         <label>Owner</label>
@@ -79,7 +89,7 @@
                         </select>
                     </div>
                     
-                    <div class="form-item">
+                    <!-- <div class="form-item">
                         <label>Brand</label>
                         <input 
                             type="text" 
@@ -91,16 +101,6 @@
                         <datalist id="brands">
                             <option *ngFor="let brand of uniqueBrands" [value]="brand"></option>
                         </datalist>
-                    </div>
-
-                    <div class="form-item">
-                        <label>Asset Name</label>
-                        <input 
-                            type="text" 
-                            class="form-control" 
-                            [(ngModel)]="searchCriteria.assetName"
-                            name="assetName"
-                            placeholder="Asset name">
                     </div>
                     
                     <div class="form-item">
@@ -129,7 +129,7 @@
                         <datalist id="subCategories">
                             <option *ngFor="let subCategory of uniqueSubCategories" [value]="subCategory"></option>
                         </datalist>
-                    </div>
+                    </div> -->
                 </div>
                 
                 <div class="form-actions">
@@ -200,9 +200,8 @@
         <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
             <div class="first-column">
                 <h6 class="asset-tag">{{ assetCard.assetTag }}</h6>
-                <p class="asset-name">{{ assetCard.assetName }}</p>
-                <p class="asset-details">{{ assetCard.assetBrand }} • {{ assetCard.category }}</p>
                 <p class="serial-number">S/N: {{ assetCard.serialNumber }}</p>
+                <p class="site-name">{{ assetCard.siteName }}</p>
                 <p class="asset-owner">Owner: {{ assetCard.assetOwnerName }}</p>
             </div>
     
