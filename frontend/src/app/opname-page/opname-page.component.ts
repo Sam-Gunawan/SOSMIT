@@ -125,6 +125,9 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   }
 
   cancelOpnameSession() {
+    // Close the modal first
+    this.closeModal('opnameCanceled');
+    
     // This method will cancel the current stock opname session.
     if (this.sessionID <= 0) {
       console.error('[OpnamePage] Invalid session ID:', this.sessionID);
@@ -160,6 +163,9 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   }
 
   finishOpnameSession() {
+    // Close the modal first
+    this.closeModal('opnameFinished');
+    
     // This method will finish the current stock opname session.
     if (this.sessionID <= 0) {
       console.error('[OpnamePage] Invalid session ID:', this.sessionID);
@@ -205,6 +211,68 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       // Small screens: use default variant without location
       this.cardVariant = 'default';
       this.showLocation = false;
+    }
+  }
+
+  // Open finish modal programmatically
+  openFinishModal() {
+    setTimeout(() => {
+      const modalElement = document.getElementById('opnameFinished');
+      
+      if (modalElement) {
+        try {
+          const modal = new (window as any).bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+          });
+          modal.show();
+        } catch (error) {
+          console.error('[OpnamePage] Error creating/showing modal:', error);
+        }
+      } else {
+        console.error('[OpnamePage] Modal element not found!');
+      }
+    }, 100);
+  }
+
+  // Open cancel modal programmatically
+  openCancelModal() {
+    setTimeout(() => {
+      const modalElement = document.getElementById('opnameCanceled');
+      
+      if (modalElement) {
+        try {
+          const modal = new (window as any).bootstrap.Modal(modalElement, {
+            backdrop: 'static',
+            keyboard: false
+          });
+          modal.show();
+        } catch (error) {
+          console.error('[OpnamePage] Error creating/showing modal:', error);
+        }
+      } else {
+        console.error('[OpnamePage] Modal element not found!');
+      }
+    }, 100);
+  }
+
+  // Close modal programmatically and clean up
+  closeModal(modalId: string) {
+    const modalElement = document.getElementById(modalId);
+    if (modalElement) {
+      try {
+        const modal = (window as any).bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+          modal.hide();
+        } else {
+          const newModal = new (window as any).bootstrap.Modal(modalElement);
+          newModal.hide();
+        }
+      } catch (error) {
+        console.error('[OpnamePage] Error closing modal:', error);
+      }
+    } else {
+      console.error('[OpnamePage] Modal element not found for closing:', modalId);
     }
   }
 }

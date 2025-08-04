@@ -21,57 +21,15 @@
                 </div>
                 <div class="buttons">
                     <div class="finish-button">
-                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#opnameFinished">
+                        <button class="btn btn-success" (click)="openFinishModal()">
                             Finish
                         </button>
                     </div>
 
-                    <div class="modal fade" id="opnameFinished" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Are all the data correct?</h1>
-                                </div>
-                                <div class="modal-body">
-                                    This will finish the current opname session and <strong>all changed data will be saved</strong>. Are you sure you want to proceed?
-                                    <br>
-                                    <br>
-                                    <strong>Note:</strong> This action cannot be undone. Once you finish, <strong class="text-danger">you will not be able to make further changes</strong> to the assets in this session.
-                                    <br>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button class="btn btn-success" data-bs-dismiss="modal" (click)="finishOpnameSession()">Finish</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="cancel-button">
-                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#opnameCanceled">
-                            Cancel
+                        <button type="button" class="btn btn-danger" (click)="openCancelModal()">
+                            Cancel Opname
                         </button>
-                    </div>
-
-                    <div class="modal fade" id="opnameCanceled" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Are you sure to Cancel Opname?</h1>
-                                </div>
-                                <div class="modal-body">
-                                    This will cancel the current opname session and <strong class="text-danger">all changed data will be lost</strong>. Are you sure you want to proceed?
-                                    <br>
-                                    <br>
-                                    <strong>Note:</strong> This action cannot be undone.
-                                    <br>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button class="btn btn-danger" data-bs-dismiss="modal" (click)="cancelOpnameSession()">Proceed</button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -87,3 +45,51 @@
         </section>
     </div>
 </main>
+
+<div class="modal fade" id="opnameFinished" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Are all the data correct?</h1>
+            </div>
+            <div class="modal-body">
+                This will finish the current opname session and <strong>all changed data will be saved</strong>. Are you sure you want to proceed?
+                <br>
+                <br>
+                <strong>Note:</strong> This action cannot be undone. Once you finish, <strong class="text-danger">you will not be able to make further changes</strong> to the assets in this session.
+                <br>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal('opnameFinished')">Close</button>
+                <button class="btn btn-success" (click)="finishOpnameSession()">
+                    <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span *ngIf="!isLoading">Finish</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="opnameCanceled" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Are you sure to Cancel Opname?</h1>
+            </div>
+            <div class="modal-body">
+                This will cancel the current opname session and <strong class="text-danger">all changed data will be lost</strong>. Are you sure you want to proceed?
+                <br>
+                <br>
+                <strong>Note:</strong> This action cannot be undone.
+                <br>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" (click)="closeModal('opnameCanceled')">Close</button>
+                <button class="btn btn-danger" (click)="cancelOpnameSession()">
+                    <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span *ngIf="!isLoading">Proceed</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
