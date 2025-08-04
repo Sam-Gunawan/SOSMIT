@@ -8,11 +8,11 @@
 h1, h2, h3, h4, h5, h6 {
   font-family: styles.$font-family;
   color: styles.$primary-text-color;
-  margin: 0px;
+  margin-bottom: 5px;
 }
 
 p {
-  font-size: 12px;
+  font-size: 10px;
   margin: 0px;
   color: styles.$quaternary-text-color;
 }
@@ -21,11 +21,11 @@ p {
 .date-dropdown-wrapper {
   position: relative;
   display: inline-block;
-  width: 135px;
+  width: 95px;
   
   .date-dropdown {
     width: 100%;
-    padding-right: 35px; // Make space for the icon
+    // padding-right: 25px; // Reduced space for the icon
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -33,7 +33,7 @@ p {
     border: 1px solid #ced4da;
     border-radius: 0.375rem;
     padding: 0.375rem 0.75rem;
-    font-size: 1rem;
+    font-size: 10px;
     line-height: 1.5;
     color: #495057;
     cursor: pointer;
@@ -47,12 +47,12 @@ p {
   
   .calendar-icon {
     position: absolute;
-    right: 10px;
+    right: 8px; // Moved closer to the edge
     top: 50%;
     transform: translateY(-50%);
     pointer-events: none;
     color: #6c757d;
-    font-size: 1rem;
+    font-size: 11px;
   }
 }
 
@@ -104,8 +104,8 @@ p {
   padding: 5px 0px;
 
   img {
-    width: 30px;
-    height: 30px;
+    width: 20px;
+    height: 20px;
   }
 }
 
