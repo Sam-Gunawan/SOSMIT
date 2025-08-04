@@ -22,13 +22,13 @@
                 <div class="buttons">
                     <div class="finish-button">
                         <button class="btn btn-success" (click)="openFinishModal()">
-                            Finish
+                            Selesai
                         </button>
                     </div>
 
                     <div class="cancel-button">
                         <button type="button" class="btn btn-danger" (click)="openCancelModal()">
-                            Cancel
+                            Batalkan
                         </button>
                     </div>
                 </div>
@@ -50,20 +50,21 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="staticBackdropLabel">Are all the data correct?</h1>
+                <h5 class="modal-title fs-5" id="staticBackdropLabel">Apakah Anda yakin ingin menyelesaikan opname?</h5>
             </div>
             <div class="modal-body">
-                This will finish the current opname session and <strong>all changed data will be saved</strong>. Are you sure you want to proceed?
-                <br>
-                <br>
-                <strong>Note:</strong> This action cannot be undone. Once you finish, <strong class="text-danger">you will not be able to make further changes</strong> to the assets in this session.
-                <br>
+                <p class="confirmation-text">
+                    Tindakan ini akan menyelesaikan sesi opname saat ini dan <strong>semua perubahan data akan disimpan</strong>.
+                    <br>
+                    <br>
+                    <strong>Catatan:</strong> Tindakan ini tidak dapat dibatalkan. Setelah selesai, <strong class="text-danger">Anda tidak akan dapat melakukan perubahan lebih lanjut</strong> pada aset dalam sesi ini. Pastikan semua data sudah benar sebelum melanjutkan.
+                </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="closeModal('opnameFinished')">Close</button>
+                <button type="button" class="btn btn-secondary" (click)="closeModal('opnameFinished')">Tutup</button>
                 <button class="btn btn-success" (click)="finishOpnameSession()">
                     <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span *ngIf="!isLoading">Finish</span>
+                    <span *ngIf="!isLoading">Selesai</span>
                 </button>
             </div>
         </div>
@@ -74,20 +75,21 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5" id="staticBackdropLabel">Are you sure to Cancel Opname?</h1>
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Apakah Anda yakin ingin membatalkan opname?</h1>
             </div>
             <div class="modal-body">
-                This will cancel the current opname session and <strong class="text-danger">all changed data will be lost</strong>. Are you sure you want to proceed?
-                <br>
-                <br>
-                <strong>Note:</strong> This action cannot be undone.
-                <br>
+                <p class="confirmation-text">
+                    Tindakan ini akan membatalkan sesi opname saat ini dan <strong class="text-danger">semua perubahan data akan hilang</strong>.
+                    <br>
+                    <br>
+                    <strong>Catatan:</strong> Tindakan ini tidak dapat dibatalkan.
+                </p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="closeModal('opnameCanceled')">Close</button>
+                <button type="button" class="btn btn-secondary" (click)="closeModal('opnameCanceled')">Tutup</button>
                 <button class="btn btn-danger" (click)="cancelOpnameSession()">
                     <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span *ngIf="!isLoading">Proceed</span>
+                    <span *ngIf="!isLoading">Batalkan</span>
                 </button>
             </div>
         </div>

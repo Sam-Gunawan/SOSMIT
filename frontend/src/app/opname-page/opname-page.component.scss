@@ -46,7 +46,7 @@ p {
 
     .btn {
       font-size: 0.75rem;
-      width: 55px;
+      width: 65px;
       padding: 0.375rem 0.5rem;
     }
   }
@@ -67,6 +67,19 @@ p {
     font-size: 12px;
   }
 }
+
+.confirmation-text {
+  font-size: 12px;
+  color: styles.$primary-text-color;
+  margin: 0;
+}
+
+.modal-footer {
+  .btn {
+    font-size: 12px;
+  }
+}
+
 
 .search-bar {
   margin-bottom: 10px;
