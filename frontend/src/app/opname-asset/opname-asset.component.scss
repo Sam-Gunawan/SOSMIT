@@ -649,7 +649,16 @@ p {
               color: #28a745;
             }
           }
+
+          &.is-invalid {
+          background-color: color.adjust(#dc3545, $lightness: 40%);
+          border-color: color.adjust(#dc3545, $lightness: -10%);
+          color: color.adjust(#dc3545, $lightness: -50%);
           
+            i {
+              color: color.adjust(#dc3545, $lightness: -10%);
+            }
+          }
           i {
             font-size: 7px;
           }

@@ -384,13 +384,15 @@
                                         <div class="equipment-status" *ngIf="result.availableEquipments.length > 0">
                                             <span class="status-indicator" 
                                                   [ngClass]="{
-                                                    'status-changed': hasEquipmentChanges(result),
-                                                    'status-unchanged': !hasEquipmentChanges(result)
+                                                    'status-changed': hasEquipmentChanges(result) && hasEquipment(result),
+                                                    'status-unchanged': !hasEquipmentChanges(result),
+                                                    'is-invalid': !hasEquipment(result)
                                                   }">
                                                 <i class="fas" 
                                                    [ngClass]="{
-                                                     'fa-edit': hasEquipmentChanges(result),
-                                                     'fa-check': !hasEquipmentChanges(result)
+                                                     'fa-edit': hasEquipmentChanges(result) && hasEquipment(result),
+                                                     'fa-check': !hasEquipmentChanges(result),
+                                                     'fa-circle-exclamation': !hasEquipment(result)
                                                    }"></i>
                                                 {{ getEquipmentStatus(result) }}
                                             </span>
@@ -562,7 +564,7 @@
                         <div class="modal-footer">
                             <!-- Warning visual cue when save is disabled -->
                             <div class="save-warning-container" 
-                                 *ngIf="(isLoading || !result.changeReason || !hasFormChangesForAsset(result) || invalidForms > 0) && !isLoading">
+                                 *ngIf="(isLoading || !result.changeReason || !hasFormChangesForAsset(result) || getInvalidFormsForAsset(result.pendingAsset.assetTag) > 0) && !isLoading">
                                 <div class="save-warning-tooltip" 
                                      [title]="getSaveDisabledReason(result)">
                                     <i class="fas fa-exclamation-triangle text-warning me-1"></i>
@@ -570,7 +572,7 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary" [disabled]="isLoading || !result.changeReason || !hasFormChangesForAsset(result) || invalidForms > 0">
+                            <button type="submit" class="btn btn-primary" [disabled]="isLoading || !result.changeReason || !hasFormChangesForAsset(result) || getInvalidFormsForAsset(result.pendingAsset.assetTag) > 0">
                                 <span *ngIf="isLoading">Saving...</span>
                                 <span *ngIf="!isLoading">Save Changes</span>
                             </button>

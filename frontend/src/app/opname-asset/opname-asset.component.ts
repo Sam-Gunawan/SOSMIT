@@ -926,8 +926,13 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     // Update the equipment string
     result.pendingAsset.equipments = equipmentList.filter(item => item).join(', ');
 
-    // Force change detection
+    // Force change detection and trigger form validation update
     this.cdr.detectChanges();
+    
+    // Additional delay to ensure DOM updates are complete
+    setTimeout(() => {
+      this.cdr.detectChanges();
+    }, 0);
   }
 
   // Update adaptor serial number in equipment string (called on blur)
@@ -1012,16 +1017,28 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     return normalizedPending !== normalizedExisting;
   }
 
+  // Check if equipment exists for an asset being opnamed
+  hasEquipment(result: any): boolean {
+    if (!result.pendingAsset.equipments || result.pendingAsset.equipments.trim() === '') {
+      return false; // No equipments stored for this asset
+    }
+    return true;
+  }
+
   // Get equipment status text in Bahasa Indonesia
   getEquipmentStatus(result: any): string {
-    if (!result || !result.availableEquipments || result.availableEquipments.length === 0) {
-      return 'Memuat peralatan...'; // Loading equipments...
-    }
-    
-    if (this.hasEquipmentChanges(result)) {
-      return 'Terdapat perubahan dengan data master'; // There are changes
+    if (!this.hasEquipment(result)) {
+      return 'Minimal satu kelengkapan diisi';
     } else {
-      return 'Sesuai dengan data master'; // Matches master data
+      if (!result || !result.availableEquipments || result.availableEquipments.length === 0) {
+        return 'Memuat peralatan...'; // Loading equipments...
+      }
+      
+      if (this.hasEquipmentChanges(result)) {
+        return 'Terdapat perubahan dengan data master'; // There are changes
+      } else {
+        return 'Sesuai dengan data master'; // Matches master data
+      }
     }
   }
 
@@ -1059,14 +1076,22 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     return document.getElementsByClassName('is-invalid').length;
   }
 
+  // Get invalid forms count for a specific modal/asset
+  getInvalidFormsForAsset(assetTag: string): number {
+    const modalElement = document.getElementById(`edit-modal-${assetTag}`);
+    if (!modalElement) return 0;
+    return modalElement.getElementsByClassName('is-invalid').length;
+  }
+
   // Get reason why save button is disabled for user feedback
   getSaveDisabledReason(result: any): string {
     if (!this.hasFormChangesForAsset(result)) {
       return 'Tidak ada perubahan terdeteksi. Silakan lakukan perubahan jika ada.';
     }
     
-    if (this.invalidForms > 0) {
-      if (this.invalidForms === 1 && (!result.changeReason || result.changeReason === '')) {
+    const invalidCount = this.getInvalidFormsForAsset(result.pendingAsset.assetTag);
+    if (invalidCount > 0) {
+      if (invalidCount === 1 && (!result.changeReason || result.changeReason === '')) {
         return 'Alasan perubahan wajib diisi. Mohon jelaskan alasan Anda melakukan perubahan ini.';
       }
       return 'Mohon perbaiki kesalahan pengisian sebelum menyimpan.';
@@ -1125,6 +1150,16 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     // Check for valid site (must have a valid ID)
     if (pending.siteID === undefined) {
       this.errorMessage = 'Please select a valid site from the list.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
+      this.isLoading = false;
+      return;
+    }
+
+    // Final validation check using asset-specific form validation
+    const invalidFormsCount = this.getInvalidFormsForAsset(result.pendingAsset.assetTag);
+    if (invalidFormsCount > 0) {
+      this.errorMessage = 'Please fix form validation errors before saving.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
