@@ -184,6 +184,7 @@ type AssetChangeRequest struct {
 	NewOwnerSiteID       *int    `json:"new_owner_site_id"`
 	NewSiteID            *int    `json:"new_site_id"`
 	ChangeReason         string  `json:"change_reason"`
+	ProcessingStatus     string  `json:"processing_status" binding:"required,oneof=pending edited all_good"`
 }
 
 // ProcessAssetChangesHandler handles the processing of asset changes during an opname session.
@@ -236,6 +237,7 @@ func (handler *Handler) ProcessAssetChangesHandler(context *gin.Context) {
 		NewOwnerSiteID:       assetChangeRequest.NewOwnerSiteID,
 		NewSiteID:            assetChangeRequest.NewSiteID,
 		ChangeReason:         assetChangeRequest.ChangeReason,
+		ProcessingStatus:     assetChangeRequest.ProcessingStatus,
 	}
 
 	changesJSON, err := handler.service.ProcessAssetChanges(changedAsset)
@@ -339,10 +341,11 @@ func (handler *Handler) LoadOpnameProgressHandler(context *gin.Context) {
 	var responseProgress []map[string]any
 	for _, progress := range progressList {
 		progressItem := map[string]any{
-			"id":            progress.ID,
-			"asset_tag":     progress.AssetTag,
-			"changes":       string(progress.Changes),
-			"change_reason": progress.ChangeReason,
+			"id":                progress.ID,
+			"asset_tag":         progress.AssetTag,
+			"changes":           string(progress.Changes),
+			"change_reason":     progress.ChangeReason,
+			"processing_status": progress.ProcessingStatus,
 		}
 		responseProgress = append(responseProgress, progressItem)
 	}

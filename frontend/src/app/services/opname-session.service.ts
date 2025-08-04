@@ -154,6 +154,7 @@ export class OpnameSessionService {
       new_owner_site_id: assetChanges.newOwnerSiteID,
       new_site_id: assetChanges.newSiteID,
       change_reason: assetChanges.changeReason,
+      processing_status: assetChanges.processingStatus
     }
 
     return this.http.post<JSON>(`${this.opnameApiUrl}/${sessionID}/process-asset`, payload).pipe(
@@ -197,22 +198,23 @@ export class OpnameSessionService {
               id: progressItem.id,
               assetTag: progressItem.asset_tag,
               assetChanges: {
-              newSerialNumber: changes.newSerialNumber,
-              newStatus: changes.newStatus,
-              newStatusReason: changes.newStatusReason,
-              newCondition: changes.newCondition,
-              newConditionNotes: changes.newConditionNotes,
-              newConditionPhotoURL: changes.newConditionPhotoURL,
-              newLocation: changes.newLocation,
-              newRoom: changes.newRoom,
-              newEquipments: changes.newEquipments,
-              newOwnerID: changes.newOwnerID,
-              newOwnerSiteID: changes.newOwnerSiteID,
-              newOwnerPosition: changes.newOwnerPosition,
-              newOwnerCostCenter: changes.newOwnerCostCenter,
-              newSiteID: changes.newSiteID,
-              changeReason: progressItem.change_reason
-              }
+                newSerialNumber: changes.newSerialNumber,
+                newStatus: changes.newStatus,
+                newStatusReason: changes.newStatusReason,
+                newCondition: changes.newCondition,
+                newConditionNotes: changes.newConditionNotes,
+                newConditionPhotoURL: changes.newConditionPhotoURL,
+                newLocation: changes.newLocation,
+                newRoom: changes.newRoom,
+                newEquipments: changes.newEquipments,
+                newOwnerID: changes.newOwnerID,
+                newOwnerSiteID: changes.newOwnerSiteID,
+                newOwnerPosition: changes.newOwnerPosition,
+                newOwnerCostCenter: changes.newOwnerCostCenter,
+                newSiteID: changes.newSiteID,
+                changeReason: progressItem.change_reason
+              },
+              processingStatus: progressItem.processing_status
             };
           })
         }

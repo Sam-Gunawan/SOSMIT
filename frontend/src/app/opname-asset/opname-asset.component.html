@@ -236,7 +236,7 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
             (click)="onRowClick(row)" 
             class="clickable-row"
-            [class.pending-row]="!row.isProcessed"></tr>
+            [class.pending-row]="row.processingStatus === 'pending'"></tr>
     </table>
 
     <!-- Pagination -->

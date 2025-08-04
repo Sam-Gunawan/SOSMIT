@@ -259,9 +259,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   private getAvailableEquipments(result: any): void {
     this.apiService.getAssetEquipments(result.pendingAsset.productVariety).subscribe({
       next: (equipmentsString: string) => {
-        console.log('[OpnameAsset] Raw equipment response:', equipmentsString);
-        console.log('[OpnameAsset] Equipment string type:', typeof equipmentsString);
-        
         // Parse the comma-separated string into an array
         if (equipmentsString && typeof equipmentsString === 'string' && equipmentsString.trim() !== '') {
           result.availableEquipments = equipmentsString.split(',').map((e: string) => e.trim()).filter((e: string) => e !== '');
@@ -269,11 +266,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
           result.availableEquipments = []; // No equipments available for this product variety
         }
         
-        console.log('[OpnameAsset] Available equipments for', result.pendingAsset.productVariety, ':', result.availableEquipments);
         this.cdr.detectChanges(); // Trigger change detection to update the UI
       },
       error: (error) => {
-        console.error('[OpnameAsset] Error fetching equipments for', result.pendingAsset.productVariety, ':', error);
         result.availableEquipments = []; // Fallback to empty array on error
         this.cdr.detectChanges();
       }
@@ -284,7 +279,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     this.opnameSessionService.loadOpnameProgress(sessionID).subscribe({
       next: (progress: OpnameSessionProgress[]) => {
         this.populateSessionData(progress);
-        console.log('[OpnameAsset] Opname session progress loaded:', progress);
         this.connectTableComponents();
       },
       error: (error) => {
@@ -353,7 +347,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
             conditionPhotoURL: savedRecord.assetChanges.newConditionPhotoURL ?? asset.conditionPhotoURL,
             location: savedRecord.assetChanges.newLocation ?? asset.location,
             room: savedRecord.assetChanges.newRoom ?? asset.room,
-            equipments: savedRecord.assetChanges.newEquipments ?? asset.equipments,
+            equipments: savedRecord.processingStatus === 'pending' ? '' : savedRecord.assetChanges.newEquipments ?? asset.equipments, // If pending, keep equipments empty
             assetOwner: ownerID,
             assetOwnerName: ownerName,
             assetOwnerPosition: ownerPosition,
@@ -389,7 +383,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
             availableEquipments: [] as string[], // Initialize as empty, will be loaded asynchronously
             adaptorSN: parseAdaptorSN(pendingAsset.equipments), // Extract adaptor serial number
             assetProcessed: true,
-            processingStatus: hasChanges ? 'edited' as const : 'all_good' as const,
+            processingStatus: savedRecord.processingStatus,
             savedChangeReason: savedRecord.assetChanges.changeReason || '',
             changeReason: savedRecord.assetChanges.changeReason || ''
           };
@@ -628,8 +622,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     this.isSearching = true;
     this.errorMessage = ''; // Clear previous error message
 
-    console.log('[OpnameAsset] Starting search for:', this.searchQuery, 'by', this.searchType);
-
     // Check if the seached asset already exists in the search results
     const alreadyExists = this.searchResults.some(result => (
       result.existingAsset.assetTag === this.searchQuery ||
@@ -648,8 +640,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     // Call the universal search method from API service.
     this.apiService.searchAsset(this.searchQuery, this.searchType).subscribe({
       next: (asset) => {
-        console.log('[OpnameAsset] Asset found from search:', asset);
-
         // Add the found asset to the search results, using deep copies to avoid reference issues
         const newAsset = JSON.parse(JSON.stringify(asset));
         const pendingAsset = JSON.parse(JSON.stringify(asset)); // Deep copy for modifications
@@ -676,13 +666,29 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
           savedChangeReason: '',
           changeReason: ''
         };
-        
+
+        // Save this to the db as pending asset with empty changes
+        const pendingAssetChange: AssetChange = {
+          assetTag: newAsset.assetTag,
+          newStatus: newAsset.assetStatus,
+          // ...the rest of the fields are set to undefined to indicate no changes
+          changeReason: '',
+          processingStatus: 'pending'
+        };
+
+        this.opnameSessionService.processScannedAsset(this.sessionID, pendingAssetChange).subscribe({
+          error: (error) => {
+            console.error('[OpnameAsset] Error saving newly scanned asset:', error);
+          }
+        });
+
         this.searchResults.unshift(newResult);
 
         // Load available equipments for this specific asset
         this.getAvailableEquipments(newResult);
         this.updateTableDataSource(); // Update table with new search result
         this.isSearching = false;
+        
         // Clear the appropriate input field after successful search
         if (this.searchType === 'asset_tag') {
           this.assetTagQuery = '';
@@ -710,7 +716,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       
       this.apiService.uploadConditionPhoto(this.conditionPhoto, result.pendingAsset.conditionPhotoURL).subscribe({
         next: (response) => {
-          console.log('[OpnameAsset] Condition photo uploaded successfully:', response);
           result.pendingAsset.conditionPhotoURL = response.url; // Use the URL returned from the API
           this.cdr.detectChanges(); // Trigger change detection to update the view
 
@@ -1173,51 +1178,23 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     if (pending.siteID !== existing.siteID) {
       assetChanges.newSiteID = pending.siteID;
     }
+    
+    // Set processing status to 'edited'
+    result.processingStatus = 'edited';
+    assetChanges.processingStatus = result.processingStatus;
 
     // Add required fields
     assetChanges.assetTag = existing.assetTag;
     assetChanges.changeReason = result.changeReason || '';
-    
-    console.log('[OpnameAsset] Processing asset change: ', assetChanges);
-
+  
     // Set loading state while processing
     this.isSearching = true; 
     this.isLoading = true;
 
-    console.log('[OpnameAsset] Processing new asset change:', assetChanges);
     this.opnameSessionService.processScannedAsset(this.sessionID, assetChanges).subscribe({
-      next: (response) => {
-        console.log('[OpnameAsset] Asset processed successfully:', response);
+      next: () => {
         result.assetProcessed = true; // Mark the asset as processed
         result.savedChangeReason = result.changeReason || ''; // Save the change reason
-        
-        // Check if there are any changes to apply
-        if (response.assetChanges && Object.keys(response.assetChanges).length > 0) {
-          result.processingStatus = 'edited';
-          console.log('[OpnameAsset] Changes detected, updating pending asset:', response.assetChanges);  
-
-          // Create a new pendingAsset with deep copied properties and apply changes
-          const pendingAssetCopy = JSON.parse(JSON.stringify(result.pendingAsset));
-          result.pendingAsset = {
-            ...pendingAssetCopy,
-            ...response.assetChanges
-          } as AssetInfo; // Ensure the pending asset is of type AssetInfo
-
-        } else { // No changes to apply
-          result.processingStatus = 'all_good';
-          // Create a deep copy of existingAsset to avoid reference issues
-          result.pendingAsset = JSON.parse(JSON.stringify(result.existingAsset));
-          
-          // Ensure owner site information is properly set
-          if (!result.pendingAsset.assetOwnerSiteID) {
-            result.pendingAsset.assetOwnerSiteID = result.pendingAsset.siteID;
-          }
-          if (!result.pendingAsset.assetOwnerSiteName) {
-            result.pendingAsset.assetOwnerSiteName = result.pendingAsset.siteName;
-          }
-        }
-
-        console.log('[OpnameAsset] Updated asset:', result.pendingAsset);
 
         // Update table data source after processing is complete
         this.updateTableDataSource();
@@ -1268,8 +1245,11 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       newOwnerCostCenter: existing.assetOwnerCostCenter,
       newOwnerSiteID: existing.assetOwnerSiteID,
       newSiteID: existing.siteID,
-      changeReason: "No changes. Asset verified on " + this.opnameSession?.startDate
+      changeReason: "No changes. Asset verified on " + this.opnameSession?.startDate,
+      processingStatus: 'all_good'
     }
+    
+    result.processingStatus = 'all_good';
 
     this.isLoading = true;
     this.opnameSessionService.processScannedAsset(this.sessionID, assetChanges).subscribe({
@@ -1289,7 +1269,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         result.adaptorSN = parseAdaptorSN(result.existingAsset.equipments);
 
         result.assetProcessed = true;
-        result.processingStatus = 'all_good';
         result.savedChangeReason = assetChanges.changeReason || '';
         result.changeReason = ''; // Clear current editing change reason
         

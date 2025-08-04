@@ -39,13 +39,15 @@ type AssetChange struct {
 	NewOwnerSiteID       *int    `json:"new_owner_site_id"`
 	NewSiteID            *int    `json:"new_site_id"`
 	ChangeReason         string  `json:"change_reason"`
+	ProcessingStatus     string  `json:"processing_status" binding:"required,oneof=pending edited all_good"`
 }
 
 type OpnameSessionProgress struct {
-	ID           int    `json:"id"`
-	Changes      []byte `json:"changes"`
-	ChangeReason string `json:"change_reason"`
-	AssetTag     string `json:"asset_tag"`
+	ID               int    `json:"id"`
+	Changes          []byte `json:"changes"`
+	ChangeReason     string `json:"change_reason"`
+	AssetTag         string `json:"asset_tag"`
+	ProcessingStatus string `json:"processing_status"`
 }
 
 type Repository struct {
@@ -123,7 +125,7 @@ func (repo *Repository) DeleteSession(sessionID int) error {
 func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, error) {
 	var changesJSON []byte // Use []byte to receive raw JSON data.
 
-	query := `SELECT record_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`
+	query := `SELECT record_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`
 
 	err := repo.db.QueryRow(query,
 		changedAsset.SessionID,
@@ -143,6 +145,7 @@ func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, err
 		changedAsset.NewSiteID,
 		changedAsset.ChangeReason,
 		changedAsset.NewOwnerSiteID,
+		changedAsset.ProcessingStatus,
 	).Scan(&changesJSON)
 	if err != nil {
 		log.Printf("❌ Error recording asset change for asset %s: %v", changedAsset.AssetTag, err)
@@ -232,7 +235,7 @@ func (repo *Repository) LoadOpnameProgress(sessionID int) ([]OpnameSessionProgre
 
 	for rows.Next() {
 		var progress OpnameSessionProgress
-		if err := rows.Scan(&progress.ID, &progress.Changes, &progress.ChangeReason, &progress.AssetTag); err != nil {
+		if err := rows.Scan(&progress.ID, &progress.Changes, &progress.ChangeReason, &progress.AssetTag, &progress.ProcessingStatus); err != nil {
 			log.Printf("❌ Error scanning row for opname progress: %v", err)
 			return nil, err // Row scan failed for some error.
 		}
