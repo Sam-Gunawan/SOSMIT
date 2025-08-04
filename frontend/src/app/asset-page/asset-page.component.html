@@ -44,7 +44,7 @@
                             <h6>User Info</h6>
 
                             <div class="form-item">
-                                <label [for]="'owner-name-' + assetPage?.assetTag" class="form-label mb-0">Owner Name</label>
+                                <label [for]="'owner-name-' + assetPage?.assetTag" class="form-label mb-0">User</label>
                                 <input type="text" class="form-control" 
                                     [id]="'owner-name-' + assetPage?.assetTag" 
                                     [value]="assetPage?.assetOwnerName" 
@@ -52,7 +52,7 @@
                             </div>
 
                             <div class="form-item">
-                                <label [for]="'owner-position-' + assetPage?.assetTag" class="form-label mb-0">Owner Position</label>
+                                <label [for]="'owner-position-' + assetPage?.assetTag" class="form-label mb-0">Position</label>
                                 <input type="text" class="form-control" 
                                     [id]="'owner-position-' + assetPage?.assetTag" 
                                     [value]="assetPage?.assetOwnerPosition" 
@@ -95,29 +95,23 @@
                         </div>
 
                         <div class="right-top">
-                            <h6>User Location</h6>
+                            <h6>User Organization</h6>
 
+                            <!-- will change to division -->
                             <div class="form-item">
-                                <label [for]="'user-site-' + assetPage?.assetTag" class="form-label mb-0">Site</label>
+                                <label [for]="'user-division-' + assetPage?.assetTag" class="form-label mb-0">Division</label>
                                 <input type="text" class="form-control" 
-                                    [id]="'user-site-' + assetPage?.assetTag" 
-                                    [value]="assetPage?.siteName" 
+                                    [id]="'user-division-' + assetPage?.assetTag" 
+                                    [value]="assetPage?.assetOwnerName" 
                                     readonly>
                             </div>
 
+                            <!-- will change to department -->
                             <div class="form-item">
-                                <label [for]="'user-group-' + assetPage?.assetTag" class="form-label mb-0">Group</label>
+                                <label [for]="'user-department-' + assetPage?.assetTag" class="form-label mb-0">Owner Dept.</label>
                                 <input type="text" class="form-control" 
-                                    [id]="'user-group-' + assetPage?.assetTag" 
-                                    [value]="assetPage?.siteGroupName" 
-                                    readonly>
-                            </div>
-
-                            <div class="form-item">
-                                <label [for]="'user-region-' + assetPage?.assetTag" class="form-label mb-0">Region</label>
-                                <input type="text" class="form-control" 
-                                    [id]="'user-region-' + assetPage?.assetTag" 
-                                    [value]="assetPage?.regionName" 
+                                    [id]="'user-department-' + assetPage?.assetTag" 
+                                    [value]="assetPage?.assetOwnerName" 
                                     readonly>
                             </div>
                         </div>
@@ -146,17 +140,42 @@
                             </div>
                         </div>
         
-                        <div class="right-bottom"></div>
-
-                        <div class="location">
+                        <div class="right-bottom">
                             <div class="asset-location">
                                 <h6>Asset Location</h6>
-                                <p>Region - {{ assetPage?.regionName }}</p>
+
+                                <!-- <p>Region - {{ assetPage?.regionName }}</p>
+                                <p>Group - {{ assetPage?.siteGroupName }}</p> -->
 
                                 <div class="form-item">
-                                    <label [for]="'site-name-' + assetPage?.assetTag" class="form-label mb-0">Site Name</label>
+                                    <label [for]="'user-region-' + assetPage?.assetTag" class="form-label mb-0">Region</label>
                                     <input type="text" class="form-control" 
-                                        [id]="'site-name-' + assetPage?.assetTag" 
+                                        [id]="'user-region-' + assetPage?.assetTag" 
+                                        [value]="assetPage?.regionName" 
+                                        readonly>
+                                </div>
+
+                                <div class="form-item">
+                                    <label [for]="'user-group-' + assetPage?.assetTag" class="form-label mb-0">Group</label>
+                                    <input type="text" class="form-control" 
+                                        [id]="'user-group-' + assetPage?.assetTag" 
+                                        [value]="assetPage?.siteGroupName" 
+                                        readonly>
+                                </div>
+
+                                <!-- need site list -->
+                                <div class="form-item">
+                                    <label [for]="'user-site-' + assetPage?.assetTag" class="form-label mb-0">Site</label>
+                                    <input type="text" class="form-control" 
+                                        [id]="'user-site-' + assetPage?.assetTag" 
+                                        [value]="assetPage?.siteName" 
+                                        readonly>
+                                </div>
+
+                                <div class="form-item">
+                                    <label [for]="'user-site-' + assetPage?.assetTag" class="form-label mb-0">Owner Site</label>
+                                    <input type="text" class="form-control" 
+                                        [id]="'user-site-' + assetPage?.assetTag" 
                                         [value]="assetPage?.siteName" 
                                         readonly>
                                 </div>
@@ -170,6 +189,10 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- <div class="location">
+                            
+                        </div> -->
                     </div>
                 </div>
             </div>

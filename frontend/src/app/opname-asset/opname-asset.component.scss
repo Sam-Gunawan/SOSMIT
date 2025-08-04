@@ -396,18 +396,18 @@ p {
 // Asset status styles
 .asset-status {
   font-size: 9px;
-  padding: 3px 6px;
-  border-radius: 10px;
-  font-weight: 600;
+  // padding: 3px 6px;
+  // border-radius: 10px;
+  // font-weight: 600;
   text-transform: capitalize;
 
-  @each $name, $color in styles.$asset-pill-colors {
-    &.status-#{$name} {
-      background-color: $color;
-      border: 1px solid color.adjust($color, $lightness: -10%);
-      color: color.adjust($color, $lightness: -50%);
-    }
-  }
+  // @each $name, $color in styles.$asset-pill-colors {
+  //   &.status-#{$name} {
+  //     background-color: $color;
+  //     border: 1px solid color.adjust($color, $lightness: -10%);
+  //     color: color.adjust($color, $lightness: -50%);
+  //   }
+  // }
 }
 
 .modal {
@@ -440,8 +440,7 @@ p {
     grid-template-areas: 
       "main-info user-info"
       "left-top right-top"
-      "left-bottom right-bottom"
-      "location tbd";
+      "left-bottom right-bottom";
     min-height: 0; // Prevents grid from growing beyond container
     
     // Responsive design for smaller screens
@@ -452,7 +451,7 @@ p {
         "main-info"
         "left-top"
         "left-bottom"
-        "location"
+        "right-bottom"
         "user-info"
         "right-top";
     }
@@ -743,11 +742,11 @@ p {
     flex-direction: column;
     padding: 10px;
     align-self: stretch;
-    border-bottom: 1px solid styles.$quaternary-text-color;
     border-right: 1px solid styles.$quaternary-text-color;
     
     @media (max-width: 860px) {
       border-right: none;
+      border-bottom: 1px solid styles.$quaternary-text-color;
     }
   }
 
@@ -768,32 +767,30 @@ p {
     }
   }
 
-  .location { 
-    grid-area: location;
+  .right-bottom { 
+    grid-area: right-bottom;
     display: flex;
     flex-direction: column;
     padding: 10px;
     align-self: stretch;
-    border-right: 1px solid styles.$quaternary-text-color;
     
     h5 {
       margin-bottom: 10px;
     }
 
     @media (max-width: 860px) {
-      border-right: none;
       border-bottom: 1px solid styles.$quaternary-text-color;
     }
   }
 
-  .right-bottom {
-    grid-area: right-bottom;
-    display: flex;
-    flex-direction: column;
-    padding: 10px;
-    align-self: stretch;
-    border-bottom: 1px solid styles.$quaternary-text-color;
-  }
+  // .right-bottom {
+  //   grid-area: right-bottom;
+  //   display: flex;
+  //   flex-direction: column;
+  //   padding: 10px;
+  //   align-self: stretch;
+  //   border-bottom: 1px solid styles.$quaternary-text-color;
+  // }
 
   .reason-changes {
     padding: 10px;
@@ -1064,23 +1061,24 @@ table {
       }
     }
   }
-}
+} 
 
 // Condition badges
 .condition-badge {
+  margin-left: 5px;
   font-size: 10px;
-  padding: 4px 8px;
   border-radius: 12px;
-  font-weight: 600;
+  // font-weight: 600;
   text-transform: capitalize;
   
-  &.condition-good {
-    background-color: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
-  }
+  // &.condition-good {
+  //   background-color: #d4edda;
+  //   color: #155724;
+  //   border: 1px solid #c3e6cb;
+  // }
   
   &.condition-bad {
+    padding: 4px 8px;
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6cb;
