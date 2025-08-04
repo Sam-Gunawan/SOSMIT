@@ -15,7 +15,7 @@ DROP PROCEDURE IF EXISTS public.finish_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.approve_opname_session(INT, INT);
 DROP PROCEDURE IF EXISTS public.reject_opname_session(INT, INT);
-DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(50), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, VARCHAR(255), INT, INT, TEXT, INT);
+DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(50), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, VARCHAR(255), INT, INT, TEXT, INT, VARCHAR(25));
 DROP PROCEDURE IF EXISTS public.delete_asset_change(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_asset_change_photo(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
@@ -645,7 +645,8 @@ CREATE OR REPLACE FUNCTION public.record_asset_change(
 	_new_owner_cost_center INT,
 	_new_site_id INT,
 	_change_reason TEXT,
-	_new_owner_site_id INT
+	_new_owner_site_id INT,
+	_processing_status VARCHAR(25)
 ) RETURNS JSONB
 	LANGUAGE plpgsql
 AS $$
@@ -714,13 +715,13 @@ AS $$
 		END IF;
 
 		-- Regardless of whether changes were made, we will insert a record of the changes.
-		INSERT INTO "AssetChanges" (session_id, asset_tag, "changes", change_reason)
-		VALUES (_session_id, _asset_tag, _changes, _change_reason)
+		INSERT INTO "AssetChanges" (session_id, asset_tag, "changes", change_reason, processing_status)
+		VALUES (_session_id, _asset_tag, _changes, _change_reason, _processing_status)
 		ON CONFLICT (session_id, asset_tag) DO UPDATE
 		SET
 			"changes" = _changes, -- Completely replace the existing changes with the new ones
-			change_reason = EXCLUDED.change_reason; -- Update the change reason
-
+			change_reason = EXCLUDED.change_reason,
+			processing_status = EXCLUDED.processing_status; -- Update the processing status
 		RETURN _changes;
 	END;
 $$;
@@ -854,13 +855,14 @@ CREATE OR REPLACE FUNCTION public.load_opname_progress(_session_id INT)
 		id INT,
 		"changes" JSONB,
 		change_reason TEXT,
-		asset_tag VARCHAR(12)
+		asset_tag VARCHAR(12),
+		processing_status VARCHAR(25)
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT ac.id, ac."changes", ac.change_reason, ac.asset_tag
+		SELECT ac.id, ac."changes", ac.change_reason, ac.asset_tag, ac.processing_status
 		FROM "AssetChanges" as ac
 		WHERE session_id = _session_id;
 	END;

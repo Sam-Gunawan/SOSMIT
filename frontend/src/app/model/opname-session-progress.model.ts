@@ -18,4 +18,5 @@ export interface OpnameSessionProgress {
         newSiteID?: number;
         changeReason?: string;
     };
+    processingStatus: 'pending' | 'edited' | 'all_good';
 }

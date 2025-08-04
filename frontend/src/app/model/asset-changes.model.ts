@@ -15,4 +15,5 @@ export interface AssetChange {
     newOwnerSiteID?: number;
     newSiteID?: number;
     changeReason?: string;
+    processingStatus: 'pending' | 'edited' | 'all_good';
 }
