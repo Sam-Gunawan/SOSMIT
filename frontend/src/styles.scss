@@ -43,21 +43,21 @@ $asset-pill-colors: (
 }
 
 @mixin main-header {
-    background-color: $background-color;
-    color: white;
-    text-align: center;
-    align-items: center;
-    flex-wrap: wrap;
-    box-shadow: 0  0 4px rgba(0, 0, 0, 0.1);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+  background-color: $background-color;
+  color: white;
+  text-align: center;
+  align-items: center;
+  flex-wrap: wrap;
+  box-shadow: 0  0 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 
-    .brand-logo img {
-        width: 30px;
-        height: auto;
-        object-fit: cover;
-    }
+  .brand-logo img {
+    width: 50px;
+    height: auto;
+    object-fit: cover;
+  }
 }
 
 html, body {
