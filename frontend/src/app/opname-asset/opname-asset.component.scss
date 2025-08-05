@@ -1129,7 +1129,7 @@ table {
       margin-right: 0px;
     }
     
-    @media (max-width: 768px) {
+    @media (max-width: 860px) {
       font-size: 8px; // Even smaller on mobile
       
       .mat-mdc-paginator-range-label {
@@ -1185,12 +1185,12 @@ table {
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 620px) {
   .assets-table {
     .mat-column-ownerName,
     .mat-column-condition,
     .mat-column-status {
-      display: none;
+      display: none;  
     }
     
     .asset-name-cell {
