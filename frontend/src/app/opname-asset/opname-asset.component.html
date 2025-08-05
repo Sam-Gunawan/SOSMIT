@@ -2,10 +2,10 @@
 
 <!-- Unified Search and Filter Container -->
 <!-- !!!!!! CHANGE NGIF LOGIC -->
-<div class="unified-controls-container sticky-container" *ngIf="!isInReport">
+<div class="unified-controls-container sticky-container">
     <!-- Mobile toggle buttons -->
     <div class="mobile-toggles">
-        <button class="btn btn-outline-primary toggle-btn" (click)="toggleSearchForm()">
+        <button class="btn btn-outline-primary toggle-btn" (click)="toggleSearchForm()" *ngIf="!isInReport">
             <i class="fas fa-search"></i>
             {{ showSearchForm ? 'Hide Search' : 'Show Search' }}
         </button>
@@ -17,7 +17,7 @@
     </div>
 
     <!-- Search form container -->
-    <div class="search-form-container" [ngClass]="{'mobile-hidden': !showSearchForm}">
+    <div class="search-form-container" [ngClass]="{'mobile-hidden': !showSearchForm}" *ngIf="!isInReport">
         <form class="compact-search-form" (ngSubmit)="onSearch()">
             <div class="form-grid">
                 <div class="form-item">
