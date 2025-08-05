@@ -106,9 +106,25 @@
 // Filter section
 .filter-section {
   .table-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: end;
     padding: 8px 0 6px 0;
     border-bottom: 2px solid styles.$primary-color;
     margin-bottom: 15px;
+
+    .preview-button {
+      .btn {
+        padding: 5px 8px;
+        font-size: 12px;
+      }
+
+      i {
+        font-size: 11px;
+        margin-right: 8px;
+      }
+    }
     
     h5 {
       margin: 0;

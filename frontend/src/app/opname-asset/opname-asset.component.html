@@ -65,6 +65,13 @@
             <h5 *ngIf="dataSource.filteredData.length === 0 && hasActiveFilters" class="text-danger">
                 Tidak ada aset yang cocok dengan filter saat ini.
             </h5>
+
+            <div class="preview-button">
+                <button class="btn btn-secondary">
+                    <i class="fas fa-eye"></i>
+                    <span>Preview</span>
+                </button>
+            </div>
         </div>
         
         <div class="filter-container" [ngClass]="{'mobile-hidden': !showFilterForm}">
@@ -368,10 +375,9 @@
                                     <div class="form-item">
                                         <label [for]="'cost-center-' + result.pendingAsset.assetTag" class="form-label mb-0">Cost Center</label>
 
-                                        <input type="number" class="form-control" 
+                                        <input type="text" class="form-control" 
                                             [id]="'cost-center-' + result.pendingAsset.assetTag" 
-                                            [(ngModel)]="result.pendingAsset.assetOwnerCostCenter" 
-                                            name="newCostCenter"
+                                            [(ngModel)]="result.pendingAsset.assetOwnerCostCenter" name="newCostCenter"
                                             [class.is-invalid]="!result.pendingAsset.assetOwnerCostCenter || result.pendingAsset.assetOwnerCostCenter === undefined">
                                         <div *ngIf="!result.pendingAsset.assetOwnerCostCenter || result.pendingAsset.assetOwnerCostCenter === undefined" class="invalid-feedback">
                                             User cost center is required.
