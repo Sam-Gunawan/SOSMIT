@@ -25,15 +25,15 @@ type Asset struct {
 	OwnerID            int64
 	OwnerName          string // Owner's full name, can be a combination of first and last name
 	OwnerPosition      string
+	OwnerDepartment    string // Owner's department
+	OwnerDivision      string // Owner's division
 	OwnerCostCenter    int64
-	OwnerSiteID        int64  // Site where the owner is located
-	OwnerSiteName      string // Name of the site where the owner is located
-	OwnerSiteGroupName string // Site group where the owner is located
-	OwnerRegionName    string // Region where the owner is located
-	SiteID             int64  // Site where the asset is physically located
-	SiteName           string // Name of the site where the asset is physically located
-	SiteGroupName      string // Site group where the asset is physically located
-	RegionName         string // Region where the asset is physically located
+	SubSiteID          int64  // SubSite where the asset is physically located
+	SubSiteName        string // Name of the SubSite where the asset is physically located
+	SiteID             int64  // Parent Site in hierarchy
+	SiteName           string // Name of the parent Site in hierarchy
+	SiteGroupName      string // Site group where the asset is located
+	RegionName         string // Region where the asset is located
 }
 
 type Repository struct {
@@ -71,11 +71,11 @@ func (repo *Repository) GetAssetByTag(assetTag string) (*Asset, error) {
 		&asset.OwnerID,
 		&asset.OwnerName,
 		&asset.OwnerPosition,
+		&asset.OwnerDepartment,
+		&asset.OwnerDivision,
 		&asset.OwnerCostCenter,
-		&asset.OwnerSiteID,
-		&asset.OwnerSiteName,
-		&asset.OwnerSiteGroupName,
-		&asset.OwnerRegionName,
+		&asset.SubSiteID,
+		&asset.SubSiteName,
 		&asset.SiteID,
 		&asset.SiteName,
 		&asset.SiteGroupName,
@@ -121,11 +121,11 @@ func (repo *Repository) GetAssetBySerialNumber(serialNumber string) (*Asset, err
 		&asset.OwnerID,
 		&asset.OwnerName,
 		&asset.OwnerPosition,
+		&asset.OwnerDepartment,
+		&asset.OwnerDivision,
 		&asset.OwnerCostCenter,
-		&asset.OwnerSiteID,
-		&asset.OwnerSiteName,
-		&asset.OwnerSiteGroupName,
-		&asset.OwnerRegionName,
+		&asset.SubSiteID,
+		&asset.SubSiteName,
 		&asset.SiteID,
 		&asset.SiteName,
 		&asset.SiteGroupName,

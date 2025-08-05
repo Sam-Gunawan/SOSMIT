@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS "AssetEquipments" CASCADE;
 DROP TABLE IF EXISTS "Asset" CASCADE;
 DROP TABLE IF EXISTS "User" CASCADE;
 DROP TABLE IF EXISTS "CostCenter" CASCADE;
+DROP TABLE IF EXISTS "SubSite" CASCADE;
 DROP TABLE IF EXISTS "Site" CASCADE;
 DROP TABLE IF EXISTS "SiteGroup" CASCADE;
 DROP TABLE IF EXISTS "Region" CASCADE;
@@ -21,7 +22,7 @@ CREATE TABLE "Region" (
     "region_name" VARCHAR(100) UNIQUE NOT NULL
 );
 
--- Site group (Middle level)
+-- Site group (Middle level 2)
 CREATE TABLE "SiteGroup" (
     "id" SERIAL PRIMARY KEY,
     "site_group_name" VARCHAR(100) UNIQUE NOT NULL,
@@ -30,17 +31,26 @@ CREATE TABLE "SiteGroup" (
     "region_id" INT NOT NULL REFERENCES "Region"("id") ON DELETE CASCADE
 );
 
--- Site / OU (Most granular level, lowest level)
+-- Site (Middle level 1)
 CREATE TABLE "Site" (
     "id" SERIAL PRIMARY KEY,
     "site_name" VARCHAR(100) NOT NULL,
-    "last_opname_date" TIMESTAMP WITH TIME ZONE DEFAULT '1945-08-17 00:00:00+07', 
+    "last_opname_date" TIMESTAMP WITH TIME ZONE DEFAULT '1945-08-17 00:00:00+07',
 
     -- Foreign key to SiteGroup.
     "site_group_id" INT NOT NULL REFERENCES "SiteGroup"("id") ON DELETE CASCADE,
 
     -- Foreign key to User (General Affairs staff for the site). Set after the "User" table is created.
     "site_ga_id" INT NOT NULL
+);
+
+-- Sub Site / OU (Most granular level, lowest level)
+CREATE TABLE "SubSite" (
+    "id" SERIAL PRIMARY KEY,
+    "sub_site_name" VARCHAR(100) NOT NULL,
+
+    -- Foreign key to Site.
+    "site_id" INT NOT NULL REFERENCES "Site"("id") ON DELETE CASCADE
 );
 
 -- == ENTITY TABLES ==
@@ -59,6 +69,8 @@ CREATE TABLE "User" (
     "first_name" VARCHAR(255) NOT NULL,
     "last_name" VARCHAR(255) NOT NULL,
     "position" VARCHAR(100) NOT NULL,
+    "department" VARCHAR(100) NOT NULL,
+    "division" VARCHAR(100) NOT NULL,
 
     -- Foreign key to Site and Cost Center
     "site_id" INT NOT NULL REFERENCES "Site"("id") ON DELETE CASCADE,
@@ -96,7 +108,7 @@ CREATE TABLE "Asset" (
     "owner_id" INT NOT NULL REFERENCES "User"("user_id") ON DELETE SET NULL,
 
     -- Foreign key to Site (where the asset is located).
-    "site_id" INT NOT NULL REFERENCES "Site"("id") ON DELETE CASCADE
+    "sub_site_id" INT NOT NULL REFERENCES "SubSite"("id") ON DELETE CASCADE
 );
 
 -- Asset Equipment Relationship

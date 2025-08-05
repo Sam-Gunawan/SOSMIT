@@ -35,9 +35,11 @@ type AssetChange struct {
 	NewEquipments        *string `json:"new_equipments"`
 	NewOwnerID           *int    `json:"new_owner_id"`
 	NewOwnerPosition     *string `json:"new_owner_position"`
+	NewOwnerDepartment   *string `json:"new_owner_department"`
+	NewOwnerDivision     *string `json:"new_owner_division"`
 	NewOwnerCostCenter   *int    `json:"new_owner_cost_center"`
+	NewSubSiteID         *int    `json:"new_sub_site_id"`
 	NewOwnerSiteID       *int    `json:"new_owner_site_id"`
-	NewSiteID            *int    `json:"new_site_id"`
 	ChangeReason         string  `json:"change_reason"`
 	ProcessingStatus     string  `json:"processing_status" binding:"required,oneof=pending edited all_good"`
 }
@@ -125,7 +127,7 @@ func (repo *Repository) DeleteSession(sessionID int) error {
 func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, error) {
 	var changesJSON []byte // Use []byte to receive raw JSON data.
 
-	query := `SELECT record_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)`
+	query := `SELECT record_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`
 
 	err := repo.db.QueryRow(query,
 		changedAsset.SessionID,
@@ -141,10 +143,12 @@ func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, err
 		changedAsset.NewEquipments,
 		changedAsset.NewOwnerID,
 		changedAsset.NewOwnerPosition,
+		changedAsset.NewOwnerDepartment,
+		changedAsset.NewOwnerDivision,
 		changedAsset.NewOwnerCostCenter,
-		changedAsset.NewSiteID,
-		changedAsset.ChangeReason,
+		changedAsset.NewSubSiteID,
 		changedAsset.NewOwnerSiteID,
+		changedAsset.ChangeReason,
 		changedAsset.ProcessingStatus,
 	).Scan(&changesJSON)
 	if err != nil {
@@ -331,7 +335,7 @@ func (repo *Repository) GetUserFromOpnameSession(sessionID int) (*user.User, err
 
 	query := `SELECT * FROM get_user_from_opname_session($1)`
 
-	err := repo.db.QueryRow(query, sessionID).Scan(&user.UserID, &user.Username, &user.Email, &user.FirstName, &user.LastName, &user.Position)
+	err := repo.db.QueryRow(query, sessionID).Scan(&user.UserID, &user.Username, &user.Email, &user.FirstName, &user.LastName, &user.Position, &user.Department, &user.Division)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("⚠ No user found for opname session ID: %d", sessionID)

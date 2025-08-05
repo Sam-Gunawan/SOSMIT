@@ -1,16 +1,16 @@
-user_id;username;email;first_name;last_name;position;site_id;cost_center
-1223;LESTARIL;samistheguns@gmail.com;LESTARI;LESTARI;SERVICES DESK SPECIALIST;30;110
-1224;PUJIA;samistheguns@gmail.com;PUJI;ASTUTI;SUPERVISOR TMC;2;410
-1225;ANANDAA;samistheguns@gmail.com;ANANDA;ARIF;SALESMAN TMC;3;240
-1226;BAYUP02;samistheguns@gmail.com;BAYU;PUTRA;SUPERVISOR TMC;3;240
-1227;DINDAP01;samistheguns@gmail.com;DINDA;PERMATASARI;SUPERVISOR TMC;1;230
-1228;IKHWANF;samistheguns@gmail.com;IKHWAN;FITRA;SUPERVISOR TMC;1;230
-1229;EKKOF;samistheguns@gmail.com;EKKO;FITRAN;ASSISTEN SALESMAN-TMC;1;230
-1230;FAHMIK;samistheguns@gmail.com;FAHMI;KURNIAWAN;SALESMAN TMC;1;230
-1231;RAHMAA;samistheguns@gmail.com;RAHMA;WIJAYA;ASSISTEN SALESMAN-TMC;1;230
-1232;BIMAP;samistheguns@gmail.com;BIMA;PUTRA;SERVICES DESK SPECIALIST;25;110
-1233;SAM;samistheguns@gmail.com;SAMUEL;GUNAWAN;ADMIN STAFF GENERAL AFFAIRS;4;350
-1234;PRISKA;samistheguns@gmail.com;PRISKA;AIMEE;L1 SUPPORT;25;110
-1235;RADITYA;samistheguns@gmail.com;RADITYA;DIPA;AREA MANAGER;1;230
-1236;DION;samistheguns@gmail.com;DION;WIYOYO;AREA MANAGER;14;410
-1237;SHEILA;samistheguns@gmail.com;SHEILA;PARA;AREA MANAGER;25;110
+user_id;username;email;first_name;last_name;position;department;division;site_id;cost_center
+1223;LESTARIL;samistheguns@gmail.com;LESTARI;LESTARI;SERVICES DESK SPECIALIST;IT;Support;30;110
+1224;PUJIA;samistheguns@gmail.com;PUJI;ASTUTI;SUPERVISOR TMC;Sales;TMC;2;410
+1225;ANANDAA;samistheguns@gmail.com;ANANDA;ARIF;SALESMAN TMC;Sales;TMC;3;240
+1226;BAYUP02;samistheguns@gmail.com;BAYU;PUTRA;SUPERVISOR TMC;Sales;TMC;3;240
+1227;DINDAP01;samistheguns@gmail.com;DINDA;PERMATASARI;SUPERVISOR TMC;Sales;TMC;1;230
+1228;IKHWANF;samistheguns@gmail.com;IKHWAN;FITRA;SUPERVISOR TMC;Sales;TMC;1;230
+1229;EKKOF;samistheguns@gmail.com;EKKO;FITRAN;ASSISTEN SALESMAN-TMC;Sales;TMC;1;230
+1230;FAHMIK;samistheguns@gmail.com;FAHMI;KURNIAWAN;SALESMAN TMC;Sales;TMC;1;230
+1231;RAHMAA;samistheguns@gmail.com;RAHMA;WIJAYA;ASSISTEN SALESMAN-TMC;Sales;TMC;1;230
+1232;BIMAP;samistheguns@gmail.com;BIMA;PUTRA;SERVICES DESK SPECIALIST;IT;Support;25;110
+1233;SAM;samistheguns@gmail.com;SAMUEL;GUNAWAN;ADMIN STAFF GENERAL AFFAIRS;Administration;General Affairs;4;350
+1234;PRISKA;samistheguns@gmail.com;PRISKA;AIMEE;L1 SUPPORT;IT;Support;25;110
+1235;RADITYA;samistheguns@gmail.com;RADITYA;DIPA;AREA MANAGER;Management;Regional Operations;1;230
+1236;DION;samistheguns@gmail.com;DION;WIYOYO;AREA MANAGER;Management;Regional Operations;14;410
+1237;SHEILA;samistheguns@gmail.com;SHEILA;PARA;AREA MANAGER;Management;Regional Operations;25;110

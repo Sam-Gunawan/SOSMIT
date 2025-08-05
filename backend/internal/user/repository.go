@@ -22,6 +22,8 @@ type User struct {
 	FirstName     string
 	LastName      string
 	Position      string
+	Department    string
+	Division      string
 	SiteID        int64
 	SiteName      string
 	SiteGroupName string
@@ -106,6 +108,8 @@ func (repo *Repository) GetAllUsers() ([]*User, error) {
 			&user.FirstName,
 			&user.LastName,
 			&user.Position,
+			&user.Department,
+			&user.Division,
 			&user.SiteID,
 			&user.SiteName,
 			&user.SiteGroupName,
@@ -136,7 +140,7 @@ func (repo *Repository) GetUserByID(userID int64) (*User, error) {
 
 	query := `SELECT * FROM get_user_by_id($1)`
 
-	err := repo.db.QueryRow(query, userID).Scan(&user.UserID, &user.Username, &user.Email, &user.FirstName, &user.LastName, &user.Position, &user.SiteID, &user.SiteName, &user.SiteGroupName, &user.RegionName, &user.CostCenterID)
+	err := repo.db.QueryRow(query, userID).Scan(&user.UserID, &user.Username, &user.Email, &user.FirstName, &user.LastName, &user.Position, &user.Department, &user.Division, &user.SiteID, &user.SiteName, &user.SiteGroupName, &user.RegionName, &user.CostCenterID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// If no user is found, return nil
@@ -159,7 +163,7 @@ func (repo *Repository) GetUserByUsername(username string) (*User, error) {
 
 	query := `SELECT * FROM get_user_by_username($1)`
 
-	err := repo.db.QueryRow(query, username).Scan(&user.UserID, &user.Username, &user.Email, &user.FirstName, &user.LastName, &user.Position, &user.SiteID, &user.SiteName, &user.SiteGroupName, &user.RegionName, &user.CostCenterID)
+	err := repo.db.QueryRow(query, username).Scan(&user.UserID, &user.Username, &user.Email, &user.FirstName, &user.LastName, &user.Position, &user.Department, &user.Division, &user.SiteID, &user.SiteName, &user.SiteGroupName, &user.RegionName, &user.CostCenterID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// If no user is found, return nil
