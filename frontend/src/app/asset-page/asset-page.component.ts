@@ -82,9 +82,22 @@ export class AssetPageComponent implements OnInit {
   }
   
   ngOnInit(): void {
-    this.isLoading = true;
     this.checkScreenSize();
-    this.fetchAssetPage(); // Fetch asset page data when the component initializes
+    
+    // Only fetch data if NOT in pending mode (report mode)
+    // In pending mode, data is passed via [assetPage] input
+    if (!this.isPending) {
+      this.isLoading = true;
+      this.fetchAssetPage(); // Fetch asset page data when the component initializes
+    } else {
+      // In report mode, use the passed assetPage data and set UI state
+      if (this.assetPage?.condition) {
+        this.setLike();
+      } else {
+        this.setDislike();
+      }
+    }
+    
     this.siteID = Number(this.route.snapshot.paramMap.get('id')); // Get site ID from route parameters
   }
 
@@ -117,33 +130,26 @@ export class AssetPageComponent implements OnInit {
   }
 
   fetchAssetPage(): void {
-    if (!this.isPending) {
-      this.isLoading = true; // Set loading state to true before fetching data
-      this.apiService.getAssetByAssetTag(this.assetTag()).subscribe({
-        next: (asset) => {
-          this.assetPage = asset; // Update the assetPage with the fetched data
-          this.isLoading = false; // Set loading state to false after data is fetched
-          if (this.assetPage?.condition) {
-            this.setLike();
-          } else {
-            this.setDislike();
-          }
-        },
-        error: (error) => {
-          // Handle the error appropriately, e.g., show a message to the user
-          console.error('[AssetPage] Failed to fetch asset:', error);
-          this.isLoading = false; // Set loading state to false even if there's an error
-          this.errorMessage = 'Failed to load asset. Please try again later.';
-          this.showToast = true;
-          setTimeout(() => this.showToast = false, 3000);
+    this.isLoading = true; // Set loading state to true before fetching data
+    this.apiService.getAssetByAssetTag(this.assetTag()).subscribe({
+      next: (asset) => {
+        this.assetPage = asset; // Update the assetPage with the fetched data
+        this.isLoading = false; // Set loading state to false after data is fetched
+        if (this.assetPage?.condition) {
+          this.setLike();
+        } else {
+          this.setDislike();
         }
-      });
-    } else {
-      // If isPending is true, we assume the assetPage is already set and we just check the condition
-      this.assetPage?.condition ? this.setLike() : this.setDislike();
-    }
-
-    this.isLoading = false;
+      },
+      error: (error) => {
+        // Handle the error appropriately, e.g., show a message to the user
+        console.error('[AssetPage] Failed to fetch asset:', error);
+        this.isLoading = false; // Set loading state to false even if there's an error
+        this.errorMessage = 'Failed to load asset. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
+      }
+    });
   }
 
   // Check if equipment is selected for the current asset (readonly display)
