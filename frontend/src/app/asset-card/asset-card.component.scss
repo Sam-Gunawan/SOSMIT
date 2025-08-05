@@ -182,49 +182,49 @@ p {
 }
 
 .first-column {
-    margin-left: 10px;
-    flex-grow: 1;
-    display: flex;
+  margin-left: 10px;
+  flex-grow: 1;
+  display: flex;
 	flex-direction: column;
 	align-items: start;
 
     .asset-tag {
-        font-size: 11px;
-        font-weight: 600;
-        margin-bottom: 4px;
-        color: styles.$primary-text-color;
-    }
-
-    .asset-name {
-        font-size: 10px;
-        font-weight: 500;
-        margin: 2px 0;
-        color: styles.$primary-text-color;
-        max-width: 200px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .asset-details {
-        color: styles.$quaternary-text-color;
-        font-weight: 400;
-        font-size: 8px;
-        margin: 2px 0;
+      font-size: 11px;
+      font-weight: 600;
+      margin: 2px 0;
+      color: styles.$primary-text-color;
     }
 
     .serial-number {
-        color: styles.$quaternary-text-color;
-        font-style: italic;
-        font-size: 8px;
-        margin: 2px 0;
+      font-size: 10px;
+      font-weight: 500;
+      margin: 2px 0;
+      color: styles.$primary-text-color;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .asset-details {
+      color: styles.$quaternary-text-color;
+      font-weight: 400;
+      font-size: 8px;
+      margin: 2px 0;
+    }
+
+    .site-name {
+      color: styles.$quaternary-text-color;
+      font-style: italic;
+      font-size: 8px;
+      margin: 2px 0;
     }
 
     .asset-owner {
-        color: styles.$quaternary-text-color;
-        font-weight: 400;
-        font-size: 8px;
-        margin: 2px 0;
+      color: styles.$quaternary-text-color;
+      font-weight: 400;
+      font-size: 8px;
+      margin: 2px 0;
     }
 }
 

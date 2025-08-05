@@ -1383,7 +1383,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   }
 
   private checkScreenSize() {
-    const newIsMobile = window.innerWidth < 768; // Define mobile breakpoint
+    const newIsMobile = window.innerWidth < 860; // Define mobile breakpoint
     const newScreenSize = newIsMobile ? 'small' : 'large';
     let newCurrentView = this.currentView;
     if (!this.isInReport) {
@@ -1411,7 +1411,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
   private updateResponsiveSettings() {
     const previousIsMobile = this.isMobile;
-    this.isMobile = window.innerWidth <= 768;
+    this.isMobile = window.innerWidth <= 860;
     
     // Handle form visibility based on screen size
     if (!this.isMobile) {
