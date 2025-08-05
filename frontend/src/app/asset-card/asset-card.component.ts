@@ -231,8 +231,11 @@ export class AssetCardComponent {
       subCategory: ''
     };
     
+    // Reset search state
+    this.hasSearched = false;
+    
     // If we have searched before, reset to show all assets
-    if (this.hasSearched) {
+    if (this.originalAssetsOnSite.length > 0) {
       this.filteredAssetsOnSite = [...this.originalAssetsOnSite];
       this.totalItems = this.originalAssetsOnSite.length;
       this.pageIndex = 0;

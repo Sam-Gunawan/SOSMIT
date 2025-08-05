@@ -60,6 +60,15 @@
                             <option *ngFor="let ownerName of uniqueOwnerNames" [value]="ownerName"></option>
                         </datalist>
                     </div>
+
+                    <div class="form-item">
+                        <label>Site</label>
+                        <input 
+                            type="text" 
+                            class="form-control" 
+                            name="siteName"
+                            placeholder="Site name">
+                    </div>
                     
                     <div class="form-item">
                         <label>Status</label>
@@ -301,7 +310,7 @@
 </section>
 
 <!-- NO ASSETS FOUND FOR THE SITE MESSAGE -->
-<section *ngIf="assetsOnSite && assetsOnSite.length === 0">
+<section *ngIf="!hasSearched && assetsOnSite && assetsOnSite.length === 0">
     <div class="no-assets-message">
         <p>No assets found for this site</p>
     </div>
