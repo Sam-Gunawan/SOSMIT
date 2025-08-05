@@ -94,6 +94,31 @@ func (handler *Handler) GetSiteByIDHandler(context *gin.Context) {
 	})
 }
 
+// GetAllSubSitesHandler handles the API request to retrieve all sub-sites.
+func (handler *Handler) GetAllSubSitesHandler(context *gin.Context) {
+	subSites, err := handler.service.GetAllSubSites()
+	if err != nil {
+		log.Printf("Error fetching all sub-sites: %v", err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to fetch sub-sites: " + err.Error(),
+		})
+		return
+	}
+
+	if subSites == nil {
+		log.Println("No sub-sites found in the system")
+		context.JSON(http.StatusNotFound, gin.H{
+			"message": "no sub-sites found",
+		})
+		return
+	}
+
+	log.Printf("Successfully retrieved %d sub-sites", len(subSites))
+	context.JSON(http.StatusOK, gin.H{
+		"sub_sites": subSites,
+	})
+}
+
 // GetSubSitesBySiteIDHandler handles the API request to retrieve all sub-sites for a given site ID.
 func (handler *Handler) GetSubSitesBySiteIDHandler(context *gin.Context) {
 	siteIDstr, exists := context.Params.Get("site-id")

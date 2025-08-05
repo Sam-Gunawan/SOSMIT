@@ -20,6 +20,7 @@ DROP PROCEDURE IF EXISTS public.delete_asset_change(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_asset_change_photo(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
 DROP FUNCTION IF EXISTS public.get_all_sites();
+DROP FUNCTION IF EXISTS public.get_all_sub_sites();
 DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_sub_sites_by_site_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
@@ -837,6 +838,23 @@ AS $$
 	END;
 $$;
 
+-- get_all_sub_sites retrieves all sub-sites with their details
+CREATE OR REPLACE FUNCTION public.get_all_sub_sites()
+	RETURNS TABLE (
+		sub_site_id INT,
+		sub_site_name VARCHAR(100),
+		site_id INT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT ss.id AS sub_site_id, ss.sub_site_name, s.id AS site_id
+		FROM "SubSite" AS ss
+		INNER JOIN "Site" AS s ON ss.site_id = s.id;
+	END;
+$$;
+
 -- get_site_by_id retrieves site details by site ID
 CREATE OR REPLACE FUNCTION public.get_site_by_id(_site_id INT)
 	RETURNS TABLE (
@@ -873,7 +891,7 @@ CREATE OR REPLACE FUNCTION public.get_sub_sites_by_site_id(_site_id INT)
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT ss.id, ss.site_name
+		SELECT ss.id, ss.sub_site_name
 		FROM "SubSite" AS ss
 		WHERE ss.site_id = _site_id;
 	END;

@@ -125,6 +125,9 @@ func main() {
 
 			// GET /api/site/:site-id/sub-sites
 			siteRoutes.GET("/:site-id/sub-sites", siteHandler.GetSubSitesBySiteIDHandler)
+
+			// GET /api/site/all-sub-sites
+			siteRoutes.GET("/all-sub-sites", siteHandler.GetAllSubSitesHandler)
 		}
 
 		assetRoutes := api.Group("/asset").Use(auth.AuthMiddleware())
