@@ -50,3 +50,21 @@ func (service *Service) GetSiteByID(siteID int) (*Site, error) {
 	log.Printf("Successfully retrieved site by ID: %d", siteID)
 	return site, nil
 }
+
+// GetSubSitesBySiteID retrieves all sub-sites for a given site ID.
+func (service *Service) GetSubSitesBySiteID(siteID int) ([]*SubSite, error) {
+	subSites, err := service.repo.GetSubSitesBySiteID(siteID)
+	if err != nil {
+		// Log the error and return it
+		log.Printf("Error fetching sub-sites for site ID %d: %v", siteID, err)
+		return nil, err
+	}
+	if subSites == nil {
+		// If no sub-sites are found, return an empty slice
+		log.Printf("No sub-sites found for site ID: %d", siteID)
+		return nil, nil // No sub-sites found
+	}
+
+	log.Printf("Successfully retrieved %d sub-sites for site ID: %d", len(subSites), siteID)
+	return subSites, nil
+}

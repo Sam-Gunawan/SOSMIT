@@ -93,3 +93,46 @@ func (handler *Handler) GetSiteByIDHandler(context *gin.Context) {
 		"site_ga_email":   site.SiteGaEmail,
 	})
 }
+
+// GetSubSitesBySiteIDHandler handles the API request to retrieve all sub-sites for a given site ID.
+func (handler *Handler) GetSubSitesBySiteIDHandler(context *gin.Context) {
+	siteIDstr, exists := context.Params.Get("site-id")
+	if !exists {
+		log.Printf("Error retrieving site ID from request")
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid API request, site ID is required",
+		})
+		return
+	}
+
+	siteID, err := strconv.Atoi(siteIDstr)
+	if err != nil {
+		log.Printf("Error converting site ID to integer: %v", err)
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid site ID format",
+		})
+		return
+	}
+
+	subSites, err := handler.service.GetSubSitesBySiteID(siteID)
+	if err != nil {
+		log.Printf("Error fetching sub-sites for site ID %v: %v", siteID, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to fetch sub-sites: " + err.Error(),
+		})
+		return
+	}
+
+	if subSites == nil {
+		log.Printf("No sub-sites found for site ID: %d", siteID)
+		context.JSON(http.StatusNotFound, gin.H{
+			"message": "no sub-sites found",
+		})
+		return
+	}
+
+	log.Printf("Successfully retrieved %d sub-sites for site ID: %d", len(subSites), siteID)
+	context.JSON(http.StatusOK, gin.H{
+		"sub_sites": subSites,
+	})
+}

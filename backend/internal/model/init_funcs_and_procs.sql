@@ -21,6 +21,7 @@ DROP FUNCTION IF EXISTS public.get_asset_change_photo(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
 DROP FUNCTION IF EXISTS public.get_all_sites();
 DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
+DROP FUNCTION IF EXISTS public.get_sub_sites_by_site_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
 DROP FUNCTION IF EXISTS public.get_opname_by_site_id(INT);
 DROP FUNCTION IF EXISTS public.get_asset_equipments(VARCHAR(50));
@@ -672,7 +673,7 @@ AS $$
 		END IF;
 
 		-- Fetch the current owner's site information for comparison
-		SELECT u.site_id, u.cost_center_id, u.position INTO _old_owner_data
+		SELECT u.site_id, u.cost_center_id, u.position, u.department, u.division INTO _old_owner_data
 		FROM "User" AS u
 		WHERE u.user_id = _old_data.owner_id;
 
@@ -711,10 +712,10 @@ AS $$
 		IF _new_owner_position IS NOT NULL AND LOWER(_new_owner_position) IS DISTINCT FROM LOWER(_old_owner_data.position) THEN
 			_changes := jsonb_set(_changes, '{newOwnerPosition}', to_jsonb(_new_owner_position));
 		END IF;
-		IF _new_owner_department IS NOT NULL AND LOWER(_new_owner_department) IS DISTINCT FROM LOWER(_old_data.department) THEN
+		IF _new_owner_department IS NOT NULL AND LOWER(_new_owner_department) IS DISTINCT FROM LOWER(_old_owner_data.department) THEN
 			_changes := jsonb_set(_changes, '{newOwnerDepartment}', to_jsonb(_new_owner_department));
 		END IF;
-		IF _new_owner_division IS NOT NULL AND LOWER(_new_owner_division) IS DISTINCT FROM LOWER(_old_data.division) THEN
+		IF _new_owner_division IS NOT NULL AND LOWER(_new_owner_division) IS DISTINCT FROM LOWER(_old_owner_data.division) THEN
 			_changes := jsonb_set(_changes, '{newOwnerDivision}', to_jsonb(_new_owner_division));
 		END IF;
 		IF _new_owner_cost_center IS NOT NULL AND _new_owner_cost_center IS DISTINCT FROM _old_owner_data.cost_center_id THEN
@@ -859,6 +860,22 @@ AS $$
 		INNER JOIN "Region" AS r ON sg.region_id = r.id
 		INNER JOIN "User" AS u ON s.site_ga_id = u.user_id
 		WHERE s.id = _site_id;
+	END;
+$$;
+
+-- get_sub_sites_by_site_id retrieves all sub-sites for a given site ID
+CREATE OR REPLACE FUNCTION public.get_sub_sites_by_site_id(_site_id INT)
+	RETURNS TABLE (
+		sub_site_id INT,
+		sub_site_name VARCHAR(100)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT ss.id, ss.site_name
+		FROM "SubSite" AS ss
+		WHERE ss.site_id = _site_id;
 	END;
 $$;
 

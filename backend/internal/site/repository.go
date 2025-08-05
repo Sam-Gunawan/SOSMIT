@@ -20,6 +20,12 @@ type Site struct {
 	SiteGaEmail   string
 }
 
+type SubSite struct {
+	SubSiteID   int
+	SubSiteName string
+	SiteID      int
+}
+
 // NewRepository creates a new site repository for managing site-related operations.
 func NewRepository(db *sql.DB) *Repository {
 	return &Repository{db: db}
@@ -64,4 +70,34 @@ func (repo *Repository) GetSiteByID(siteID int) (*Site, error) {
 
 	log.Printf("✅ Successfully retrieved site with ID: %d\n", siteID)
 	return &site, nil
+}
+
+// GetSubSitesBySiteID retrieves all sub-sites for a given site ID.
+func (repo *Repository) GetSubSitesBySiteID(siteID int) ([]*SubSite, error) {
+	var subSites []*SubSite
+
+	query := `SELECT sub_site_id, sub_site_name FROM get_sub_sites_by_site_id($1)`
+	rows, err := repo.db.Query(query, siteID)
+	if err != nil {
+		log.Printf("❌ Error retrieving sub-sites for site ID %d: %v", siteID, err)
+		return nil, err // Return the error if query fails
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var subSite SubSite
+		if err := rows.Scan(&subSite.SubSiteID, &subSite.SubSiteName); err != nil {
+			log.Printf("❌ Error scanning sub-site row: %v", err)
+			return nil, err // Return the error if scanning fails
+		}
+		subSite.SiteID = siteID               // Set the site ID for the sub-site
+		subSites = append(subSites, &subSite) // Append the sub-site to the slice
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("❌ Error iterating over sub-site rows: %v", err)
+		return nil, err // Return any error encountered during iteration
+	}
+
+	return subSites, nil
 }
