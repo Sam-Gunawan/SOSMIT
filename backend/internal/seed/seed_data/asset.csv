@@ -1,4 +1,4 @@
-asset_tag;serial_number;status;status_reason;product_category;product_subcategory;product_variety;brand_name;product_name;condition;condition_photo_url;location;room;equipments;owner_id;site_id
+asset_tag;serial_number;status;status_reason;product_category;product_subcategory;product_variety;brand_name;product_name;condition;condition_photo_url;location;room;equipments;owner_id;sub_site_id
 SMPC00000001;SGH7J2L9Q4M;Deployed;;Hardware;Processing Unit;Desktop;HP;HP ProDesk 400 G4 SFF;1;;Shelf A.1;16th floor storage room;Unit, Kabel power, Keyboard, Mouse;1223;25
 SMLT00000003;5CD2597SON;Deployed;;Hardware;Processing Unit;Laptop;HP;HP Notebook;1;;Shelf A.1;16th floor storage room;Unit, Tas;1224;1
 SMLT00000012;5CD3009LBE;On Loan;;Hardware;Processing Unit;Laptop;HP;HP Zbook Power G8;1;;Shelf A.1;16th floor storage room;Unit, Tas;1225;2

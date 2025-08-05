@@ -180,9 +180,11 @@ type AssetChangeRequest struct {
 	NewEquipments        *string `json:"new_equipments"`
 	NewOwnerID           *int    `json:"new_owner_id"`
 	NewOwnerPosition     *string `json:"new_owner_position"`
+	NewOwnerDepartment   *string `json:"new_owner_department"`
+	NewOwnerDivision     *string `json:"new_owner_division"`
 	NewOwnerCostCenter   *int    `json:"new_owner_cost_center"`
+	NewSubSiteID         *int    `json:"new_sub_site_id"`
 	NewOwnerSiteID       *int    `json:"new_owner_site_id"`
-	NewSiteID            *int    `json:"new_site_id"`
 	ChangeReason         string  `json:"change_reason"`
 	ProcessingStatus     string  `json:"processing_status" binding:"required,oneof=pending edited all_good"`
 }
@@ -233,9 +235,11 @@ func (handler *Handler) ProcessAssetChangesHandler(context *gin.Context) {
 		NewEquipments:        assetChangeRequest.NewEquipments,
 		NewOwnerID:           assetChangeRequest.NewOwnerID,
 		NewOwnerPosition:     assetChangeRequest.NewOwnerPosition,
+		NewOwnerDepartment:   assetChangeRequest.NewOwnerDepartment,
+		NewOwnerDivision:     assetChangeRequest.NewOwnerDivision,
 		NewOwnerCostCenter:   assetChangeRequest.NewOwnerCostCenter,
+		NewSubSiteID:         assetChangeRequest.NewSubSiteID,
 		NewOwnerSiteID:       assetChangeRequest.NewOwnerSiteID,
-		NewSiteID:            assetChangeRequest.NewSiteID,
 		ChangeReason:         assetChangeRequest.ChangeReason,
 		ProcessingStatus:     assetChangeRequest.ProcessingStatus,
 	}

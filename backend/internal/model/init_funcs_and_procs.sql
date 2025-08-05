@@ -15,7 +15,7 @@ DROP PROCEDURE IF EXISTS public.finish_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.approve_opname_session(INT, INT);
 DROP PROCEDURE IF EXISTS public.reject_opname_session(INT, INT);
-DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(50), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, VARCHAR(255), INT, INT, TEXT, INT, VARCHAR(25));
+DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(50), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, VARCHAR(255), VARCHAR(100), VARCHAR(100), INT, INT, INT, TEXT, VARCHAR(25));
 DROP PROCEDURE IF EXISTS public.delete_asset_change(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_asset_change_photo(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
@@ -53,6 +53,8 @@ CREATE OR REPLACE FUNCTION public.get_all_users()
 		first_name VARCHAR(255),
 		last_name VARCHAR(255),
 		"position" VARCHAR(100),
+		department VARCHAR(100),
+		division VARCHAR(100),
 		site_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
@@ -63,7 +65,7 @@ CREATE OR REPLACE FUNCTION public.get_all_users()
 AS $$
 	BEGIN 
 		RETURN QUERY
-		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", s.id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
+		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", u.department, u.division, s.id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
 		FROM "User" AS u
 		INNER JOIN "Site" AS s ON u.site_id = s.id
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
@@ -80,6 +82,8 @@ CREATE OR REPLACE FUNCTION public.get_user_by_id(_user_id INT)
 		first_name VARCHAR(255),
 		last_name VARCHAR(255),
 		"position" VARCHAR(100),
+		department VARCHAR(100),
+		division VARCHAR(100),
 		site_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
@@ -90,7 +94,7 @@ CREATE OR REPLACE FUNCTION public.get_user_by_id(_user_id INT)
 AS $$
 	BEGIN 
 		RETURN QUERY
-		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
+		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", u.department, u.division, s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
 		FROM "User" AS u
 		INNER JOIN "Site" AS s ON u.site_id = s.id
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
@@ -108,6 +112,8 @@ CREATE OR REPLACE FUNCTION public.get_user_by_username(_username VARCHAR(255))
 		first_name VARCHAR(255),
 		last_name VARCHAR(255),
 		"position" VARCHAR(100),
+		department VARCHAR(100),
+		division VARCHAR(100),
 		site_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
@@ -118,7 +124,7 @@ CREATE OR REPLACE FUNCTION public.get_user_by_username(_username VARCHAR(255))
 AS $$
 	BEGIN 
 		RETURN QUERY
-		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
+		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", u.department, u.division, s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
 		FROM "User" AS u
 		INNER JOIN "Site" AS s ON u.site_id = s.id
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
@@ -256,11 +262,11 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_tag(_asset_tag VARCHAR(12))
 		owner_id INT,
 		owner_name VARCHAR(510),
 		owner_position VARCHAR(100),
+		owner_department VARCHAR(100),
+		owner_division VARCHAR(100),
 		owner_cost_center INT,
-		owner_site_id INT,
-		owner_site_name VARCHAR(100),
-		owner_site_group_name VARCHAR(100),
-		owner_region_name VARCHAR(100),
+		sub_site_id INT,
+		sub_site_name VARCHAR(100),
 		site_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
@@ -278,23 +284,21 @@ AS $$
 				a.owner_id,
 				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
 				u.position AS owner_position,
+				u.department AS owner_department,
+				u.division AS owner_division,
 				u.cost_center_id AS owner_cost_center,
-				u.site_id AS owner_site_id,
-				owner_site.site_name AS owner_site_name,
-				owner_sg.site_group_name AS owner_site_group_name,
-				owner_r.region_name AS owner_region_name,
-				a.site_id,
+				a.sub_site_id,
+				ss.sub_site_name AS sub_site_name,
+				s.id AS site_id,
 				s.site_name AS site_name,
 				sg.site_group_name AS site_group_name,
 				r.region_name AS region_name
 			FROM "Asset" AS a
 			LEFT JOIN "User" AS u ON a.owner_id = u.user_id
-			LEFT JOIN "Site" AS s ON a.site_id = s.id
-			LEFT JOIN "Site" AS owner_site ON u.site_id = owner_site.id
+			LEFT JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
+			LEFT JOIN "Site" AS s ON ss.site_id = s.id
 			LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-			LEFT JOIN "SiteGroup" AS owner_sg ON owner_site.site_group_id = owner_sg.id
 			LEFT JOIN "Region" AS r ON sg.region_id = r.id
-			LEFT JOIN "Region" AS owner_r ON owner_sg.region_id = owner_r.id
 			WHERE a.asset_tag = _asset_tag;
 	END;
 $$;
@@ -320,11 +324,11 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_serial_number(_serial_number VARC
 		owner_id INT,
 		owner_name VARCHAR(510),
 		owner_position VARCHAR(100),
+		owner_department VARCHAR(100),
+		owner_division VARCHAR(100),
 		owner_cost_center INT,
-		owner_site_id INT,
-		owner_site_name VARCHAR(100),
-		owner_site_group_name VARCHAR(100),
-		owner_region_name VARCHAR(100),
+		sub_site_id INT,
+		sub_site_name VARCHAR(100),
 		site_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
@@ -342,28 +346,26 @@ AS $$
 				a.owner_id,
 				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
 				u.position AS owner_position,
+				u.department AS owner_department,
+				u.division AS owner_division,
 				u.cost_center_id AS owner_cost_center,
-				u.site_id AS owner_site_id,
-				owner_site.site_name AS owner_site_name,
-				owner_sg.site_group_name AS owner_site_group_name,
-				owner_r.region_name AS owner_region_name,
-				a.site_id,
+				a.sub_site_id,
+				ss.sub_site_name AS sub_site_name,
+				s.id AS site_id,
 				s.site_name AS site_name,
 				sg.site_group_name AS site_group_name,
 				r.region_name AS region_name
 			FROM "Asset" AS a
 			LEFT JOIN "User" AS u ON a.owner_id = u.user_id
-			LEFT JOIN "Site" AS s ON a.site_id = s.id
-			LEFT JOIN "Site" AS owner_site ON u.site_id = owner_site.id
+			LEFT JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
+			LEFT JOIN "Site" AS s ON ss.site_id = s.id
 			LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-			LEFT JOIN "SiteGroup" AS owner_sg ON owner_site.site_group_id = owner_sg.id
 			LEFT JOIN "Region" AS r ON sg.region_id = r.id
-			LEFT JOIN "Region" AS owner_r ON owner_sg.region_id = owner_r.id
 			WHERE a.serial_number = _serial_number;
 	END;
 $$;
 
--- get_assets_by_site retrieves all assets for a given site
+-- get_assets_by_site retrieves all assets for a given site (aggregates from all sub-sites)
 CREATE OR REPLACE FUNCTION public.get_assets_by_site(_site_id INT)
 	RETURNS TABLE (
 		asset_tag VARCHAR(12)
@@ -374,7 +376,8 @@ AS $$
 		RETURN QUERY
 			SELECT a.asset_tag
 			FROM "Asset" AS a
-			WHERE a.site_id = _site_id;
+			INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
+			WHERE ss.site_id = _site_id;
 	END;
 $$;
 
@@ -452,13 +455,15 @@ CREATE OR REPLACE FUNCTION public.get_user_from_opname_session(_session_id INT)
 		email VARCHAR(255),
 		first_name VARCHAR(255),
 		last_name VARCHAR(255),
-		"position" VARCHAR(100)
+		"position" VARCHAR(100),
+		department VARCHAR(100),
+		division VARCHAR(100)
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position"
+		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", u.department, u.division
 		FROM "User" AS u
 		INNER JOIN "OpnameSession" AS os ON u.user_id = os.user_id
 		WHERE os.id = _session_id;
@@ -642,10 +647,12 @@ CREATE OR REPLACE FUNCTION public.record_asset_change(
 	_new_equipments TEXT,
 	_new_owner_id INT,
 	_new_owner_position VARCHAR(255),
+	_new_owner_department VARCHAR(100),
+	_new_owner_division VARCHAR(100),
 	_new_owner_cost_center INT,
-	_new_site_id INT,
-	_change_reason TEXT,
+	_new_sub_site_id INT,
 	_new_owner_site_id INT,
+	_change_reason TEXT,
 	_processing_status VARCHAR(25)
 ) RETURNS JSONB
 	LANGUAGE plpgsql
@@ -704,11 +711,17 @@ AS $$
 		IF _new_owner_position IS NOT NULL AND LOWER(_new_owner_position) IS DISTINCT FROM LOWER(_old_owner_data.position) THEN
 			_changes := jsonb_set(_changes, '{newOwnerPosition}', to_jsonb(_new_owner_position));
 		END IF;
+		IF _new_owner_department IS NOT NULL AND LOWER(_new_owner_department) IS DISTINCT FROM LOWER(_old_data.department) THEN
+			_changes := jsonb_set(_changes, '{newOwnerDepartment}', to_jsonb(_new_owner_department));
+		END IF;
+		IF _new_owner_division IS NOT NULL AND LOWER(_new_owner_division) IS DISTINCT FROM LOWER(_old_data.division) THEN
+			_changes := jsonb_set(_changes, '{newOwnerDivision}', to_jsonb(_new_owner_division));
+		END IF;
 		IF _new_owner_cost_center IS NOT NULL AND _new_owner_cost_center IS DISTINCT FROM _old_owner_data.cost_center_id THEN
 			_changes := jsonb_set(_changes, '{newOwnerCostCenter}', to_jsonb(_new_owner_cost_center));
 		END IF;
-		IF _new_site_id IS NOT NULL AND _new_site_id IS DISTINCT FROM _old_data.site_id THEN
-			_changes := jsonb_set(_changes, '{newSiteID}', to_jsonb(_new_site_id));
+		IF _new_sub_site_id IS NOT NULL AND _new_sub_site_id IS DISTINCT FROM _old_data.sub_site_id THEN
+			_changes := jsonb_set(_changes, '{newSubSiteID}', to_jsonb(_new_sub_site_id));
 		END IF;
 		IF _new_owner_site_id IS NOT NULL AND _new_owner_site_id IS DISTINCT FROM _old_owner_data.site_id THEN
 			_changes := jsonb_set(_changes, '{newOwnerSiteID}', to_jsonb(_new_owner_site_id));

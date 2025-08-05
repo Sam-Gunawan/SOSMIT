@@ -45,6 +45,7 @@ func main() {
 	seedTable(db, "Region", "internal/seed/seed_data/region.csv", seedRegion)
 	seedTable(db, "SiteGroup", "internal/seed/seed_data/site_group.csv", seedSiteGroup)
 	seedTable(db, "Site", "internal/seed/seed_data/site.csv", seedSite)
+	seedTable(db, "SubSite", "internal/seed/seed_data/sub_site.csv", seedSubSite)
 	seedTable(db, "CostCenter", "internal/seed/seed_data/cost_center.csv", seedCostCenter)
 	seedTable(db, "User", "internal/seed/seed_data/user.csv", seedUser)
 	seedTable(db, "Asset", "internal/seed/seed_data/asset.csv", seedAsset)
@@ -155,6 +156,22 @@ func seedSite(db *sql.DB, record []string) error {
 	return nil
 }
 
+// Expected CSV format for sub_site.csv:
+// id [PK], sub_site_name, site_id [FK]
+func seedSubSite(db *sql.DB, record []string) error {
+	sub_site_name := record[1]
+	site_id := record[2]
+	query := `INSERT INTO "SubSite" (sub_site_name, site_id) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING`
+
+	_, err := db.Exec(query, sub_site_name, site_id)
+	if err != nil {
+		log.Fatalf("Error inserting record into SubSite table: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
 // Expected CSV format for cost_center.csv:
 // cost_center_id [PK], cost_center_name
 func seedCostCenter(db *sql.DB, record []string) error {
@@ -183,12 +200,13 @@ func seedUser(db *sql.DB, record []string) error {
 	first_name := record[3]
 	last_name := record[4]
 	position := record[5]
-	site_id := record[6]
-	cost_center_id := record[7]
+	department := record[6]
+	division := record[7]
+	site_id := record[8]
+	cost_center_id := record[9]
+	query := `INSERT INTO "User" (user_id, username, email, password, first_name, last_name, position, department, division, site_id, cost_center_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) ON CONFLICT (user_id) DO NOTHING`
 
-	query := `INSERT INTO "User" (user_id, username, email, password, first_name, last_name, position, site_id, cost_center_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (user_id) DO NOTHING`
-
-	_, err := db.Exec(query, user_id, username, email, password, first_name, last_name, position, site_id, cost_center_id)
+	_, err := db.Exec(query, user_id, username, email, password, first_name, last_name, position, department, division, site_id, cost_center_id)
 	if err != nil {
 		log.Fatalf("Error inserting record into User table: %v\n", err)
 		return err
@@ -217,7 +235,7 @@ func seedAsset(db *sql.DB, record []string) error {
 	room := record[12]
 	equipments := record[13]
 	owner_id := record[14]
-	site_id := record[15]
+	sub_site_id := record[15]
 
 	// Convert condition to int
 	condition, err := strconv.Atoi(conditionStr)
@@ -235,10 +253,10 @@ func seedAsset(db *sql.DB, record []string) error {
 		condition_photo_url = "-1"
 	}
 
-	query := `INSERT INTO "Asset" (asset_tag, serial_number, status, status_reason, product_category, product_subcategory, product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, owner_id, site_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) ON CONFLICT (asset_tag) DO NOTHING`
+	query := `INSERT INTO "Asset" (asset_tag, serial_number, status, status_reason, product_category, product_subcategory, product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, owner_id, sub_site_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) ON CONFLICT (asset_tag) DO NOTHING`
 
 	_, err = db.Exec(query, asset_tag, serial_number, status, status_reason, product_category, product_subcategory,
-		product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, owner_id, site_id)
+		product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, owner_id, sub_site_id)
 	if err != nil {
 		log.Fatalf("Error inserting record into Asset table: %v\n", err)
 
