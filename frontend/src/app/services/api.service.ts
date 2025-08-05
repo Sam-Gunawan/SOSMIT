@@ -8,6 +8,7 @@
   import { User } from '../model/user.model';
   import { formatDate, titleCase } from '../reusable_functions';
   import { environment } from '../../environments/environments';
+import { SubSite } from '../model/sub-site.model';
 
   @Injectable({
     providedIn: 'root'
@@ -59,6 +60,8 @@
             firstName: titleCase(response.first_name),
             lastName: titleCase(response.last_name),
             position: titleCase(response.position),
+            department: titleCase(response.department),
+            division: titleCase(response.division),
             siteID: response.site_id,
             siteName: response.site_name,
             siteGroupName: response.site_group_name,
@@ -85,6 +88,8 @@
             firstName: titleCase(response.first_name),
             lastName: titleCase(response.last_name),
             position: titleCase(response.position),
+            department: titleCase(response.department),
+            division: titleCase(response.division),
             siteID: response.site_id,
             siteName: response.site_name,
             siteGroupName: response.site_group_name,
@@ -111,6 +116,8 @@
             firstName: titleCase(user.FirstName),
             lastName: titleCase(user.LastName),
             position: titleCase(user.Position),
+            department: titleCase(user.Department),
+            division: titleCase(user.Division),
             siteID: user.SiteID,
             siteName: user.SiteName,
             siteGroupName: user.SiteGroupName,
@@ -207,6 +214,42 @@
       );
     }
 
+    getAllSubSites(): Observable<SubSite[]> {
+      // This method will fetch all sub-sites from the database.
+      return this.http.get<SubSite[]>(`${this.siteApiUrl}/all-sub-sites`).pipe(
+        map((response: any) => {
+          // Map the response to the desired format.
+          return response.sub_sites.map((subSite: any) => ({
+            subSiteID: subSite.SubSiteID,
+            subSiteName: subSite.SubSiteName,
+            siteID: subSite.SiteID
+          }));
+        }),
+        tap((subSites: SubSite[]) => {
+          // Log the fetched sub-sites for debugging purposes.
+          console.log('[ApiService] Fetched sub-sites:', subSites);
+        })
+      );
+    }
+
+    getSubSitesBySiteID(siteID: number): Observable<SubSite[]> {
+      // This method will fetch all sub-sites for a specific site by its ID.
+      return this.http.get<SubSite[]>(`${this.siteApiUrl}/${siteID}/sub-sites`).pipe(
+        map((response: any) => {
+          // Map the response to the desired format.
+          return response.sub_sites.map((subSite: any) => ({
+            subSiteID: subSite.SubSiteID,
+            subSiteName: subSite.SubSiteName,
+            siteID: subSite.SiteID
+          }));
+        }),
+        tap((subSites: SubSite[]) => {
+          // Log the fetched sub-sites for debugging purposes.
+          console.log('[ApiService] Fetched sub-sites:', subSites);
+        })
+      );
+    }
+
     getAssetByAssetTag(assetTag: string): Observable<any> {
       // This method will fetch the details of a specific asset by its tag.
       return this.http.get<AssetInfo>(`${this.assetApiUrl}/tag/${assetTag}`).pipe(
@@ -232,11 +275,11 @@
             assetOwner: response.owner_id,
             assetOwnerName: titleCase(response.owner_name) || '', // Default to empty string if owner name is not provided
             assetOwnerPosition: titleCase(response.owner_position),
+            assetOwnerDepartment: titleCase(response.owner_department),
+            assetOwnerDivision: titleCase(response.owner_division),
             assetOwnerCostCenter: response.owner_cost_center,
-            assetOwnerSiteID: response.owner_site_id,
-            assetOwnerSiteName: response.owner_site_name,
-            assetOwnerSiteGroupName: response.owner_site_group_name,
-            assetOwnerRegionName: response.owner_region_name,
+            subSiteID: response.sub_site_id,
+            subSiteName: response.sub_site_name,
             siteID: response.site_id,
             siteName: response.site_name,
             siteGroupName: response.site_group_name,
@@ -275,7 +318,11 @@
             assetOwner: asset.OwnerID,
             assetOwnerName: titleCase(asset.OwnerName) || '', // Default to empty string if owner name is not provided
             assetOwnerPosition: titleCase(asset.OwnerPosition),
+            assetOwnerDepartment: titleCase(asset.OwnerDepartment),
+            assetOwnerDivision: titleCase(asset.OwnerDivision),
             assetOwnerCostCenter: asset.OwnerCostCenter,
+            subSiteID: asset.SubSiteID,
+            subSiteName: asset.SubSiteName,
             siteID: asset.SiteID,
             siteName: asset.SiteName,
             siteGroupName: asset.SiteGroupName,
@@ -314,11 +361,11 @@
             assetOwner: response.owner_id,
             assetOwnerName: titleCase(response.owner_name) || '', // Fixed: Apply titleCase here
             assetOwnerPosition: titleCase(response.owner_position),
+            assetOwnerDepartment: titleCase(response.owner_department),
+            assetOwnerDivision: titleCase(response.owner_division),
             assetOwnerCostCenter: response.owner_cost_center,
-            assetOwnerSiteID: response.owner_site_id,
-            assetOwnerSiteName: response.owner_site_name,
-            assetOwnerSiteGroupName: response.owner_site_group_name,
-            assetOwnerRegionName: response.owner_region_name,
+            subSiteID: response.sub_site_id,
+            subSiteName: response.sub_site_name,
             siteID: response.site_id,
             siteName: response.site_name,
             siteGroupName: response.site_group_name,

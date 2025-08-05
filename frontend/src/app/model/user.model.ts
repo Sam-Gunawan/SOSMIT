@@ -5,6 +5,8 @@ export interface User {
     firstName: string;
     lastName: string;
     position: string;
+    department: string;
+    division: string;
     siteID: number;
     siteName: string;
     siteGroupName: string;

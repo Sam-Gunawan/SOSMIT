@@ -150,9 +150,10 @@ export class OpnameSessionService {
       new_equipments: assetChanges.newEquipments,
       new_owner_id: assetChanges.newOwnerID,
       new_owner_position: assetChanges.newOwnerPosition,
+      new_owner_department: assetChanges.newOwnerDepartment,
+      new_owner_division: assetChanges.newOwnerDivision,
       new_owner_cost_center: assetChanges.newOwnerCostCenter,
-      new_owner_site_id: assetChanges.newOwnerSiteID,
-      new_site_id: assetChanges.newSiteID,
+      new_sub_site_id: assetChanges.newSubSiteID,
       change_reason: assetChanges.changeReason,
       processing_status: assetChanges.processingStatus
     }
@@ -208,10 +209,11 @@ export class OpnameSessionService {
                 newRoom: changes.newRoom,
                 newEquipments: changes.newEquipments,
                 newOwnerID: changes.newOwnerID,
-                newOwnerSiteID: changes.newOwnerSiteID,
                 newOwnerPosition: changes.newOwnerPosition,
+                newOwnerDepartment: changes.newOwnerDepartment,
+                newOwnerDivision: changes.newOwnerDivision,
                 newOwnerCostCenter: changes.newOwnerCostCenter,
-                newSiteID: changes.newSiteID,
+                newSubSiteID: changes.newSubSiteID,
                 changeReason: progressItem.change_reason
               },
               processingStatus: progressItem.processing_status
@@ -288,7 +290,9 @@ export class OpnameSessionService {
           email: response.email,
           firstName: response.first_name,
           lastName: response.last_name,
-          position: response.position
+          position: response.position,
+          department: response.department,
+          division: response.division
         };
       }),
       tap((response: any) => {

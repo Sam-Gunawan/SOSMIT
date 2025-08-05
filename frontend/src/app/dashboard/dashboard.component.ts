@@ -27,6 +27,8 @@ export class DashboardComponent {
       firstName: 'N/A',
       lastName: 'N/A',
       position: 'N/A',
+      department: 'N/A',
+      division: 'N/A',
       siteID: -1,
       siteName: 'N/A',
       siteGroupName: 'N/A',

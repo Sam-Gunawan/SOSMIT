@@ -11,9 +11,11 @@ export interface AssetChange {
     newEquipments?: string;
     newOwnerID?: number;
     newOwnerPosition?: string;
+    newOwnerDepartment?: string;
+    newOwnerDivision?: string;
     newOwnerCostCenter?: number;
-    newOwnerSiteID?: number;
-    newSiteID?: number;
+    newOwnerSiteID?: number; // Owner's site (where the owner works)
+    newSubSiteID?: number; // Asset's physical location (sub-site)
     changeReason?: string;
     processingStatus: 'pending' | 'edited' | 'all_good';
 }

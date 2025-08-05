@@ -1,6 +1,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=delete" />
 
 <!-- Unified Search and Filter Container -->
+<!-- !!!!!! CHANGE NGIF LOGIC -->
 <div class="unified-controls-container sticky-container" *ngIf="!isInReport">
     <!-- Mobile toggle buttons -->
     <div class="mobile-toggles">
@@ -437,7 +438,7 @@
                                         <label [for]="'user-division-' + result.pendingAsset.assetTag" class="form-label mb-0">Division</label>
                                         <input type="text" class="form-control" 
                                             [id]="'user-division-' + result.pendingAsset.assetTag" 
-                                            [value]="result.pendingAsset.assetOwnerName" 
+                                            [value]="result.pendingAsset.assetOwnerDivision" 
                                             readonly>
                                     </div>
 
@@ -446,7 +447,7 @@
                                         <label [for]="'user-department-' + result.pendingAsset.assetTag" class="form-label mb-0">Owner Dept.</label>
                                         <input type="text" class="form-control" 
                                             [id]="'user-department-' + result.pendingAsset.assetTag" 
-                                            [value]="result.pendingAsset.assetOwnerName" 
+                                            [value]="result.pendingAsset.assetOwnerDepartment" 
                                             readonly>
                                     </div>
                                 </div>
@@ -524,17 +525,17 @@
                                         
                                         <!-- need site list -->
                                         <div class="form-item">
-                                            <label [for]="'site-name-' + result.pendingAsset.assetTag" class="form-label mb-0">Site</label>
+                                            <label [for]="'sub-site-name-' + result.pendingAsset.assetTag" class="form-label mb-0">Site</label>
                                             <input type="text" class="form-control" 
-                                                [id]="'site-name-' + result.pendingAsset.assetTag" 
-                                                [(ngModel)]="result.pendingAsset.siteName" name="siteName"
-                                                (input)="onSiteInputChange(i)"
-                                                list="all-sites"
-                                                [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName">
-                                            <datalist id="all-sites">
-                                                <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
+                                                [id]="'sub-site-name-' + result.pendingAsset.assetTag" 
+                                                [(ngModel)]="result.pendingAsset.subSiteName" name="subSiteName"
+                                                (input)="onSubSiteInputChange(i)"
+                                                list="all-sub-sites"
+                                                [class.is-invalid]="(result.pendingAsset.subSiteID === undefined && result.pendingAsset.subSiteName) || !result.pendingAsset.subSiteName">
+                                            <datalist id="all-sub-sites">
+                                                <option *ngFor="let subSite of allSubSites" [value]="subSite.subSiteName">{{ subSite.subSiteName }}</option>
                                             </datalist>
-                                            <div *ngIf="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName" class="invalid-feedback">
+                                            <div *ngIf="(result.pendingAsset.subSiteID === undefined && result.pendingAsset.subSiteName) || !result.pendingAsset.subSiteName" class="invalid-feedback">
                                                 Please select a valid site from the list.
                                             </div>
                                         </div>
@@ -543,16 +544,8 @@
                                             <label [for]="'site-name-' + result.pendingAsset.assetTag" class="form-label mb-0">Owner Site</label>
                                             <input type="text" class="form-control" 
                                                 [id]="'site-name-' + result.pendingAsset.assetTag" 
-                                                [(ngModel)]="result.pendingAsset.siteName" name="siteName"
-                                                (input)="onSiteInputChange(i)"
-                                                list="all-sites"
-                                                [class.is-invalid]="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName">
-                                            <datalist id="all-sites">
-                                                <option *ngFor="let site of allSites" [value]="site.siteName">{{ site.siteName }}</option>
-                                            </datalist>
-                                            <div *ngIf="(result.pendingAsset.siteID === undefined && result.pendingAsset.siteName) || !result.pendingAsset.siteName" class="invalid-feedback">
-                                                Please select a valid site from the list.
-                                            </div>
+                                                [value]="result.pendingAsset.siteName" 
+                                                readonly>
                                         </div>
 
                                         <div class="form-item">

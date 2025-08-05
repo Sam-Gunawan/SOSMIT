@@ -14,8 +14,10 @@ export interface OpnameSessionProgress {
         newOwnerID?: number;
         newOwnerSiteID?: number;
         newOwnerPosition?: string;
+        newOwnerDepartment?: string;
+        newOwnerDivision?: string;
         newOwnerCostCenter?: number;
-        newSiteID?: number;
+        newSubSiteID?: number;
         changeReason?: string;
     };
     processingStatus: 'pending' | 'edited' | 'all_good';

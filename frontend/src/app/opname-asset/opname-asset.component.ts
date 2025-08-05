@@ -15,6 +15,7 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { AssetPageComponent } from '../asset-page/asset-page.component';
 import { parseAdaptorSN } from '../reusable_functions';
+import { SubSite } from '../model/sub-site.model';
 
 export interface AssetTableData {
   assetTag: string;
@@ -103,6 +104,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   opnameSession: OpnameSession = {} as OpnameSession;
   allUsers: User[] = []; // List of all users in the company
   allSites: SiteInfo[] = []; // List of all sites in the company
+  allSubSites: SubSite[] = []; // List of all sub-sites for a given site
   isLoading: boolean = false; // Loading state for fetching assets
   errorMessage: string = ''; // Error message for fetching assets
   private resizeCheckInterval?: number; // Interval for periodic size checks
@@ -184,6 +186,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     this.updateResponsiveSettings();
     this.getAllUsers();
     this.getAllSites();
+    this.getAllSubSites();
     this.errorMessage = '';
 
     setTimeout(() => {
@@ -256,6 +259,19 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     })
   }
 
+  getAllSubSites(): void {
+    this.apiService.getAllSubSites().subscribe({
+      next: (subSites: SubSite[]) => {
+        this.allSubSites = [...subSites];
+        this.cdr.detectChanges();
+      },
+      error: (error) => {
+        console.error('[OpnameAsset] Error fetching sub-sites:', error);
+        this.errorMessage = 'Failed to fetch sub-sites.';
+      }
+    });
+  }
+
   private getAvailableEquipments(result: any): void {
     this.apiService.getAssetEquipments(result.pendingAsset.productVariety).subscribe({
       next: (equipmentsString: string) => {
@@ -311,14 +327,21 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         next: (asset: AssetInfo) => {
           const existingAsset = JSON.parse(JSON.stringify(asset)); // Deep copy to preserve original
           
-          // ...existing code...
+          // Extract data from saved changes or fall back to original asset
           const ownerID = savedRecord.assetChanges.newOwnerID ?? asset.assetOwner;
-          const ownerSiteID = savedRecord.assetChanges.newOwnerSiteID ?? asset.assetOwnerSiteID;
-          const siteID = savedRecord.assetChanges.newSiteID ?? asset.siteID;
+          const subSiteID = savedRecord.assetChanges.newSubSiteID ?? asset.subSiteID;
+          const ownerDepartment = savedRecord.assetChanges.newOwnerDepartment ?? asset.assetOwnerDepartment;
+          const ownerDivision = savedRecord.assetChanges.newOwnerDivision ?? asset.assetOwnerDivision;
           
           // Find the owner data based on the owner ID
           const owner = this.allUsers.find(user => user.userID === ownerID);
           const ownerName = owner ? `${owner.firstName} ${owner.lastName}` : asset.assetOwnerName;
+          
+          // Owner's site: Use saved owner site ID, or derive from owner's data, or fall back to asset's original owner site
+          const ownerSiteID = savedRecord.assetChanges.newOwnerSiteID ?? 
+                             (owner ? owner.siteID : asset.siteID);
+          const ownerSite = this.allSites.find(site => site.siteID === ownerSiteID);
+          const ownerSiteName = ownerSite ? ownerSite.siteName : asset.siteName;
           
           // Use saved position/cost center if available, otherwise fall back to owner data or original asset data
           const ownerPosition = savedRecord.assetChanges.newOwnerPosition ?? 
@@ -326,16 +349,16 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
           const ownerCostCenter = savedRecord.assetChanges.newOwnerCostCenter ?? 
                                  (owner ? owner.costCenterID : asset.assetOwnerCostCenter);
 
-          // Find the owner site data based on the owner site ID
-          const ownerSite = this.allSites.find(site => site.siteID === ownerSiteID);
-          const ownerSiteName = ownerSite ? ownerSite.siteName : asset.assetOwnerSiteName;
+          // Asset location: Find the sub-site data based on the sub site ID (this is the asset's physical location)
+          const subSite = this.allSubSites.find(subSite => subSite.subSiteID === subSiteID);
+          const subSiteName = subSite ? subSite.subSiteName : asset.subSiteName;
           
-          // Find the asset site name based on the asset site ID
-          const site = this.allSites.find(site => site.siteID === siteID);
-          const siteName = site ? site.siteName : asset.siteName;
-          const siteGroupName = site ? site.siteGroup : asset.siteGroupName;
-          const regionName = site ? site.siteRegion : asset.regionName;
+          // Asset's site group and region: Derived from the sub-site's parent site (asset location, not owner location)
+          const assetLocationSite = this.allSites.find(site => site.siteID === subSite?.siteID);
+          const siteGroupName = assetLocationSite ? assetLocationSite.siteGroup : asset.siteGroupName;
+          const regionName = assetLocationSite ? assetLocationSite.siteRegion : asset.regionName;
           
+
           // Populate pending asset and apply changes from savedRecord
           const pendingAsset: AssetInfo = {
             ...JSON.parse(JSON.stringify(asset)), // Deep copy to avoid reference issues
@@ -352,30 +375,16 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
             assetOwnerName: ownerName,
             assetOwnerPosition: ownerPosition,
             assetOwnerCostCenter: ownerCostCenter,
-            assetOwnerSiteID: ownerSiteID,
-            assetOwnerSiteName: ownerSiteName,
-            siteID: siteID,
-            siteName: siteName,
-            siteGroupName: siteGroupName,
-            regionName: regionName
+            assetOwnerDepartment: ownerDepartment,
+            assetOwnerDivision: ownerDivision,
+            subSiteID: subSiteID,
+            subSiteName: subSiteName,
+            siteID: ownerSiteID, // Owner's site, not asset location site
+            siteName: ownerSiteName,
+            siteGroupName: siteGroupName, // From asset location site
+            regionName: regionName // From asset location site
           };
 
-          // Check if there are any meaningful changes (excluding changeReason)
-          const hasChanges = savedRecord.assetChanges.newSerialNumber !== undefined ||
-                           savedRecord.assetChanges.newStatus !== undefined ||
-                           savedRecord.assetChanges.newStatusReason !== undefined ||
-                           savedRecord.assetChanges.newCondition !== undefined ||
-                           savedRecord.assetChanges.newConditionNotes !== undefined ||
-                           savedRecord.assetChanges.newConditionPhotoURL !== undefined ||
-                           savedRecord.assetChanges.newLocation !== undefined ||
-                           savedRecord.assetChanges.newRoom !== undefined ||
-                           savedRecord.assetChanges.newEquipments !== undefined ||
-                           savedRecord.assetChanges.newOwnerID !== undefined ||
-                           savedRecord.assetChanges.newOwnerPosition !== undefined ||
-                           savedRecord.assetChanges.newOwnerCostCenter !== undefined ||
-                           savedRecord.assetChanges.newOwnerSiteID !== undefined ||
-                           savedRecord.assetChanges.newSiteID !== undefined;
-          
           // Store in the correct position to preserve order
           const resultItem = {
             existingAsset: existingAsset,
@@ -644,13 +653,13 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         const newAsset = JSON.parse(JSON.stringify(asset));
         const pendingAsset = JSON.parse(JSON.stringify(asset)); // Deep copy for modifications
         
-        // Ensure owner site information is properly set
-        // If no owner site info exists, default to the asset's current site
-        if (!pendingAsset.assetOwnerSiteID) {
-          pendingAsset.assetOwnerSiteID = pendingAsset.siteID;
-        }
-        if (!pendingAsset.assetOwnerSiteName) {
-          pendingAsset.assetOwnerSiteName = pendingAsset.siteName;
+        // Ensure owner organizational information is properly set from user data if missing
+        if (!pendingAsset.assetOwnerDepartment || !pendingAsset.assetOwnerDivision) {
+          const owner = this.allUsers.find(user => user.userID === pendingAsset.assetOwner);
+          if (owner) {
+            pendingAsset.assetOwnerDepartment = pendingAsset.assetOwnerDepartment || owner.department;
+            pendingAsset.assetOwnerDivision = pendingAsset.assetOwnerDivision || owner.division;
+          }
         }
 
         // Set empty equipments by default
@@ -777,12 +786,15 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         assetOwnerName: `${matchedUser.firstName} ${matchedUser.lastName}`,
         assetOwnerPosition: matchedUser.position,
         assetOwnerCostCenter: matchedUser.costCenterID,
-        assetOwnerSiteID: matchedUser.siteID,
-        assetOwnerSiteName: matchedUser.siteName,
-        assetOwnerSiteGroupName: matchedUser.siteGroupName,
-        assetOwnerRegionName: matchedUser.regionName
-        // Note: Asset location (siteID, siteName, siteGroupName, regionName) remains unchanged
-        // when changing owner - only owner location changes
+        assetOwnerDepartment: matchedUser.department,
+        assetOwnerDivision: matchedUser.division,
+        
+        // Update owner's site information when owner changes
+        siteID: matchedUser.siteID,
+        siteName: matchedUser.siteName,
+
+        // Note: Asset location (subSiteID, subSiteName, ...) remains unchanged
+        // when changing owner - only owner organizational data changes
       };
 
       // Force change detection to update the view
@@ -797,68 +809,31 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }
   }
 
-  // Handle owner site name input change
-  onOwnerSiteInputChange(index: number): void {
+  // Handle sub-site name input change
+  onSubSiteInputChange(index: number): void {
     const result = this.searchResults[index];
-    const input = result.pendingAsset.assetOwnerSiteName?.trim().toLowerCase() || '';
-    
+    const input = result.pendingAsset.subSiteName?.trim().toLowerCase() || '';
+
     if (!input) {
-      result.pendingAsset.assetOwnerSiteID = undefined; // Clear owner site ID if input is empty
-      result.pendingAsset.assetOwnerSiteName = '';
+      result.pendingAsset.subSiteID = undefined;
+      result.pendingAsset.subSiteName = '';
       return;
     }
-    
-    const matchedSite = this.allSites.find(site => (
-      site.siteName.toLowerCase() === input ||
-      site.siteGroup.toLowerCase() === input ||
-      site.siteRegion.toLowerCase() === input
+
+    const matchedSubSite = this.allSubSites.find(subSite => (
+      subSite.subSiteName.toLowerCase() === input
     ));
 
-    if (matchedSite) {
-      // Update pendingAsset directly with matched owner site data
-      result.pendingAsset = {
-        ...result.pendingAsset,
-        assetOwnerSiteID: matchedSite.siteID,
-        assetOwnerSiteName: matchedSite.siteName,
-        assetOwnerSiteGroupName: matchedSite.siteGroup,
-        assetOwnerRegionName: matchedSite.siteRegion
-      };
-
-      // Force change detection to update the view
-      this.cdr.detectChanges();
-    } else {
-      // Invalid site - explicitly set ID to undefined to trigger validation
-      console.error('[OpnameAsset] No matching site found for owner site input:', input);
-      result.pendingAsset.assetOwnerSiteID = undefined;
-      
-      // Force change detection to update validation state
-      this.cdr.detectChanges();
-    }
-  }
-
-  // Handle site name input change
-  onSiteInputChange(index: number): void {
-    const result = this.searchResults[index];
-    const input = result.pendingAsset.siteName?.trim().toLowerCase() || '';
-    
-    if (!input) {
-      result.pendingAsset.siteID = undefined; // Clear site ID if input is empty
-      result.pendingAsset.siteName = '';
-      return;
-    }
-    
     const matchedSite = this.allSites.find(site => (
-      site.siteName.toLowerCase() === input ||
-      site.siteGroup.toLowerCase() === input ||
-      site.siteRegion.toLowerCase() === input
+      site.siteID === matchedSubSite?.siteID
     ));
 
-    if (matchedSite) {
-      // Update pendingAsset directly with matched site data
+    if (matchedSubSite && matchedSite) {
+      // Update pendingAsset directly with matched sub-site data
       result.pendingAsset = {
         ...result.pendingAsset,
-        siteID: matchedSite.siteID,
-        siteName: matchedSite.siteName,
+        subSiteID: matchedSubSite.subSiteID,
+        subSiteName: matchedSubSite.subSiteName,
         siteGroupName: matchedSite.siteGroup,
         regionName: matchedSite.siteRegion
       };
@@ -866,13 +841,12 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       // Force change detection to update the view
       this.cdr.detectChanges();
     } else {
-      // Invalid site - explicitly set ID to undefined to trigger validation
-      console.error('[OpnameAsset] No matching site found for input:', input);
-      result.pendingAsset.siteID = undefined;
-
-      // Force change detection to update validation state
-      this.cdr.detectChanges();
+      // Invalid sub-site - explicitly set ID to undefined to trigger validation
+      result.pendingAsset.subSiteID = undefined;
     }
+
+    // Force change detection to update validation state
+    this.cdr.detectChanges();
   }
 
   // Check if equipment is selected for a specific asset
@@ -1061,8 +1035,10 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
            pending.assetOwner !== existing.assetOwner ||
            pending.assetOwnerPosition !== existing.assetOwnerPosition ||
            pending.assetOwnerCostCenter !== existing.assetOwnerCostCenter ||
-           pending.assetOwnerSiteID !== existing.assetOwnerSiteID ||
-           pending.siteID !== existing.siteID;
+           pending.assetOwnerDepartment !== existing.assetOwnerDepartment ||
+           pending.assetOwnerDivision !== existing.assetOwnerDivision ||
+           pending.siteID !== existing.siteID || // Owner site change is tracked when owner changes
+           pending.subSiteID !== existing.subSiteID;
 
     // Auto-clear change reason if no changes exist
     if (!hasChanges && result.changeReason) {
@@ -1207,11 +1183,17 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     if (pending.assetOwnerCostCenter !== existing.assetOwnerCostCenter) {
       assetChanges.newOwnerCostCenter = pending.assetOwnerCostCenter;
     }
-    if (pending.assetOwnerSiteID !== existing.assetOwnerSiteID) {
-      assetChanges.newOwnerSiteID = pending.assetOwnerSiteID;
+    if (pending.assetOwnerDepartment !== existing.assetOwnerDepartment) {
+      assetChanges.newOwnerDepartment = pending.assetOwnerDepartment;
+    }
+    if (pending.assetOwnerDivision !== existing.assetOwnerDivision) {
+      assetChanges.newOwnerDivision = pending.assetOwnerDivision;
+    }
+    if (pending.subSiteID !== existing.subSiteID) {
+      assetChanges.newSubSiteID = pending.subSiteID;
     }
     if (pending.siteID !== existing.siteID) {
-      assetChanges.newSiteID = pending.siteID;
+      assetChanges.newOwnerSiteID = pending.siteID; // Owner site change - use correct field name for backend
     }
     
     // Set processing status to 'edited'
@@ -1278,8 +1260,10 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       newOwnerID: existing.assetOwner,
       newOwnerPosition: existing.assetOwnerPosition,
       newOwnerCostCenter: existing.assetOwnerCostCenter,
-      newOwnerSiteID: existing.assetOwnerSiteID,
-      newSiteID: existing.siteID,
+      newOwnerDepartment: existing.assetOwnerDepartment,
+      newOwnerDivision: existing.assetOwnerDivision,
+      newOwnerSiteID: existing.siteID,
+      newSubSiteID: existing.subSiteID,
       changeReason: "No changes. Asset verified on " + this.opnameSession?.startDate,
       processingStatus: 'all_good'
     }
@@ -1292,12 +1276,13 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         // Deep copy the existingAsset to ensure no shared references
         result.pendingAsset = JSON.parse(JSON.stringify(result.existingAsset));
         
-        // Ensure owner site information is properly set
-        if (!result.pendingAsset.assetOwnerSiteID) {
-          result.pendingAsset.assetOwnerSiteID = result.pendingAsset.siteID;
-        }
-        if (!result.pendingAsset.assetOwnerSiteName) {
-          result.pendingAsset.assetOwnerSiteName = result.pendingAsset.siteName;
+        // Ensure owner organizational information is properly set from user data if missing
+        if (!result.pendingAsset.assetOwnerDepartment || !result.pendingAsset.assetOwnerDivision) {
+          const owner = this.allUsers.find(user => user.userID === result.pendingAsset.assetOwner);
+          if (owner) {
+            result.pendingAsset.assetOwnerDepartment = result.pendingAsset.assetOwnerDepartment || owner.department;
+            result.pendingAsset.assetOwnerDivision = result.pendingAsset.assetOwnerDivision || owner.division;
+          }
         }
         
         // Update the adaptor SN
