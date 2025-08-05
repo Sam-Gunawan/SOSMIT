@@ -301,7 +301,7 @@
 </section>
 
 <!-- NO ASSETS FOUND FOR THE SITE MESSAGE -->
-<section *ngIf="assetsOnSite && assetsOnSite.length === 0">
+<section *ngIf="!hasSearched && assetsOnSite && assetsOnSite.length === 0">
     <div class="no-assets-message">
         <p>No assets found for this site</p>
     </div>
