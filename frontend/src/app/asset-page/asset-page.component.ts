@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, input, HostListener } from '@angular/core';
+import { Component, Input, OnInit, input, HostListener, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AssetInfo } from '../model/asset-info.model';
@@ -6,6 +6,7 @@ import { ApiService } from '../services/api.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { environment } from '../../environments/environments';
+import { parseAdaptorSN } from '../reusable_functions';
 
 @Component({
   selector: 'app-asset-page',
@@ -17,7 +18,7 @@ export class AssetPageComponent implements OnInit {
   public readonly serverURL = environment.serverURL; // Expose environment for use in the template
 
   @Input() isPending: boolean = false; // Flag to check if the user can edit assets in this opname session
-  @Input() assetPage? : AssetInfo;
+  @Input() assetPage? : AssetInfo & { availableEquipments: string[] }; // Asset data with available equipments
   
   screenSize: 'large' | 'small' = 'large';
   isMobile: boolean = false;
@@ -36,20 +37,7 @@ export class AssetPageComponent implements OnInit {
   // File to upload for condition photo
   conditionPhoto?: File;
 
-  // Equipment options based on seed data (same as opname-asset)
-  availableEquipments: string[] = [
-    'Kabel power',
-    'Adaptor',
-    'Tas',
-    'Kabel VGA',
-    'Kabel USB', 
-    'Simcard',
-    'Handstrap',
-    'Tali tas'
-  ];
-
-  constructor(private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService, private route: ActivatedRoute) {
-    // TODO: separate assetPage and assetCard sql function. make one for each and fetch only the displayed info.
+  constructor(private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
     this.assetPage = {
       assetTag: 'N/A',
       assetIcon: '',
@@ -78,10 +66,12 @@ export class AssetPageComponent implements OnInit {
       siteName: 'N/A',
       siteGroupName: 'N/A',
       regionName: 'N/A',
+      availableEquipments: [],
     }; 
   }
   
   ngOnInit(): void {
+    this.isLoading = true;
     this.checkScreenSize();
     
     // Only fetch data if NOT in pending mode (report mode)
@@ -140,6 +130,8 @@ export class AssetPageComponent implements OnInit {
         } else {
           this.setDislike();
         }
+
+        this.getAvailableEquipments();
       },
       error: (error) => {
         // Handle the error appropriately, e.g., show a message to the user
@@ -152,11 +144,38 @@ export class AssetPageComponent implements OnInit {
     });
   }
 
+  private getAvailableEquipments(): void {
+    const assetPage = this.assetPage ? this.assetPage : { productVariety: 'N/A', availableEquipments: [] };
+    this.apiService.getAssetEquipments(assetPage.productVariety).subscribe({
+      next: (equipmentsString: string) => {
+        // Parse the comma-separated string into an array
+        if (equipmentsString && typeof equipmentsString === 'string' && equipmentsString.trim() !== '') {
+          assetPage.availableEquipments = equipmentsString.split(',').map((e: string) => e.trim()).filter((e: string) => e !== '');
+        } else {
+          assetPage.availableEquipments = []; // No equipments available for this product variety
+        }
+        
+        this.cdr.detectChanges(); // Trigger change detection to update the UI
+      },
+      error: (error) => {
+        console.error('[OpnameAsset] Error fetching available equipments:', error);
+        this.errorMessage = 'Failed to fetch available equipments. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
+        assetPage.availableEquipments = []; // Fallback to empty array on error
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   // Check if equipment is selected for the current asset (readonly display)
   isEquipmentSelected(equipment: string): boolean {
     if (!this.assetPage?.equipments) return false;
-    
-    const equipmentList = this.assetPage.equipments.split(',').map(item => item.trim());
-    return equipmentList.includes(equipment);
+
+    return this.assetPage.equipments.includes(equipment);
+  }
+
+  parseAdaptorSN(equipments?: string): string {
+    return parseAdaptorSN(equipments || '') || '';
   }
 }

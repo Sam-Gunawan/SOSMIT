@@ -289,6 +289,10 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         this.cdr.detectChanges(); // Trigger change detection to update the UI
       },
       error: (error) => {
+        console.error('[OpnameAsset] Error fetching available equipments:', error);
+        this.errorMessage = 'Failed to fetch available equipments. Please try again later.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
         result.availableEquipments = []; // Fallback to empty array on error
         this.cdr.detectChanges();
       }

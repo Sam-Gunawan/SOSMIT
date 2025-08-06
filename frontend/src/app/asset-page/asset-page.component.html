@@ -1,6 +1,6 @@
 <div class="modal fade" [id]="isPending ? 'pending-modal-' + assetPage?.assetTag : 'modal-' + assetPage?.assetTag" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" [attr.aria-labelledby]="'modal-' + assetPage?.assetTag + '-label'" aria-hidden="true">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content" *ngIf="errorMessage === '' && !isLoading">
+        <div class="modal-content" *ngIf="!isLoading">
             <div class="modal-header">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -72,7 +72,7 @@
                             <h6>Equipments</h6>
 
                             <div class="equipment-checkboxes readonly">
-                                <div class="form-check" *ngFor="let equipment of availableEquipments"
+                                <div class="form-check" *ngFor="let equipment of assetPage?.availableEquipments"
                                     [ngClass]="{'form-check-adaptor': equipment === 'Adaptor'}">
                                     <input class="form-check-input" type="checkbox" 
                                         [id]="'equipment-' + equipment + '-' + assetPage?.assetTag"
@@ -86,7 +86,8 @@
                                     <div class="form-item" *ngIf="equipment === 'Adaptor'">
                                         <input type="text" class="form-control" 
                                             [id]="'serial-number-adaptor-' + assetPage?.assetTag" 
-                                            name="newSerialNumberAdaptor"
+                                            name="adaptorSN"
+                                            [value]="parseAdaptorSN(assetPage?.equipments)"
                                             placeholder="Adaptor Serial Number"
                                             readonly>
                                     </div>
@@ -97,7 +98,6 @@
                         <div class="right-top">
                             <h6>User Organization</h6>
 
-                            <!-- will change to division -->
                             <div class="form-item">
                                 <label [for]="'user-division-' + assetPage?.assetTag" class="form-label mb-0">Division</label>
                                 <input type="text" class="form-control" 
@@ -106,7 +106,6 @@
                                     readonly>
                             </div>
 
-                            <!-- will change to department -->
                             <div class="form-item">
                                 <label [for]="'user-department-' + assetPage?.assetTag" class="form-label mb-0">Owner Dept.</label>
                                 <input type="text" class="form-control" 
