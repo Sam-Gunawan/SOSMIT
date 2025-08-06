@@ -187,6 +187,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     this.getAllUsers();
     this.getAllSites();
     this.getAllSubSites();
+    localStorage.setItem('pendingCount', '0'); // Initialize pending assets count to 0
+    localStorage.setItem('assetCount', '0'); // Initialize scanned assets count to 0
     this.errorMessage = '';
 
     setTimeout(() => {
@@ -316,6 +318,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       this.isLoading = false;
       return;
     }
+
+    // Save the amount of assets in progress to local storage
+    this.incrementAssetScanned(progress.length);
     
     // Pre-allocate array with the correct length to preserve order
     const orderedResults: Array<any> = new Array(progress.length);
@@ -326,6 +331,11 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       this.apiService.getAssetByAssetTag(savedRecord.assetTag).subscribe({
         next: (asset: AssetInfo) => {
           const existingAsset = JSON.parse(JSON.stringify(asset)); // Deep copy to preserve original
+
+          // Count the pending assets
+          if (savedRecord.processingStatus === 'pending') {
+            this.incrementPendingCount(1);
+          }
           
           // Extract data from saved changes or fall back to original asset
           const ownerID = savedRecord.assetChanges.newOwnerID ?? asset.assetOwner;
@@ -676,6 +686,12 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
           changeReason: ''
         };
 
+        // Increment pending assets count in local storage
+        this.incrementPendingCount(1);
+
+        // Increment scanned assets count in local storage
+        this.incrementAssetScanned(1);
+
         // Save this to the db as pending asset with empty changes
         const pendingAssetChange: AssetChange = {
           assetTag: newAsset.assetTag,
@@ -739,6 +755,28 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         }
       })
     }
+  }
+
+  incrementPendingCount(increment: number): void {
+    // Increment the pending count in local storage
+    // To decrement, pass -1
+    if (increment < 0 && parseInt(localStorage.getItem('pendingCount') || '0', 10) <= 0) {
+      console.warn('[OpnameAsset] Cannot decrement pending count below zero');
+      return; // Prevent decrementing below zero
+    }
+    const pendingCount = parseInt(localStorage.getItem('pendingCount') || '0', 10);
+    localStorage.setItem('pendingCount', (pendingCount + increment).toString());
+  }
+
+  incrementAssetScanned(increment: number): void {
+    // Increment the scanned asset count in local storage
+    // To decrement, pass -1
+    if (increment < 0 && parseInt(localStorage.getItem('assetCount') || '0', 10) <= 0) {
+      console.warn('[OpnameAsset] Cannot decrement asset count below zero');
+      return; // Prevent decrementing below zero
+    }
+    const assetCount = parseInt(localStorage.getItem('assetCount') || '0', 10);
+    localStorage.setItem('assetCount', (assetCount + increment).toString());
   }
 
   setLike(): void {
@@ -1217,6 +1255,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         this.updateTableDataSource();
         this.cdr.detectChanges();
 
+        // Decrement pending assets count in local storage
+        this.incrementPendingCount(-1);
+
         this.isSearching = false;
         this.isLoading = false;
       },
@@ -1269,6 +1310,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }
     
     result.processingStatus = 'all_good';
+
+    // Decrement pending assets count in local storage
+    this.incrementPendingCount(-1);
 
     this.isLoading = true;
     this.opnameSessionService.processScannedAsset(this.sessionID, assetChanges).subscribe({
@@ -1323,7 +1367,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       return;
     }
 
-    console.log('[OpnameAsset] Removing asset at index:', index);
     const asset = this.searchResults[index]
     this.searchResults.splice(index, 1); // Remove the asset from the search results
     this.updateTableDataSource(); // Update the table after removal
@@ -1332,7 +1375,15 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       // If the asset was processed, remove it from the session
       this.opnameSessionService.removeAssetFromSession(this.sessionID, asset.existingAsset.assetTag).subscribe({
         next: () => {
-          console.log('[OpnameAsset] Asset removed successfully from session:', this.sessionID);
+          // Successfully removed from session
+          this.incrementAssetScanned(-1);
+
+          if (asset.processingStatus === 'pending') {
+            // Decrement pending assets count in local storage
+            this.incrementPendingCount(-1);
+          }
+
+          this.successMessage = `Asset ${asset.existingAsset.assetTag} removed successfully.`;
         },
         error: (error: any) => {
           console.error('[OpnameAsset] Error removing asset from session:', error);
@@ -1342,7 +1393,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         }
       });
     }
-    this.successMessage = `Asset ${asset.existingAsset.assetTag} removed successfully.`;
   }
 
   @HostListener('input', ['$event'])

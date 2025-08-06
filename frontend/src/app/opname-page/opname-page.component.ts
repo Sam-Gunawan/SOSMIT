@@ -52,14 +52,12 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     const serviceSessionId = this.opnameSessionService.getSessionId();
     if (serviceSessionId && serviceSessionId > 0) {
       this.sessionID = serviceSessionId;
-      console.log('[OpnamePage] Session ID from service/localStorage:', this.sessionID);
       
       // If we have a session ID but no site ID from route, try to get it from localStorage
       if (this.siteID <= 0) {
         const siteid = this.opnameSessionService.getSiteId();
         if (siteid && siteid > 0) {
           this.siteID = siteid;
-          console.log('[OpnamePage] Site ID from localStorage:', this.siteID);
         }
       }
       return;
@@ -69,7 +67,6 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     const navigation = this.router.getCurrentNavigation();
     if (navigation?.extras?.state?.['sessionId']) {
       this.sessionID = navigation.extras.state['sessionId'];
-      console.log('[OpnamePage] Session ID from router state:', this.sessionID);
       this.opnameSessionService.setSessionId(this.sessionID); // Also saves to localStorage
       return;
     }
@@ -77,7 +74,6 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     // Method 3: Try to get from history.state (direct navigation)
     if (history.state?.sessionId) {
       this.sessionID = history.state.sessionId;
-      console.log('[OpnamePage] Session ID from history state:', this.sessionID);
       this.opnameSessionService.setSessionId(this.sessionID); // Also saves to localStorage
       return;
     }
@@ -103,7 +99,6 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       next: (session) => {
         this.opnameSession = session;
         this.isLoading = false; // Set loading state to false after fetching session
-        console.log('[OpnamePage] Opname session initialized:', this.opnameSession);
         
         // Update responsive settings based on screen size
         this.updateResponsiveSettings();
@@ -138,18 +133,14 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     }
     
     this.isLoading = true; // Set loading state to true before cancelling
-    console.log('[OpnamePage] About to call API to cancel session:', this.sessionID);
-    
     this.opnameSessionService.cancelOpnameSession(this.sessionID).subscribe({
       next: (response) => {
         this.isLoading = false; // Set loading state to false after cancelling
-        console.log('[OpnamePage] Opname session cancelled successfully:', response);
         
         // Clear the session from the service and localStorage
         this.opnameSessionService.clearSession();
         
         // Navigate back to the site page
-        console.log('[OpnamePage] Navigating back to site:', this.siteID);
         this.router.navigate(['/site', this.siteID]);
       },
       error: (error) => {
@@ -160,6 +151,22 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
         console.error('[OpnamePage] Error cancelling opname session:', error);
       }
     });
+  }
+
+  get invalidSession(): string {
+    // Invalid if there is no asset count
+    const assetCount = localStorage.getItem('assetCount');
+    if (!assetCount || parseInt(assetCount, 10) <= 0) {
+      return 'asset-count';
+    }
+
+    // Invalid if there are still pending assets
+    const pendingCount = localStorage.getItem('pendingCount');
+    if (pendingCount && parseInt(pendingCount, 10) > 0) {
+      return 'pending-count';
+    }
+    
+    return '';
   }
 
   finishOpnameSession() {
@@ -175,19 +182,32 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Can't finish if there are no assets in the session
+    if (this.invalidSession === 'asset-count') {
+      this.errorMessage = 'Tidak ada aset yang dipindai. Silakan pindai aset sebelum menyelesaikan sesi opname.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
+      return;
+    }
+
+    // Can't finish if there are still pending assets
+    if (this.invalidSession === 'pending-count') {
+      this.errorMessage = 'Masih ada aset yang belum diproses. Silakan verifikasi atau perbarui data aset tersebut sebelum menyelesaikan sesi opname.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
+      return;
+    }
+
     this.isLoading = true; // Set loading state to true before finishing
-    console.log('[OpnamePage] About to call API to finish session:', this.sessionID);
 
     this.opnameSessionService.finishOpnameSession(this.sessionID).subscribe({
       next: () => {
         this.isLoading = false; // Set loading state to false after finishing
-        console.log('[OpnamePage] Opname session finished successfully!');
-        
+
         // Clear the session from the service and localStorage !!!
         this.opnameSessionService.clearSession();
         
         // Navigate back to the site page
-        console.log('[OpnamePage] Navigating to report page:', this.siteID);
         this.router.navigate(['/site', this.siteID, 'report'], {
           queryParams: { session_id: this.sessionID, from: 'opname_page' }
         });
@@ -214,32 +234,10 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Open finish modal programmatically
-  openFinishModal() {
+  openModal(modalId: string) {
     setTimeout(() => {
-      const modalElement = document.getElementById('opnameFinished');
-      
-      if (modalElement) {
-        try {
-          const modal = new (window as any).bootstrap.Modal(modalElement, {
-            backdrop: 'static',
-            keyboard: false
-          });
-          modal.show();
-        } catch (error) {
-          console.error('[OpnamePage] Error creating/showing modal:', error);
-        }
-      } else {
-        console.error('[OpnamePage] Modal element not found!');
-      }
-    }, 100);
-  }
+      const modalElement = document.getElementById(modalId);
 
-  // Open cancel modal programmatically
-  openCancelModal() {
-    setTimeout(() => {
-      const modalElement = document.getElementById('opnameCanceled');
-      
       if (modalElement) {
         try {
           const modal = new (window as any).bootstrap.Modal(modalElement, {
