@@ -64,13 +64,310 @@ p {
       }
       
       .divider {
-        margin-bottom: 0px;
+        margin-bottom: 20px;
+      }
+      
+      .preview-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        
+        .table-section {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          height: 100%;
+          
+          .header-original, .header-updated {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            
+            h6 {
+              margin-bottom: 15px;
+              padding-bottom: 5px;
+              border-bottom: 2px solid styles.$primary-color;
+            }
+            
+            .table-container {
+              flex: 1;
+              overflow: auto;
+            }
+          }
+        }
       }
     }
   }
 }
 
-// Responsive design
+/* Assets Table Styles - copied from opname-asset component */
+.assets-table {
+  width: 100%;
+  font-size: 12px;
+  background: transparent !important;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  
+  .mat-mdc-table {
+    background: transparent !important;
+  }
+  
+  // Style the svg arrow sort icon on the table header
+  ::ng-deep .mat-sort-header-arrow svg {
+    fill: white !important;
+    color: white !important;
+  }
+  
+  .mat-mdc-header-row {
+    height: 40px;
+    background-color: styles.$primary-color !important;
+    z-index: 20; // Lower than filter controls
+  }
+  
+  .mat-mdc-row {
+    height: 42px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    background-color: white;
+    
+    &:hover {
+      background-color: #f8f9fa !important;
+    }
+    
+    &:active {
+      background-color: #e9ecef !important;
+    }
+
+    &.pending-row {
+      background-color: #fffbe66f !important; // Soft pastel yellow for pending rows
+
+      &:hover {
+        background-color: #fcf7c9 !important; // Slightly brighter on hover
+      }
+
+      &:active {
+        background-color: #fff3b2 !important; // Darker on active
+      }
+
+      .mat-mdc-cell:first-child {
+        border-left: 4px solid #ffe066; // Soft yellow for pending, good UX contrast
+      }
+    }
+  }
+  
+  .mat-mdc-header-cell {
+    font-size: 10px !important;
+    color: white !important;
+    padding: 10px 14px;
+    border-bottom: none;
+    background-color: styles.$primary-color;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    min-width: fit-content;
+  }
+  
+  .mat-mdc-cell {
+    font-size: 10px !important;
+    color: styles.$primary-text-color;
+    border-bottom: 1px solid #b5b5b5b1;
+    vertical-align: middle;
+  }
+  
+  // Remove border from last row cells
+  .mat-mdc-row:last-child .mat-mdc-cell {
+    border-bottom: none;
+  }
+  
+  // Column specific styles
+  .asset-tag-cell {
+    font-weight: 600;
+    color: styles.$primary-color;
+    font-size: 12px !important;
+    min-width: 100px;
+  }
+  
+  .asset-name-cell {
+    max-width: 250px;
+    min-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+  }
+  
+  .owner-name-cell {
+    max-width: 180px;
+    min-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .position-cell {
+    max-width: 160px;
+    min-width: 130px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 9px !important;
+    color: styles.$secondary-text-color;
+  }
+  
+  .organization-cell {
+    max-width: 180px;
+    min-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 8px !important;
+    color: styles.$secondary-text-color;
+  }
+  
+  .equipment-cell {
+    max-width: 220px;
+    min-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 9px !important;
+    color: styles.$secondary-text-color;
+  }
+  
+  .location-cell {
+    max-width: 150px;
+    min-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 8px !important;
+    color: styles.$quaternary-text-color;
+  }
+}
+
+// Condition badges
+.condition-badge {
+  margin-left: 5px;
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  text-transform: capitalize;
+  font-weight: 600;
+  
+  &.condition-good {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+  
+  &.condition-bad {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+}
+
+// Asset status styles
+.asset-status {
+  font-size: 9px;
+  padding: 3px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: capitalize;
+  
+  &.status-deployed {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+  }
+  
+  &.status-onloan {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+  }
+  
+  &.status-inventory {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+  
+  &.status-repair {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  
+  &.status-down {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+  }
+  
+  &.status-disposed {
+    background-color: #e2e3e5;
+    color: #383d41;
+    border: 1px solid #c6c8ca;
+  }
+}
+
+// Processing status styles
+.processing-status {
+  font-size: 9px;
+  padding: 3px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: capitalize;
+  
+  &.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+  }
+  
+  &.status-edited {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+  }
+  
+  &.status-all-good {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+}
+
+// Responsive Design
+@media (max-width: 980px) {
+  .assets-table {
+    font-size: 10px;
+    
+    .mat-mdc-header-cell,
+    .mat-mdc-cell {
+      padding: 8px 12px;
+    }
+    
+    .mat-mdc-row {
+      height: 44px;
+    }
+    
+    .asset-name-cell {
+      max-width: 120px;
+    }
+    
+    .owner-name-cell {
+      max-width: 100px;
+    }
+  }
+}
+
+// Preview-specific responsive design
 @media (max-width: 768px) {
   .preview-wrapper {
     width: 98%;
@@ -83,6 +380,14 @@ p {
         .preview-header {
           flex-direction: row;
           gap: 15px;
+        }
+        
+        .preview-body {
+          .table-section {
+            grid-template-columns: 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 15px;
+          }
         }
       }
     }
