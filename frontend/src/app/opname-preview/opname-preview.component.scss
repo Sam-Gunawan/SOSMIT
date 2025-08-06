@@ -1,0 +1,42 @@
+@use "../../styles.scss" as styles;
+@use "sass:color";
+
+* {
+  @include styles.default-styles;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: styles.$font-family;
+  color: styles.$primary-text-color;
+  margin-bottom: 5px;
+}
+
+p {
+  font-size: 10px;
+  margin: 0px;
+  color: styles.$quaternary-text-color;
+}
+
+.preview-wrapper {
+  padding: 20px 30px;
+}
+
+.preview-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 -30px;
+  padding: 0.75rem 30px; // Reduced padding to make it more compact
+  position: sticky;
+  top: 52px; // Height of fixed navbar: 52px
+  background-color: white;
+  z-index: 100;
+  border-bottom: 1px solid #e9ecef;
+  margin-bottom: 1rem;
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 10px;
+    margin: 0 -10px;
+  }
+}

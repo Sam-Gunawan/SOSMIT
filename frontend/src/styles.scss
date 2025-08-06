@@ -147,7 +147,7 @@ body .offcanvas-backdrop {
         }
       }
 
-      @media (max-width: 768px) {
+      @media (max-width: 860px) {
         .mat-mdc-paginator-range-label {
           font-size: 8px;
         }
@@ -174,7 +174,7 @@ body .offcanvas-backdrop {
     display: none;
     margin-bottom: 10px;
 
-    @media (max-width: 768px) {
+    @media (max-width: 860px) {
       display: block;
       text-align: center;
     }
@@ -216,7 +216,7 @@ body .offcanvas-backdrop {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     margin-bottom: 10px;
 
-    @media (max-width: 768px) {
+    @media (max-width: 860px) {
       // Smooth slide-down animation
       overflow: hidden;
       max-height: 1000px;
@@ -256,7 +256,7 @@ body .offcanvas-backdrop {
         grid-template-columns: repeat(2, 1fr);
       }
 
-      @media (max-width: 768px) {
+      @media (max-width: 860px) {
         grid-template-columns: 1fr;
         gap: 8px;
       }
@@ -268,7 +268,7 @@ body .offcanvas-backdrop {
       gap: 8px;
       align-items: center;
 
-      @media (max-width: 768px) {
+      @media (max-width: 860px) {
         grid-template-columns: 60px 1fr;
         gap: 6px;
       }
@@ -280,7 +280,7 @@ body .offcanvas-backdrop {
         margin: 0;
         text-align: right;
 
-        @media (max-width: 768px) {
+        @media (max-width: 860px) {
           font-size: 8px;
           text-align: left;
         }
@@ -295,7 +295,7 @@ body .offcanvas-backdrop {
         color: $primary-text-color;
         height: 28px;
 
-        @media (max-width: 768px) {
+        @media (max-width: 860px) {
           font-size: 8px;
           padding: 4px 6px;
           height: 26px;
@@ -312,7 +312,7 @@ body .offcanvas-backdrop {
           font-style: italic;
           font-size: 8px;
 
-          @media (max-width: 768px) {
+          @media (max-width: 860px) {
             font-size: 7px;
           }
         }
@@ -336,7 +336,7 @@ body .offcanvas-backdrop {
         border-radius: 6px;
         min-width: 70px;
 
-        @media (max-width: 768px) {
+        @media (max-width: 860px) {
           font-size: 8px;
           padding: 5px 12px;
           min-width: 60px;
