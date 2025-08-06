@@ -66,7 +66,7 @@
             </h5>
 
             <div class="preview-button">
-                <button class="btn btn-secondary">
+                <button class="btn btn-secondary" (click)="showDataPreview()">
                     <i class="fas fa-eye"></i>
                     <span>Preview</span>
                 </button>
@@ -653,4 +653,11 @@
         <span class="visually-hidden">Loading...</span>
     </div>
     <p class="mt-2">Loading opname session...</p>
+</div>
+
+<!-- Preview Overlay -->
+<div class="preview-overlay" *ngIf="showPreview">
+    <app-opname-preview 
+        (closePreviewEvent)="closePreview()">
+    </app-opname-preview>
 </div>
