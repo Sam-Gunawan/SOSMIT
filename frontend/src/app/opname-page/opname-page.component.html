@@ -5,7 +5,6 @@
             <div class="d-flex">
                 <div class="toast-body">
                     <p>{{ errorMessage }}</p>
-                    <p>Please try again later.</p>
                 </div>
                 <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
             </div>
@@ -15,19 +14,18 @@
             <div class="opname-header">
                 <div class="opname-details">
                     <h5>Opname in progress...</h5>
-                    <!-- placeholder -->
-                    <p>Site name</p>
+                    <p>{{ site.siteName }}</p>
                     <p>Started on {{ opnameSession.startDate }}</p>
                 </div>
                 <div class="buttons">
                     <div class="finish-button">
-                        <button class="btn btn-success" (click)="openFinishModal()">
+                        <button class="btn btn-success" (click)="openModal('opnameFinished')">
                             Selesai
                         </button>
                     </div>
 
                     <div class="cancel-button">
-                        <button type="button" class="btn btn-danger" (click)="openCancelModal()">
+                        <button type="button" class="btn btn-danger" (click)="openModal('opnameCanceled')">
                             Batalkan
                         </button>
                     </div>
@@ -50,21 +48,35 @@
 
 <div class="modal fade" id="opnameFinished" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content" [ngClass]="{'modal-no-asset-count': invalidSession === 'asset-count', 'modal-pending-count': invalidSession === 'pending-count'}">
             <div class="modal-header">
-                <h5 class="modal-title fs-5" id="staticBackdropLabel">Apakah Anda yakin ingin menyelesaikan opname?</h5>
+                <h5 class="modal-title fs-5" id="staticBackdropLabel" *ngIf="!invalidSession">Apakah Anda yakin ingin menyelesaikan opname?</h5>
+                <h5 class="modal-title fs-5" id="staticBackdropLabel" *ngIf="invalidSession === 'asset-count'">
+                    <i class="fas fa-exclamation-triangle text-danger"></i> Tidak ada aset yang dipindai.
+                </h5>
+                <h5 class="modal-title fs-5" id="staticBackdropLabel" *ngIf="invalidSession === 'pending-count'">
+                    <i class="fas fa-exclamation-triangle text-warning"></i> Masih ada aset yang belum diproses.
+                </h5>
             </div>
             <div class="modal-body">
-                <p class="confirmation-text">
+                <p class="confirmation-text" *ngIf="!invalidSession">
                     Tindakan ini akan menyelesaikan sesi opname saat ini dan <strong>semua perubahan data akan disimpan</strong>.
                     <br>
                     <br>
                     <strong>Catatan:</strong> Tindakan ini tidak dapat dibatalkan. Setelah selesai, <strong class="text-danger">Anda tidak akan dapat melakukan perubahan lebih lanjut</strong> pada aset dalam sesi ini. Pastikan semua data sudah benar sebelum melanjutkan.
                 </p>
+                <p class="confirmation-text" *ngIf="invalidSession === 'asset-count'">
+                    Sesi opname tidak dapat diselesaikan karena <span class="text-danger">belum ada aset</span> yang dipindai. Silakan lakukan pemindaian aset terlebih dahulu sebelum melanjutkan.<br><br>
+                    <strong>Catatan:</strong> Pastikan minimal satu aset sudah dipindai agar sesi dapat diselesaikan.
+                </p>
+                <p class="confirmation-text" *ngIf="invalidSession === 'pending-count'">
+                    Sesi opname tidak dapat diselesaikan karena masih ada <span class="pending-text-color">aset yang belum diproses</span>. Silakan verifikasi atau perbarui data aset tersebut sebelum melanjutkan.<br><br>
+                    <strong>Tips:</strong> Filter daftar aset dengan status <strong>pending</strong> untuk memudahkan melihat aset yang masih perlu diproses.
+                </p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" (click)="closeModal('opnameFinished')">Tutup</button>
-                <button class="btn btn-success" (click)="finishOpnameSession()">
+                <button class="btn btn-success" (click)="finishOpnameSession()" *ngIf="!invalidSession">
                     <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     <span *ngIf="!isLoading">Selesai</span>
                 </button>

@@ -1,6 +1,3 @@
-<!-- Font Awesome CDN for icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
 <div class="sticky-top">
     <div class="assets-info-header" *ngIf="showHeader">
         <!-- Mobile search toggle button -->
@@ -62,12 +59,14 @@
                     </div>
 
                     <div class="form-item">
-                        <label>Site</label>
-                        <input 
-                            type="text" 
-                            class="form-control" 
-                            name="siteName"
-                            placeholder="Site name">
+                        <label>Site+</label>
+                        <select 
+                            class="form-select" 
+                            name="subSiteName"
+                            [(ngModel)]="searchCriteria.subSiteName">
+                            <option value="">All Sites</option>
+                            <option *ngFor="let subSite of subSiteNames" [value]="subSite">{{ subSite }}</option>
+                        </select>
                     </div>
                     
                     <div class="form-item">

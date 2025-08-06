@@ -495,6 +495,15 @@ AS $$
 			RAISE EXCEPTION 'No asset changes recorded for opname session ID: %', _session_id;
 		END IF;
 
+		-- Check if there are any assets that hasn't been processed yet
+		IF EXISTS (
+			SELECT 1
+			FROM "AssetChanges"
+			WHERE session_id = _session_id AND "processing_status" = 'pending'
+		) THEN
+			RAISE EXCEPTION 'There are assets that have not been processed yet for opname session ID: %', _session_id;
+		END IF;
+
 		-- Update the opname session to mark it as finished and await manager approval
 		UPDATE "OpnameSession"
 		SET "status" = 'Submitted', end_date = NOW()

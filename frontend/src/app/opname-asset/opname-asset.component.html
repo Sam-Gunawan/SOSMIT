@@ -270,7 +270,7 @@
         <app-asset-page 
             [assetTag]="result.pendingAsset.assetTag" 
             [isPending]="true" 
-            [assetPage]="result.pendingAsset">
+            [assetPage]="createAssetPageData(result)">
         </app-asset-page>
     </div>
 </div>
@@ -294,7 +294,6 @@
                         <div class="d-flex">
                             <div class="toast-body">
                                 <p>{{ errorMessage }}</p>
-                                <p>Please try again later.</p>
                             </div>
                             <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
                         </div>
