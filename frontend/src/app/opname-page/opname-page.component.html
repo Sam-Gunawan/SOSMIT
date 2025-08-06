@@ -49,14 +49,14 @@
 
 <div class="modal fade" id="opnameFinished" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content" [ngClass]="{'modal-no-asset-count': invalidSession === 'asset-count', 'modal-pending-count': invalidSession === 'pending-count'}">
             <div class="modal-header">
                 <h5 class="modal-title fs-5" id="staticBackdropLabel" *ngIf="!invalidSession">Apakah Anda yakin ingin menyelesaikan opname?</h5>
                 <h5 class="modal-title fs-5" id="staticBackdropLabel" *ngIf="invalidSession === 'asset-count'">
                     <i class="fas fa-exclamation-triangle text-danger"></i> Tidak ada aset yang dipindai.
                 </h5>
                 <h5 class="modal-title fs-5" id="staticBackdropLabel" *ngIf="invalidSession === 'pending-count'">
-                    <i class="fas fa-exclamation-triangle text-danger"></i> Masih ada aset yang belum diproses.
+                    <i class="fas fa-exclamation-triangle text-warning"></i> Masih ada aset yang belum diproses.
                 </h5>
             </div>
             <div class="modal-body">

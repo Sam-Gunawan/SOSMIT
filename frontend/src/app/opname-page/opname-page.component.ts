@@ -214,9 +214,9 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       },
       error: (error: any) => {
         this.isLoading = false; // Set loading state to false on error
-        this.errorMessage = 'No asset changes recorded for this session. Please ensure you have made changes before finishing.';
+        this.errorMessage = 'Sesi opname tidak dapat diselesaikan. Pastikan terdapat minimal satu aset dalam opname dan semua aset telah diproses.';
         this.showToast = true;
-        setTimeout(() => this.showToast = false, 3000);
+        setTimeout(() => this.showToast = false, 5000);
         console.error('[OpnamePage] Error finishing opname session:', error);
       }
     });

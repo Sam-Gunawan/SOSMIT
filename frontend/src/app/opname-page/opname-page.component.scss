@@ -144,3 +144,15 @@ p {
 .pending-text-color {
   color: #d4a500; // Darker golden yellow for good contrast on white background, similar to pending yellow theme
 }
+
+.modal .modal-content {
+  &.modal-no-asset-count {
+    border-color: #d9534f;
+    box-shadow: 0 0 10px rgba(217, 83, 79, 0.5);
+  }
+
+  &.modal-pending-count {
+    border-color: #d4a500;
+    box-shadow: 0 0 10px rgba(212, 165, 0, 0.5);
+  }
+}
