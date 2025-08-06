@@ -18,7 +18,11 @@ p {
 }
 
 .opname-wrapper {
-  padding: 10px 30px;
+  padding: 20px 30px;
+}
+
+.opname-page {
+  position: relative;
 }
 
 .opname-header {
@@ -26,19 +30,8 @@ p {
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  margin: 0 -30px;
-  padding: 0.75rem 30px; // Reduced padding to make it more compact
-  position: sticky;
-  top: 52px; // Height of fixed navbar: 52px
-  background-color: white;
-  z-index: 100;
-  border-bottom: 1px solid #e9ecef;
-  margin-bottom: 1rem;
 
   @media (max-width: 768px) {
-    padding: 0.5rem 10px;
-    margin: 0 -10px;
-    
     .buttons {
       flex-direction: column;
       align-items: center;
@@ -79,7 +72,6 @@ p {
     font-size: 12px;
   }
 }
-
 
 .search-bar {
   margin-bottom: 10px;

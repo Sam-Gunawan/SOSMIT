@@ -1,9 +1,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=delete" />
 
 <!-- Unified Search and Filter Container -->
-<div class="unified-controls-container sticky-container">
+<div class="sticky-top">
     <!-- Mobile toggle buttons -->
-    <div class="mobile-toggles">
+    <div class="mobile-search-toggle">
         <button class="btn btn-outline-primary toggle-btn" (click)="toggleSearchForm()" *ngIf="!isInReport">
             <i class="fas fa-search"></i>
             {{ showSearchForm ? 'Hide Search' : 'Show Search' }}
@@ -66,7 +66,7 @@
             </h5>
 
             <div class="preview-button">
-                <button class="btn btn-secondary">
+                <button class="btn btn-secondary" (click)="showDataPreview()">
                     <i class="fas fa-eye"></i>
                     <span>Preview</span>
                 </button>
@@ -652,4 +652,11 @@
         <span class="visually-hidden">Loading...</span>
     </div>
     <p class="mt-2">Loading opname session...</p>
+</div>
+
+<!-- Preview Overlay -->
+<div class="preview-overlay" *ngIf="showPreview">
+    <app-opname-preview 
+        (closePreviewEvent)="closePreview()">
+    </app-opname-preview>
 </div>

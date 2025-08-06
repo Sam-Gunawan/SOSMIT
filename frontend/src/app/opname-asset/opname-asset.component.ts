@@ -16,6 +16,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { AssetPageComponent } from '../asset-page/asset-page.component';
 import { parseAdaptorSN } from '../reusable_functions';
 import { SubSite } from '../model/sub-site.model';
+import { OpnamePreviewComponent } from '../opname-preview/opname-preview.component';
 
 export interface AssetTableData {
   assetTag: string;
@@ -32,7 +33,7 @@ export interface AssetTableData {
 
 @Component({
   selector: 'app-opname-asset',
-  imports: [CommonModule, FormsModule, MatTableModule, MatSortModule, MatPaginatorModule, AssetPageComponent],
+  imports: [CommonModule, FormsModule, MatTableModule, MatSortModule, MatPaginatorModule, AssetPageComponent, OpnamePreviewComponent],
   templateUrl: './opname-asset.component.html',
   styleUrl: './opname-asset.component.scss'
 })
@@ -70,6 +71,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   showToast: boolean = false;
   showSearchForm: boolean = false; // Track if search form is visible on mobile
   showFilterForm: boolean = false; // Track if filter form is visible on mobile
+  showPreview: boolean = false; // Track if preview is visible
 
   // Assets - Each search result is stored as an object in this array (it is appended to the array)
   searchResults: Array<{
@@ -1415,6 +1417,14 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
   toggleFilterForm(): void {
     this.showFilterForm = !this.showFilterForm;
+  }
+
+  showDataPreview(): void {
+    this.showPreview = true;
+  }
+
+  closePreview(): void {
+    this.showPreview = false;
   }
 
   private checkScreenSize() {

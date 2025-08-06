@@ -1,0 +1,90 @@
+@use "../../styles.scss" as styles;
+@use "sass:color";
+
+* {
+  @include styles.default-styles;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: styles.$font-family;
+  color: styles.$primary-text-color;
+  margin-bottom: 5px;
+}
+
+p {
+  font-size: 10px;
+  margin: 0px;
+  color: styles.$quaternary-text-color;
+}
+
+// Overlay styling - makes the component appear as a full-screen overlay
+:host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1050; // Higher than Bootstrap modals
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.preview-wrapper {
+  width: 95%;
+  max-width: 1400px;
+  height: 95%;
+  max-height: 90vh;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+
+  .preview-page {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .preview-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 20px;
+      
+      .preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      
+      .divider {
+        margin-bottom: 0px;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .preview-wrapper {
+    width: 98%;
+    height: 98%;
+    
+    .preview-page {
+      .preview-content {
+        padding: 15px;
+        
+        .preview-header {
+          flex-direction: row;
+          gap: 15px;
+        }
+      }
+    }
+  }
+}
