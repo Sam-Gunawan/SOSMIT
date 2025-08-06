@@ -232,6 +232,20 @@ import { SubSite } from '../model/sub-site.model';
       );
     }
 
+    getSubSiteByID(subSiteID: number): Observable<SubSite> {
+      // This method will fetch a specific sub-site by its ID.
+      return this.http.get<SubSite>(`${this.siteApiUrl}/sub-site/${subSiteID}`).pipe(
+        map((response: any) => {
+          // Map the response to the desired format.
+          return {
+            subSiteID: response.sub_site_id,
+            subSiteName: response.sub_site_name,
+            siteID: response.site_id
+          };
+        })
+      );
+    }
+
     getSubSitesBySiteID(siteID: number): Observable<SubSite[]> {
       // This method will fetch all sub-sites for a specific site by its ID.
       return this.http.get<SubSite[]>(`${this.siteApiUrl}/${siteID}/sub-sites`).pipe(

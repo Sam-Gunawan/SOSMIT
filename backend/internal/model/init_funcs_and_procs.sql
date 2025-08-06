@@ -22,6 +22,7 @@ DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
 DROP FUNCTION IF EXISTS public.get_all_sites();
 DROP FUNCTION IF EXISTS public.get_all_sub_sites();
 DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
+DROP FUNCTION IF EXISTS public.get_sub_site_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_sub_sites_by_site_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
 DROP FUNCTION IF EXISTS public.get_opname_by_site_id(INT);
@@ -887,6 +888,23 @@ AS $$
 		INNER JOIN "Region" AS r ON sg.region_id = r.id
 		INNER JOIN "User" AS u ON s.site_ga_id = u.user_id
 		WHERE s.id = _site_id;
+	END;
+$$;
+
+-- get_sub_site_by_id retrieves sub-site details by sub-site ID
+CREATE OR REPLACE FUNCTION public.get_sub_site_by_id(_sub_site_id INT)
+	RETURNS TABLE (
+		sub_site_id INT,
+		sub_site_name VARCHAR(100),
+		site_id INT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT ss.id AS sub_site_id, ss.sub_site_name, ss.site_id
+		FROM "SubSite" AS ss
+		WHERE ss.id = _sub_site_id;
 	END;
 $$;
 

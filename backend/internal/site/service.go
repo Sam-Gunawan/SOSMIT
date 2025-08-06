@@ -51,6 +51,25 @@ func (service *Service) GetSiteByID(siteID int) (*Site, error) {
 	return site, nil
 }
 
+// GetSubSiteByID retrieves a sub-site by its ID from the repository.
+func (service *Service) GetSubSiteByID(subSiteID int) (*SubSite, error) {
+	subSite, err := service.repo.GetSubSiteByID(subSiteID)
+	if err != nil {
+		// Log the error and return it
+		log.Printf("Error fetching sub-site by ID %d: %v", subSiteID, err)
+		return nil, err
+	}
+
+	if subSite == nil {
+		// If no sub-site is found, return nil
+		log.Printf("No sub-site found with ID: %d", subSiteID)
+		return nil, nil // No sub-site found
+	}
+
+	log.Printf("Successfully retrieved sub-site by ID: %d", subSiteID)
+	return subSite, nil
+}
+
 // GetAllSubSites retrieves all sub-sites from the database.
 func (service *Service) GetAllSubSites() ([]*SubSite, error) {
 	subSites, err := service.repo.GetAllSubSites()

@@ -123,6 +123,9 @@ func main() {
 			// GET /api/site/:site-id
 			siteRoutes.GET("/:site-id", siteHandler.GetSiteByIDHandler)
 
+			// GET /api/site/sub-site/:sub-site-id
+			siteRoutes.GET("/sub-site/:sub-site-id", siteHandler.GetSubSiteByIDHandler)
+
 			// GET /api/site/:site-id/sub-sites
 			siteRoutes.GET("/:site-id/sub-sites", siteHandler.GetSubSitesBySiteIDHandler)
 
