@@ -59,12 +59,14 @@
                     </div>
 
                     <div class="form-item">
-                        <label>Site</label>
-                        <input 
-                            type="text" 
-                            class="form-control" 
-                            name="siteName"
-                            placeholder="Site name">
+                        <label>Site+</label>
+                        <select 
+                            class="form-select" 
+                            name="subSiteName"
+                            [(ngModel)]="searchCriteria.subSiteName">
+                            <option value="">All Sites</option>
+                            <option *ngFor="let subSite of subSiteNames" [value]="subSite">{{ subSite }}</option>
+                        </select>
                     </div>
                     
                     <div class="form-item">
