@@ -86,6 +86,7 @@ export class AssetPageComponent implements OnInit {
       } else {
         this.setDislike();
       }
+      this.isLoading = false;
     }
     
     this.siteID = Number(this.route.snapshot.paramMap.get('id')); // Get site ID from route parameters

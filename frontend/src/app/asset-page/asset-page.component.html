@@ -200,7 +200,6 @@
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
-
     </div>
 
     <!-- ERROR MESSAGE -->
@@ -215,18 +214,16 @@
     </div>
 
     <!-- Loading modal for asset view -->
-    <div class="modal-content" *ngIf="isLoading">
-        <div class="modal-header">
-            <h5 class="modal-title">Loading</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-
-        <div class="modal-body">
-            <p>Loading asset data...</p>
-        </div>
-
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" *ngIf="isLoading">
+            <div class="modal-header">
+                <h5 class="modal-title" id="loadingModalLabel">Please wait...</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body d-flex flex-column align-items-center justify-content-center" style="min-height: 200px;">
+                <div class="spinner-border text-secondary mb-3" role="status" aria-label="Loading"></div>
+                <span>Loading asset data...</span>
+            </div>
         </div>
     </div>
 </div>

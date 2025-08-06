@@ -1060,6 +1060,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }
   }
 
+
   // Check if there are any meaningful changes for a specific asset
   hasFormChangesForAsset(result: any): boolean {
     if (!result) return false;
@@ -1399,6 +1400,14 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         }
       });
     }
+  }
+
+  // Helper method to create asset page data with available equipments
+  createAssetPageData(result: any): AssetInfo & { availableEquipments: string[] } {
+    return {
+      ...result.pendingAsset,
+      availableEquipments: result.availableEquipments || []
+    };
   }
 
   @HostListener('input', ['$event'])
