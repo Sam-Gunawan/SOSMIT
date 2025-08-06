@@ -7,6 +7,7 @@ import { OpnameSessionService } from '../services/opname-session.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { OpnameSession } from '../model/opname-session.model';
+import { SiteInfo } from '../model/site-info.model';
 
 @Component({
   selector: 'app-opname-page',
@@ -24,6 +25,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   cardVariant: 'default' | 'compact' = 'compact';
   showLocation: boolean = true;
   opnameSession: OpnameSession = {} as OpnameSession;
+  site: SiteInfo = {} as SiteInfo;
   sessionID: number = -1; // Default value, will be set later
   siteID: number = -1; // Site ID for the current opname session
   isLoading: boolean = true; // Loading state for the opname session
@@ -36,7 +38,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     this.siteID = Number(this.route.snapshot.paramMap.get('id')); // Get site ID from route parameters
     this.initSessionID();
     this.initOpnameSession();
-    this.isLoading = false;
+    this.initSiteInfo();
   }
 
   ngOnDestroy() {
@@ -95,6 +97,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   }
 
   private initOpnameSession() {
+    this.isLoading = true;
     this.opnameSessionService.getOpnameSession(this.sessionID).subscribe({
       next: (session) => {
         this.opnameSession = session;
@@ -110,6 +113,21 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
         setTimeout(() => this.showToast = false, 3000);
         console.error('[OpnamePage] Error initializing opname session:', error);
       }
+    });
+  }
+
+  private initSiteInfo() {
+    this.isLoading = true;
+    this.apiService.getSiteByID(this.siteID).subscribe({
+      next: (site) => {
+        this.site = site;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        this.errorMessage = 'Failed to load site information. Try refreshing the page.';
+        console.error('[OpnamePage] Error fetching site info:', error);
+        this.isLoading = false;
+      },
     });
   }
 
