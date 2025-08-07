@@ -469,20 +469,8 @@
                                             </span>
                                         </div>
                 
-                                        <div *ngIf="isDisliked">                                                            
-                                            <div class="form-item">
-                                                <label [for]="'condition-notes-' + result.pendingAsset.assetTag" class="form-label mb-0">Notes</label>
-                                                <textarea class="form-control" 
-                                                    [id]="'condition-notes-' + result.pendingAsset.assetTag" 
-                                                    [(ngModel)]="result.pendingAsset.conditionNotes" name="newConditionNotes"
-                                                    style="height: 80px"
-                                                    [class.is-invalid]="!result.pendingAsset.conditionNotes || result.pendingAsset.conditionNotes === ''"></textarea>
-                                                <div *ngIf="!result.pendingAsset.conditionNotes || result.pendingAsset.conditionNotes === ''" class="invalid-feedback">
-                                                    Catatan kondisi wajib diisi jika aset dalam kondisi buruk.
-                                                </div>
-                                            </div>
-                                            
-                                            <div class="mb-3">
+                                        <div *ngIf="isDisliked">
+                                            <div class="mb-1">
                                                 <label [for]="'condition-photo-' + result.pendingAsset.assetTag" class="form-label">
                                                     Condition Photo
                                                 </label>
@@ -501,6 +489,18 @@
                                                     [class.is-invalid]="!result.pendingAsset.conditionPhotoURL || result.pendingAsset.conditionPhotoURL === '-1'">
                                                 <div *ngIf="!result.pendingAsset.conditionPhotoURL || result.pendingAsset.conditionPhotoURL === '-1'" class="invalid-feedback">
                                                     Foto aset diperlukan jika dalam kondisi buruk.
+                                                </div>
+                                            </div>
+
+                                            <div class="form-item">
+                                                <label [for]="'condition-notes-' + result.pendingAsset.assetTag" class="form-label mb-0">Notes</label>
+                                                <textarea class="form-control" 
+                                                    [id]="'condition-notes-' + result.pendingAsset.assetTag" 
+                                                    [(ngModel)]="result.pendingAsset.conditionNotes" name="newConditionNotes"
+                                                    style="height: 80px"
+                                                    [class.is-invalid]="!result.pendingAsset.conditionNotes || result.pendingAsset.conditionNotes === ''"></textarea>
+                                                <div *ngIf="!result.pendingAsset.conditionNotes || result.pendingAsset.conditionNotes === ''" class="invalid-feedback">
+                                                    Catatan kondisi wajib diisi jika aset dalam kondisi buruk.
                                                 </div>
                                             </div>
                                         </div>
