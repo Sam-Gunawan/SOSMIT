@@ -213,6 +213,11 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
     return '';
   }
 
+  private normalizeEquipments(equipments: string): string {
+    // Normalize equipments string by trimming and sorting them
+    return equipments.split(',').map(e => e.trim()).sort().join(', ');
+  }
+
   // Helper method to check if there are changes between two assets
   private hasAssetChanges(original: AssetInfo, updated: AssetInfo): boolean {
     return original.assetStatus !== updated.assetStatus ||
@@ -223,7 +228,7 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
            original.conditionPhotoURL !== updated.conditionPhotoURL ||
            original.location !== updated.location ||
            original.room !== updated.room ||
-           original.equipments !== updated.equipments ||
+           this.normalizeEquipments(original.equipments) !== this.normalizeEquipments(updated.equipments) ||
            original.assetOwner !== updated.assetOwner ||
            original.assetOwnerPosition !== updated.assetOwnerPosition ||
            original.assetOwnerCostCenter !== updated.assetOwnerCostCenter ||
@@ -246,6 +251,11 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
     // Compare the field values
     const currentValue = currentElement[fieldName];
     const otherValue = otherElement[fieldName];
+
+    // If equipments are being compared, normalize them first
+    if (fieldName === 'equipments') {
+      return this.normalizeEquipments(currentValue as string) !== this.normalizeEquipments(otherValue as string);
+    }
     
     return currentValue !== otherValue;
   }

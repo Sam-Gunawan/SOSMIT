@@ -288,7 +288,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       next: (equipmentsString: string) => {
         // Parse the comma-separated string into an array
         if (equipmentsString && typeof equipmentsString === 'string' && equipmentsString.trim() !== '') {
-          result.availableEquipments = equipmentsString.split(',').map((e: string) => e.trim()).filter((e: string) => e !== '');
+          result.availableEquipments = equipmentsString.split(',').map((e: string) => e.trim()).filter((e: string) => e !== '').sort();
         } else {
           result.availableEquipments = []; // No equipments available for this product variety
         }
