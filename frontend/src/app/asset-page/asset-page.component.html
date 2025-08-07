@@ -34,10 +34,14 @@
                                     [value]="assetPage?.assetStatus" 
                                     readonly>
                             </div>
-                            
-                            <p class="status-reason" *ngIf="assetPage?.assetStatus === 'Disposed' && assetPage?.statusReason">
-                                Reason: {{ assetPage?.statusReason }}
-                            </p>
+
+                            <div class="form-item" *ngIf="assetPage?.assetStatus === 'Disposed' && assetPage?.statusReason">
+                                <label [for]="'asset-status-reason-' + assetPage?.assetTag" class="form-label mb-0">Status Reason</label>
+                                <input type="text" class="form-control" 
+                                    [id]="'asset-status-reason-' + assetPage?.assetTag" 
+                                    [value]="assetPage?.statusReason" 
+                                    readonly>
+                            </div>
                         </div>
         
                         <div class="user-info">
@@ -129,11 +133,18 @@
                                 </div>
         
                                 <div *ngIf="isDisliked">
-                                    <p class="condition-notes">{{ assetPage?.conditionNotes }}</p>
-                                    <div class="mb-3" *ngIf="assetPage?.conditionPhotoURL !== ''">
+                                    <div class="mb-1" *ngIf="assetPage?.conditionPhotoURL !== ''">
                                         <img [src]="serverURL + assetPage?.conditionPhotoURL" 
                                             [alt]="'Condition photo for ' + assetPage?.assetTag" 
                                             class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
+                                    </div>
+
+                                    <div class="form-item">
+                                        <label [for]="'condition-notes-' + assetPage?.assetTag" class="form-label mb-0">Notes</label>
+                                        <textarea class="form-control" 
+                                            [id]="'condition-notes-' + assetPage?.assetTag"
+                                            style="height: 80px"
+                                            readonly>{{ assetPage?.conditionNotes }}</textarea>
                                     </div>
                                 </div>
                             </div>
