@@ -17,6 +17,7 @@ import { AssetPageComponent } from '../asset-page/asset-page.component';
 import { parseAdaptorSN } from '../reusable_functions';
 import { SubSite } from '../model/sub-site.model';
 import { OpnamePreviewComponent } from '../opname-preview/opname-preview.component';
+import { lastValueFrom } from 'rxjs/internal/lastValueFrom';
 
 export interface AssetTableData {
   assetTag: string;
@@ -309,7 +310,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     this.opnameSessionService.loadOpnameProgress(sessionID).subscribe({
       next: async (progress: OpnameSessionProgress[]) => {
         await this.populateSessionData(progress);
-        console.log('[OpnameAsset] Opname session progress loaded:', progress);
         this.connectTableComponents();
       },
       error: (error) => {
@@ -368,40 +368,39 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         }
 
         const ownerName = owner ? `${owner.firstName} ${owner.lastName}` : asset.assetOwnerName;
-        
-        // Owner's site: Use saved owner site ID, or derive from owner's data, or fall back to asset's original owner site
-        const ownerSiteID = savedRecord.assetChanges.newOwnerSiteID ?? 
-                           (owner ? owner.siteID : asset.siteID);
-        
-        // Get owner site data by ID - convert Observable to Promise and wait for it
-        let ownerSite: SiteInfo | null = null;
-        if (ownerSiteID) {
-          try {
-            ownerSite = await this.apiService.getSiteByID(ownerSiteID).toPromise() || null;
-          } catch (error) {
-            console.error('[OpnameAsset] Error fetching owner site by ID:', error);
-            // Continue with null site, will fall back to asset data
-          }
-        }
-        const ownerSiteName = ownerSite ? ownerSite.siteName : asset.siteName;
-        
+      
         // Use saved position/cost center if available, otherwise fall back to owner data or original asset data
         const ownerPosition = savedRecord.assetChanges.newOwnerPosition ?? 
                              (owner ? owner.position : asset.assetOwnerPosition);
-        const ownerCostCenter = savedRecord.assetChanges.newOwnerCostCenter ?? 
-                               (owner ? owner.costCenterID : asset.assetOwnerCostCenter);
+        const ownerCostCenter = Number(savedRecord.assetChanges.newOwnerCostCenter ?? 
+                               (owner ? owner.costCenterID : asset.assetOwnerCostCenter));
 
         // Get sub-site data by ID - convert Observable to Promise and wait for it
         let subSite: SubSite | null = null;
         if (subSiteID) {
           try {
-            subSite = await this.apiService.getSubSiteByID(subSiteID).toPromise() || null;
+            subSite = await lastValueFrom(this.apiService.getSubSiteByID(subSiteID)) || null;
           } catch (error) {
             console.error('[OpnameAsset] Error fetching sub-site by ID:', error);
             // Continue with null sub-site, will fall back to asset data
           }
         }
         const subSiteName = subSite ? subSite.subSiteName : asset.subSiteName;
+
+        // Owner's site: Use site ID from saved sub site ID
+        const ownerSiteID = subSite ? subSite.siteID : asset.siteID;
+       
+        // Get owner site data by ID - convert Observable to Promise and wait for it
+        let ownerSite: SiteInfo | null = null;
+        if (ownerSiteID) {
+          try {
+            ownerSite = await lastValueFrom(this.apiService.getSiteByID(ownerSiteID)) || null;
+          } catch (error) {
+            console.error('[OpnameAsset] Error fetching owner site by ID:', error);
+            // Continue with null site, will fall back to asset data
+          }
+        }
+        const ownerSiteName = ownerSite ? ownerSite.siteName : asset.siteName;
         
         // Asset's site group and region: Derived from the sub-site's parent site (asset location, not owner location)
         let assetLocationSite: SiteInfo | null = null;
@@ -856,14 +855,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         assetOwner: matchedUser.userID,
         assetOwnerName: `${matchedUser.firstName} ${matchedUser.lastName}`,
         assetOwnerPosition: matchedUser.position,
-        assetOwnerCostCenter: matchedUser.costCenterID,
+        assetOwnerCostCenter: Number(matchedUser.costCenterID), // Ensure it's a number
         assetOwnerDepartment: matchedUser.department,
         assetOwnerDivision: matchedUser.division,
-        
-        // Update owner's site information when owner changes
-        siteID: matchedUser.siteID,
-        siteName: matchedUser.siteName,
-
         // Note: Asset location (subSiteID, subSiteName, ...) remains unchanged
         // when changing owner - only owner organizational data changes
       };
@@ -906,7 +900,10 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         subSiteID: matchedSubSite.subSiteID,
         subSiteName: matchedSubSite.subSiteName,
         siteGroupName: matchedSite.siteGroup,
-        regionName: matchedSite.siteRegion
+        regionName: matchedSite.siteRegion,
+        // Update owner's site information when owner changes
+        siteID: matchedSite.siteID,
+        siteName: matchedSite.siteName,
       };
 
       // Force change detection to update the view
@@ -1253,7 +1250,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       assetChanges.newOwnerPosition = pending.assetOwnerPosition;
     }
     if (pending.assetOwnerCostCenter !== existing.assetOwnerCostCenter) {
-      assetChanges.newOwnerCostCenter = pending.assetOwnerCostCenter;
+      // Ensure cost center is always sent as a number, not string
+      assetChanges.newOwnerCostCenter = Number(pending.assetOwnerCostCenter);
     }
     if (pending.assetOwnerDepartment !== existing.assetOwnerDepartment) {
       assetChanges.newOwnerDepartment = pending.assetOwnerDepartment;
@@ -1334,7 +1332,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       newEquipments: existing.equipments,
       newOwnerID: existing.assetOwner,
       newOwnerPosition: existing.assetOwnerPosition,
-      newOwnerCostCenter: existing.assetOwnerCostCenter,
+      newOwnerCostCenter: Number(existing.assetOwnerCostCenter), // Ensure it's a number
       newOwnerDepartment: existing.assetOwnerDepartment,
       newOwnerDivision: existing.assetOwnerDivision,
       newOwnerSiteID: existing.siteID,

@@ -373,7 +373,7 @@
                                     <div class="form-item">
                                         <label [for]="'cost-center-' + result.pendingAsset.assetTag" class="form-label mb-0">Cost Center</label>
 
-                                        <input type="text" class="form-control" 
+                                        <input type="number" class="form-control" 
                                             [id]="'cost-center-' + result.pendingAsset.assetTag" 
                                             [(ngModel)]="result.pendingAsset.assetOwnerCostCenter" name="newCostCenter"
                                             [class.is-invalid]="!result.pendingAsset.assetOwnerCostCenter || result.pendingAsset.assetOwnerCostCenter === undefined">
