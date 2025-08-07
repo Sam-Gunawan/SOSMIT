@@ -10,6 +10,7 @@ import (
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/auth"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/email"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/opname"
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/report"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/site"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/upload"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
@@ -54,6 +55,7 @@ func main() {
 	assetRepo := asset.NewRepository(db)
 	opnameRepo := opname.NewRepository(db)
 	siteRepo := site.NewRepository(db)
+	reportRepo := report.NewRepository(db)
 
 	// Initialize the services
 	uploadService := upload.NewService()
@@ -63,6 +65,7 @@ func main() {
 	assetService := asset.NewService(assetRepo)
 	opnameService := opname.NewService(opnameRepo, uploadService, userRepo, siteRepo, emailService)
 	siteService := site.NewService(siteRepo)
+	reportService := report.NewService(reportRepo)
 
 	// Initialize the handlers
 	authHandler := auth.NewHandler(authService)
@@ -71,6 +74,7 @@ func main() {
 	opnameHandler := opname.NewHandler(opnameService)
 	siteHandler := site.NewHandler(siteService)
 	uploadHandler := upload.NewHandler(uploadService)
+	reportHandler := report.NewHandler(reportService)
 
 	// Setup the static file server route for serving uploaded files.
 	router.Static("/uploads", "../uploads")
@@ -185,6 +189,12 @@ func main() {
 		{
 			// POST /api/upload/photo
 			uploadRoutes.POST("/photo", uploadHandler.UploadPhotoHandler)
+		}
+
+		reportRoutes := api.Group("/report").Use(auth.AuthMiddleware())
+		{
+			// GET /api/report/:session-id/stats
+			reportRoutes.GET("/:session-id/stats", reportHandler.GetOpnameStatsHandler)
 		}
 
 	}

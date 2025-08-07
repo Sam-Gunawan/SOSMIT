@@ -27,6 +27,7 @@ DROP FUNCTION IF EXISTS public.get_sub_sites_by_site_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
 DROP FUNCTION IF EXISTS public.get_opname_by_site_id(INT);
 DROP FUNCTION IF EXISTS public.get_asset_equipments(VARCHAR(50));
+DROP FUNCTION IF EXISTS public.get_opname_stats(INT);
 
 -- get_credentials retrieves user credentials by username (for login auth)
 -- ! email not implemented yet
@@ -972,5 +973,75 @@ AS $$
 		SELECT ae.equipments
 		FROM "AssetEquipments" AS ae
 		WHERE ae.product_variety = _product_variety;
+	END;
+$$;
+
+-- get_opname_stats retrieves the statistic for an opname session
+CREATE OR REPLACE FUNCTION public.get_opname_stats(_session_id INT)
+	RETURNS TABLE (
+		working_assets INT,
+		broken_assets INT,
+		misplaced_assets INT,
+		missing_assets INT
+	)
+	LANGUAGE plpgsql
+AS $$
+	DECLARE
+		_site_id INT;
+		_total_assets_on_site INT;
+		_scanned_assets INT;
+		_missing_count INT;
+	BEGIN
+		-- Get the site ID for this opname session
+		SELECT os.site_id INTO _site_id
+		FROM "OpnameSession" AS os
+		WHERE os.id = _session_id;
+		
+		-- Count total assets registered to this site (across all sub-sites)
+		SELECT COUNT(*) INTO _total_assets_on_site
+		FROM "Asset" AS a
+		INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
+		WHERE ss.site_id = _site_id;
+		
+		-- Count assets (only the ones belonging to the site) that were scanned in this opname session
+		SELECT COUNT(*) INTO _scanned_assets
+		FROM "AssetChanges" AS ac
+		WHERE ac.session_id = _session_id AND ac.asset_tag IN (
+			SELECT a.asset_tag
+			FROM "Asset" AS a
+			INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
+			WHERE ss.site_id = _site_id
+		);
+		
+		-- Calculate missing assets (registered but not scanned)
+		_missing_count := _total_assets_on_site - _scanned_assets;
+		
+		RETURN QUERY
+		SELECT
+			-- Working assets: scanned assets that are NOT down and NOT misplaced
+			COUNT(CASE 
+				WHEN (COALESCE(ac."changes" ->> 'newStatus', a.status) <> 'Down') 
+					AND NOT (ac."changes" ? 'newOwnerCostCenter' AND ac."changes" ->> 'newOwnerCostCenter' IS NOT NULL)
+				THEN 1 
+			END)::INT AS working_assets,
+			
+			-- Broken assets: any asset with status 'Down' (highest priority)
+			COUNT(CASE 
+				WHEN (COALESCE(ac."changes" ->> 'newStatus', a.status) = 'Down') 
+				THEN 1 
+			END)::INT AS broken_assets,
+			
+			-- Misplaced assets: assets with changed cost center BUT not broken
+			COUNT(CASE 
+				WHEN (ac."changes" ? 'newOwnerCostCenter' AND ac."changes" ->> 'newOwnerCostCenter' IS NOT NULL)
+					AND (COALESCE(ac."changes" ->> 'newStatus', a.status) <> 'Down')
+				THEN 1 
+			END)::INT AS misplaced_assets,
+			
+			-- Missing assets: registered to site but not scanned
+			_missing_count AS missing_assets
+		FROM "AssetChanges" AS ac
+		INNER JOIN "Asset" AS a ON ac.asset_tag = a.asset_tag
+		WHERE ac.session_id = _session_id;
 	END;
 $$;
