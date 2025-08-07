@@ -1465,6 +1465,47 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     this.showPreview = false;
   }
 
+  // Methods to provide data to preview component
+  getOriginalAssets(): AssetInfo[] {
+    return this.searchResults.map(result => ({
+      ...result.existingAsset,
+      changeReason: '' // Original data has no change reason
+    }));
+  }
+
+  getUpdatedAssets(): AssetInfo[] {
+    return this.searchResults.map(result => result.pendingAsset);
+  }
+
+  getUpdatedAssetsWithStatus(): any[] {
+    return this.searchResults.map(result => ({
+      ...result.pendingAsset,
+      processingStatus: result.processingStatus,
+      changeReason: result.savedChangeReason || result.changeReason || '' // Use saved change reason or current change reason
+    }));
+  }
+
+  getAssetProcessingStatusMap(): { [assetTag: string]: 'pending' | 'all_good' | 'edited' } {
+    const statusMap: { [assetTag: string]: 'pending' | 'all_good' | 'edited' } = {};
+    this.searchResults.forEach(result => {
+      statusMap[result.existingAsset.assetTag] = result.processingStatus;
+    });
+    return statusMap;
+  }
+
+  getChangeReasonMap(): { [assetTag: string]: string } {
+    const reasonMap: { [assetTag: string]: string } = {};
+    this.searchResults.forEach(result => {
+      reasonMap[result.existingAsset.assetTag] = result.savedChangeReason || result.changeReason || '';
+    });
+    return reasonMap;
+  }
+
+  getAllAssets(): AssetInfo[] {
+    // Return all assets (can be used as fallback)
+    return this.searchResults.map(result => result.pendingAsset);
+  }
+
   private checkScreenSize() {
     const newIsMobile = window.innerWidth < 860; // Define mobile breakpoint
     const newScreenSize = newIsMobile ? 'small' : 'large';

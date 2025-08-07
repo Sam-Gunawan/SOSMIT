@@ -657,6 +657,11 @@
 <!-- Preview Overlay -->
 <div class="preview-overlay" *ngIf="showPreview">
     <app-opname-preview 
+        [originalAssets]="getOriginalAssets()"
+        [updatedAssets]="getUpdatedAssetsWithStatus()"
+        [assetProcessingStatus]="getAssetProcessingStatusMap()"
+        [assetChangeReasons]="getChangeReasonMap()"
+        [searchResults]="getAllAssets()"
         (closePreviewEvent)="closePreview()">
     </app-opname-preview>
 </div>
