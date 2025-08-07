@@ -183,6 +183,12 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
   ngOnInit(): void {
     this.isLoading = true;
+
+    if (this.isInReport) {
+      // In report mode, we only need to load progress
+      this.loadOpnameProgress(this.sessionID);
+      return;
+    }
         
     this.checkScreenSize();
     this.updateResponsiveSettings();
@@ -301,8 +307,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
   loadOpnameProgress(sessionID: number): void {
     this.opnameSessionService.loadOpnameProgress(sessionID).subscribe({
-      next: (progress: OpnameSessionProgress[]) => {
-        this.populateSessionData(progress);
+      next: async (progress: OpnameSessionProgress[]) => {
+        await this.populateSessionData(progress);
+        console.log('[OpnameAsset] Opname session progress loaded:', progress);
         this.connectTableComponents();
       },
       error: (error) => {
@@ -315,7 +322,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     });
   }
 
-  populateSessionData(progress: OpnameSessionProgress[]): void {
+  async populateSessionData(progress: OpnameSessionProgress[]): Promise<void> {
     // Clear existing search results first
     this.searchResults = [];
     
@@ -328,130 +335,150 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     // Save the amount of assets in progress to local storage
     this.incrementAssetScanned(progress.length);
     
-    // Pre-allocate array with the correct length to preserve order
-    const orderedResults: Array<any> = new Array(progress.length);
-    let completedCount = 0;
-    
-    progress.forEach((savedRecord, index) => {
-      // Get the existing asset from API
-      this.apiService.getAssetByAssetTag(savedRecord.assetTag).subscribe({
-        next: (asset: AssetInfo) => {
-          const existingAsset = JSON.parse(JSON.stringify(asset)); // Deep copy to preserve original
+    try {
+      // Process each progress item sequentially to maintain order
+      for (let index = 0; index < progress.length; index++) {
+        const savedRecord = progress[index];
+        this.errorMessage = ''; // Clear previous errors
 
-          // Count the pending assets
-          if (savedRecord.processingStatus === 'pending') {
-            this.incrementPendingCount(1);
-          }
-          
-          // Extract data from saved changes or fall back to original asset
-          const ownerID = savedRecord.assetChanges.newOwnerID ?? asset.assetOwner;
-          const subSiteID = savedRecord.assetChanges.newSubSiteID ?? asset.subSiteID;
-          const ownerDepartment = savedRecord.assetChanges.newOwnerDepartment ?? asset.assetOwnerDepartment;
-          const ownerDivision = savedRecord.assetChanges.newOwnerDivision ?? asset.assetOwnerDivision;
-          
-          // Find the owner data based on the owner ID
-          const owner = this.allUsers.find(user => user.userID === ownerID);
-          const ownerName = owner ? `${owner.firstName} ${owner.lastName}` : asset.assetOwnerName;
-          
-          // Owner's site: Use saved owner site ID, or derive from owner's data, or fall back to asset's original owner site
-          const ownerSiteID = savedRecord.assetChanges.newOwnerSiteID ?? 
-                             (owner ? owner.siteID : asset.siteID);
-          const ownerSite = this.allSites.find(site => site.siteID === ownerSiteID);
-          const ownerSiteName = ownerSite ? ownerSite.siteName : asset.siteName;
-          
-          // Use saved position/cost center if available, otherwise fall back to owner data or original asset data
-          const ownerPosition = savedRecord.assetChanges.newOwnerPosition ?? 
-                               (owner ? owner.position : asset.assetOwnerPosition);
-          const ownerCostCenter = savedRecord.assetChanges.newOwnerCostCenter ?? 
-                                 (owner ? owner.costCenterID : asset.assetOwnerCostCenter);
+        // Get the existing asset from API - convert Observable to Promise
+        const asset: AssetInfo = await this.apiService.getAssetByAssetTag(savedRecord.assetTag).toPromise();
+        const existingAsset = JSON.parse(JSON.stringify(asset)); // Deep copy to preserve original
 
-          // Asset location: Find the sub-site data based on the sub site ID (this is the asset's physical location)
-          const subSite = this.allSubSites.find(subSite => subSite.subSiteID === subSiteID);
-          const subSiteName = subSite ? subSite.subSiteName : asset.subSiteName;
-          
-          // Asset's site group and region: Derived from the sub-site's parent site (asset location, not owner location)
-          const assetLocationSite = this.allSites.find(site => site.siteID === subSite?.siteID);
-          const siteGroupName = assetLocationSite ? assetLocationSite.siteGroup : asset.siteGroupName;
-          const regionName = assetLocationSite ? assetLocationSite.siteRegion : asset.regionName;
-          
-
-          // Populate pending asset and apply changes from savedRecord
-          const pendingAsset: AssetInfo = {
-            ...JSON.parse(JSON.stringify(asset)), // Deep copy to avoid reference issues
-            serialNumber: savedRecord.assetChanges.newSerialNumber ?? asset.serialNumber,
-            assetStatus: savedRecord.assetChanges.newStatus ?? asset.assetStatus,
-            statusReason: savedRecord.assetChanges.newStatusReason ?? asset.statusReason,
-            condition: savedRecord.assetChanges.newCondition ?? asset.condition,
-            conditionNotes: savedRecord.assetChanges.newConditionNotes ?? asset.conditionNotes,
-            conditionPhotoURL: savedRecord.assetChanges.newConditionPhotoURL ?? asset.conditionPhotoURL,
-            location: savedRecord.assetChanges.newLocation ?? asset.location,
-            room: savedRecord.assetChanges.newRoom ?? asset.room,
-            equipments: savedRecord.processingStatus === 'pending' ? '' : savedRecord.assetChanges.newEquipments ?? asset.equipments, // If pending, keep equipments empty
-            assetOwner: ownerID,
-            assetOwnerName: ownerName,
-            assetOwnerPosition: ownerPosition,
-            assetOwnerCostCenter: ownerCostCenter,
-            assetOwnerDepartment: ownerDepartment,
-            assetOwnerDivision: ownerDivision,
-            subSiteID: subSiteID,
-            subSiteName: subSiteName,
-            siteID: ownerSiteID, // Owner's site, not asset location site
-            siteName: ownerSiteName,
-            siteGroupName: siteGroupName, // From asset location site
-            regionName: regionName // From asset location site
-          };
-
-          // Store in the correct position to preserve order
-          const resultItem = {
-            existingAsset: existingAsset,
-            pendingAsset: pendingAsset,
-            availableEquipments: [] as string[], // Initialize as empty, will be loaded asynchronously
-            adaptorSN: parseAdaptorSN(pendingAsset.equipments), // Extract adaptor serial number
-            assetProcessed: true,
-            processingStatus: savedRecord.processingStatus,
-            savedChangeReason: savedRecord.assetChanges.changeReason || '',
-            changeReason: savedRecord.assetChanges.changeReason || ''
-          };
-          
-          orderedResults[index] = resultItem;
-
-          // Load available equipments for this asset
-          this.getAvailableEquipments(resultItem);
-
-          completedCount++;
-          
-          // When all API calls are complete, update searchResults in the correct order
-          if (completedCount === progress.length) {
-            this.searchResults = orderedResults;
-            this.updateTableDataSource(); // Update table with loaded data
-            
-            // Set as current asset if it's the first one
-            if (this.searchResults.length > 0) {
-              this.currentActiveIndex = 0;
-            }
-            
-            this.isLoading = false; // Now loading is truly complete
-            this.cdr.detectChanges(); // Trigger change detection to update the view
-          }
-        },
-        error: (error) => {
-          console.error('[OpnameAsset] Error fetching master asset:', error);
-          this.errorMessage = 'Failed to load master asset. Please try again later.';
-          this.showToast = true;
-          setTimeout(() => this.showToast = false, 3000);
-          
-          completedCount++;
-          // Even on error, check if we've completed all calls
-          if (completedCount === progress.length) {
-            // Filter out any undefined entries caused by errors
-            this.searchResults = orderedResults.filter(result => result !== undefined);
-            this.updateTableDataSource(); // Update table even after errors
-            this.isLoading = false; // Loading complete even with errors
-            this.cdr.detectChanges();
+        // Count the pending assets
+        if (savedRecord.processingStatus === 'pending') {
+          this.incrementPendingCount(1);
+        }
+        
+        // Extract data from saved changes or fall back to original asset
+        const ownerID = savedRecord.assetChanges.newOwnerID ?? asset.assetOwner;
+        const subSiteID = savedRecord.assetChanges.newSubSiteID ?? asset.subSiteID;
+        const ownerDepartment = savedRecord.assetChanges.newOwnerDepartment ?? asset.assetOwnerDepartment;
+        const ownerDivision = savedRecord.assetChanges.newOwnerDivision ?? asset.assetOwnerDivision;
+        
+        // Get owner data by ID - convert Observable to Promise and wait for it
+        let owner: User | null = null;
+        if (ownerID) {
+          try {
+            owner = await this.apiService.getUserByID(ownerID).toPromise() || null;
+          } catch (error) {
+            console.error('[OpnameAsset] Error fetching owner by ID:', error);
+            // Continue with null owner, will fall back to asset data
           }
         }
-      })
-    });
+
+        const ownerName = owner ? `${owner.firstName} ${owner.lastName}` : asset.assetOwnerName;
+        
+        // Owner's site: Use saved owner site ID, or derive from owner's data, or fall back to asset's original owner site
+        const ownerSiteID = savedRecord.assetChanges.newOwnerSiteID ?? 
+                           (owner ? owner.siteID : asset.siteID);
+        
+        // Get owner site data by ID - convert Observable to Promise and wait for it
+        let ownerSite: SiteInfo | null = null;
+        if (ownerSiteID) {
+          try {
+            ownerSite = await this.apiService.getSiteByID(ownerSiteID).toPromise() || null;
+          } catch (error) {
+            console.error('[OpnameAsset] Error fetching owner site by ID:', error);
+            // Continue with null site, will fall back to asset data
+          }
+        }
+        const ownerSiteName = ownerSite ? ownerSite.siteName : asset.siteName;
+        
+        // Use saved position/cost center if available, otherwise fall back to owner data or original asset data
+        const ownerPosition = savedRecord.assetChanges.newOwnerPosition ?? 
+                             (owner ? owner.position : asset.assetOwnerPosition);
+        const ownerCostCenter = savedRecord.assetChanges.newOwnerCostCenter ?? 
+                               (owner ? owner.costCenterID : asset.assetOwnerCostCenter);
+
+        // Get sub-site data by ID - convert Observable to Promise and wait for it
+        let subSite: SubSite | null = null;
+        if (subSiteID) {
+          try {
+            subSite = await this.apiService.getSubSiteByID(subSiteID).toPromise() || null;
+          } catch (error) {
+            console.error('[OpnameAsset] Error fetching sub-site by ID:', error);
+            // Continue with null sub-site, will fall back to asset data
+          }
+        }
+        const subSiteName = subSite ? subSite.subSiteName : asset.subSiteName;
+        
+        // Asset's site group and region: Derived from the sub-site's parent site (asset location, not owner location)
+        let assetLocationSite: SiteInfo | null = null;
+        if (subSite?.siteID) {
+          try {
+            assetLocationSite = await this.apiService.getSiteByID(subSite.siteID).toPromise() || null;
+          } catch (error) {
+            console.error('[OpnameAsset] Error fetching asset location site by ID:', error);
+            // Continue with null site, will fall back to asset data
+          }
+        }
+        const siteGroupName = assetLocationSite ? assetLocationSite.siteGroup : asset.siteGroupName;
+        const regionName = assetLocationSite ? assetLocationSite.siteRegion : asset.regionName;
+
+        // Populate pending asset and apply changes from savedRecord
+        const pendingAsset: AssetInfo = {
+          ...JSON.parse(JSON.stringify(asset)), // Deep copy to avoid reference issues
+          serialNumber: savedRecord.assetChanges.newSerialNumber ?? asset.serialNumber,
+          assetStatus: savedRecord.assetChanges.newStatus ?? asset.assetStatus,
+          statusReason: savedRecord.assetChanges.newStatusReason ?? asset.statusReason,
+          condition: savedRecord.assetChanges.newCondition ?? asset.condition,
+          conditionNotes: savedRecord.assetChanges.newConditionNotes ?? asset.conditionNotes,
+          conditionPhotoURL: savedRecord.assetChanges.newConditionPhotoURL ?? asset.conditionPhotoURL,
+          location: savedRecord.assetChanges.newLocation ?? asset.location,
+          room: savedRecord.assetChanges.newRoom ?? asset.room,
+          equipments: savedRecord.processingStatus === 'pending' ? '' : savedRecord.assetChanges.newEquipments ?? asset.equipments, // If pending, keep equipments empty
+          assetOwner: ownerID,
+          assetOwnerName: ownerName,
+          assetOwnerPosition: ownerPosition,
+          assetOwnerCostCenter: ownerCostCenter,
+          assetOwnerDepartment: ownerDepartment,
+          assetOwnerDivision: ownerDivision,
+          subSiteID: subSiteID,
+          subSiteName: subSiteName,
+          siteID: ownerSiteID, // Owner's site, not asset location site
+          siteName: ownerSiteName,
+          siteGroupName: siteGroupName, // From asset location site
+          regionName: regionName // From asset location site
+        };
+
+        // Create result item
+        const resultItem = {
+          existingAsset: existingAsset,
+          pendingAsset: pendingAsset,
+          availableEquipments: [] as string[], // Initialize as empty, will be loaded asynchronously
+          adaptorSN: parseAdaptorSN(pendingAsset.equipments), // Extract adaptor serial number
+          assetProcessed: true,
+          processingStatus: savedRecord.processingStatus,
+          savedChangeReason: savedRecord.assetChanges.changeReason || '',
+          changeReason: savedRecord.assetChanges.changeReason || ''
+        };
+        
+        // Add to search results in order
+        this.searchResults.push(resultItem);
+
+        // Load available equipments for this asset
+        this.getAvailableEquipments(resultItem);
+      }
+
+      // Update table with loaded data
+      this.updateTableDataSource();
+      
+      // Set as current asset if it's the first one
+      if (this.searchResults.length > 0) {
+        this.currentActiveIndex = 0;
+      }
+      
+      this.isLoading = false; // Now loading is truly complete
+      this.cdr.detectChanges(); // Trigger change detection to update the view
+
+    } catch (error) {
+      console.error('[OpnameAsset] Error processing session data:', error);
+      this.errorMessage = 'Failed to load session data. Please try again later.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
+      this.isLoading = false;
+    }
   }
 
   initOpnameData(): void {

@@ -146,6 +146,34 @@ p {
   background-color: color.adjust(styles.$tertiary-color, $lightness: -5%);
 }
 
+// Skeleton loading styles
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.skeleton-text {
+  height: 12px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skeleton-number {
+  height: 24px;
+  border-radius: 4px;
+  width: 60%;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
 #date{
   color: styles.$quaternary-text-color;
   padding: 5px 10px;

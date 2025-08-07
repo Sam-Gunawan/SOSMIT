@@ -72,6 +72,25 @@ func (repo *Repository) GetSiteByID(siteID int) (*Site, error) {
 	return &site, nil
 }
 
+// GetSubSiteByID retrieves a sub-site by its ID from the database.
+func (repo *Repository) GetSubSiteByID(subSiteID int) (*SubSite, error) {
+	var subSite SubSite
+
+	query := `SELECT * FROM get_sub_site_by_id($1)`
+	err := repo.db.QueryRow(query, subSiteID).Scan(&subSite.SubSiteID, &subSite.SubSiteName, &subSite.SiteID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("⚠ No sub-site found with ID: %d\n", subSiteID)
+			return nil, nil // No sub-site found
+		}
+		log.Printf("❌ Error retrieving sub-site with ID: %d, error: %v\n", subSiteID, err)
+		return nil, err // Return the error for unexpected cases
+	}
+
+	log.Printf("✅ Successfully retrieved sub-site with ID: %d\n", subSiteID)
+	return &subSite, nil
+}
+
 // GetAllSubSites retrieves all sub-sites from the database.
 func (repo *Repository) GetAllSubSites() ([]*SubSite, error) {
 	var allSubSites []*SubSite

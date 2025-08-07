@@ -209,6 +209,7 @@ export class OpnameSessionService {
                 newRoom: changes.newRoom,
                 newEquipments: changes.newEquipments,
                 newOwnerID: changes.newOwnerID,
+                newOwnerSiteID: changes.newOwnerSiteID,
                 newOwnerPosition: changes.newOwnerPosition,
                 newOwnerDepartment: changes.newOwnerDepartment,
                 newOwnerDivision: changes.newOwnerDivision,

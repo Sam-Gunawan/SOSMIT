@@ -40,22 +40,45 @@
 
             <div class="opname-body">                
                 <div class="report-cards">
-                    <div class="card card-1">
-                        <p>Working</p>
-                        <h5>5</h5>
-                    </div>
-                    <div class="card card-2">
-                        <p>Broken</p>
-                        <h5>5</h5>
-                    </div>
-                    <div class="card card-3">
-                        <p>Administration Issue</p>
-                        <h5>5</h5>
-                    </div>
-                    <div class="card card-4">
-                        <p>Missing</p>
-                        <h5>5</h5>
-                    </div>
+                    <!-- Loading skeleton cards -->
+                    <ng-container *ngIf="isLoading">
+                        <div class="card card-1">
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-number"></div>
+                        </div>
+                        <div class="card card-2">
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-number"></div>
+                        </div>
+                        <div class="card card-3">
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-number"></div>
+                        </div>
+                        <div class="card card-4">
+                            <div class="skeleton skeleton-text"></div>
+                            <div class="skeleton skeleton-number"></div>
+                        </div>
+                    </ng-container>
+
+                    <!-- Actual data cards -->
+                    <ng-container *ngIf="!isLoading && selectedDate">
+                        <div class="card card-1">
+                            <p>Working</p>
+                            <h5>{{ opnameStats.workingAssets }}</h5>
+                        </div>
+                        <div class="card card-2">
+                            <p>Broken</p>
+                            <h5>{{ opnameStats.brokenAssets }}</h5>
+                        </div>
+                        <div class="card card-3">
+                            <p>Administration Issue</p>
+                            <h5>{{ opnameStats.misplacedAssets }}</h5>
+                        </div>
+                        <div class="card card-4">
+                            <p>Missing</p>
+                            <h5>{{ opnameStats.missingAssets }}</h5>
+                        </div>
+                    </ng-container>
                 </div>
 
                 <div class="my-container" *ngIf="selectedDate">

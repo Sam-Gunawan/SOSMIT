@@ -1,13 +1,16 @@
-import { ChangeDetectorRef, Component, Host, HostListener, Input } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
+import { ReportService } from '../services/report.service';
 import { ActivatedRoute } from '@angular/router';
 import { SiteInfo } from '../model/site-info.model';
 import { OpnameAssetComponent } from '../opname-asset/opname-asset.component';
 import { FormsModule } from '@angular/forms';
 import { ViewChild, ElementRef } from '@angular/core';
 import html2pdf from 'html2pdf.js';
+import { OpnameStats } from '../model/opname-stats.model';
+import { lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-report',
@@ -28,7 +31,8 @@ export class ReportComponent {
   successMessage: string = '';
   errorMessage: string = '';
   showSuccessToast: boolean = false;
-  isExporting = false;
+  isExporting: boolean = false;
+  isLoading: boolean = false;
   @ViewChild('exportSection', { static: false }) exportSection!: ElementRef;
 
   // Wrap both sessionID and endDate into an object
@@ -36,11 +40,20 @@ export class ReportComponent {
 
   // Date options for dropdown
   dateOptions: { value: string, label: string }[] = [];
+
+  // Opname statistics
+  opnameStats: OpnameStats = {} as OpnameStats;
   
   cardVariant: 'default' | 'compact' = 'compact';
   showLocation: boolean = true;
 
-  constructor(private apiService: ApiService, private opnameSessionService: OpnameSessionService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
+  constructor(
+    private apiService: ApiService,
+    private opnameSessionService: OpnameSessionService,
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
+    private reportService: ReportService
+  ) {
     this.siteID = Number(this.route.snapshot.paramMap.get('id'));
   }
 
@@ -111,6 +124,28 @@ export class ReportComponent {
     });
   }
 
+  async initOpnameStats() {
+    this.isLoading = true;
+    
+    if (this.sessionID === -1) {
+      this.errorMessage = 'No session selected.';
+      console.error('[Report] Error: No session selected for stats.');
+      this.isLoading = false;
+      return;
+    }
+
+    try {
+      // Convert Observable to Promise using lastValueFrom
+      const stats = await lastValueFrom(this.reportService.getOpnameStats(this.sessionID));
+      this.opnameStats = stats;
+      this.isLoading = false;
+    } catch (error) {
+      console.error('[Report] Error fetching opname stats:', error);
+      this.errorMessage = 'Failed to load opname stats.';
+      this.isLoading = false;
+    }
+  }
+
   generateDateOptions() {
     this.dateOptions = this.availableOpnameSessions.map(s => ({
       value: s.endDate,
@@ -123,17 +158,21 @@ export class ReportComponent {
     console.log('[Report] Date options generated:', this.dateOptions);
   }
 
-  onDateChange() {
+  async onDateChange() {
     const found = this.availableOpnameSessions.find(s => s.endDate === this.selectedDate);
     this.sessionID = found ? found.sessionID : -1;
-    console.log('[Report] Date changed to:', this.selectedDate, 'Session ID:', this.sessionID);
+
+    if (found) {
+      await this.initOpnameStats();
+    }
+
     this.cdr.detectChanges();
   }
 
   private handleInputFromURL() {
     // Check if there's a selectedDate and selectedSessionID in query parameters
     // This is when a user was redirected after finishing an opname
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe(async params => {
       const selectedSessionID = params['session_id'];
       const from = params['from'];
 
@@ -146,7 +185,7 @@ export class ReportComponent {
         if (session) {
           this.selectedDate = session.endDate;
           console.log('[Report] Selected date from session:', this.selectedDate);
-          this.onDateChange(); // Trigger date change logic
+          await this.onDateChange();
           if (from === 'opname_page') {
             this.successMessage = 'Opname session finished successfully!';
             this.showSuccessMessage();
