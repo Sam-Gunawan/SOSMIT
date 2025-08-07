@@ -6,7 +6,7 @@ import { ApiService } from '../services/api.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { environment } from '../../environments/environments';
-import { parseAdaptorSN } from '../reusable_functions';
+import { parseAdaptorSN } from '../utils';
 
 @Component({
   selector: 'app-asset-page',

@@ -4,7 +4,7 @@ import { CommonModule } from '@angular/common';
 import { SiteCardComponent } from '../site-card/site-card.component';
 import { SiteInfo } from '../model/site-info.model';
 import { User } from '../model/user.model';
-import { titleCase, formatDate } from '../reusable_functions'; // Import the titleCase function
+import { titleCase, formatDate } from '../utils'; // Import the titleCase function
 
 @Component({
   selector: 'app-dashboard',

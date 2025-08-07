@@ -1,11 +1,15 @@
 export function titleCase(str: string): string {
     var result: string[] = [];
+    const alwaysUpperCase = ['TMC', 'IT']; // List of words to always keep in uppercase
+    const specialCases = {
+        'SALESMAN-TMC': 'Salesman-TMC'
+    };
     for (var word of str.split(' ')) {
-        if (word.toUpperCase() === 'TMC') {
-            // Special case for "TMC" to keep it in uppercase
-            result.push('TMC');
-        } else if (word.toUpperCase() === 'SALESMAN-TMC') {
-            result.push('Salesman-TMC');
+        if (alwaysUpperCase.includes(word.toUpperCase())) {
+            // Special case for these words to keep it in uppercase
+            result.push(word.toUpperCase());
+        } else if (word.toUpperCase() in specialCases) {
+            result.push(specialCases[word.toUpperCase() as keyof typeof specialCases]);
         } else {
             // Capitalize the first letter of each word
             result.push(word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());

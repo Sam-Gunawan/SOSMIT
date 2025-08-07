@@ -14,7 +14,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { AssetPageComponent } from '../asset-page/asset-page.component';
-import { parseAdaptorSN } from '../reusable_functions';
+import { parseAdaptorSN } from '../utils';
 import { SubSite } from '../model/sub-site.model';
 import { OpnamePreviewComponent } from '../opname-preview/opname-preview.component';
 import { lastValueFrom } from 'rxjs/internal/lastValueFrom';
