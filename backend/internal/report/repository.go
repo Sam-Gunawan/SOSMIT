@@ -24,6 +24,10 @@ type OpnameStats struct {
 	MissingAssets   int64
 }
 
+// TODO: !!!
+type ReportSummary struct {
+}
+
 // GetOpnameStats retrieves the opname statistics for a given opname session ID.
 func (repo *Repository) GetOpnameStats(sessionID int64) (*OpnameStats, error) {
 	var stats OpnameStats
