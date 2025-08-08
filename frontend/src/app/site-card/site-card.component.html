@@ -117,6 +117,19 @@
                         <option *ngFor="let site of originalSiteCardList"></option>
                     </datalist>
                 </div>
+
+                <div class="form-item">
+                    <label>Owner Dept.</label>
+                    <input 
+                        type="text" 
+                        class="form-control"
+                        name="departmentName"
+                        placeholder="Owner department"
+                        list="departmentNames">
+                    <datalist id="departmentNames">
+                        <option *ngFor="let site of originalSiteCardList"></option>
+                    </datalist>
+                </div>
             </div>
             
             <div class="form-actions">
