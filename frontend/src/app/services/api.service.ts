@@ -6,7 +6,7 @@
   import { SiteInfo } from '../model/site-info.model';
   import { AssetInfo } from '../model/asset-info.model';
   import { User } from '../model/user.model';
-  import { formatDate, titleCase } from '../reusable_functions';
+  import { formatDate, titleCase } from '../utils';
   import { environment } from '../../environments/environments';
 import { SubSite } from '../model/sub-site.model';
 

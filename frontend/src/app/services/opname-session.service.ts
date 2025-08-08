@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { OpnameSession } from '../model/opname-session.model';
 import { AssetChange } from '../model/asset-changes.model';
 import { OpnameSessionProgress } from '../model/opname-session-progress.model';
-import { formatDate } from '../reusable_functions';
+import { formatDate } from '../utils';
 
 @Injectable({ providedIn: 'root' })
 export class OpnameSessionService {

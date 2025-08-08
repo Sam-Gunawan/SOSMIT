@@ -14,7 +14,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { AssetPageComponent } from '../asset-page/asset-page.component';
-import { parseAdaptorSN } from '../reusable_functions';
+import { parseAdaptorSN } from '../utils';
 import { SubSite } from '../model/sub-site.model';
 import { OpnamePreviewComponent } from '../opname-preview/opname-preview.component';
 import { lastValueFrom } from 'rxjs/internal/lastValueFrom';
@@ -288,7 +288,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       next: (equipmentsString: string) => {
         // Parse the comma-separated string into an array
         if (equipmentsString && typeof equipmentsString === 'string' && equipmentsString.trim() !== '') {
-          result.availableEquipments = equipmentsString.split(',').map((e: string) => e.trim()).filter((e: string) => e !== '');
+          result.availableEquipments = equipmentsString.split(',').map((e: string) => e.trim()).filter((e: string) => e !== '').sort();
         } else {
           result.availableEquipments = []; // No equipments available for this product variety
         }
