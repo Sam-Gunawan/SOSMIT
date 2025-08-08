@@ -149,7 +149,7 @@
                         </div>
                         
                         <!-- Original data table -->
-                        <div class="table-container">
+                        <div class="table-container" id="original-data-table">
                             <table mat-table [dataSource]="originalDataSource" class="assets-table">
                                 <!-- Asset Tag Column -->
                                 <ng-container matColumnDef="assetTag">
@@ -368,7 +368,7 @@
                         </div>
                         <!-- Updated data table will go here -->
 
-                        <div class="table-container">
+                        <div class="table-container" id="updated-data-table">
                             <table mat-table [dataSource]="updatedDataSource" class="assets-table">
                                 <!-- Asset Tag Column -->
                                 <ng-container matColumnDef="assetTag">

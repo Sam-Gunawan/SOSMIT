@@ -96,6 +96,7 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
 
   ngOnInit() {
     this.loadPreviewData();
+    this.syncScrollPosition();
   }
 
   ngOnChanges() {
@@ -418,13 +419,18 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
     this.showFilterForm = !this.showFilterForm;
   }
 
-  // Show data preview (placeholder method for consistency)
-  showDataPreview(): void {
-    // This method is here for template compatibility but doesn't do anything
-    // since we're already in the preview component
-  }
+  private syncScrollPosition(): void {
+    const originalTable = document.getElementById('original-data-table');
+    const updatedTable = document.getElementById('updated-data-table');
 
-  // errorMessage: string = '';
-  // showToast: boolean = false;
-  // isLoading: boolean = true;
+    if (originalTable && updatedTable) {
+      const syncScroll = () => {
+        updatedTable.scrollLeft = originalTable.scrollLeft;
+        updatedTable.scrollTop = originalTable.scrollTop;
+      };
+
+      originalTable.addEventListener('scroll', syncScroll, false);
+      updatedTable.addEventListener('scroll', syncScroll, false);
+    }
+  }
 }
