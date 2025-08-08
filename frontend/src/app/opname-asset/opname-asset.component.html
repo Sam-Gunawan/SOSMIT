@@ -333,9 +333,20 @@
                                             readonly>
                                     </div>
                                     
-                                    <p class="status-reason" *ngIf="result.pendingAsset.assetStatus === 'Disposed' && result.pendingAsset.statusReason">
-                                        Reason: {{ result.pendingAsset.statusReason }}
-                                    </p>
+                                    <div class="form-item" *ngIf="result.pendingAsset.assetStatus === 'Disposed' && result.pendingAsset.statusReason">
+                                        <label [for]="'asset-status-reason-' + result.pendingAsset.assetTag" class="form-label mb-0">Status Reason</label>
+                                        <input type="text" class="form-control" 
+                                            [id]="'asset-status-reason-' + result.pendingAsset.assetTag" 
+                                            [value]="result.pendingAsset.statusReason" 
+                                            readonly>
+                                    </div>
+
+                                    <div class="form-item">
+                                        <label [for]="'asset-total-cost-' + result.pendingAsset.assetTag" class="form-label mb-0">Total Cost</label>
+                                        <input type="text" class="form-control" 
+                                            [id]="'asset-total-cost-' + result.pendingAsset.assetTag" 
+                                            readonly>
+                                    </div>
                                 </div>
                                 
                                 <div class="user-info">
@@ -385,7 +396,7 @@
                 
                                 <div class="left-top">
                                     <div class="equipment-header">
-                                        <h6>Peralatan</h6>
+                                        <h6>Kelengkapan</h6>
                                         <div class="equipment-status" *ngIf="result.availableEquipments.length > 0">
                                             <span class="status-indicator" 
                                                   [ngClass]="{
@@ -448,7 +459,7 @@
 
                                     <!-- will change to department -->
                                     <div class="form-item">
-                                        <label [for]="'user-department-' + result.pendingAsset.assetTag" class="form-label mb-0">Owner Dept.</label>
+                                        <label [for]="'user-department-' + result.pendingAsset.assetTag" class="form-label mb-0">Department</label>
                                         <input type="text" class="form-control" 
                                             [id]="'user-department-' + result.pendingAsset.assetTag" 
                                             [value]="result.pendingAsset.assetOwnerDepartment" 
@@ -459,7 +470,7 @@
                                 <div class="left-bottom">
                                     <div class="asset-condition">  
                                         <div class="rating">
-                                            <h6 class="condition">Condition</h6>
+                                            <h6 class="condition">Kondisi Fisik Unit</h6>
 
                                             <span class="like-btn" [class.active]="isLiked" (click)="setLike()">
                                                 Good
@@ -511,13 +522,13 @@
                                     <div class="asset-location">
                                         <h6>Asset Location</h6>
 
-                                        <div class="form-item">
+                                        <!-- <div class="form-item">
                                             <label [for]="'user-region-' + result.pendingAsset.assetTag" class="form-label mb-0">Region</label>
                                             <input type="text" class="form-control" 
                                                 [id]="'user-region-' + result.pendingAsset.assetTag" 
                                                 [value]="result.pendingAsset.regionName" 
                                                 readonly>
-                                        </div>
+                                        </div> -->
 
                                         <div class="form-item">
                                             <label [for]="'user-group-' + result.pendingAsset.assetTag" class="form-label mb-0">Group</label>
@@ -542,6 +553,15 @@
                                             <div *ngIf="(result.pendingAsset.subSiteID === undefined && result.pendingAsset.subSiteName) || !result.pendingAsset.subSiteName" class="invalid-feedback">
                                                 Please select a valid site from the list.
                                             </div>
+                                        </div>
+
+                                        <!-- will change value later -->
+                                        <div class="form-item">
+                                            <label [for]="'owner-department-' + result.pendingAsset.assetTag" class="form-label mb-0">Owner Dept.</label>
+                                            <input type="text" class="form-control" 
+                                                [id]="'owner-department-' + result.pendingAsset.assetTag" 
+                                                [value]="result.pendingAsset.assetOwnerDepartment" 
+                                                readonly>
                                         </div>
 
                                         <div class="form-item">

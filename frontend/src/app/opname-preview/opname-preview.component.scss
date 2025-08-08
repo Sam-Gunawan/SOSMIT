@@ -471,6 +471,10 @@ p {
     font-weight: 500;
   }
 
+  .equipment-cell {
+    min-width: 400px;
+  }
+
   // Highlighting for changed cells
   .cell-changed {
     background-color: #fff3cd !important; // Light yellow background
