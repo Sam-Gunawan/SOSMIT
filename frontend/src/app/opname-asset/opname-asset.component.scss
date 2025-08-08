@@ -449,9 +449,9 @@ p {
     padding: 5px 8px;
   }
 
-  .modal-header {
-    padding: 10px;
-  }
+  // .modal-header {
+  //   padding: 10px;
+  // }
 
   .modal-body {
     position: relative;
@@ -1224,14 +1224,21 @@ table {
   }
 }
 
+.confirmation-body {
+  padding: 16px !important;
+}
+
+.confirmation-text {
+  font-size: 12px !important;
+  color: styles.$primary-text-color !important;
+  padding: 0px !important;
+}
+
 .modal-footer {
   position: relative;
   
   .btn {
-    font-size: 9px;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-weight: 500;
+    font-size: 12px;
     
     &.btn-primary {
       background-color: styles.$primary-color;

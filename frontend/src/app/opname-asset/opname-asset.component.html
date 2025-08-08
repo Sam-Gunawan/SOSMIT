@@ -593,7 +593,7 @@
                                 <span *ngIf="!isLoading">Save Changes</span>
                             </button>
 
-                            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" [attr.data-bs-target]="'#assetAllGood-' + i">
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" [attr.data-bs-target]="'#assetAllGood-' + i">
                                 All good
                             </button>
                         </div>
@@ -607,20 +607,22 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Asset Data correct?</h1>
+                    <h5 class="modal-title fs-5" id="staticBackdropLabel">Apakah data asset sudah benar?</h5>
                 </div>
-                <div class="modal-body">
-                    This will confirm that the asset data is correct.
-                    <br>
-                    <br>
-                    <strong>Note:</strong> If you have changed the asset data, please keep in mind that this action will <strong class="text-danger">delete the changes you make</strong> and <strong>revert back to the original data</strong>.
-                    <br>
+                <div class="modal-body confirmation-body">
+                    <p class="confirmation-text">
+                        Ini akan mengkonfirmasi bahwa data asset sudah benar.
+                        <br>
+                        <br>
+                        <strong>Catatan:</strong> Jika Anda telah mengubah data asset, harap diingat bahwa tindakan ini akan <strong class="text-danger">menghapus perubahan yang Anda buat</strong> dan <strong>mengembalikan ke data asli</strong>.
+                        <br>
+                    </p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-secondary" [disabled]="isLoading" (click)="markAsAllGood(i)">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="button" class="btn btn-success" [disabled]="isLoading" (click)="markAsAllGood(i)">
                         <span *ngIf="isLoading" class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        <span *ngIf="!isLoading">All good</span>
+                        <span *ngIf="!isLoading">Semua Benar</span>
                     </button>
                 </div>
             </div>
