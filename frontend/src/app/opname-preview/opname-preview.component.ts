@@ -419,18 +419,25 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
     this.showFilterForm = !this.showFilterForm;
   }
 
+  // TODO: optimize scroll sync using throttling or debouncing
   private syncScrollPosition(): void {
     const originalTable = document.getElementById('original-data-table');
     const updatedTable = document.getElementById('updated-data-table');
 
     if (originalTable && updatedTable) {
-      const syncScroll = () => {
-        updatedTable.scrollLeft = originalTable.scrollLeft;
-        updatedTable.scrollTop = originalTable.scrollTop;
+      let isSyncing = false;
+
+      const syncScroll = (source: HTMLElement, target: HTMLElement) => {
+        if (isSyncing) return;
+
+        isSyncing = true;
+        target.scrollLeft = source.scrollLeft;
+        target.scrollTop = source.scrollTop;
+        isSyncing = false;
       };
 
-      originalTable.addEventListener('scroll', syncScroll, false);
-      updatedTable.addEventListener('scroll', syncScroll, false);
+      originalTable.addEventListener('scroll', () => syncScroll(originalTable, updatedTable), { passive: true });
+      updatedTable.addEventListener('scroll', () => syncScroll(updatedTable, originalTable), { passive: true });
     }
   }
 }
