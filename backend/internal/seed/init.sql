@@ -155,6 +155,9 @@ CREATE TABLE "AssetChanges" (
 
     "processing_status" VARCHAR(25) NOT NULL CHECK ("processing_status" IN ('pending', 'edited', 'all_good')), -- Status of the change processing
 
+    -- Appears when user wants to generate BAP and is editable then.
+    "action_notes" TEXT DEFAULT '',
+
     CONSTRAINT unique_session_asset UNIQUE (session_id, asset_tag) -- Ensure each asset can only have one change record per session
 );
 

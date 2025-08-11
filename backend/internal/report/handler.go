@@ -10,16 +10,10 @@ import (
 )
 
 // Handler holds the report service.
-type Handler struct {
-	service *Service
-}
+type Handler struct{ service *Service }
 
 // NewHandler creates a new report handler with the provided report service.
-func NewHandler(service *Service) *Handler {
-	return &Handler{
-		service: service,
-	}
-}
+func NewHandler(service *Service) *Handler { return &Handler{service: service} }
 
 // GetOpnameStatsHandler retrieves the opname statistics for a given opname session ID.
 func (handler *Handler) GetOpnameStatsHandler(context *gin.Context) {
@@ -58,3 +52,28 @@ func (handler *Handler) GetOpnameStatsHandler(context *gin.Context) {
 		"missing_assets":   stats.MissingAssets,
 	})
 }
+
+// GenerateBAPHandler streams the BAP PDF for a session.
+func (handler *Handler) GenerateBAPHandler(c *gin.Context) {
+	sessionIDStr := c.Param("session-id")
+	if sessionIDStr == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "session-id is required"})
+		return
+	}
+	sessionID, err := strconv.ParseInt(sessionIDStr, 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session-id"})
+		return
+	}
+
+	pdfBytes, filename, err := handler.service.GenerateAndAssembleBAP(sessionID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate BAP PDF: " + err.Error()})
+		return
+	}
+	c.Header("Content-Type", "application/pdf")
+	c.Header("Content-Disposition", "attachment; filename="+filename)
+	c.Data(http.StatusOK, "application/pdf", pdfBytes)
+}
+
+// legacy sanitize retained in service

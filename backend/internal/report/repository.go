@@ -28,6 +28,116 @@ type OpnameStats struct {
 type ReportSummary struct {
 }
 
+// BAPRecapRow represents a single recap row (aggregated per category).
+type BAPRecapRow struct {
+	Category       string
+	ProductVariety string
+	AssetCount     int64
+}
+
+// BAPDetailRow represents a single asset detail row in the lampiran table.
+type BAPDetailRow struct {
+	Category            string
+	Company             string
+	AssetTag            string
+	AssetName           string
+	Equipments          sql.NullString
+	UserNameAndPosition string
+	AssetStatus         string
+	ActionNotes         sql.NullString
+	CostCenterID        sql.NullInt64
+}
+
+// SessionMeta holds minimal session metadata needed for BAP generation (avoid importing opname pkg to prevent cycles).
+type SessionMeta struct {
+	ID                int
+	EndDate           sql.NullString
+	Status            string
+	UserID            int
+	ManagerReviewerID sql.NullInt64
+	L1ReviewerID      sql.NullInt64
+	SiteID            int
+}
+
+// GetBAPRecap retrieves recap rows (grouped by category & product variety) for a session.
+func (repo *Repository) GetBAPRecap(sessionID int64) ([]BAPRecapRow, error) {
+	query := `SELECT category, product_variety, asset_count FROM get_opname_bap_recap($1)`
+	rows, err := repo.db.Query(query, sessionID)
+	if err != nil {
+		log.Printf("❌ Error querying BAP recap for session %d: %v", sessionID, err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var recap []BAPRecapRow
+	for rows.Next() {
+		var r BAPRecapRow
+		if err := rows.Scan(&r.Category, &r.ProductVariety, &r.AssetCount); err != nil {
+			log.Printf("❌ Error scanning BAP recap row: %v", err)
+			return nil, err
+		}
+		recap = append(recap, r)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return recap, nil
+}
+
+// GetBAPDetails retrieves detailed lampiran rows for a session.
+func (repo *Repository) GetBAPDetails(sessionID int64) ([]BAPDetailRow, error) {
+	query := `SELECT category, company, asset_tag, asset_name, equipments, user_name_and_position, asset_status, action_notes, cost_center_id FROM get_opname_bap_details($1)`
+	rows, err := repo.db.Query(query, sessionID)
+	if err != nil {
+		log.Printf("❌ Error querying BAP details for session %d: %v", sessionID, err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var details []BAPDetailRow
+	for rows.Next() {
+		var d BAPDetailRow
+		if err := rows.Scan(&d.Category, &d.Company, &d.AssetTag, &d.AssetName, &d.Equipments, &d.UserNameAndPosition, &d.AssetStatus, &d.ActionNotes, &d.CostCenterID); err != nil {
+			log.Printf("❌ Error scanning BAP detail row: %v", err)
+			return nil, err
+		}
+		details = append(details, d)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return details, nil
+}
+
+// GetSessionMeta retrieves minimal opname session metadata (mirrors get_opname_session_by_id) without creating package cycles.
+func (repo *Repository) GetSessionMeta(sessionID int64) (*SessionMeta, error) {
+	var sm SessionMeta
+	var startDate string                 // ignored for PDF meta currently
+	var managerReviewedAt sql.NullString // ignored
+	var l1ReviewedAt sql.NullString      // ignored
+	err := repo.db.QueryRow(`SELECT * FROM get_opname_session_by_id($1)`, sessionID).Scan(
+		&sm.ID,
+		&startDate,
+		&sm.EndDate,
+		&sm.Status,
+		&sm.UserID,
+		&sm.ManagerReviewerID,
+		&managerReviewedAt,
+		&sm.L1ReviewerID,
+		&l1ReviewedAt,
+		&sm.SiteID,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("⚠ No session meta found for ID %d", sessionID)
+			return nil, nil
+		}
+		log.Printf("❌ Error retrieving session meta %d: %v", sessionID, err)
+		return nil, err
+	}
+	return &sm, nil
+}
+
 // GetOpnameStats retrieves the opname statistics for a given opname session ID.
 func (repo *Repository) GetOpnameStats(sessionID int64) (*OpnameStats, error) {
 	var stats OpnameStats

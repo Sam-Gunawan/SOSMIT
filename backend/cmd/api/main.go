@@ -63,9 +63,9 @@ func main() {
 	authService := auth.NewService(userRepo)
 	userService := user.NewService(userRepo)
 	assetService := asset.NewService(assetRepo)
-	opnameService := opname.NewService(opnameRepo, uploadService, userRepo, siteRepo, emailService)
 	siteService := site.NewService(siteRepo)
 	reportService := report.NewService(reportRepo)
+	opnameService := opname.NewService(opnameRepo, uploadService, userRepo, siteRepo, emailService, reportService)
 
 	// Initialize the handlers
 	authHandler := auth.NewHandler(authService)
@@ -195,6 +195,8 @@ func main() {
 		{
 			// GET /api/report/:session-id/stats
 			reportRoutes.GET("/:session-id/stats", reportHandler.GetOpnameStatsHandler)
+			// GET /api/report/:session-id/bap.pdf
+			reportRoutes.GET("/:session-id/bap.pdf", reportHandler.GenerateBAPHandler)
 		}
 
 	}

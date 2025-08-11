@@ -976,6 +976,56 @@ AS $$
 	END;
 $$;
 
+-- categorize_opname_assets categorizes assets based on their status and changes
+CREATE OR REPLACE FUNCTION public.categorize_opname_assets(_session_id INT)
+	RETURNS TABLE (
+		category VARCHAR(50),
+		asset_tag VARCHAR(12),
+		product_variety VARCHAR(50)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT * FROM (
+			-- Categorize assets that were scanned and processed during opname
+			SELECT
+				CASE
+					-- Priority 1: Broken assets (status = 'Down'). Will never exist in "AssetChanges" becasue asset status can't be modified during opname.
+					WHEN a.status = 'Down'
+					THEN 'broken_assets'::VARCHAR(50)
+
+					-- Priority 2: Misplaced assets a.k.a. kesalahan mutasi (when cost center changes but is not downed).
+					WHEN ac."changes" ? 'newOwnerCostCenter'
+						AND ac."changes" ->> 'newOwnerCostCenter' IS NOT NULL
+						AND a.status <> 'Down'
+					THEN 'misplaced_assets'::VARCHAR(50)
+
+					-- Priority 3: Working assets (scanned, not broken, not misplaced)
+					ELSE 'working_assets'::VARCHAR(50)
+				END AS category,
+				a.asset_tag,
+				a.product_variety
+			FROM "AssetChanges" AS ac
+			INNER JOIN "Asset" AS a ON ac.asset_tag = a.asset_tag
+			WHERE ac.session_id = _session_id
+			
+			UNION
+
+			-- Those not scanned will definitely be 'missing_assets'
+			SELECT
+				'missing_assets'::VARCHAR(50) AS category,
+				a.asset_tag,
+				a.product_variety
+			FROM "Asset" AS a
+			INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
+			INNER JOIN "OpnameSession" AS os ON ss.site_id = os.site_id AND os.id = _session_id
+			WHERE a.asset_tag NOT IN (SELECT ac.asset_tag FROM "AssetChanges" AS ac WHERE ac.session_id = _session_id)
+		)
+		ORDER BY category, asset_tag;
+	END;
+$$;
+
 -- get_opname_stats retrieves the statistic for an opname session
 CREATE OR REPLACE FUNCTION public.get_opname_stats(_session_id INT)
 	RETURNS TABLE (
@@ -986,62 +1036,86 @@ CREATE OR REPLACE FUNCTION public.get_opname_stats(_session_id INT)
 	)
 	LANGUAGE plpgsql
 AS $$
-	DECLARE
-		_site_id INT;
-		_total_assets_on_site INT;
-		_scanned_assets INT;
-		_missing_count INT;
 	BEGIN
-		-- Get the site ID for this opname session
-		SELECT os.site_id INTO _site_id
-		FROM "OpnameSession" AS os
-		WHERE os.id = _session_id;
-		
-		-- Count total assets registered to this site (across all sub-sites)
-		SELECT COUNT(*) INTO _total_assets_on_site
-		FROM "Asset" AS a
-		INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
-		WHERE ss.site_id = _site_id;
-		
-		-- Count assets (only the ones belonging to the site) that were scanned in this opname session
-		SELECT COUNT(*) INTO _scanned_assets
-		FROM "AssetChanges" AS ac
-		WHERE ac.session_id = _session_id AND ac.asset_tag IN (
-			SELECT a.asset_tag
-			FROM "Asset" AS a
-			INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
-			WHERE ss.site_id = _site_id
-		);
-		
-		-- Calculate missing assets (registered but not scanned)
-		_missing_count := _total_assets_on_site - _scanned_assets;
-		
 		RETURN QUERY
 		SELECT
-			-- Working assets: scanned assets that are NOT down and NOT misplaced
-			COUNT(CASE 
-				WHEN (COALESCE(ac."changes" ->> 'newStatus', a.status) <> 'Down') 
-					AND NOT (ac."changes" ? 'newOwnerCostCenter' AND ac."changes" ->> 'newOwnerCostCenter' IS NOT NULL)
-				THEN 1 
-			END)::INT AS working_assets,
-			
-			-- Broken assets: any asset with status 'Down' (highest priority)
-			COUNT(CASE 
-				WHEN (COALESCE(ac."changes" ->> 'newStatus', a.status) = 'Down') 
-				THEN 1 
-			END)::INT AS broken_assets,
-			
-			-- Misplaced assets: assets with changed cost center BUT not broken
-			COUNT(CASE 
-				WHEN (ac."changes" ? 'newOwnerCostCenter' AND ac."changes" ->> 'newOwnerCostCenter' IS NOT NULL)
-					AND (COALESCE(ac."changes" ->> 'newStatus', a.status) <> 'Down')
-				THEN 1 
-			END)::INT AS misplaced_assets,
-			
-			-- Missing assets: registered to site but not scanned
-			_missing_count AS missing_assets
-		FROM "AssetChanges" AS ac
-		INNER JOIN "Asset" AS a ON ac.asset_tag = a.asset_tag
-		WHERE ac.session_id = _session_id;
+			COALESCE(SUM(CASE WHEN category = 'working_assets' THEN 1 ELSE 0 END), 0)::INT AS working_assets,
+			COALESCE(SUM(CASE WHEN category = 'broken_assets' THEN 1 ELSE 0 END), 0)::INT AS broken_assets,
+			COALESCE(SUM(CASE WHEN category = 'misplaced_assets' THEN 1 ELSE 0 END), 0)::INT AS misplaced_assets,
+			COALESCE(SUM(CASE WHEN category = 'missing_assets' THEN 1 ELSE 0 END), 0)::INT AS missing_assets
+		FROM public.categorize_opname_assets(_session_id);
+	END;
+$$;
+
+-- get_opname_bap_recap retreives the first page summary of the BAP report for an opname session
+CREATE OR REPLACE FUNCTION public.get_opname_bap_recap(_session_id INT)
+	RETURNS TABLE (
+		category VARCHAR(50),
+		product_variety VARCHAR(50),
+		asset_count INT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT ca.category, ca.product_variety, COUNT(ca.asset_tag)::INT AS asset_count
+		FROM public.categorize_opname_assets(_session_id) AS ca -- 'ca': categorized assets
+		GROUP BY ca.category, ca.product_variety
+		ORDER BY ca.category, ca.product_variety;
+	END;
+$$;
+
+-- get_opname_bap_details retrieves the detailed BAP report per category
+CREATE OR REPLACE FUNCTION public.get_opname_bap_details(_session_id INT)
+	RETURNS TABLE (
+		category VARCHAR(50),
+		company VARCHAR(50),
+		asset_tag VARCHAR(12),
+		asset_name VARCHAR(50),
+		equipments TEXT,
+		user_name_and_position TEXT,
+		asset_status VARCHAR(20),
+		action_notes TEXT,
+		cost_center_id INT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		-- NOTE:
+		-- 1. ac.action_notes does not exist; the column is change_reason in AssetChanges.
+		-- 2. Some assets may have NULL owner_id -> use LEFT JOIN to avoid losing rows.
+		-- 3. Use concat_ws to safely build user_name_and_position.
+		-- 4. Use LEFT JOIN LATERAL for equipments helper to avoid cross join warnings.
+		-- 5. Deterministic category ordering via CASE.
+		RETURN QUERY
+		SELECT
+			ca.category,
+			'PT Surya Madistrindo'::VARCHAR(50) AS company,
+			a.asset_tag,
+			a.product_name AS asset_name,
+			ae.equipments,
+			CASE 
+				WHEN u.user_id IS NULL THEN 'N/A'
+				ELSE concat_ws(' - ', u.position, trim(both ' ' FROM concat_ws(' ', u.first_name, u.last_name)))
+			END AS user_name_and_position,
+			a.status AS asset_status,
+			ac.action_notes,
+			u.cost_center_id
+		FROM public.categorize_opname_assets(_session_id) AS ca
+		INNER JOIN "Asset" AS a ON ca.asset_tag = a.asset_tag
+		LEFT JOIN "User" AS u ON a.owner_id = u.user_id
+		LEFT JOIN "AssetChanges" AS ac 
+			ON a.asset_tag = ac.asset_tag 
+			AND ac.session_id = _session_id
+		LEFT JOIN LATERAL public.get_asset_equipments(a.product_variety) AS ae ON TRUE
+		ORDER BY 
+			CASE ca.category
+				WHEN 'working_assets' THEN 1
+				WHEN 'broken_assets' THEN 2
+				WHEN 'misplaced_assets' THEN 3
+				WHEN 'missing_assets' THEN 4
+				ELSE 99
+			END,
+			a.asset_tag;
 	END;
 $$;

@@ -3,6 +3,7 @@ package email
 
 import (
 	"bytes"
+	"encoding/base64"
 	"html/template"
 	"log"
 	"os"
@@ -27,6 +28,13 @@ type EmailData struct {
 	PageLink         string
 }
 
+// Attachment represents a file attachment (e.g., PDF) to send.
+type Attachment struct {
+	Filename    string
+	ContentType string
+	Data        []byte
+}
+
 // NewService creates a new email service with the provided SendGrid API key and sender email.
 func NewService() *Service {
 	err := godotenv.Load()
@@ -48,7 +56,7 @@ func NewService() *Service {
 }
 
 // SendEmail sends an email using the SendGrid API.
-func (service *Service) SendEmail(recipientEmail, recipientName, subject, templateName string, data EmailData, ccEmail []string) error {
+func (service *Service) SendEmail(recipientEmail, recipientName, subject, templateName string, data EmailData, ccEmail []string, attachments ...Attachment) error {
 	// Parse the HTML template
 	templatePath := filepath.Join("templates", templateName)
 	templateFile, err := template.ParseFiles(templatePath)
@@ -71,6 +79,21 @@ func (service *Service) SendEmail(recipientEmail, recipientName, subject, templa
 	for _, cc := range ccEmail { // Add cc recipients if provided.
 		ccRecipient := mail.NewEmail("", cc)
 		message.Personalizations[0].AddCCs(ccRecipient)
+	}
+
+	// Add attachments if any
+	for _, att := range attachments {
+		if len(att.Data) == 0 {
+			continue
+		}
+		encoded := base64.StdEncoding.EncodeToString(att.Data)
+		a := mail.Attachment{
+			Filename:    att.Filename,
+			Type:        att.ContentType,
+			Content:     encoded,
+			Disposition: "attachment",
+		}
+		message.AddAttachment(&a)
 	}
 	client := sendgrid.NewSendClient(service.sendgridKey)
 	response, err := client.Send(message)

@@ -21,4 +21,9 @@ export class ReportService {
 			}))
 		);
 	}
+
+	/** Download BAP PDF for a session as Blob */
+	downloadBAPPdf(sessionID: number): Observable<Blob> {
+		return this.http.get(`${this.reportApiUrl}/${sessionID}/bap.pdf`, { responseType: 'blob' });
+	}
 }

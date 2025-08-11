@@ -14,6 +14,7 @@ import (
 	"golang.org/x/text/language"
 
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/email"
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/report"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/site"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/upload"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
@@ -25,16 +26,18 @@ type Service struct {
 	userRepo      *user.Repository
 	siteRepo      *site.Repository
 	emailService  *email.Service
+	reportService *report.Service
 }
 
 // NewService creates a new Opname service with the provided repository.
-func NewService(repo *Repository, uploadService *upload.Service, userRepo *user.Repository, siteRepo *site.Repository, emailService *email.Service) *Service {
+func NewService(repo *Repository, uploadService *upload.Service, userRepo *user.Repository, siteRepo *site.Repository, emailService *email.Service, reportService *report.Service) *Service {
 	return &Service{
 		repo:          repo,
 		uploadService: uploadService,
 		userRepo:      userRepo,
 		siteRepo:      siteRepo,
 		emailService:  emailService,
+		reportService: reportService,
 	}
 }
 
@@ -270,6 +273,12 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 			PageLink:         os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(site.SiteID) + "/report?session_id=" + strconv.Itoa(sessionID),
 		}
 
+		// Generate initial PDF with only submitter signature
+		pdfBytes, pdfErr := service.reportService.GenerateBAPPDF(int64(sessionID), report.BuildSignatures(submitterName, nil), site.SiteName, site.SiteGroupName, time.Now())
+		if pdfErr != nil {
+			log.Printf("❌ PDF generation failed (submitted stage): %v", pdfErr)
+		}
+
 		if err := service.emailService.SendEmail(
 			submitter.Email,
 			submitter.Username,
@@ -277,6 +286,7 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 			"opname_submitted.html",
 			emailDataUser,
 			nil,
+			email.Attachment{Filename: fmt.Sprintf("BAP_opname_%s_%s.pdf", strings.ReplaceAll(site.SiteName, " ", "_"), time.Now().Format("02-01-2006")), ContentType: "application/pdf", Data: pdfBytes},
 		); err != nil {
 			log.Printf("❌ Error sending email to submitter: %v", err)
 		}
@@ -291,6 +301,8 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 			PageLink:         "",
 		}
 
+		// Reuse same PDF for manager (only submitter signature at this point)
+
 		if err := service.emailService.SendEmail(
 			managerEmail,
 			manager.Username,
@@ -298,6 +310,7 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 			"opname_review_manager.html",
 			emailDataAreaManager,
 			nil,
+			email.Attachment{Filename: fmt.Sprintf("BAP_opname_%s_%s.pdf", strings.ReplaceAll(site.SiteName, " ", "_"), time.Now().Format("02-01-2006")), ContentType: "application/pdf", Data: pdfBytes},
 		); err != nil {
 			log.Printf("❌ Error sending email to manager: %v", err)
 		}
@@ -396,6 +409,12 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 				PageLink:         os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(site.SiteID) + "/report?session_id=" + strconv.Itoa(sessionID),
 			}
 
+			// Generate escalated PDF (submitter + manager signatures)
+			pdfBytes, pdfErr := service.reportService.GenerateBAPPDF(int64(sessionID), report.BuildSignatures(cases.Title(language.English).String(submitter.FirstName+" "+submitter.LastName), []string{managerName}), site.SiteName, site.SiteGroupName, time.Now())
+			if pdfErr != nil {
+				log.Printf("❌ PDF generation failed (escalated stage submitter email): %v", pdfErr)
+			}
+
 			if err := service.emailService.SendEmail(
 				submitter.Email,
 				submitter.Username,
@@ -403,6 +422,7 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 				"opname_escalated.html",
 				emailDataUser,
 				ccEmails,
+				email.Attachment{Filename: fmt.Sprintf("BAP_opname_%s_%s.pdf", strings.ReplaceAll(site.SiteName, " ", "_"), time.Now().Format("02-01-2006")), ContentType: "application/pdf", Data: pdfBytes},
 			); err != nil {
 				log.Printf("❌ Error sending email to submitter: %v", err)
 			}
@@ -435,6 +455,7 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 					"opname_verification_needed.html",
 					emailDataL1,
 					ccEmails,
+					email.Attachment{Filename: fmt.Sprintf("BAP_opname_%s_%s.pdf", strings.ReplaceAll(site.SiteName, " ", "_"), time.Now().Format("02-01-2006")), ContentType: "application/pdf", Data: pdfBytes},
 				); err != nil {
 					log.Printf("❌ Error sending email to L1 support (%s): %v", emailAddr, err)
 				}
@@ -475,6 +496,20 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 				PageLink:         os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(site.SiteID) + "/report?session_id=" + strconv.Itoa(sessionID),
 			}
 
+			// Generate verified PDF (submitter + manager (if any) + l1 signatures)
+			var reviewerNames []string
+			if session.ManagerReviewerID.Valid {
+				mgrUser, _ := service.userRepo.GetUserByID(session.ManagerReviewerID.Int64)
+				if mgrUser != nil {
+					reviewerNames = append(reviewerNames, cases.Title(language.English).String(mgrUser.FirstName+" "+mgrUser.LastName))
+				}
+			}
+			reviewerNames = append(reviewerNames, l1Name)
+			pdfBytes, pdfErr := service.reportService.GenerateBAPPDF(int64(sessionID), report.BuildSignatures(cases.Title(language.English).String(submitter.FirstName+" "+submitter.LastName), reviewerNames), site.SiteName, site.SiteGroupName, time.Now())
+			if pdfErr != nil {
+				log.Printf("❌ PDF generation failed (verified stage): %v", pdfErr)
+			}
+
 			if err := service.emailService.SendEmail(
 				submitter.Email,
 				submitter.Username,
@@ -482,6 +517,7 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 				"opname_verified.html",
 				emailDataUser,
 				ccEmails,
+				email.Attachment{Filename: fmt.Sprintf("BAP_opname_%s_%s.pdf", strings.ReplaceAll(site.SiteName, " ", "_"), time.Now().Format("02-01-2006")), ContentType: "application/pdf", Data: pdfBytes},
 			); err != nil {
 				log.Printf("❌ Error sending email to submitter: %v", err)
 			}

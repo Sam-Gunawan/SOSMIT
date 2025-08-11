@@ -8,7 +8,7 @@ import { SiteInfo } from '../model/site-info.model';
 import { OpnameAssetComponent } from '../opname-asset/opname-asset.component';
 import { FormsModule } from '@angular/forms';
 import { ViewChild, ElementRef } from '@angular/core';
-import html2pdf from 'html2pdf.js';
+// import html2pdf from 'html2pdf.js'; // replaced by backend generated PDF
 import { OpnameStats } from '../model/opname-stats.model';
 import { lastValueFrom } from 'rxjs';
 
@@ -58,25 +58,28 @@ export class ReportComponent {
   }
 
   async exportToPDF() {
+    if (this.sessionID === -1) { this.errorMessage = 'Select a session first.'; return; }
     this.isExporting = true;
-    this.cdr.detectChanges(); // Ensure the export section is rendered
-
-    // Wait a tick to ensure DOM is updated
-    setTimeout(async () => {
-      const options = {
-        margin: 0.5,
-        filename: 'opname-report.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
-      };
-
-      const element = this.exportSection.nativeElement;
-      await html2pdf().from(element).set(options).save();
-
+    try {
+      const blob = await lastValueFrom(this.reportService.downloadBAPPdf(this.sessionID));
+      const url = window.URL.createObjectURL(blob);
+      // Attempt to extract filename from content-disposition if present later; fallback generic.
+      const a = document.createElement('a');
+      const today = new Date();
+      const dateStr = today.toLocaleDateString('en-GB').replace(/\//g,'-');
+      a.href = url;
+      a.download = `BAP_opname_${this.site?.siteName?.replace(/\s+/g,'_') || 'site'}_${dateStr}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('[Report] PDF download failed', err);
+      this.errorMessage = 'Failed to download PDF.';
+    } finally {
       this.isExporting = false;
       this.cdr.detectChanges();
-    }, 0);
+    }
   }
 
   ngOnInit() {
