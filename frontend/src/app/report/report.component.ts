@@ -119,7 +119,7 @@ export class ReportComponent {
       },
       error: (error) => {
         console.error('[Report] Error fetching available opname sessions:', error);
-        this.errorMessage = 'Failed to load available sessions.';
+        this.errorMessage = 'Gagal memuat sesi yang tersedia.';
       }
     });
   }
@@ -128,7 +128,7 @@ export class ReportComponent {
     this.isLoading = true;
     
     if (this.sessionID === -1) {
-      this.errorMessage = 'No session selected.';
+      this.errorMessage = 'Tidak ada sesi yang dipilih.';
       console.error('[Report] Error: No session selected for stats.');
       this.isLoading = false;
       return;
@@ -141,7 +141,7 @@ export class ReportComponent {
       this.isLoading = false;
     } catch (error) {
       console.error('[Report] Error fetching opname stats:', error);
-      this.errorMessage = 'Failed to load opname stats.';
+      this.errorMessage = 'Gagal memuat statistik opname.';
       this.isLoading = false;
     }
   }
@@ -187,12 +187,12 @@ export class ReportComponent {
           console.log('[Report] Selected date from session:', this.selectedDate);
           await this.onDateChange();
           if (from === 'opname_page') {
-            this.successMessage = 'Opname session finished successfully!';
+            this.successMessage = 'Sesi opname berhasil diselesaikan!';
             this.showSuccessMessage();
           }
         } else {
           console.warn('[Report] No session found for ID:', this.sessionID);
-          this.errorMessage = 'Session not found.';
+          this.errorMessage = 'Sesi opname tidak ditemukan.';
         }
       }
     })

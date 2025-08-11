@@ -56,7 +56,7 @@ import { OpnameSession } from '../model/opname-session.model';
           if (fetchedSite) {
             this.sitePage = fetchedSite; // Set the sitePage to the fetched site
           } else {
-            this.errorMessage = 'Site not found.';
+            this.errorMessage = 'Site tidak ditemukan.';
             this.showToast = true;
             setTimeout(() => this.showToast = false, 3000);
             console.error('[SitePage] Site not found for ID:', id);
@@ -68,7 +68,7 @@ import { OpnameSession } from '../model/opname-session.model';
           // Handle the error appropriately, e.g., show a message to the user
           console.error('[SitePage] Failed to fetch site cards:', error);
           this.isLoading = false; // Set loading state to false even if there's an error
-          this.errorMessage = 'Failed to load site cards. Please try again later.';
+          this.errorMessage = 'Gagal memuat kartu site. Silakan coba lagi nanti.';
           this.showToast = true;
           setTimeout(() => this.showToast = false, 3000);
         }
@@ -124,7 +124,7 @@ import { OpnameSession } from '../model/opname-session.model';
         error: (error) => {
           this.opnameLoading = false; // Set loading state to false even if there's an error
           console.error('[SitePage] Error starting new opname session:', error.error.error);
-          this.errorMessage = error.error.error || 'Failed to start new opname session. Please try again later.';
+          this.errorMessage = error.error.error || 'Gagal memulai sesi opname baru. Silakan coba lagi nanti.';
           this.showToast = true;
           setTimeout(() => this.showToast = false, 3000);
         }
@@ -144,7 +144,7 @@ import { OpnameSession } from '../model/opname-session.model';
       
       if (this.sitePage.opnameSessionID <= 0) {
         this.opnameLoading = false;
-        this.errorMessage = 'No opname session ID available.';
+        this.errorMessage = 'Tidak ada sesi opname yang tersedia.';
         console.error('[SitePage] No opname session ID to continue');
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
@@ -163,7 +163,7 @@ import { OpnameSession } from '../model/opname-session.model';
           } else {
             const status = this.opnameSession ? this.opnameSession.status : 'unknown';
             console.error('[SitePage] Opname session is not active:', status);
-            this.errorMessage = `Opname session is not active (current status: ${status}).`;
+            this.errorMessage = `Sesi opname tidak aktif (status saat ini: ${status}).`;
             this.showToast = true;
             setTimeout(() => this.showToast = false, 3000);
           }
@@ -171,7 +171,7 @@ import { OpnameSession } from '../model/opname-session.model';
         error: (error) => {
           console.error('[SitePage] Error fetching current opname session:', error);
           this.opnameLoading = false; // Set loading state to false on error
-          this.errorMessage = 'Failed to fetch current opname session. Please try again later.';
+          this.errorMessage = 'Gagal memuat sesi opname saat ini. Silakan coba lagi nanti.';
           this.showToast = true;
           setTimeout(() => this.showToast = false, 3000);
         }
@@ -185,7 +185,7 @@ import { OpnameSession } from '../model/opname-session.model';
         this.router.navigate(['/site', siteID, 'report']);
       } else {
         console.error('[SitePage] Invalid site ID for report navigation:', siteID);
-        this.errorMessage = 'Invalid site ID for report navigation.';
+        this.errorMessage = 'ID site tidak valid untuk navigasi laporan.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
       }

@@ -138,7 +138,7 @@ export class AssetPageComponent implements OnInit {
         // Handle the error appropriately, e.g., show a message to the user
         console.error('[AssetPage] Failed to fetch asset:', error);
         this.isLoading = false; // Set loading state to false even if there's an error
-        this.errorMessage = 'Failed to load asset. Please try again later.';
+        this.errorMessage = 'Gagal memuat asset. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
       }
@@ -160,7 +160,7 @@ export class AssetPageComponent implements OnInit {
       },
       error: (error) => {
         console.error('[OpnameAsset] Error fetching available equipments:', error);
-        this.errorMessage = 'Failed to fetch available equipments. Please try again later.';
+        this.errorMessage = 'Gagal memuat peralatan yang tersedia. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
         assetPage.availableEquipments = []; // Fallback to empty array on error

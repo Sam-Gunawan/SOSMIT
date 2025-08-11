@@ -88,7 +88,7 @@
                             class="form-control filter-input" 
                             [(ngModel)]="filterText"
                             (input)="applyFilters()"
-                            placeholder="Filter by A/T, asset name, S/N, owner, or cost center..."
+                            placeholder="Filter by A/T, asset name, S/N, user, or cost center..."
                             name="filterText">
                     </div>
                     
@@ -172,7 +172,7 @@
 
         <!-- Owner Name Column -->
         <ng-container matColumnDef="ownerName">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Owner</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>User</th>
             <td mat-cell *matCellDef="let element" class="owner-name-cell" [title]="element.ownerName">
                 {{ element.ownerName }}
             </td>
@@ -592,7 +592,7 @@
                             <textarea class="form-control" 
                                 [id]="'change-reason-' + result.pendingAsset.assetTag" 
                                 [(ngModel)]="result.changeReason" name="changeReason"
-                                placeholder="Please provide a reason for these changes"
+                                placeholder="Silakan berikan alasan untuk perubahan ini"
                                 style="height: 80px"
                                 [class.is-invalid]="!result.changeReason || result.changeReason === ''"></textarea>
                         </div>
@@ -609,12 +609,12 @@
                             </div>
 
                             <button type="submit" class="btn btn-primary" [disabled]="isLoading || !result.changeReason || !hasFormChangesForAsset(result) || getInvalidFormsForAsset(result.pendingAsset.assetTag) > 0">
-                                <span *ngIf="isLoading">Saving...</span>
-                                <span *ngIf="!isLoading">Save Changes</span>
+                                <span *ngIf="isLoading">Menyimpan...</span>
+                                <span *ngIf="!isLoading">Simpan Perubahan</span>
                             </button>
 
                             <button type="button" class="btn btn-success" data-bs-toggle="modal" [attr.data-bs-target]="'#assetAllGood-' + i">
-                                All good
+                                Semua Benar
                             </button>
                         </div>
                     </form>
@@ -662,7 +662,6 @@
     <div class="d-flex">
         <div class="toast-body">
             <p>{{ errorMessage }}</p>
-            <p>Please try again later.</p>
         </div>
         <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
     </div>

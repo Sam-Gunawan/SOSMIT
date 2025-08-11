@@ -71,7 +71,7 @@ export class AssetCardComponent {
         console.log('[AssetCard] Assets fetched successfully:', this.assetsOnSite);
       },
       error: (error) => {
-        this.errorMessage = 'Failed to fetch assets. Please try again later.';
+        this.errorMessage = 'Gagal memuat asset. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
         this.isLoading = false;
@@ -103,7 +103,7 @@ export class AssetCardComponent {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = 'Failed to fetch sub-site names. Please try again later.';
+        this.errorMessage = 'Gagal memuat nama sub-site. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
         this.isLoading = false;

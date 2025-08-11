@@ -249,7 +249,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       },
       error: (error) => {
         console.error('[OpnameAsset] Error fetching all users:', error);
-        this.errorMessage = 'Failed to fetch user list. Please try again later.';
+        this.errorMessage = 'Gagal memuat daftar pengguna. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
       }
@@ -263,7 +263,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       },
       error: (error) => {
         console.error('[OpnameAsset] Error fetching all sites:', error);
-        this.errorMessage = 'Failed to fetch site list. Please try again later.';
+        this.errorMessage = 'Gagal memuat daftar site. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
       }
@@ -278,7 +278,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       },
       error: (error) => {
         console.error('[OpnameAsset] Error fetching sub-sites:', error);
-        this.errorMessage = 'Failed to fetch sub-sites.';
+        this.errorMessage = 'Gagal memuat daftar sub-site.';
       }
     });
   }
@@ -297,7 +297,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       },
       error: (error) => {
         console.error('[OpnameAsset] Error fetching available equipments:', error);
-        this.errorMessage = 'Failed to fetch available equipments. Please try again later.';
+        this.errorMessage = 'Gagal memuat daftar kelengkapan. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
         result.availableEquipments = []; // Fallback to empty array on error
@@ -314,7 +314,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       },
       error: (error) => {
         console.error('[OpnameAsset] Error loading opname session progress:', error);
-        this.errorMessage = 'Failed to load opname session progress. Please try again later.';
+        this.errorMessage = 'Gagal memuat proses sesi opname. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
         this.isLoading = false; // Only set false on error
@@ -473,7 +473,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
     } catch (error) {
       console.error('[OpnameAsset] Error processing session data:', error);
-      this.errorMessage = 'Failed to load session data. Please try again later.';
+      this.errorMessage = 'Gagal memuat data sesi. Silakan coba lagi nanti.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
@@ -492,7 +492,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       },
       error: (error) => {
         console.error('[OpnameAsset] Error loading opname session:', error);
-        this.errorMessage = 'Failed to load opname session. Please try again later.';
+        this.errorMessage = 'Gagal memuat sesi opname. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
       }
@@ -663,7 +663,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }
 
     if (!searchValue) {
-      this.errorMessage = 'Please enter either an asset tag or serial number to search.';
+      this.errorMessage = 'Silakan masukkan asset tag atau nomor seri untuk mencari.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       return;
@@ -681,7 +681,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
     if (alreadyExists) {
       this.isSearching = false;
-      this.errorMessage = 'Asset already exists in the search results. Please check the list.';
+      this.errorMessage = 'Asset sudah ada dalam hasil pencarian. Silakan periksa daftarnya.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       console.log('[OpnameAsset] Asset already exists in search results:', this.searchQuery);
@@ -757,7 +757,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       error: (error) => {
         console.error('[OpnameAsset] Error during search:', error);
         this.isSearching = false;
-        this.errorMessage = 'Asset not found. Please check the asset tag or serial number.';
+        this.errorMessage = 'Asset tidak ditemukan. Silakan periksa asset tag atau nomor seri.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
       }      
@@ -781,7 +781,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         },
         error: (error) => {
           console.error('[OpnameAsset] Error uploading condition photo:', error);
-          this.errorMessage = 'Failed to upload condition photo. Please try again.';
+          this.errorMessage = 'Gagal mengunggah foto kondisi. Silakan coba lagi.';
           this.showToast = true;
           setTimeout(() => this.showToast = false, 3000);
         }
@@ -1155,7 +1155,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     // Validate the index to ensure it is within bounds of the search results array
     if (index < 0 || index >= this.searchResults.length) {
       console.error('[OpnameAsset] Invalid index for asset changes:', index);
-      this.errorMessage = 'Invalid asset index. Please try again.';
+      this.errorMessage = 'Indeks asset tidak valid. Silakan coba lagi.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       return;
@@ -1168,7 +1168,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     // Validate the required input fields
     // Check if any change has been made
     if (!this.hasFormChangesForAsset(result)) {
-      this.errorMessage = 'No changes made to the asset. Please modify at least one field.';
+      this.errorMessage = 'Tidak ada perubahan yang dibuat pada asset. Silakan ubah setidaknya satu bidang.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       return;
@@ -1176,7 +1176,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
     // Check for change reason (required for any changes made)
     if (!result.changeReason) {
-      this.errorMessage = 'Please provide a reason for the changes.';
+      this.errorMessage = 'Silakan berikan alasan untuk perubahan tersebut.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
@@ -1185,7 +1185,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
     // Check for valid owner (must have a valid ID)
     if (pending.assetOwner === undefined || pending.assetOwner === 0) {
-      this.errorMessage = 'Please select a valid user from the list.';
+      this.errorMessage = 'Silakan pilih pengguna yang valid dari daftar.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
@@ -1194,7 +1194,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
     // Check for valid site (must have a valid ID)
     if (pending.siteID === undefined) {
-      this.errorMessage = 'Please select a valid site from the list.';
+      this.errorMessage = 'Silakan pilih site yang valid dari daftar.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
@@ -1204,7 +1204,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     // Final validation check using asset-specific form validation
     const invalidFormsCount = this.getInvalidFormsForAsset(result.pendingAsset.assetTag);
     if (invalidFormsCount > 0) {
-      this.errorMessage = 'Please fix form validation errors before saving.';
+      this.errorMessage = 'Mohon perbaiki kesalahan pengisian sebelum menyimpan.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       this.isLoading = false;
@@ -1295,7 +1295,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       },
       error: (error) => {
         console.error('[OpnameAsset] Error processing asset:', error);
-        this.errorMessage = 'Failed to process asset. Please try again later.';
+        this.errorMessage = 'Gagal memproses asset. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
         this.isSearching = false;
@@ -1305,7 +1305,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     });
     
     this.closeBootstrapModal(`edit-modal-${result.existingAsset.assetTag}`);
-    this.successMessage = 'Asset verification processed successfully.';
+    this.successMessage = 'Verifikasi asset berhasil diproses.';
   }
 
   // Mark as all good, i.e. no changes available
@@ -1374,10 +1374,10 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         this.cdr.detectChanges();
         
         this.isLoading = false;
-        this.successMessage = 'Asset marked as all good. No changes.';
+        this.successMessage = 'Asset ditandai sebagai baik. Tidak ada perubahan.';
       },
       error: (error) => {
-        this.errorMessage = 'Failed to mark asset as verified: ' + (error.message || 'Unkown error');
+        this.errorMessage = 'Gagal menandai asset sebagai terverifikasi: ' + (error.message || 'Kesalahan tidak diketahui');
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
         this.isLoading = false;
@@ -1393,7 +1393,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     // Validate the index to ensure it is within bounds of the search results array
     if (index < 0 || index >= this.searchResults.length) {
       console.error('[OpnameAsset] Invalid index for asset removal:', index);
-      this.errorMessage = 'Invalid asset index. Please try again.';
+      this.errorMessage = 'Indeks asset tidak valid. Silakan coba lagi.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       return;
@@ -1419,7 +1419,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         },
         error: (error: any) => {
           console.error('[OpnameAsset] Error removing asset from session:', error);
-          this.errorMessage = 'Failed to remove asset. Please try again later.';
+          this.errorMessage = 'Gagal menghapus asset. Silakan coba lagi nanti.';
           this.showToast = true;
           setTimeout(() => this.showToast = false, 3000);
         }
