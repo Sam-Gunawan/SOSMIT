@@ -4,8 +4,7 @@
         <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
             <div class="d-flex">
                 <div class="toast-body">
-                    <p>{{ errorMessage }}</p>
-                    <p>Please try again later.</p>
+                    <p>{{ errorMessage }}</p>\
                 </div>
                 <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
             </div>
@@ -50,19 +49,19 @@
         <div id="container-floating" [class.expanded]="floatingMenuExpanded">
             <div class="nd2 nds my-tooltip">
                 <img class="report" src="assets/report.svg" (click)="goToReport()">
-                <span class="tooltiptext">See opname report</span>
+                <span class="tooltiptext">Lihat laporan opname</span>
             </div>
             
             <div class="nd1 nds my-tooltip">
                 <img class="previous" src="assets/previous.svg" (click)="continueOpname()">
-                <span class="tooltiptext">Continue opname</span>
+                <span class="tooltiptext">Lanjutkan opname</span>
             </div>
             
             <div id="floating-button" (click)="floatingMenuExpanded ? null : toggleFloatingMenu()">
                 <img class="more" src="assets/more.svg">
                 <div class="my-tooltip">
                     <img class="add" src="assets/add.svg" (click)="startNewOpname()"/>
-                    <span class="tooltiptext">Start new opname</span>
+                    <span class="tooltiptext">Mulai opname baru</span>
                 </div>
             </div>
         </div>

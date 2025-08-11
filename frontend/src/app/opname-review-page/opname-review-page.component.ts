@@ -49,7 +49,7 @@ export class OpnameReviewPageComponent implements OnInit{
                 this.submittedUser = { ...user, fullName: `${user.firstName} ${user.lastName}` };
             },
             error: (error) => {
-              this.errorMessage = 'Error fetching user details: ' + error.message;
+              this.errorMessage = 'User tidak ditemukan: ' + error.message;
             },
             complete: () => {
               this.isLoading = false;
@@ -61,7 +61,7 @@ export class OpnameReviewPageComponent implements OnInit{
               this.opnameSite = site;
             },
             error: (error) => {
-              this.errorMessage = 'Error fetching site details: ' + error.message;
+              this.errorMessage = 'Site tidak ditemukan: ' + error.message;
             },
             complete: () => {
               this.isLoading = false;
@@ -71,14 +71,14 @@ export class OpnameReviewPageComponent implements OnInit{
           this.fetchReviewerNames();
         },
         error: (error) => {
-          this.errorMessage = 'Error fetching opname session: ' + error.message;
+          this.errorMessage = 'Sesi opname tidak ditemukan: ' + error.message;
         },
         complete: () => {
           this.isLoading = false;
         }
       });
     } else {
-      this.errorMessage = 'Session ID not found in the route parameters.';
+      this.errorMessage = 'Sesi opname tidak ditemukan';
       console.error('[OpnameReviewPage] Error:', this.errorMessage);
       this.isLoading = false;
     }
@@ -90,7 +90,7 @@ export class OpnameReviewPageComponent implements OnInit{
         this.loggedInUser = { ...user, fullName: `${user.firstName} ${user.lastName}` };
       },
       error: (error) => {
-        this.errorMessage = 'Error fetching logged-in user: ' + error.message;
+        this.errorMessage = 'User tidak ditemukan: ' + error.message;
         console.error('[OpnameReviewPage] Error:', error);
       },
       complete: () => {
@@ -110,7 +110,7 @@ export class OpnameReviewPageComponent implements OnInit{
           this.reviewerNames.l1 = `${user.firstName} ${user.lastName}`;
         },
         error: (error) => {
-          this.errorMessage = 'Error fetching L1 reviewer details: ' + error.message;
+          this.errorMessage = 'L1 reviewer tidak ditemukan: ' + error.message;
           console.error('[OpnameReviewPage] Error:', error);
         },
         complete: () => {
@@ -130,7 +130,7 @@ export class OpnameReviewPageComponent implements OnInit{
           this.reviewerNames.manager = `${user.firstName} ${user.lastName}`;
         },
         error: (error) => {
-          this.errorMessage = 'Error fetching manager reviewer details: ' + error.message;
+          this.errorMessage = 'Manager reviewer tidak ditemukan: ' + error.message;
           console.error('[OpnameReviewPage] Error:', error);
         },
         complete: () => {
@@ -215,7 +215,7 @@ export class OpnameReviewPageComponent implements OnInit{
         this.initSession();
       },
       error: (error) => {
-        this.errorMessage = 'Error approving opname session: ' + error.message;
+        this.errorMessage = 'Gagal menyetujui sesi opname: ' + error.message;
         console.error('[OpnameReviewPage] Error:', error);
         this.isLoading = false;
       }
@@ -232,7 +232,7 @@ export class OpnameReviewPageComponent implements OnInit{
         this.initSession();
       },
       error: (error) => {
-        this.errorMessage = 'Error rejecting opname session: ' + error.message;
+        this.errorMessage = 'Gagal menolak sesi opname: ' + error.message;
         console.error('[OpnameReviewPage] Error:', error);
         this.isLoading = false;
       }

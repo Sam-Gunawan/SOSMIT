@@ -42,6 +42,13 @@
                                     [value]="assetPage?.statusReason" 
                                     readonly>
                             </div>
+
+                            <div class="form-item">
+                                <label [for]="'asset-total-cost-' + assetPage?.assetTag" class="form-label mb-0">Total Cost</label>
+                                <input type="text" class="form-control" 
+                                    [id]="'asset-total-cost-' + assetPage?.assetTag" 
+                                    readonly>
+                            </div>
                         </div>
         
                         <div class="user-info">
@@ -73,7 +80,7 @@
                         </div>
         
                         <div class="left-top">
-                            <h6>Equipments</h6>
+                            <h6>Kelengkapan</h6>
 
                             <div class="equipment-checkboxes readonly">
                                 <div class="form-check" *ngFor="let equipment of assetPage?.availableEquipments"
@@ -111,7 +118,7 @@
                             </div>
 
                             <div class="form-item">
-                                <label [for]="'user-department-' + assetPage?.assetTag" class="form-label mb-0">Owner Dept.</label>
+                                <label [for]="'user-department-' + assetPage?.assetTag" class="form-label mb-0">Department</label>
                                 <input type="text" class="form-control" 
                                     [id]="'user-department-' + assetPage?.assetTag" 
                                     [value]="assetPage?.assetOwnerDepartment" 
@@ -122,7 +129,7 @@
                         <div class="left-bottom">
                             <div class="asset-condition">  
                                 <div class="rating">
-                                    <h6 class="condition">Condition</h6>
+                                    <h6 class="condition">Kondisi Fisik Unit</h6>
 
                                     <span class="like-btn" [class.active]="isLiked">
                                         Good
@@ -157,13 +164,13 @@
                                 <!-- <p>Region - {{ assetPage?.regionName }}</p>
                                 <p>Group - {{ assetPage?.siteGroupName }}</p> -->
 
-                                <div class="form-item">
+                                <!-- <div class="form-item">
                                     <label [for]="'user-region-' + assetPage?.assetTag" class="form-label mb-0">Region</label>
                                     <input type="text" class="form-control" 
                                         [id]="'user-region-' + assetPage?.assetTag" 
                                         [value]="assetPage?.regionName" 
                                         readonly>
-                                </div>
+                                </div> -->
 
                                 <div class="form-item">
                                     <label [for]="'user-group-' + assetPage?.assetTag" class="form-label mb-0">Group</label>
@@ -179,6 +186,15 @@
                                     <input type="text" class="form-control" 
                                         [id]="'user-site-' + assetPage?.assetTag" 
                                         [value]="assetPage?.subSiteName" 
+                                        readonly>
+                                </div>
+                                
+                                <!-- will change value later -->
+                                <div class="form-item">
+                                    <label [for]="'owner-department-' + assetPage?.assetTag" class="form-label mb-0">Owner Dept.</label>
+                                    <input type="text" class="form-control" 
+                                        [id]="'owner-department-' + assetPage?.assetTag" 
+                                        [value]="assetPage?.assetOwnerDepartment" 
                                         readonly>
                                 </div>
 
@@ -218,7 +234,6 @@
         <div class="d-flex">
             <div class="toast-body">
                 <p>{{ errorMessage }}</p>
-                <p>Please try again later.</p>
             </div>
             <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
         </div>

@@ -91,7 +91,7 @@ export class SiteCardComponent {
       },
 
       error: (error) => {
-        this.errorMessage = 'Failed to fetch your sites. Please try again later.';
+        this.errorMessage = 'Gagal memuat site Anda. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
         this.isLoading = false;

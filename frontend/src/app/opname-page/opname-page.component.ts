@@ -91,7 +91,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       this.router.navigate(['']);
     }
     
-    this.errorMessage = 'No opname session found. Please start a new session.';
+    this.errorMessage = 'Tidak ditemukan sesi opname. Silakan mulai sesi baru.';
     this.showToast = true;
     setTimeout(() => this.showToast = false, 3000);
   }
@@ -108,7 +108,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.isLoading = false; // Set loading state to false on error
-        this.errorMessage = 'Failed to load opname session. Please try again later.';
+        this.errorMessage = 'Gagal memuat sesi opname. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
         console.error('[OpnamePage] Error initializing opname session:', error);
@@ -124,7 +124,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: (error) => {
-        this.errorMessage = 'Failed to load site information. Try refreshing the page.';
+        this.errorMessage = 'Gagal memuat informasi site. Silakan refresh halaman.';
         console.error('[OpnamePage] Error fetching site info:', error);
         this.isLoading = false;
       },
@@ -144,7 +144,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     // This method will cancel the current stock opname session.
     if (this.sessionID <= 0) {
       console.error('[OpnamePage] Invalid session ID:', this.sessionID);
-      this.errorMessage = 'Invalid opname session.';
+      this.errorMessage = 'Sesi opname tidak valid.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       return;
@@ -163,7 +163,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         this.isLoading = false; // Set loading state to false on error
-        this.errorMessage = 'Failed to cancel opname session. Please try again later.';
+        this.errorMessage = 'Gagal membatalkan sesi opname. Silakan coba lagi nanti.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
         console.error('[OpnamePage] Error cancelling opname session:', error);
@@ -194,7 +194,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     // This method will finish the current stock opname session.
     if (this.sessionID <= 0) {
       console.error('[OpnamePage] Invalid session ID:', this.sessionID);
-      this.errorMessage = 'Invalid opname session.';
+      this.errorMessage = 'Sesi opname tidak valid.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       return;
@@ -202,7 +202,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
 
     // Can't finish if there are no assets in the session
     if (this.invalidSession === 'asset-count') {
-      this.errorMessage = 'Tidak ada aset yang dipindai. Silakan pindai aset sebelum menyelesaikan sesi opname.';
+      this.errorMessage = 'Tidak ada asset yang dipindai. Silakan pindai asset sebelum menyelesaikan sesi opname.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       return;
@@ -210,7 +210,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
 
     // Can't finish if there are still pending assets
     if (this.invalidSession === 'pending-count') {
-      this.errorMessage = 'Masih ada aset yang belum diproses. Silakan verifikasi atau perbarui data aset tersebut sebelum menyelesaikan sesi opname.';
+      this.errorMessage = 'Masih ada asset yang belum diproses. Silakan verifikasi atau perbarui data asset tersebut sebelum menyelesaikan sesi opname.';
       this.showToast = true;
       setTimeout(() => this.showToast = false, 3000);
       return;
@@ -232,7 +232,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
       },
       error: (error: any) => {
         this.isLoading = false; // Set loading state to false on error
-        this.errorMessage = 'Sesi opname tidak dapat diselesaikan. Pastikan terdapat minimal satu aset dalam opname dan semua aset telah diproses.';
+        this.errorMessage = 'Sesi opname tidak dapat diselesaikan. Pastikan terdapat minimal satu asset dalam opname dan semua asset telah diproses.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 5000);
         console.error('[OpnamePage] Error finishing opname session:', error);

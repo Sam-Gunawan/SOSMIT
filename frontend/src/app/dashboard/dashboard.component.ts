@@ -58,7 +58,7 @@ export class DashboardComponent {
 
       // Handle errors gracefully (HTTP 400-599)
       error: (error) => {
-        this.errorMessage = "User's profile not found.";
+        this.errorMessage = "Profil pengguna tidak ditemukan.";
         this.isLoading = false; // Set loading state to false
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
