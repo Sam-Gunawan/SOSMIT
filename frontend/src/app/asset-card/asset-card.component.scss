@@ -5,6 +5,9 @@
   @include styles.default-styles;
 }
 
+@include styles.search-form-styles;
+@include styles.mat-paginator-styles;
+
 h1, h2, h3, h4, h5, h6 {
   font-family: styles.$font-family;
   color: styles.$primary-text-color;
@@ -25,73 +28,6 @@ p {
   background-color: styles.$background-color;
   align-content: center;
   justify-content: center;
-}
-
-// Use global search form styles
-@include styles.search-form-styles;
-
-// Legacy simple search styles
-.simple-search {
-  .assets-info-header {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .asset-search {
-  	display: flex;
-  	flex-direction: row;
-  	align-items: center;
-  	justify-content: space-between;
-  	margin-bottom: 10px;
-  }
-
-  .search-view {
-  	display: flex;
-  	flex-direction: row;
-  	align-items: center;
-  	gap: 10px;
-  }
-
-  .search-bar{
-  	align-items: center;
-  	flex-grow: 1;
-  }
-
-  @media (max-width: 767px) {
-    .search-view {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      gap: 10px;
-  	}
-      
-  	.search-bar{
-  		display: flex;
-  		flex-direction: row;
-  		align-items: center;
-  		flex-grow: 1;
-  		gap: 10px;
-  	}
-  }
-
-  .filter-pills {
-  	display: flex;
-  	gap: 8px;
-  	flex-wrap: wrap;
-  	justify-content: end;
-
-  	.clear-filter {
-  		background-color: #dc3545;
-  		color: white;
-  		font-size: 12px;
-  		border-radius: 15px;
-  		padding: 5px 10px;
-  		
-  		&:hover {
-  			background-color: color.adjust(#dc3545, $lightness: -10%);
-  		}
-  	}
-  }
 }
 
 // Asset status and condition styling
@@ -206,13 +142,6 @@ p {
     text-overflow: ellipsis;
   }
 
-  .asset-details {
-    color: styles.$quaternary-text-color;
-    font-weight: 400;
-    font-size: 8px;
-    margin: 2px 0;
-  }
-
   .site-name {
     color: styles.$quaternary-text-color;
     font-style: italic;
@@ -239,9 +168,6 @@ p {
 		font-size: 8px;
 	}
 }
-
-// Use global pagination styles
-@include styles.mat-paginator-styles;
 
 // Toast messaging
 .my-toast {
