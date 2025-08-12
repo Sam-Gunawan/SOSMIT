@@ -5,6 +5,7 @@ import { OpnameSessionService } from '../services/opname-session.service';
 import { ReportService } from '../services/report.service';
 import { ActivatedRoute } from '@angular/router';
 import { SiteInfo } from '../model/site-info.model';
+import { OpnameSession } from '../model/opname-session.model';
 import { OpnameAssetComponent } from '../opname-asset/opname-asset.component';
 import { FormsModule } from '@angular/forms';
 import { ViewChild, ElementRef } from '@angular/core';
@@ -27,6 +28,7 @@ export class ReportComponent {
   screenSize: 'large' | 'small' = 'large';
   siteID: number = -1;
   site: SiteInfo = {} as SiteInfo;
+  opnameSession: OpnameSession = {} as OpnameSession;
   sessionID: number = -1;
   successMessage: string = '';
   errorMessage: string = '';
@@ -138,13 +140,19 @@ export class ReportComponent {
     }
 
     try {
-      // Convert Observable to Promise using lastValueFrom
-      const stats = await lastValueFrom(this.reportService.getOpnameStats(this.sessionID));
+      // Fetch both stats and session details
+      const [stats, session] = await Promise.all([
+        lastValueFrom(this.reportService.getOpnameStats(this.sessionID)),
+        lastValueFrom(this.opnameSessionService.getOpnameSession(this.sessionID))
+      ]);
+      
       this.opnameStats = stats;
+      this.opnameSession = session;
       this.isLoading = false;
+      console.log('[Report] Opname session fetched successfully:', this.opnameSession);
     } catch (error) {
-      console.error('[Report] Error fetching opname stats:', error);
-      this.errorMessage = 'Gagal memuat statistik opname.';
+      console.error('[Report] Error fetching opname data:', error);
+      this.errorMessage = 'Gagal memuat data opname.';
       this.isLoading = false;
     }
   }
