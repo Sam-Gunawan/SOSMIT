@@ -273,8 +273,10 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 			PageLink:         os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(site.SiteID) + "/report?session_id=" + strconv.Itoa(sessionID),
 		}
 
-		// Generate initial PDF with only submitter signature
-		pdfBytes, pdfErr := service.reportService.GenerateBAPPDF(int64(sessionID), report.BuildSignatures(submitterName, nil), site.SiteName, site.SiteGroupName, time.Now())
+		// Generate initial PDF with only submitter signature (capture submit time in Asia/Jakarta)
+		loc, _ := time.LoadLocation("Asia/Jakarta")
+		submitTime := time.Now().In(loc)
+		pdfBytes, pdfErr := service.reportService.GenerateBAPPDF(int64(sessionID), report.BuildSignatures(submitterName, &submitTime, "", nil, "", nil), site.SiteName, site.SiteGroupName, submitTime)
 		if pdfErr != nil {
 			log.Printf("❌ PDF generation failed (submitted stage): %v", pdfErr)
 		}
@@ -409,8 +411,18 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 				PageLink:         os.Getenv("FRONTEND_URL") + "/site/" + strconv.Itoa(site.SiteID) + "/report?session_id=" + strconv.Itoa(sessionID),
 			}
 
-			// Generate escalated PDF (submitter + manager signatures)
-			pdfBytes, pdfErr := service.reportService.GenerateBAPPDF(int64(sessionID), report.BuildSignatures(cases.Title(language.English).String(submitter.FirstName+" "+submitter.LastName), []string{managerName}), site.SiteName, site.SiteGroupName, time.Now())
+			// Generate escalated PDF (submitter + manager signatures) with timestamps
+			loc, _ := time.LoadLocation("Asia/Jakarta")
+			// Parse submit time from session end date if available
+			var submitPtr *time.Time
+			if session.EndDate.Valid {
+				if t, err := time.Parse(time.RFC3339, session.EndDate.String); err == nil {
+					tt := t.In(loc)
+					submitPtr = &tt
+				}
+			}
+			mgrTime := time.Now().In(loc)
+			pdfBytes, pdfErr := service.reportService.GenerateBAPPDF(int64(sessionID), report.BuildSignatures(cases.Title(language.English).String(submitter.FirstName+" "+submitter.LastName), submitPtr, managerName, &mgrTime, "", nil), site.SiteName, site.SiteGroupName, submitPtrOrNow(submitPtr, mgrTime))
 			if pdfErr != nil {
 				log.Printf("❌ PDF generation failed (escalated stage submitter email): %v", pdfErr)
 			}
@@ -497,15 +509,30 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 			}
 
 			// Generate verified PDF (submitter + manager (if any) + l1 signatures)
-			var reviewerNames []string
+			loc, _ := time.LoadLocation("Asia/Jakarta")
+			var submitPtr *time.Time
+			if session.EndDate.Valid {
+				if t, err := time.Parse(time.RFC3339, session.EndDate.String); err == nil {
+					tt := t.In(loc)
+					submitPtr = &tt
+				}
+			}
+			var mgrName string
+			var mgrTimePtr *time.Time
 			if session.ManagerReviewerID.Valid {
 				mgrUser, _ := service.userRepo.GetUserByID(session.ManagerReviewerID.Int64)
 				if mgrUser != nil {
-					reviewerNames = append(reviewerNames, cases.Title(language.English).String(mgrUser.FirstName+" "+mgrUser.LastName))
+					mgrName = cases.Title(language.English).String(mgrUser.FirstName + " " + mgrUser.LastName)
+				}
+				if session.ManagerReviewedAt.Valid {
+					if mt, err := time.Parse(time.RFC3339, session.ManagerReviewedAt.String); err == nil {
+						mtt := mt.In(loc)
+						mgrTimePtr = &mtt
+					}
 				}
 			}
-			reviewerNames = append(reviewerNames, l1Name)
-			pdfBytes, pdfErr := service.reportService.GenerateBAPPDF(int64(sessionID), report.BuildSignatures(cases.Title(language.English).String(submitter.FirstName+" "+submitter.LastName), reviewerNames), site.SiteName, site.SiteGroupName, time.Now())
+			l1Time := time.Now().In(loc)
+			pdfBytes, pdfErr := service.reportService.GenerateBAPPDF(int64(sessionID), report.BuildSignatures(cases.Title(language.English).String(submitter.FirstName+" "+submitter.LastName), submitPtr, mgrName, mgrTimePtr, l1Name, &l1Time), site.SiteName, site.SiteGroupName, submitPtrOrNow(submitPtr, l1Time))
 			if pdfErr != nil {
 				log.Printf("❌ PDF generation failed (verified stage): %v", pdfErr)
 			}
@@ -625,6 +652,14 @@ func (service *Service) RejectOpnameSession(sessionID int, reviewerID int) error
 
 	log.Printf("✅ Opname session with ID %d rejected successfully by user %d", sessionID, reviewerID)
 	return nil
+}
+
+// submitPtrOrNow returns the submit time if not nil else fallback time (usually reviewer time)
+func submitPtrOrNow(submit *time.Time, fallback time.Time) time.Time {
+	if submit != nil {
+		return *submit
+	}
+	return fallback
 }
 
 // GetUserFromOpnameSession retrieves the user who started an opname session.

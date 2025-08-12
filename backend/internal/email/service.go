@@ -39,14 +39,19 @@ type Attachment struct {
 func NewService() *Service {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("❌ Error loading .env file: ", err)
+		log.Printf("⚠️ Warning: Could not load .env file (this is normal in Docker): %v", err)
 	}
 
 	apiKey := os.Getenv("SENDGRID_API_KEY")
 	sender := os.Getenv("SENDER_EMAIL")
 
 	if apiKey == "" || sender == "" {
-		log.Fatal("❌ SENDGRID_API_KEY or SENDER_EMAIL environment variables are not set")
+		log.Printf("⚠️ Warning: SENDGRID_API_KEY or SENDER_EMAIL environment variables are not set. Email functionality will be disabled.")
+		// Return a service with empty credentials - it won't work but won't crash the app
+		return &Service{
+			sendgridKey: "",
+			senderEmail: "",
+		}
 	}
 
 	return &Service{

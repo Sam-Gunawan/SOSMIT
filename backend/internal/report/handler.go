@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -65,15 +66,16 @@ func (handler *Handler) GenerateBAPHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session-id"})
 		return
 	}
-
+	start := time.Now()
+	log.Printf("[REPORT] START GenerateBAP session=%d", sessionID)
 	pdfBytes, filename, err := handler.service.GenerateAndAssembleBAP(sessionID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate BAP PDF: " + err.Error()})
+		log.Printf("[REPORT] ERROR GenerateBAP session=%d err=%v", sessionID, err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate BAP PDF", "detail": err.Error()})
 		return
 	}
+	log.Printf("[REPORT] DONE GenerateBAP session=%d bytes=%d elapsed=%s", sessionID, len(pdfBytes), time.Since(start))
 	c.Header("Content-Type", "application/pdf")
 	c.Header("Content-Disposition", "attachment; filename="+filename)
 	c.Data(http.StatusOK, "application/pdf", pdfBytes)
 }
-
-// legacy sanitize retained in service

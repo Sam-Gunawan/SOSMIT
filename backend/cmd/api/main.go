@@ -5,6 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"strconv"
+	"time"
 
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/asset"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/auth"
@@ -20,20 +23,31 @@ import (
 	_ "github.com/lib/pq" // PostgreSQL driver
 )
 
-// Database connection details.
-const (
-	host     = "localhost"
-	port     = 5433
-	username = "sosmit_admin"
-	password = "admin123"
-	db_name  = "sosmit_db"
-)
+// Get environment variable with fallback.
+func getenv(key, def string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return def
+}
 
 func main() {
-	// Setup the database connection.
-	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, username, password, db_name))
-	if err != nil {
-		log.Fatalln("Error connecting to the database:", err)
+	// Resolve DB connection parameters from environment (Docker friendly) with sensible defaults.
+	host := getenv("DB_HOST", "localhost")
+	portStr := getenv("DB_PORT", "5433")
+	port, _ := strconv.Atoi(portStr)
+	username := getenv("DB_USER", "sosmit_admin")
+	password := getenv("DB_PASSWORD", "admin123")
+	dbName := getenv("DB_NAME", "sosmit_db")
+	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, username, password, dbName)
+	db, err := sql.Open("postgres", dsn)
+	for trial := 0; err != nil && trial < 3; trial++ {
+		log.Printf("Attempt %d: Error connecting to the database: %v", trial+1, err)
+		time.Sleep(2 * time.Second) // Wait before retrying
+		db, err = sql.Open("postgres", dsn)
+		if trial == 2 {
+			log.Fatalln("Error connecting to database after 3 attempts:", err, "\nExiting program...")
+		}
 	}
 
 	// Make sure the database is closed when the function returns.

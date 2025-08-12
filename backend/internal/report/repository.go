@@ -52,10 +52,13 @@ type BAPDetailRow struct {
 type SessionMeta struct {
 	ID                int
 	EndDate           sql.NullString
+	StartDate         sql.NullString
 	Status            string
 	UserID            int
 	ManagerReviewerID sql.NullInt64
+	ManagerReviewedAt sql.NullString
 	L1ReviewerID      sql.NullInt64
+	L1ReviewedAt      sql.NullString
 	SiteID            int
 }
 
@@ -112,19 +115,16 @@ func (repo *Repository) GetBAPDetails(sessionID int64) ([]BAPDetailRow, error) {
 // GetSessionMeta retrieves minimal opname session metadata (mirrors get_opname_session_by_id) without creating package cycles.
 func (repo *Repository) GetSessionMeta(sessionID int64) (*SessionMeta, error) {
 	var sm SessionMeta
-	var startDate string                 // ignored for PDF meta currently
-	var managerReviewedAt sql.NullString // ignored
-	var l1ReviewedAt sql.NullString      // ignored
 	err := repo.db.QueryRow(`SELECT * FROM get_opname_session_by_id($1)`, sessionID).Scan(
 		&sm.ID,
-		&startDate,
+		&sm.StartDate,
 		&sm.EndDate,
 		&sm.Status,
 		&sm.UserID,
 		&sm.ManagerReviewerID,
-		&managerReviewedAt,
+		&sm.ManagerReviewedAt,
 		&sm.L1ReviewerID,
-		&l1ReviewedAt,
+		&sm.L1ReviewedAt,
 		&sm.SiteID,
 	)
 	if err != nil {
