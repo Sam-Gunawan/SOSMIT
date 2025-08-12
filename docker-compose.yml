@@ -37,17 +37,18 @@ services:
             context: .
             dockerfile: Dockerfile
             target: production
+        env_file:
+            - .env
         environment:
             DB_HOST: db
             DB_PORT: 5432
             DB_USER: sosmit_admin
             DB_PASSWORD: admin123
             DB_NAME: sosmit_db
-            FRONTEND_URL: http://localhost:4200
-            GIN_MODE: release
-            # Email settings (optional - set these if you want email functionality)
-            # SENDGRID_API_KEY: your_sendgrid_api_key_here
-            # SENDER_EMAIL: your_sender_email_here
+            FRONTEND_URL: ${FRONTEND_URL}
+            BACKEND_URL: ${BACKEND_URL}
+            SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+            SENDER_EMAIL: ${SENDER_EMAIL}
         depends_on:
             - db
         ports:
