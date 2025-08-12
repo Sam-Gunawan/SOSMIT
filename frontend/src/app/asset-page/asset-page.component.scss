@@ -324,16 +324,16 @@ p {
 }
 
 .asset-status {
-    font-size: 12px !important;
-    border-radius: 15px;
-    padding: 5px 10px;
-    margin-bottom: 5px;
+  font-size: 12px !important;
+  border-radius: 15px;
+  padding: 5px 10px;
+  margin-bottom: 5px;
 
-    @each $name, $color in styles.$asset-pill-colors {
-		&.status-#{$name} {
-			background-color: $color;
-            border: 1px solid color.adjust($color, $lightness: -10%);
-		}
+  @each $name, $color in styles.$asset-pill-colors {
+    &.status-#{$name} {
+      background-color: $color;
+      border: 1px solid color.adjust($color, $lightness: -10%);
+    }
 	}
 }
 
@@ -394,28 +394,28 @@ p {
 }
 
 .my-toast {
-    display: block;
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    z-index: 9999;
-    max-width: 400px;
-    border-radius: 20px;
-    padding: 10px 20px;
-    // border: 0.5px solid rgb(82, 6, 6);
-    background-color: color.adjust(styles.$secondary-color, $lightness: 20%);
-    opacity: 0.8;
-    box-shadow: 0px 10px 16px rgba(0, 0, 0, 0.1);
+  display: block;
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 9999;
+  max-width: 400px;
+  border-radius: 20px;
+  padding: 10px 20px;
+  // border: 0.5px solid rgb(82, 6, 6);
+  background-color: color.adjust(styles.$secondary-color, $lightness: 20%);
+  opacity: 0.8;
+  box-shadow: 0px 10px 16px rgba(0, 0, 0, 0.1);
 
-    .toast-body {
-        padding-right: 5px;
-    }
+  .toast-body {
+    padding-right: 5px;
+  }
     
-    p {
-        margin: 0;
-        font-size: 14px;
-        color: rgb(51, 3, 3);
-    }
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: rgb(51, 3, 3);
+  }
 }
 
 .modal-footer {
