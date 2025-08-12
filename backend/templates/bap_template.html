@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Berita Acara Pemeriksaan Aset</title>
+    <style>
+      body {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 11px;
+        margin: 20px;
+      }
+      h1 {
+        text-align: center;
+        font-size: 16px;
+        margin: 0 0 10px 0;
+      }
+      h2 {
+        font-size:13px;
+        margin-top:18px;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 14px;
+      }
+      th,
+      td {
+        border: 1px solid #000;
+        padding: 4px 5px;
+      }
+      th {
+        background: #f0f0f0;
+      }
+      td {
+        vertical-align: top;
+      }
+      .recap-table th,
+      .recap-table td {
+        font-size: 11px;
+      }
+      .signatures {
+        margin-top: 12px;
+        page-break-after: always;
+      }
+      .signature-line {
+        margin-bottom: 6px;
+      }
+      .category-header {
+        font-weight: bold;
+        background: #f7f7f7;
+        page-break-inside: avoid;
+      }
+      .details-table th,
+      .details-table td {
+        font-size: 9px;
+      }
+      .nowrap {
+        white-space: nowrap;
+      }
+      .small {
+        font-size: 9px;
+      }
+      .opname-info {
+        margin:0 0 10px 0;
+        padding: 0;
+        line-height: 1.4em;
+        list-style: none;
+        font-weight: bold;
+      }
+      .underline {
+        position: relative;
+        display: inline-block;
+        padding-bottom: 2px;
+      }
+      .underline::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        background-color: #000;
+        border-radius: 10px;
+      }
+      .text-center {
+        text-align: center;
+      }
+      
+      /* Page break styles for lampiran section */
+      .lampiran-section {
+        page-break-before: always;
+      }
+      
+      .lampiran-page {
+        position: relative;
+        min-height: calc(100vh - 120px);
+      }
+      
+      .lampiran-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        font-weight: bold;
+        font-size: 13px;
+      }
+      
+      .page-number {
+        font-size: 11px;
+      }
+      
+      .details-table {
+        page-break-inside: auto;
+      }
+      
+      .details-table tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+      
+      .details-table thead {
+        display: table-header-group;
+      }
+      
+      @media print {
+        .signatures {
+          page-break-after: always;
+        }
+        
+        .lampiran-section {
+          page-break-before: always;
+        }
+        
+        .lampiran-page {
+          page-break-after: always;
+        }
+        
+        .lampiran-page:last-child {
+          page-break-after: auto;
+        }
+        
+        .details-table thead {
+          display: table-header-group;
+        }
+        
+        .details-table tr {
+          page-break-inside: avoid;
+        }
+        
+        .category-header {
+          page-break-inside: avoid;
+          page-break-after: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <ul class="small opname-info">
+      <li>PT Surya Madistrindo</li>
+      <li>Site: {{ .SiteName }}</li>
+    </ul>
+    <h1>BERITA ACARA PEMERIKSAAN ASET</h1>
+    <ul class="small opname-info">
+      <li>Dilaksanakan pada tanggal: <span class="underline">{{ .EndDate }}</span> pukul <span class="underline">{{ .EndTime }}</span></li>
+      <li>dengan perincian sbb:</li>
+    </ul>
+    
+    <table class="recap-table">
+      <colgroup>
+        <col>
+        <col>
+        <col>
+        <col>
+        <col>
+        <col>
+        <col width="30px">
+        <col width="30px">
+        <col width="30px">
+        <col width="30px">
+        <col>
+        <col>
+      </colgroup>
+      <thead>
+        <tr>
+            <th rowspan="2">No</th>
+            <th rowspan="2">No Asset by sistem</th>
+            <th rowspan="2">Asset Tag</th>
+            <th rowspan="2">Nama Asset</th>
+            <th rowspan="2">Kelengkapan Asset</th>
+            <th rowspan="2" width="280px">PIC Asset</th>
+            <th colspan="4">Qty</th>
+            <th rowspan="2">Keterangan</th>
+            <th rowspan="2">Tindak Lanjut</th>
+        </tr>
+        <tr>
+            <th>Fisik</th>
+            <th>Data</th>
+            <th>Satuan</th>
+            <th>Selisih</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="category-header">
+          <td colspan="12">C. ASET IT</td>
+        </tr>
+        {{ $currentCategory := "" }}
+        {{ range $i, $row := .Recap }}
+        {{ if ne $currentCategory $row.Category }}
+        <tr class="category-header">
+          <td colspan="12">{{ upper (index $.CategoryLabel $row.Category) }}</td>
+        </tr>
+        {{ $currentCategory = $row.Category }}
+        {{ end }}
+        <tr class="text-center">          
+            <td>{{ add $i 1 }}</td>
+            <td>Terlampir</td>
+            <td>Terlampir</td>
+            <td>{{ $row.ProductVariety }}</td>
+            <td>Terlampir</td>
+            <td>Terlampir</td>
+            <td>{{ FisikQty $row }}</td>
+            <td>{{ DataQty $row }}</td>
+            <td>{{ Satuan $row }}</td>
+            <td>{{ Selisih $row }}</td>
+            <td>Terlampir</td>
+            <td>Terlampir</td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+    <div class="signatures">
+      <strong>Approval</strong>
+      <div>
+        {{ range .Signatures }}
+        <div class="signature-line">{{ . }}</div>
+        {{ end }}
+      </div>
+    </div>
+    
+    <div class="lampiran-section" id="lampiran-section">
+      <!-- This will be populated by JavaScript -->
+    </div>
+    
+    <!-- Hidden data for JavaScript -->
+    <script type="application/json" id="details-data">
+      [
+        {{ range $i, $detail := .Details }}
+        {
+          "index": {{ add $i 1 }},
+          "category": "{{ $detail.Category }}",
+          "categoryLabel": "{{ upper (index $.CategoryLabel $detail.Category) }}",
+          "company": "{{ $detail.Company }}",
+          "assetTag": "{{ $detail.AssetTag }}",
+          "assetName": "{{ $detail.AssetName }}",
+          "equipments": "{{ Safe $detail.Equipments }}",
+          "userNameAndPosition": "{{ $detail.UserNameAndPosition }}",
+          "assetStatus": "{{ $detail.AssetStatus }}",
+          "actionNotes": "{{ Safe $detail.ActionNotes }}",
+          "costCenterID": "{{ SafeInt $detail.CostCenterID }}"
+        }{{ if ne $i (sub (len $.Details) 1) }},{{ end }}
+        {{ end }}
+      ]
+    </script>
+    
+    <script>
+      // Function to create intelligent page breaks for lampiran
+      function createLampiranPages() {
+        const lampiranSection = document.getElementById('lampiran-section');
+        const detailsData = JSON.parse(document.getElementById('details-data').textContent);
+        
+        // Calculate approximate rows per page (considering header space)
+        const rowsPerPage = 36; // Conservative estimate for A4 landscape
+        
+        let currentPage = 1;
+        let currentPageElement = null;
+        let currentTable = null;
+        let currentTbody = null;
+        let rowsInCurrentPage = 0;
+        let currentCategory = "";
+        
+        function createNewPage() {
+          // Create page container
+          currentPageElement = document.createElement('div');
+          currentPageElement.className = 'lampiran-page';
+          
+          // Create header
+          const header = document.createElement('div');
+          header.className = 'lampiran-header';
+          header.innerHTML = `
+            <span>LAMPIRAN DETAIL ASET</span>
+            <span class="page-number">Hal. ${currentPage}</span>
+          `;
+          currentPageElement.appendChild(header);
+          
+          // Create table
+          currentTable = document.createElement('table');
+          currentTable.className = 'details-table';
+          
+          // Create table header
+          const thead = document.createElement('thead');
+          thead.innerHTML = `
+            <tr>
+              <th>No</th>
+              <th>Kategori</th>
+              <th>Perusahaan</th>
+              <th>Asset Tag</th>
+              <th>Nama Aset</th>
+              <th>Perlengkapan</th>
+              <th>Pengguna</th>
+              <th>Status</th>
+              <th>Catatan</th>
+              <th>Cost Center</th>
+            </tr>
+          `;
+          currentTable.appendChild(thead);
+          
+          // Create tbody
+          currentTbody = document.createElement('tbody');
+          currentTable.appendChild(currentTbody);
+          
+          currentPageElement.appendChild(currentTable);
+          lampiranSection.appendChild(currentPageElement);
+          
+          rowsInCurrentPage = 0;
+          currentPage++;
+        }
+        
+        function addCategoryHeader(label) {
+          const categoryRow = document.createElement('tr');
+          categoryRow.className = 'category-header';
+          categoryRow.innerHTML = `<td colspan="10">${label.toUpperCase()}</td>`;
+          currentTbody.appendChild(categoryRow);
+          rowsInCurrentPage++;
+        }
+
+        function addDetailRow(detail) {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td style="white-space:nowrap;">${detail.index}</td>
+            <td></td>
+            <td>${escapeHtml(detail.company)}</td>
+            <td class="nowrap">${escapeHtml(detail.assetTag)}</td>
+            <td>${escapeHtml(detail.assetName)}</td>
+            <td>${escapeHtml(detail.equipments)}</td>
+            <td>${escapeHtml(detail.userNameAndPosition)}</td>
+            <td>${escapeHtml(detail.assetStatus)}</td>
+            <td>${escapeHtml(detail.actionNotes)}</td>
+            <td class="text-center">${escapeHtml(detail.costCenterID)}</td>
+          `;
+          currentTbody.appendChild(row);
+          rowsInCurrentPage++;
+        }
+        
+        function escapeHtml(text) {
+          const div = document.createElement('div');
+          div.textContent = text;
+          return div.innerHTML;
+        }
+        
+        function shouldStartNewPage() {
+          return rowsInCurrentPage >= rowsPerPage;
+        }
+        
+        // Start first page
+        createNewPage();
+        
+        // Process each detail row
+        detailsData.forEach((detail) => {
+          const needsCategoryHeader = currentCategory !== detail.category;
+
+          // Decide if a new page is needed (either full, or not enough space before a new category header block)
+          // We use > rowsPerPage - 4 heuristic same as before to leave room for header + at least a row or two.
+          if (shouldStartNewPage() || (needsCategoryHeader && rowsInCurrentPage > rowsPerPage - 4)) {
+            createNewPage();
+            currentCategory = ""; // Force header on new page
+          }
+
+          if (needsCategoryHeader) {
+            addCategoryHeader(detail.categoryLabel);
+            currentCategory = detail.category;
+          }
+
+          addDetailRow(detail);
+        });
+        
+        // Update total pages count in all page headers
+        const pageHeaders = document.querySelectorAll('.page-number');
+        const actualTotalPages = currentPage - 1;
+        pageHeaders.forEach((header, index) => {
+          header.textContent = `${index + 1}/${actualTotalPages}`;
+        });
+      }
+      
+      // Run the function when the page loads
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', createLampiranPages);
+      } else {
+        createLampiranPages();
+      }
+    </script>
+  </body>
+</html>
