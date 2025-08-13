@@ -1025,26 +1025,26 @@ AS $$
 	BEGIN
 		RETURN QUERY
 		SELECT * FROM (
-			-- Categorize assets that were scanned and processed during opname
+			-- Categorize assets that were scanned and processed during opname (use effective values from changes JSON)
 			SELECT
 				CASE
-					-- Priority 1: Broken assets (status = 'Down'). Will never exist in "AssetChanges" becasue asset status can't be modified during opname.
-					WHEN a.status = 'Down'
-					THEN 'broken_assets'::VARCHAR(50)
-
-					-- Priority 2: Misplaced assets a.k.a. kesalahan mutasi (when cost center changes but is not downed).
-					WHEN ac."changes" ? 'newOwnerCostCenter'
-						AND ac."changes" ->> 'newOwnerCostCenter' IS NOT NULL
-						AND a.status <> 'Down'
-					THEN 'misplaced_assets'::VARCHAR(50)
-
-					-- Priority 3: Working assets (scanned, not broken, not misplaced)
+					WHEN effective_status = 'Down' THEN 'broken_assets'::VARCHAR(50)
+					WHEN cost_center_changed AND effective_status <> 'Down' THEN 'misplaced_assets'::VARCHAR(50)
 					ELSE 'working_assets'::VARCHAR(50)
 				END AS category,
 				a.asset_tag,
 				a.product_variety
 			FROM "AssetChanges" AS ac
 			INNER JOIN "Asset" AS a ON ac.asset_tag = a.asset_tag
+			LEFT JOIN "User" AS ou ON a.owner_id = ou.user_id
+			LEFT JOIN LATERAL (
+				SELECT
+					COALESCE((ac."changes"->>'newStatus')::VARCHAR, a.status) AS effective_status,
+					COALESCE((ac."changes"->>'newOwnerCostCenter')::INT, ou.cost_center_id) AS effective_cost_center,
+					CASE 
+						WHEN (ac."changes" ? 'newOwnerCostCenter') AND ( (ac."changes"->>'newOwnerCostCenter')::INT IS DISTINCT FROM ou.cost_center_id) 
+						THEN TRUE ELSE FALSE END AS cost_center_changed
+			) eff ON TRUE
 			WHERE ac.session_id = _session_id
 			
 			UNION
@@ -1057,7 +1057,9 @@ AS $$
 			FROM "Asset" AS a
 			INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
 			INNER JOIN "OpnameSession" AS os ON ss.site_id = os.site_id AND os.id = _session_id
-			WHERE a.asset_tag NOT IN (SELECT ac.asset_tag FROM "AssetChanges" AS ac WHERE ac.session_id = _session_id)
+			WHERE NOT EXISTS (
+				SELECT 1 FROM "AssetChanges" AS ac2 WHERE ac2.session_id = _session_id AND ac2.asset_tag = a.asset_tag
+			)
 		)
 		ORDER BY category, asset_tag;
 	END;
@@ -1119,10 +1121,10 @@ CREATE OR REPLACE FUNCTION public.get_opname_bap_details(_session_id INT)
 AS $$
 	BEGIN
 		-- NOTE:
-		-- 1. ac.action_notes does not exist; the column is change_reason in AssetChanges.
-		-- 2. Some assets may have NULL owner_id -> use LEFT JOIN to avoid losing rows.
+		-- 1. Some assets may have NULL owner_id -> use LEFT JOIN to avoid losing rows.
+		-- 2. Apply latest (effective) values from AssetChanges JSON when present.
 		-- 3. Use concat_ws to safely build user_name_and_position.
-		-- 4. Use LEFT JOIN LATERAL for equipments helper to avoid cross join warnings.
+		-- 4. Use LEFT JOIN LATERAL for equipments helper and effective field derivation.
 		-- 5. Deterministic category ordering via CASE.
 		RETURN QUERY
 		SELECT
@@ -1130,21 +1132,33 @@ AS $$
 			'PT Surya Madistrindo'::VARCHAR(50) AS company,
 			a.asset_tag,
 			a.product_name AS asset_name,
-			ae.equipments,
+			eff.effective_equipments AS equipments,
 			CASE 
 				WHEN u.user_id IS NULL THEN 'N/A'
-				ELSE concat_ws(' - ', u.position, trim(both ' ' FROM concat_ws(' ', u.first_name, u.last_name)))
+				WHEN LOWER(u.username) = 'vacant' THEN 'VACANT'
+				ELSE concat_ws(' - ', eff.effective_owner_position, trim(both ' ' FROM concat_ws(' ', u.first_name, u.last_name)))
 			END AS user_name_and_position,
-			a.status AS asset_status,
+				eff.effective_status::VARCHAR(20) AS asset_status,
 			ac.action_notes,
-			u.cost_center_id
+			eff.effective_owner_cost_center AS cost_center_id
 		FROM public.categorize_opname_assets(_session_id) AS ca
 		INNER JOIN "Asset" AS a ON ca.asset_tag = a.asset_tag
-		LEFT JOIN "User" AS u ON a.owner_id = u.user_id
 		LEFT JOIN "AssetChanges" AS ac 
 			ON a.asset_tag = ac.asset_tag 
 			AND ac.session_id = _session_id
+		LEFT JOIN "User" AS ou ON a.owner_id = ou.user_id -- original owner
 		LEFT JOIN LATERAL public.get_asset_equipments(a.product_variety) AS ae ON TRUE
+		LEFT JOIN LATERAL (
+			SELECT
+				COALESCE((ac."changes"->>'newOwnerID')::INT, a.owner_id) AS effective_owner_id,
+				COALESCE(ac."changes"->>'newOwnerPosition', ou.position) AS effective_owner_position,
+				COALESCE(ac."changes"->>'newOwnerDepartment', ou.department) AS effective_owner_department,
+				COALESCE(ac."changes"->>'newOwnerDivision', ou.division) AS effective_owner_division,
+				COALESCE((ac."changes"->>'newOwnerCostCenter')::INT, ou.cost_center_id) AS effective_owner_cost_center,
+				COALESCE(ac."changes"->>'newEquipments', ae.equipments) AS effective_equipments,
+				COALESCE(ac."changes"->>'newStatus', a.status) AS effective_status
+		) eff ON TRUE
+		LEFT JOIN "User" AS u ON u.user_id = eff.effective_owner_id
 		ORDER BY 
 			CASE ca.category
 				WHEN 'working_assets' THEN 1
