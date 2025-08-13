@@ -7,9 +7,9 @@ export interface User {
     position: string;
     department: string;
     division: string;
-    siteID: number;
+    siteID: number | null;
     siteName: string;
     siteGroupName: string;
     regionName: string;
-    costCenterID: number;
+    costCenterID: number | null;
 }

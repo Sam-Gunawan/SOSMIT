@@ -3,6 +3,7 @@ package auth
 
 import (
 	"errors"
+	"strings"
 	"time"
 
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
@@ -28,6 +29,10 @@ func NewService(userRepo *user.Repository) *Service {
 
 // Login validates the user's credentials and returns a JWT token if successful.
 func (service *Service) Login(username, password string) (string, error) {
+	// Block system placeholder accounts explicitly (case-insensitive)
+	if strings.EqualFold(username, "vacant") {
+		return "", errors.New("invalid username or password")
+	}
 	// Fetch user credentials from the repository.
 	userCredentials, err := service.userRepo.GetUserCredentials(username)
 	if err != nil {

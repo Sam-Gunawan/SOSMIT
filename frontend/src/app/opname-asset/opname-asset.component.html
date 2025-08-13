@@ -375,8 +375,9 @@
                                         <input type="text" class="form-control" 
                                             [id]="'owner-position-' + result.pendingAsset.assetTag" 
                                             [(ngModel)]="result.pendingAsset.assetOwnerPosition" name="newOwnerPosition"
-                                            [class.is-invalid]="!result.pendingAsset.assetOwnerPosition || result.pendingAsset.assetOwnerPosition === ''">
-                                        <div *ngIf="!result.pendingAsset.assetOwnerPosition || result.pendingAsset.assetOwnerPosition === ''" class="invalid-feedback">
+                                            [class.is-invalid]="(!result.pendingAsset.assetOwnerPosition || result.pendingAsset.assetOwnerPosition === '') && !isVacant(i)"
+                                            [readonly]="isVacant(i)">
+                                        <div *ngIf="(!result.pendingAsset.assetOwnerPosition || result.pendingAsset.assetOwnerPosition === '') && !isVacant(i)" class="invalid-feedback">
                                             User position is required.
                                         </div>
                                     </div>
@@ -387,8 +388,9 @@
                                         <input type="number" class="form-control" 
                                             [id]="'cost-center-' + result.pendingAsset.assetTag" 
                                             [(ngModel)]="result.pendingAsset.assetOwnerCostCenter" name="newCostCenter"
-                                            [class.is-invalid]="!result.pendingAsset.assetOwnerCostCenter || result.pendingAsset.assetOwnerCostCenter === undefined">
-                                        <div *ngIf="!result.pendingAsset.assetOwnerCostCenter || result.pendingAsset.assetOwnerCostCenter === undefined" class="invalid-feedback">
+                                            [class.is-invalid]="(!result.pendingAsset.assetOwnerCostCenter || result.pendingAsset.assetOwnerCostCenter === undefined) && !isVacant(i)"
+                                            [readonly]="isVacant(i)">
+                                        <div *ngIf="(!result.pendingAsset.assetOwnerCostCenter || result.pendingAsset.assetOwnerCostCenter === undefined) && !isVacant(i)" class="invalid-feedback">
                                             User cost center is required.
                                         </div>
                                     </div>

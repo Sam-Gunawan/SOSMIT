@@ -24,11 +24,11 @@ type User struct {
 	Position      string
 	Department    string
 	Division      string
-	SiteID        int64
-	SiteName      string
-	SiteGroupName string
-	RegionName    string
-	CostCenterID  int64
+	SiteID        sql.NullInt64
+	SiteName      sql.NullString
+	SiteGroupName sql.NullString
+	RegionName    sql.NullString
+	CostCenterID  sql.NullInt64
 }
 
 type UserSiteCard struct {

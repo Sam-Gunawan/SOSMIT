@@ -843,23 +843,31 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       return;
     }
     
-    const matchedUser = this.allUsers.find(user => (
-      `${user.firstName} ${user.lastName}`.toLowerCase() === input ||
-      (user.email.toLowerCase() === input)
-    ));
+    const matchedUser = this.allUsers.find(user => {
+      const fullName = `${(user.firstName || '').trim()} ${(user.lastName || '').trim()}`.trim().toLowerCase();
+      const email = (user.email || '').toLowerCase();
+      const username = (user.username || '').toLowerCase();
+      return fullName === input || email === input || username === input;
+    });
 
     if (matchedUser) {
       // Valid user found - update pendingAsset directly
+      // Derive display name: prefer full name, fallback to username (e.g., 'vacant')
+      const displayName = (() => {
+        const fn = (matchedUser.firstName || '').trim();
+        const ln = (matchedUser.lastName || '').trim();
+        const full = `${fn} ${ln}`.trim();
+        return full !== '' ? full : matchedUser.username; // fallback when both names empty
+      })();
+
       result.pendingAsset = {
         ...result.pendingAsset,
         assetOwner: matchedUser.userID,
-        assetOwnerName: `${matchedUser.firstName} ${matchedUser.lastName}`,
+        assetOwnerName: displayName,
         assetOwnerPosition: matchedUser.position,
-        assetOwnerCostCenter: Number(matchedUser.costCenterID), // Ensure it's a number
+        assetOwnerCostCenter: Number(matchedUser.costCenterID),
         assetOwnerDepartment: matchedUser.department,
         assetOwnerDivision: matchedUser.division,
-        // Note: Asset location (subSiteID, subSiteName, ...) remains unchanged
-        // when changing owner - only owner organizational data changes
       };
 
       // Force change detection to update the view
@@ -872,6 +880,11 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       // Force change detection to update validation state
       this.cdr.detectChanges();
     }
+  }
+
+  isVacant(index: number): boolean {
+    const pending = this.searchResults[index]?.pendingAsset;
+    return pending?.assetOwner === 1;
   }
 
   // Handle sub-site name input change

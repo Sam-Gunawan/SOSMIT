@@ -48,87 +48,74 @@ import { SubSite } from '../model/sub-site.model';
     }
 
     getUserProfile(username: string): Observable<any> {
-      // This method will fetch the user profile data.
-      // Authorization header is already handled by AuthInterceptor at ../services/auth.interceptor.ts
-      return this.http.get<User>(`${this.userApiUrl}/${username}`).pipe(
+      return this.http.get<any>(`${this.userApiUrl}/${username}`).pipe(
         map((response: any) => {
-          // Map the response to the desired format.
+          const u = response.user || response; // fallback if not wrapped
           return {
-            userID: response.user_id,
-            username: response.username,
-            email: response.email,
-            firstName: titleCase(response.first_name),
-            lastName: titleCase(response.last_name),
-            position: titleCase(response.position),
-            department: titleCase(response.department),
-            division: titleCase(response.division),
-            siteID: response.site_id,
-            siteName: response.site_name,
-            siteGroupName: response.site_group_name,
-            regionName: response.region_name,
-            costCenterID: response.cost_center_id
-          };
+            userID: u.user_id,
+            username: u.username,
+            email: u.email,
+            firstName: titleCase(u.first_name || ''),
+            lastName: titleCase(u.last_name || ''),
+            position: titleCase(u.position || ''),
+            department: titleCase(u.department || ''),
+            division: titleCase(u.division || ''),
+            siteID: u.site_id ?? null,
+            siteName: u.site_name || '',
+            siteGroupName: u.site_group || u.site_group_name || '',
+            regionName: u.region_name || '',
+            costCenterID: u.cost_center_id ?? null
+          } as User;
         }),
-        tap((userProfile: User) => {
-          // Log the fetched user profile for debugging purposes.
-          console.log('[ApiService] Fetched user profile:', userProfile);
-        })
+        tap(userProfile => console.log('[ApiService] Fetched user profile:', userProfile))
       );
     }
 
     getUserByID(userID: number): Observable<User> {
-      // This method will fetch a specific user by their ID.
-      return this.http.get<User>(`${this.userApiUrl}/${userID}`).pipe(
+      return this.http.get<any>(`${this.userApiUrl}/${userID}`).pipe(
         map((response: any) => {
-          // Map the response to the desired format.
-          return {
-            userID: response.user_id,
-            username: response.username,
-            email: response.email,
-            firstName: titleCase(response.first_name),
-            lastName: titleCase(response.last_name),
-            position: titleCase(response.position),
-            department: titleCase(response.department),
-            division: titleCase(response.division),
-            siteID: response.site_id,
-            siteName: response.site_name,
-            siteGroupName: response.site_group_name,
-            regionName: response.region_name,
-            costCenterID: response.cost_center_id
-          };
+          const u = response.user || response;
+            return {
+              userID: u.user_id,
+              username: u.username,
+              email: u.email,
+              firstName: titleCase(u.first_name || ''),
+              lastName: titleCase(u.last_name || ''),
+              position: titleCase(u.position || ''),
+              department: titleCase(u.department || ''),
+              division: titleCase(u.division || ''),
+              siteID: u.site_id ?? null,
+              siteName: u.site_name || '',
+              siteGroupName: u.site_group || u.site_group_name || '',
+              regionName: u.region_name || '',
+              costCenterID: u.cost_center_id ?? null
+            } as User;
         }),
-        tap((user: User) => {
-          // Log the fetched user for debugging purposes.
-          console.log('[ApiService] Fetched user:', user);
-        })
+        tap(user => console.log('[ApiService] Fetched user:', user))
       );
     }
 
     getAllUsers(): Observable<User[]> {
-      // This method will fetch all users from the database.
-      return this.http.get<User[]>(`${this.userApiUrl}/all`).pipe(
+      return this.http.get<any>(`${this.userApiUrl}/all`).pipe(
         map((response: any) => {
-          // Map the response to the desired format.
-          return response.users.map((user: any) => ({
-            userID: user.UserID,
-            username: user.Username,
-            email: user.Email,
-            firstName: titleCase(user.FirstName),
-            lastName: titleCase(user.LastName),
-            position: titleCase(user.Position),
-            department: titleCase(user.Department),
-            division: titleCase(user.Division),
-            siteID: user.SiteID,
-            siteName: user.SiteName,
-            siteGroupName: user.SiteGroupName,
-            regionName: user.RegionName,
-            costCenterID: user.CostCenterID
-          }));
+          const list = response.users || [];
+          return list.map((u: any) => ({
+            userID: u.user_id ?? u.UserID,
+            username: u.username ?? u.Username,
+            email: u.email ?? u.Email,
+            firstName: titleCase((u.first_name ?? u.FirstName) || ''),
+            lastName: titleCase((u.last_name ?? u.LastName) || ''),
+            position: titleCase((u.position ?? u.Position) || ''),
+            department: titleCase((u.department ?? u.Department) || ''),
+            division: titleCase((u.division ?? u.Division) || ''),
+            siteID: (u.site_id ?? u.SiteID) ?? null,
+            siteName: (u.site_name ?? u.SiteName) || '',
+            siteGroupName: (u.site_group ?? u.site_group_name ?? u.SiteGroupName) || '',
+            regionName: (u.region_name ?? u.RegionName) || '',
+            costCenterID: (u.cost_center_id ?? u.CostCenterID) ?? null
+          } as User));
         }),
-        tap((users: User[]) => {
-          // Log the fetched users for debugging purposes.
-          console.log('[ApiService] Fetched users:', users);
-        })
+        tap(users => console.log('[ApiService] Fetched users:', users))
       );
     }
 

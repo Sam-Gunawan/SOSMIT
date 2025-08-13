@@ -49,22 +49,8 @@ func (handler *Handler) GetMeHandler(context *gin.Context) {
 		return
 	}
 
-	// Return the user details
-	context.JSON(http.StatusOK, gin.H{
-		"user_id":        user.UserID,
-		"username":       user.Username,
-		"email":          user.Email,
-		"first_name":     user.FirstName,
-		"last_name":      user.LastName,
-		"position":       user.Position,
-		"department":     user.Department,
-		"division":       user.Division,
-		"site_id":        user.SiteID,
-		"site_name":      user.SiteName,
-		"site_group":     user.SiteGroupName,
-		"region_name":    user.RegionName,
-		"cost_center_id": user.CostCenterID,
-	})
+	// Return the user details (sanitize nullable fields)
+	context.JSON(http.StatusOK, gin.H{"user": serializeUser(user)})
 }
 
 // GetAllUsersHandler retrieves all users in the system.
@@ -87,9 +73,12 @@ func (handler *Handler) GetAllUsersHandler(context *gin.Context) {
 		allUsers = make([]*User, 0)
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"users": allUsers,
-	})
+	// Map users to serialized form
+	serialized := make([]gin.H, 0, len(allUsers))
+	for _, u := range allUsers {
+		serialized = append(serialized, serializeUser(u))
+	}
+	context.JSON(http.StatusOK, gin.H{"users": serialized})
 }
 
 // GetUserByIDHandler retrieves a user by their ID.
@@ -128,21 +117,7 @@ func (handler *Handler) GetUserByIDHandler(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, gin.H{
-		"user_id":        user.UserID,
-		"username":       user.Username,
-		"email":          user.Email,
-		"first_name":     user.FirstName,
-		"last_name":      user.LastName,
-		"position":       user.Position,
-		"department":     user.Department,
-		"division":       user.Division,
-		"site_id":        user.SiteID,
-		"site_name":      user.SiteName,
-		"site_group":     user.SiteGroupName,
-		"region_name":    user.RegionName,
-		"cost_center_id": user.CostCenterID,
-	})
+	context.JSON(http.StatusOK, gin.H{"user": serializeUser(user)})
 }
 
 // GetUserSiteCardsHandler retrieves all the sites a user has access to.
@@ -180,4 +155,53 @@ func (handler *Handler) GetUserSiteCardsHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"site_cards": userSiteCards,
 	})
+}
+
+// serializeUser flattens nullable SQL fields into plain JSON values.
+func serializeUser(u *User) gin.H {
+	var siteID interface{}
+	if u.SiteID.Valid {
+		siteID = u.SiteID.Int64
+	} else {
+		siteID = nil
+	}
+	var costCenterID interface{}
+	if u.CostCenterID.Valid {
+		costCenterID = u.CostCenterID.Int64
+	} else {
+		costCenterID = nil
+	}
+	var siteName interface{}
+	if u.SiteName.Valid {
+		siteName = u.SiteName.String
+	} else {
+		siteName = ""
+	}
+	var siteGroup interface{}
+	if u.SiteGroupName.Valid {
+		siteGroup = u.SiteGroupName.String
+	} else {
+		siteGroup = ""
+	}
+	var regionName interface{}
+	if u.RegionName.Valid {
+		regionName = u.RegionName.String
+	} else {
+		regionName = ""
+	}
+	return gin.H{
+		"user_id":        u.UserID,
+		"username":       u.Username,
+		"email":          u.Email,
+		"first_name":     u.FirstName,
+		"last_name":      u.LastName,
+		"position":       u.Position,
+		"department":     u.Department,
+		"division":       u.Division,
+		"site_id":        siteID,
+		"site_name":      siteName,
+		"site_group":     siteGroup,
+		"region_name":    regionName,
+		"cost_center_id": costCenterID,
+	}
 }

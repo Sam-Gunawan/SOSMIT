@@ -7,6 +7,7 @@ DROP TABLE IF EXISTS "AssetChanges" CASCADE;
 DROP TABLE IF EXISTS "OpnameSession" CASCADE;
 DROP TABLE IF EXISTS "AssetEquipments" CASCADE;
 DROP TABLE IF EXISTS "Asset" CASCADE;
+DROP TABLE IF EXISTS "ApprovalPath" CASCADE;
 DROP TABLE IF EXISTS "User" CASCADE;
 DROP TABLE IF EXISTS "CostCenter" CASCADE;
 DROP TABLE IF EXISTS "SubSite" CASCADE;
@@ -54,6 +55,21 @@ CREATE TABLE "SubSite" (
 );
 
 -- == ENTITY TABLES ==
+-- Approval sequence mapping
+CREATE TABLE "ApprovalPath" (
+    "position" VARCHAR(100) NOT NULL DEFAULT '',
+    "sequence" INT NOT NULL,
+
+    -- Foreign key to Site.
+    -- Determines which pair of sequence and position belongs to which site.
+    "site_id" INT NOT NULL REFERENCES "Site"("id") ON DELETE CASCADE,
+
+    -- Primary key will be a combination of all 3 (in case multiple approval paths are available at any given site)
+    PRIMARY KEY ("site_id", "position", "sequence"),
+
+    CONSTRAINT ck_positive_seq CHECK ("sequence" > 0)
+);
+
 -- Cost Center
 CREATE TABLE "CostCenter" (
     "cost_center_id" INT PRIMARY KEY,
@@ -64,18 +80,23 @@ CREATE TABLE "CostCenter" (
 CREATE TABLE "User" (
     "user_id" INT PRIMARY KEY,
     "username" VARCHAR(255) UNIQUE NOT NULL,
-    "email" VARCHAR(255) NOT NULL, -- For demo purposes, email is not unique.
+    "email" VARCHAR(255) NOT NULL DEFAULT '', -- For demo purposes, email is not unique.
     "password" VARCHAR(255) NOT NULL, -- For demo purposes, store in plain text for now.
-    "first_name" VARCHAR(255) NOT NULL,
-    "last_name" VARCHAR(255) NOT NULL,
-    "position" VARCHAR(100) NOT NULL,
-    "department" VARCHAR(100) NOT NULL,
-    "division" VARCHAR(100) NOT NULL,
+    "first_name" VARCHAR(255) NOT NULL DEFAULT '',
+    "last_name" VARCHAR(255) NOT NULL DEFAULT '',
+    "position" VARCHAR(100) NOT NULL DEFAULT '',
+    "department" VARCHAR(100) NOT NULL DEFAULT '',
+    "division" VARCHAR(100) NOT NULL DEFAULT '',
 
     -- Foreign key to Site and Cost Center
-    "site_id" INT NOT NULL REFERENCES "Site"("id") ON DELETE CASCADE,
-    "cost_center_id" INT NOT NULL REFERENCES "CostCenter"("cost_center_id") ON DELETE CASCADE
+    "site_id" INT REFERENCES "Site"("id") ON DELETE CASCADE,
+    "cost_center_id" INT REFERENCES "CostCenter"("cost_center_id") ON DELETE CASCADE
 );
+
+-- Seed vacant user (no site / cost center). Use a reserved ID (e.g., 1) that other seeds avoid.
+INSERT INTO "User" (user_id, username, email, password, first_name, last_name, position, department, division, site_id, cost_center_id)
+VALUES (1, 'VACANT', '', '', 'VACANT', '', '', '', '', NULL, NULL)
+ON CONFLICT (user_id) DO NOTHING;
 
 -- Asset 
 CREATE TABLE "Asset" (
@@ -103,9 +124,10 @@ CREATE TABLE "Asset" (
     ) DEFAULT '',
     "location" VARCHAR(255),
     "room" VARCHAR(255),
-    "equipments" TEXT, -- e.g. "Monitor, Keyboard, Mouse"
+    "equipments" TEXT, -- e.g. "Monitor, Keyboard, Mouse" (can be empty to show no equipments)
+
     -- Foreign key to User (owner of the asset).
-    "owner_id" INT NOT NULL REFERENCES "User"("user_id") ON DELETE SET NULL,
+    "owner_id" INT NOT NULL REFERENCES "User"("user_id"),
 
     -- Foreign key to Site (where the asset is located).
     "sub_site_id" INT NOT NULL REFERENCES "SubSite"("id") ON DELETE CASCADE

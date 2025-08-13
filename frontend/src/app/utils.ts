@@ -1,4 +1,8 @@
-export function titleCase(str: string): string {
+export function titleCase(str: string | undefined): string {
+    if (str === undefined || !str) {
+        return ''
+    }
+    
     var result: string[] = [];
     const alwaysUpperCase = ['TMC', 'IT']; // List of words to always keep in uppercase
     const specialCases = {

@@ -44,7 +44,8 @@ AS $$
         RETURN QUERY
         SELECT u.user_id, u.username, u.password, u.position
         FROM "User" AS u
-        WHERE LOWER(u.username) = LOWER(_username);
+        WHERE LOWER(u.username) = LOWER(_username)
+			AND LOWER(u.username) <> 'vacant'; -- Block users trying to login using 'vacant' username
     END;
 $$;
 
@@ -69,11 +70,23 @@ CREATE OR REPLACE FUNCTION public.get_all_users()
 AS $$
 	BEGIN 
 		RETURN QUERY
-		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", u.department, u.division, s.id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
+		SELECT u.user_id,
+		       u.username,
+		       u.email,
+		       u.first_name,
+		       u.last_name,
+		       u."position",
+		       u.department,
+		       u.division,
+		       s.id AS site_id,
+		       s.site_name,
+		       sg.site_group_name,
+		       r.region_name,
+		       u.cost_center_id
 		FROM "User" AS u
-		INNER JOIN "Site" AS s ON u.site_id = s.id
-		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-		INNER JOIN "Region" AS r ON sg.region_id = r.id;
+		LEFT JOIN "Site" AS s ON u.site_id = s.id
+		LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+		LEFT JOIN "Region" AS r ON sg.region_id = r.id;
 	END;
 $$;
 
@@ -98,11 +111,23 @@ CREATE OR REPLACE FUNCTION public.get_user_by_id(_user_id INT)
 AS $$
 	BEGIN 
 		RETURN QUERY
-		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", u.department, u.division, s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
+		SELECT u.user_id,
+		       u.username,
+		       u.email,
+		       u.first_name,
+		       u.last_name,
+		       u."position",
+		       u.department,
+		       u.division,
+		       s.id AS site_id,
+		       s.site_name,
+		       sg.site_group_name,
+		       r.region_name,
+		       u.cost_center_id
 		FROM "User" AS u
-		INNER JOIN "Site" AS s ON u.site_id = s.id
-		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-		INNER JOIN "Region" AS r ON sg.region_id = r.id
+		LEFT JOIN "Site" AS s ON u.site_id = s.id
+		LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+		LEFT JOIN "Region" AS r ON sg.region_id = r.id
 		WHERE u.user_id = _user_id; 
 	END;
 $$;
@@ -128,11 +153,23 @@ CREATE OR REPLACE FUNCTION public.get_user_by_username(_username VARCHAR(255))
 AS $$
 	BEGIN 
 		RETURN QUERY
-		SELECT u.user_id, u.username, u.email, u.first_name, u.last_name, u."position", u.department, u.division, s.id AS site_id, s.site_name, sg.site_group_name, r.region_name, u.cost_center_id
+		SELECT u.user_id,
+		       u.username,
+		       u.email,
+		       u.first_name,
+		       u.last_name,
+		       u."position",
+		       u.department,
+		       u.division,
+		       s.id AS site_id,
+		       s.site_name,
+		       sg.site_group_name,
+		       r.region_name,
+		       u.cost_center_id
 		FROM "User" AS u
-		INNER JOIN "Site" AS s ON u.site_id = s.id
-		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-		INNER JOIN "Region" AS r ON sg.region_id = r.id
+		LEFT JOIN "Site" AS s ON u.site_id = s.id
+		LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+		LEFT JOIN "Region" AS r ON sg.region_id = r.id
 		WHERE LOWER(u.username) = LOWER(_username); 
 	END;
 $$;
