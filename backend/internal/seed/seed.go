@@ -46,6 +46,7 @@ func main() {
 	seedTable(db, "SiteGroup", "internal/seed/seed_data/site_group.csv", seedSiteGroup)
 	seedTable(db, "Site", "internal/seed/seed_data/site.csv", seedSite)
 	seedTable(db, "SubSite", "internal/seed/seed_data/sub_site.csv", seedSubSite)
+	seedTable(db, "ApprovalPath", "internal/seed/seed_data/approval_path.csv", seedApprovalPath)
 	seedTable(db, "CostCenter", "internal/seed/seed_data/cost_center.csv", seedCostCenter)
 	seedTable(db, "User", "internal/seed/seed_data/user.csv", seedUser)
 	seedTable(db, "Asset", "internal/seed/seed_data/asset.csv", seedAsset)
@@ -182,6 +183,23 @@ func seedCostCenter(db *sql.DB, record []string) error {
 	_, err := db.Exec(query, cost_center_id, cost_center_name)
 	if err != nil {
 		log.Fatalf("Error inserting record into CostCenter table: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
+// Expected CSV format for approval_path.csv
+// (position, sequence, site_id [FK]) [PK]
+func seedApprovalPath(db *sql.DB, record []string) error {
+	position := record[0]
+	sequence := record[1]
+	site_id := record[2]
+
+	query := `INSERT INTO "ApprovalPath" (position, sequence, site_id) VALUES ($1, $2, $3) ON CONFLICT (site_id, position, sequence) DO NOTHING`
+	_, err := db.Exec(query, position, sequence, site_id)
+	if err != nil {
+		log.Fatalf("Error inserting record into ApprovalPath table: %v\n", err)
 		return err
 	}
 
