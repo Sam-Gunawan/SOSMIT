@@ -74,12 +74,12 @@ func (repo *Repository) GetBAPRecap(sessionID int64) ([]BAPRecapRow, error) {
 
 	var recap []BAPRecapRow
 	for rows.Next() {
-		var r BAPRecapRow
-		if err := rows.Scan(&r.Category, &r.ProductVariety, &r.AssetCount); err != nil {
+		var recapRow BAPRecapRow
+		if err := rows.Scan(&recapRow.Category, &recapRow.ProductVariety, &recapRow.AssetCount); err != nil {
 			log.Printf("❌ Error scanning BAP recap row: %v", err)
 			return nil, err
 		}
-		recap = append(recap, r)
+		recap = append(recap, recapRow)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -99,12 +99,12 @@ func (repo *Repository) GetBAPDetails(sessionID int64) ([]BAPDetailRow, error) {
 
 	var details []BAPDetailRow
 	for rows.Next() {
-		var d BAPDetailRow
-		if err := rows.Scan(&d.Category, &d.Company, &d.AssetTag, &d.AssetName, &d.Equipments, &d.UserNameAndPosition, &d.AssetStatus, &d.ActionNotes, &d.CostCenterID); err != nil {
+		var detailRow BAPDetailRow
+		if err := rows.Scan(&detailRow.Category, &detailRow.Company, &detailRow.AssetTag, &detailRow.AssetName, &detailRow.Equipments, &detailRow.UserNameAndPosition, &detailRow.AssetStatus, &detailRow.ActionNotes, &detailRow.CostCenterID); err != nil {
 			log.Printf("❌ Error scanning BAP detail row: %v", err)
 			return nil, err
 		}
-		details = append(details, d)
+		details = append(details, detailRow)
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -114,18 +114,18 @@ func (repo *Repository) GetBAPDetails(sessionID int64) ([]BAPDetailRow, error) {
 
 // GetSessionMeta retrieves minimal opname session metadata (mirrors get_opname_session_by_id) without creating package cycles.
 func (repo *Repository) GetSessionMeta(sessionID int64) (*SessionMeta, error) {
-	var sm SessionMeta
+	var sessionMeta SessionMeta
 	err := repo.db.QueryRow(`SELECT * FROM get_opname_session_by_id($1)`, sessionID).Scan(
-		&sm.ID,
-		&sm.StartDate,
-		&sm.EndDate,
-		&sm.Status,
-		&sm.UserID,
-		&sm.ManagerReviewerID,
-		&sm.ManagerReviewedAt,
-		&sm.L1ReviewerID,
-		&sm.L1ReviewedAt,
-		&sm.SiteID,
+		&sessionMeta.ID,
+		&sessionMeta.StartDate,
+		&sessionMeta.EndDate,
+		&sessionMeta.Status,
+		&sessionMeta.UserID,
+		&sessionMeta.ManagerReviewerID,
+		&sessionMeta.ManagerReviewedAt,
+		&sessionMeta.L1ReviewerID,
+		&sessionMeta.L1ReviewedAt,
+		&sessionMeta.SiteID,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -135,7 +135,7 @@ func (repo *Repository) GetSessionMeta(sessionID int64) (*SessionMeta, error) {
 		log.Printf("❌ Error retrieving session meta %d: %v", sessionID, err)
 		return nil, err
 	}
-	return &sm, nil
+	return &sessionMeta, nil
 }
 
 // GetOpnameStats retrieves the opname statistics for a given opname session ID.

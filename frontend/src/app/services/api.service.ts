@@ -299,36 +299,36 @@ import { SubSite } from '../model/sub-site.model';
       // This method will fetch all assets on a specific site.
       return this.http.get<AssetInfo[]>(`${this.siteApiUrl}/${siteID}/assets`).pipe(
         map((response: any) => {
-          // Map the response to the desired format.
-          return response.assets_on_site.map((asset: any) => ({
-            assetTag: asset.AssetTag,
-            serialNumber: asset.SerialNumber,
-            assetStatus: asset.Status,
-            statusReason: asset.StatusReason || '-1',
-            category: asset.ProductCategory,
-            subCategory: asset.ProductSubCategory,
-            productVariety: asset.ProductVariety,
-            assetBrand: asset.BrandName,
-            assetName: asset.ProductName,
-            condition: asset.Condition,
-            conditionNotes: asset.ConditionNotes,
-            conditionPhotoURL: asset.ConditionPhotoURL || '',
-            location: asset.Location,
-            room: asset.Room,
-            equipments: asset.Equipments || '',
-            totalCost: formatRupiah(asset.TotalCost),
-            assetOwner: asset.OwnerID,
-            assetOwnerName: titleCase(asset.OwnerName) || '',
-            assetOwnerPosition: titleCase(asset.OwnerPosition),
-            assetOwnerDepartment: titleCase(asset.OwnerDepartment),
-            assetOwnerDivision: titleCase(asset.OwnerDivision),
-            assetOwnerCostCenter: asset.OwnerCostCenter,
-            subSiteID: asset.SubSiteID,
-            subSiteName: asset.SubSiteName,
-            siteID: asset.SiteID,
-            siteName: asset.SiteName,
-            siteGroupName: asset.SiteGroupName,
-            regionName: asset.RegionName
+          const list = response.assets_on_site || [];
+          return list.map((asset: any) => ({
+            assetTag: asset.asset_tag ?? asset.AssetTag,
+            serialNumber: asset.serial_number ?? asset.SerialNumber,
+            assetStatus: asset.status ?? asset.Status,
+            statusReason: (asset.status_reason ?? asset.StatusReason) || '-1',
+            category: asset.product_category ?? asset.ProductCategory,
+            subCategory: asset.product_subcategory ?? asset.ProductSubCategory,
+            productVariety: asset.product_variety ?? asset.ProductVariety,
+            assetBrand: asset.brand_name ?? asset.BrandName,
+            assetName: asset.product_name ?? asset.ProductName,
+            condition: asset.condition ?? asset.Condition,
+            conditionNotes: asset.condition_notes ?? asset.ConditionNotes,
+            conditionPhotoURL: (asset.condition_photo_url ?? asset.ConditionPhotoURL) || '',
+            location: asset.location ?? asset.Location,
+            room: asset.room ?? asset.Room,
+            equipments: (asset.equipments ?? asset.Equipments) || '',
+            totalCost: formatRupiah(asset.total_cost ?? asset.TotalCost ?? 0),
+            assetOwner: asset.owner_id ?? asset.OwnerID,
+            assetOwnerName: titleCase((asset.owner_name ?? asset.OwnerName) || ''),
+            assetOwnerPosition: titleCase((asset.owner_position ?? asset.OwnerPosition) || ''),
+            assetOwnerDepartment: titleCase((asset.owner_department ?? asset.OwnerDepartment) || ''),
+            assetOwnerDivision: titleCase((asset.owner_division ?? asset.OwnerDivision) || ''),
+            assetOwnerCostCenter: asset.owner_cost_center ?? asset.OwnerCostCenter ?? null,
+            subSiteID: asset.sub_site_id ?? asset.SubSiteID ?? null,
+            subSiteName: (asset.sub_site_name ?? asset.SubSiteName) || '',
+            siteID: asset.site_id ?? asset.SiteID ?? null,
+            siteName: (asset.site_name ?? asset.SiteName) || '',
+            siteGroupName: (asset.site_group_name ?? asset.SiteGroupName) || '',
+            regionName: (asset.region_name ?? asset.RegionName) || ''
           }));
         }),
         tap((response: any) => {
@@ -390,7 +390,9 @@ import { SubSite } from '../model/sub-site.model';
       return this.http.get<any>(`${this.assetApiUrl}/${productVariety}/equipments`).pipe(
         map((response: any) => {
           // Map the response to the desired format
-          return response.equipments || "";
+          let equipments = response.equipments || "";
+          equipments += ", Tidak ada perlengkapan";
+          return equipments;
         }),
         tap((response: any) => {
           console.log('[ApiService] Fetched equipments for product variety:', response.product_variety, response.equipments);

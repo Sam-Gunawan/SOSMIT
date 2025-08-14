@@ -2,6 +2,7 @@
 package opname
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -103,33 +104,38 @@ func (handler *Handler) GetSessionByIDHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{
 		"session_id": session.ID,
 		"start_date": session.StartDate,
-		"end_date":   session.EndDate,
-		"status":     session.Status,
-		"user_id":    session.UserID,
-		"manager_reviewer_id": func() interface{} {
-			if session.ManagerReviewerID.Valid {
-				return session.ManagerReviewerID.Int64
+		"end_date": func(ns sql.NullString) interface{} {
+			if ns.Valid {
+				return ns.String
 			}
 			return nil
-		}(),
-		"manager_reviewed_at": func() interface{} {
-			if session.ManagerReviewedAt.Valid {
-				return session.ManagerReviewedAt.String
+		}(session.EndDate),
+		"status":  session.Status,
+		"user_id": session.UserID,
+		"manager_reviewer_id": func(ni sql.NullInt64) interface{} {
+			if ni.Valid {
+				return ni.Int64
 			}
 			return nil
-		}(),
-		"l1_reviewer_id": func() interface{} {
-			if session.L1ReviewerID.Valid {
-				return session.L1ReviewerID.Int64
+		}(session.ManagerReviewerID),
+		"manager_reviewed_at": func(ns sql.NullString) interface{} {
+			if ns.Valid {
+				return ns.String
 			}
 			return nil
-		}(),
-		"l1_reviewed_at": func() interface{} {
-			if session.L1ReviewedAt.Valid {
-				return session.L1ReviewedAt.String
+		}(session.ManagerReviewedAt),
+		"l1_reviewer_id": func(ni sql.NullInt64) interface{} {
+			if ni.Valid {
+				return ni.Int64
 			}
 			return nil
-		}(),
+		}(session.L1ReviewerID),
+		"l1_reviewed_at": func(ns sql.NullString) interface{} {
+			if ns.Valid {
+				return ns.String
+			}
+			return nil
+		}(session.L1ReviewedAt),
 		"site_id": session.SiteID,
 	})
 }

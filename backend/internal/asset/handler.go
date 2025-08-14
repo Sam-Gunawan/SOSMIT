@@ -10,17 +10,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Helpers to convert sql.Null* to interface{} for JSON (nil when invalid)
-func nullString(ns sql.NullString) interface{} {
-	if ns.Valid {
-		return ns.String
+// Helpers (one-liners allowed by style) to convert sql.Null* to native (nil when invalid)
+func ns(s sql.NullString) interface{} {
+	if s.Valid {
+		return s.String
 	}
 	return nil
 }
-
-func nullInt64(ni sql.NullInt64) interface{} {
-	if ni.Valid {
-		return ni.Int64
+func ni(i sql.NullInt64) interface{} {
+	if i.Valid {
+		return i.Int64
 	}
 	return nil
 }
@@ -36,6 +35,55 @@ func NewHandler(service *Service) *Handler {
 	}
 }
 
+// serializeAsset converts an Asset domain object into a JSON-friendly gin.H with proper null flattening.
+func serializeAsset(a *Asset) gin.H {
+	if a == nil {
+		return gin.H{}
+	}
+	return gin.H{
+		"asset_tag":           a.AssetTag,
+		"serial_number":       a.SerialNumber,
+		"status":              a.Status,
+		"status_reason":       ns(a.StatusReason),
+		"product_category":    a.ProductCategory,
+		"product_subcategory": a.ProductSubcategory,
+		"product_variety":     a.ProductVariety,
+		"brand_name":          a.BrandName,
+		"product_name":        a.ProductName,
+		"condition":           a.Condition,
+		"condition_notes":     ns(a.ConditionNotes),
+		"condition_photo_url": ns(a.ConditionPhotoURL),
+		"location":            ns(a.Location),
+		"room":                ns(a.Room),
+		"equipments":          ns(a.Equipments),
+		"total_cost":          a.TotalCost,
+		"owner_id":            a.OwnerID,
+		"owner_name":          a.OwnerName,
+		"owner_position":      ns(a.OwnerPosition),
+		"owner_department":    ns(a.OwnerDepartment),
+		"owner_division":      ns(a.OwnerDivision),
+		"owner_cost_center":   ni(a.OwnerCostCenter),
+		"sub_site_id":         ni(a.SubSiteID),
+		"sub_site_name":       ns(a.SubSiteName),
+		"site_id":             ni(a.SiteID),
+		"site_name":           ns(a.SiteName),
+		"site_group_name":     ns(a.SiteGroupName),
+		"region_name":         ns(a.RegionName),
+	}
+}
+
+// serializeAssets maps a slice of Asset pointers to a slice of gin.H with flattened nullable values.
+func serializeAssets(list []*Asset) []gin.H {
+	if len(list) == 0 {
+		return []gin.H{}
+	}
+	out := make([]gin.H, 0, len(list))
+	for _, a := range list {
+		out = append(out, serializeAsset(a))
+	}
+	return out
+}
+
 // GetAssetByTagHandler retrieves an asset by its tag.
 func (handler *Handler) GetAssetByTagHandler(context *gin.Context) {
 	assetTag := context.Param("asset_tag")
@@ -45,52 +93,19 @@ func (handler *Handler) GetAssetByTagHandler(context *gin.Context) {
 		return
 	}
 
-	// Call the service to get asset details
 	asset, err := handler.service.GetAssetByTag(assetTag)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch asset details: " + err.Error()})
 		log.Printf("❌ Error fetching asset by tag %s: %v", assetTag, err)
 		return
 	}
-
-	// If asset is nil, it means no asset was found with that tag
 	if asset == nil {
 		context.JSON(http.StatusNotFound, gin.H{"error": "asset not found with tag: " + assetTag})
 		log.Printf("⚠ No asset found with tag: %s", assetTag)
 		return
 	}
 
-	// Return the asset details
-	context.JSON(200, gin.H{
-		"asset_tag":           asset.AssetTag,
-		"serial_number":       asset.SerialNumber,
-		"status":              asset.Status,
-		"status_reason":       nullString(asset.StatusReason),
-		"product_category":    asset.ProductCategory,
-		"product_subcategory": asset.ProductSubcategory,
-		"product_variety":     asset.ProductVariety,
-		"brand_name":          asset.BrandName,
-		"product_name":        asset.ProductName,
-		"condition":           asset.Condition,
-		"condition_notes":     nullString(asset.ConditionNotes),
-		"condition_photo_url": nullString(asset.ConditionPhotoURL),
-		"location":            nullString(asset.Location),
-		"room":                nullString(asset.Room),
-		"equipments":          nullString(asset.Equipments),
-		"total_cost":          asset.TotalCost,
-		"owner_id":            asset.OwnerID,
-		"owner_name":          asset.OwnerName,
-		"owner_position":      nullString(asset.OwnerPosition),
-		"owner_department":    nullString(asset.OwnerDepartment),
-		"owner_division":      nullString(asset.OwnerDivision),
-		"owner_cost_center":   nullInt64(asset.OwnerCostCenter),
-		"sub_site_id":         nullInt64(asset.SubSiteID),
-		"sub_site_name":       nullString(asset.SubSiteName),
-		"site_id":             nullInt64(asset.SiteID),
-		"site_name":           nullString(asset.SiteName),
-		"site_group_name":     nullString(asset.SiteGroupName),
-		"region_name":         nullString(asset.RegionName),
-	})
+	context.JSON(http.StatusOK, serializeAsset(asset))
 }
 
 // GetAssetBySerialNumberHandler retrieves an asset by its serial number.
@@ -102,52 +117,19 @@ func (handler *Handler) GetAssetBySerialNumberHandler(context *gin.Context) {
 		return
 	}
 
-	// Call the service to get asset details
 	asset, err := handler.service.GetAssetBySerialNumber(serialNumber)
 	if err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch asset details: " + err.Error()})
 		log.Printf("❌ Error fetching asset by serial number %s: %v", serialNumber, err)
 		return
 	}
-
-	// If asset is nil, it means no asset was found with that serial number
 	if asset == nil {
 		context.JSON(http.StatusNotFound, gin.H{"error": "asset not found with serial number: " + serialNumber})
 		log.Printf("⚠ No asset found with serial number: %s", serialNumber)
 		return
 	}
 
-	// Return the asset details
-	context.JSON(200, gin.H{
-		"asset_tag":           asset.AssetTag,
-		"serial_number":       asset.SerialNumber,
-		"status":              asset.Status,
-		"status_reason":       nullString(asset.StatusReason),
-		"product_category":    asset.ProductCategory,
-		"product_subcategory": asset.ProductSubcategory,
-		"product_variety":     asset.ProductVariety,
-		"brand_name":          asset.BrandName,
-		"product_name":        asset.ProductName,
-		"condition":           asset.Condition,
-		"condition_notes":     nullString(asset.ConditionNotes),
-		"condition_photo_url": nullString(asset.ConditionPhotoURL),
-		"location":            nullString(asset.Location),
-		"room":                nullString(asset.Room),
-		"equipments":          nullString(asset.Equipments),
-		"owner_id":            asset.OwnerID,
-		"owner_name":          asset.OwnerName,
-		"owner_position":      nullString(asset.OwnerPosition),
-		"owner_department":    nullString(asset.OwnerDepartment),
-		"owner_division":      nullString(asset.OwnerDivision),
-		"owner_cost_center":   nullInt64(asset.OwnerCostCenter),
-		"sub_site_id":         nullInt64(asset.SubSiteID),
-		"total_cost":          asset.TotalCost,
-		"sub_site_name":       nullString(asset.SubSiteName),
-		"site_id":             nullInt64(asset.SiteID),
-		"site_name":           nullString(asset.SiteName),
-		"site_group_name":     nullString(asset.SiteGroupName),
-		"region_name":         nullString(asset.RegionName),
-	})
+	context.JSON(http.StatusOK, serializeAsset(asset))
 }
 
 // GetAssetsBySiteHandler retrieves all assets for a given site.
@@ -159,8 +141,7 @@ func (handler *Handler) GetAssetsOnSiteHandler(context *gin.Context) {
 		return
 	}
 
-	// Call the service to get assets for the site.
-	siteIDInt, err := strconv.Atoi(siteID) // Convert site-id to integer
+	siteIDInt, err := strconv.Atoi(siteID)
 	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{"error": "invalid site-id, must be an integer"})
 		log.Printf("⚠ invalid site-id: %s | can't convert to integer!", siteID)
@@ -173,17 +154,12 @@ func (handler *Handler) GetAssetsOnSiteHandler(context *gin.Context) {
 		log.Printf("❌ Error fetching assets for site-id %s: %v", siteID, err)
 		return
 	}
-
 	if assetsOnSite == nil {
-		// If no assets are found, return an empty array
 		assetsOnSite = make([]*Asset, 0)
 		log.Printf("⚠ No assets found for site-id: %s", siteID)
 	}
 
-	// Return the list of assets
-	context.JSON(http.StatusOK, gin.H{
-		"assets_on_site": assetsOnSite,
-	})
+	context.JSON(http.StatusOK, gin.H{"assets_on_site": serializeAssets(assetsOnSite)})
 }
 
 // GetAssetEquipmentsHandler retrieves all equipments for a given product variety.

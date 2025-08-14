@@ -278,7 +278,7 @@
 <!-- Asset Modals Container -->
 <div class="modals-container" *ngFor="let result of searchResults; let i = index">
     <!-- Desktop Edit Modal -->
-    <div class="modal fade" [id]="'edit-modal-' + result.pendingAsset.assetTag" tabindex="-1" aria-hidden="true" *ngIf="!isInReport">
+    <div class="modal fade" [id]="'edit-modal-' + result.pendingAsset.assetTag" tabindex="-1" aria-hidden="true" *ngIf="!isInReport" data-bs-backdrop="static">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header"> 
@@ -286,7 +286,7 @@
                         <h6 class="modal-title">Edit Asset</h6>
                     </section>
                     
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" (click)="reloadOpnameSession()"></button>
                 </div>
                 
                 <div class="modal-body">
@@ -424,13 +424,14 @@
                                             <small class="text-muted">Memuat peralatan yang tersedia...</small>
                                         </div>
                                         
-                                        <!-- Equipment checkboxes -->
+                                        <!-- Individual equipment checkboxes -->
                                         <div class="form-check" *ngFor="let equipment of result.availableEquipments" 
-                                                [ngClass]="{'form-check-adaptor': equipment === 'Adaptor'}">
+                                                [ngClass]="{'form-check-adaptor': equipment === 'Adaptor', 'form-check-no-equip': equipment === 'Tidak ada perlengkapan'}">
                                             <input class="form-check-input" type="checkbox" 
                                                 [id]="'equipment-' + equipment + '-' + result.pendingAsset.assetTag"
                                                 [checked]="isEquipmentSelected(i, equipment)"
-                                                (change)="toggleEquipment(i, equipment)">
+                                                (change)="toggleEquipment(i, equipment)"
+                                                [disabled]="isNoEquipmentChecked(result) && equipment !== 'Tidak ada perlengkapan'">
                                             <label class="form-check-label" 
                                                 [for]="'equipment-' + equipment + '-' + result.pendingAsset.assetTag">
                                                 {{ equipment }}
@@ -441,6 +442,7 @@
                                                     [(ngModel)]="result.adaptorSN"
                                                     (blur)="updateAdaptorInEquipments(i)"
                                                     [disabled]="!isEquipmentSelected(i, 'Adaptor')"
+                                                    [class.is-invalid]="isEquipmentSelected(i, 'Adaptor') && isAdaptorInvalid(i)"
                                                     name="newSerialNumberAdaptor"
                                                     placeholder="Adaptor Serial Number">
                                             </div>

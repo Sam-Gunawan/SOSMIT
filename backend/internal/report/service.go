@@ -17,9 +17,13 @@ import (
 	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
 )
 
-type Service struct{ repo *Repository }
+type Service struct {
+	repo *Repository
+}
 
-func NewService(repo *Repository) *Service { return &Service{repo: repo} }
+func NewService(repo *Repository) *Service {
+	return &Service{repo: repo}
+}
 
 // Category order and Indonesian labels.
 var categoryOrder = []string{"working_assets", "broken_assets", "misplaced_assets", "missing_assets"}
@@ -46,58 +50,58 @@ func getBAPTemplate() (string, error) {
 	return string(content), nil
 }
 
-func (s *Service) GetOpnameStats(sessionID int64) (*OpnameStats, error) {
-	stats, _ := s.repo.GetOpnameStats(sessionID)
+func (service *Service) GetOpnameStats(sessionID int64) (*OpnameStats, error) {
+	stats, _ := service.repo.GetOpnameStats(sessionID)
 	log.Printf("✅ Successfully retrieved opname stats for session ID %d", sessionID)
 	return stats, nil
 }
 
 // GenerateBAPPDF delegates to HTML path for backward compatibility with existing callers.
-func (s *Service) GenerateBAPPDF(sessionID int64, signatures []string, siteName, siteGroup string, endDate time.Time) ([]byte, error) {
-	return s.GenerateBAPPDFHTML(sessionID, signatures, siteName, siteGroup, endDate)
+func (service *Service) GenerateBAPPDF(sessionID int64, signatures []string, siteName, siteGroup string, endDate time.Time) ([]byte, error) {
+	return service.GenerateBAPPDFHTML(sessionID, signatures, siteName, siteGroup, endDate)
 }
 
-func (s *Service) GenerateBAPPDFHTML(sessionID int64, signatures []string, siteName, siteGroup string, endDate time.Time) ([]byte, error) {
+func (service *Service) GenerateBAPPDFHTML(sessionID int64, signatures []string, siteName, siteGroup string, endDate time.Time) ([]byte, error) {
 	if _, err := exec.LookPath("wkhtmltopdf"); err != nil {
 		log.Printf("[REPORT] wkhtmltopdf not found: %v", err)
 		return nil, fmt.Errorf("wkhtmltopdf binary not found in PATH: %w", err)
 	}
 	log.Printf("[REPORT] Generating BAP HTML->PDF session=%d", sessionID)
 
-	recapRows, err := s.repo.GetBAPRecap(sessionID)
+	recapRows, err := service.repo.GetBAPRecap(sessionID)
 	if err != nil {
 		return nil, err
 	}
-	detailRows, err := s.repo.GetBAPDetails(sessionID)
+	detailRows, err := service.repo.GetBAPDetails(sessionID)
 	if err != nil {
 		return nil, err
 	}
 
-	// Use the recap rows directly without any transformation
 	recapTable := append([]BAPRecapRow(nil), recapRows...)
 
-	// Sort recap table by category order, then by product variety
-	orderIdx := func(c string) int {
+	orderIndex := func(category string) int {
 		for i, v := range categoryOrder {
-			if v == c {
+			if v == category {
 				return i
 			}
 		}
 		return 99
 	}
+
 	sort.Slice(recapTable, func(i, j int) bool {
-		if orderIdx(recapTable[i].Category) == orderIdx(recapTable[j].Category) {
+		if orderIndex(recapTable[i].Category) == orderIndex(recapTable[j].Category) {
 			return recapTable[i].ProductVariety < recapTable[j].ProductVariety
 		}
-		return orderIdx(recapTable[i].Category) < orderIdx(recapTable[j].Category)
+		return orderIndex(recapTable[i].Category) < orderIndex(recapTable[j].Category)
 	})
 
 	sort.Slice(detailRows, func(i, j int) bool {
-		if orderIdx(detailRows[i].Category) == orderIdx(detailRows[j].Category) {
+		if orderIndex(detailRows[i].Category) == orderIndex(detailRows[j].Category) {
 			return detailRows[i].AssetTag < detailRows[j].AssetTag
 		}
-		return orderIdx(detailRows[i].Category) < orderIdx(detailRows[j].Category)
+		return orderIndex(detailRows[i].Category) < orderIndex(detailRows[j].Category)
 	})
+
 	data := struct {
 		SiteName      string
 		SiteGroup     string
@@ -107,139 +111,143 @@ func (s *Service) GenerateBAPPDFHTML(sessionID int64, signatures []string, siteN
 		CategoryLabel map[string]string
 		Signatures    []string
 		Details       []BAPDetailRow
-	}{siteName, siteGroup, endDate.Format("2006-01-02"), endDate.Format("15:04"), recapTable, categoryLabel, signatures, detailRows}
+	}{
+		SiteName:      siteName,
+		SiteGroup:     siteGroup,
+		EndDate:       endDate.Format("2006-01-02"),
+		EndTime:       endDate.Format("15:04"),
+		Recap:         recapTable,
+		CategoryLabel: categoryLabel,
+		Signatures:    signatures,
+		Details:       detailRows,
+	}
 
 	templateContent, err := getBAPTemplate()
 	if err != nil {
 		return nil, fmt.Errorf("failed to read template: %w", err)
 	}
 
-	tpl, err := template.New("bap").Funcs(template.FuncMap{
-		"Label":   func(cat string) string { return categoryLabel[cat] },
-		"Safe":    func(ns interface{}) string { return safeNullable(ns) },
-		"SafeInt": func(ni sql.NullInt64) string { return safeNullableInt(ni) },
+	templateFunctions := template.FuncMap{
+		"Label":   func(category string) string { return categoryLabel[category] },
+		"Safe":    func(nullable interface{}) string { return safeNullable(nullable) },
+		"SafeInt": func(nullableInt sql.NullInt64) string { return safeNullableInt(nullableInt) },
 		"add":     func(a, b int) int { return a + b },
 		"sub":     func(a, b int) int { return a - b },
 		"len": func(slice interface{}) int {
-			switch s := slice.(type) {
+			switch cast := slice.(type) {
 			case []BAPDetailRow:
-				return len(s)
+				return len(cast)
 			default:
 				return 0
 			}
 		},
-		"FisikQty": func(r BAPRecapRow) int64 {
-			if r.Category == "missing_assets" {
+		"FisikQty": func(row BAPRecapRow) int64 {
+			if row.Category == "missing_assets" {
 				return 0
 			}
-			return r.AssetCount
+			return row.AssetCount
 		},
-		"DataQty": func(r BAPRecapRow) int64 {
-			return r.AssetCount
-		},
-		"Selisih": func(r BAPRecapRow) string {
-			if r.Category == "missing_assets" {
-				return fmt.Sprintf("%d", r.AssetCount)
+		"DataQty": func(row BAPRecapRow) int64 { return row.AssetCount },
+		"Selisih": func(row BAPRecapRow) string {
+			if row.Category == "missing_assets" {
+				return fmt.Sprintf("%d", row.AssetCount)
 			}
 			return "-"
 		},
-		"Satuan": func(r BAPRecapRow) string {
-			return "Unit"
-		},
-		"upper": strings.ToUpper,
-	}).Parse(templateContent)
+		"Satuan": func(row BAPRecapRow) string { return "Unit" },
+		"upper":  strings.ToUpper,
+	}
+
+	tpl, err := template.New("bap").Funcs(templateFunctions).Parse(templateContent)
 	if err != nil {
 		return nil, err
 	}
-	var htmlBuf bytes.Buffer
-	if err := tpl.Execute(&htmlBuf, data); err != nil {
+
+	var htmlBuffer bytes.Buffer
+	if err := tpl.Execute(&htmlBuffer, data); err != nil {
 		return nil, err
 	}
-	pdfg, err := wkhtmltopdf.NewPDFGenerator()
+
+	pdfGenerator, err := wkhtmltopdf.NewPDFGenerator()
 	if err != nil {
 		log.Printf("[REPORT] wkhtmltopdf init failed: %v", err)
 		return nil, fmt.Errorf("wkhtmltopdf init failed: %w", err)
 	}
-	page := wkhtmltopdf.NewPageReader(bytes.NewReader(htmlBuf.Bytes()))
+	page := wkhtmltopdf.NewPageReader(bytes.NewReader(htmlBuffer.Bytes()))
 	page.EnableLocalFileAccess.Set(true)
-	pdfg.AddPage(page)
-	pdfg.Dpi.Set(96)
-	pdfg.Orientation.Set(wkhtmltopdf.OrientationLandscape)
-	pdfg.PageSize.Set(wkhtmltopdf.PageSizeA4)
-	pdfg.MarginLeft.Set(10)
-	pdfg.MarginRight.Set(10)
-	pdfg.MarginTop.Set(12)
-	pdfg.MarginBottom.Set(12)
-	if err := pdfg.Create(); err != nil {
+	pdfGenerator.AddPage(page)
+	pdfGenerator.Dpi.Set(96)
+	pdfGenerator.Orientation.Set(wkhtmltopdf.OrientationLandscape)
+	pdfGenerator.PageSize.Set(wkhtmltopdf.PageSizeA4)
+	pdfGenerator.MarginLeft.Set(10)
+	pdfGenerator.MarginRight.Set(10)
+	pdfGenerator.MarginTop.Set(12)
+	pdfGenerator.MarginBottom.Set(12)
+	if err := pdfGenerator.Create(); err != nil {
 		log.Printf("[REPORT] wkhtmltopdf create failed: %v", err)
 		return nil, fmt.Errorf("wkhtmltopdf create failed: %w", err)
 	}
-	log.Printf("[REPORT] PDF generated size=%d bytes session=%d", len(pdfg.Bytes()), sessionID)
-	return pdfg.Bytes(), nil
+	log.Printf("[REPORT] PDF generated size=%d bytes session=%d", len(pdfGenerator.Bytes()), sessionID)
+	return pdfGenerator.Bytes(), nil
 }
 
 // GenerateAndAssembleBAP gathers meta + signatures then produces PDF + filename.
-func (s *Service) GenerateAndAssembleBAP(sessionID int64) ([]byte, string, error) {
-	sm, err := s.repo.GetSessionMeta(sessionID)
-	if err != nil || sm == nil {
+func (service *Service) GenerateAndAssembleBAP(sessionID int64) ([]byte, string, error) {
+	sessionMeta, err := service.repo.GetSessionMeta(sessionID)
+	if err != nil || sessionMeta == nil {
 		return nil, "", fmt.Errorf("session not found")
 	}
 	type siteMini struct{ Name, Group string }
 	var siteInfo siteMini
-	row := s.repo.db.QueryRow(`SELECT site_name, site_group_name FROM get_site_by_id($1)`, sm.SiteID)
+	row := service.repo.db.QueryRow(`SELECT site_name, site_group_name FROM get_site_by_id($1)`, sessionMeta.SiteID)
 	if err := row.Scan(&siteInfo.Name, &siteInfo.Group); err != nil {
 		return nil, "", fmt.Errorf("site fetch failed: %w", err)
 	}
 	var submitterFirst, submitterLast string
-	_ = s.repo.db.QueryRow(`SELECT first_name, last_name FROM get_user_by_id($1)`, sm.UserID).Scan(&submitterFirst, &submitterLast)
+	_ = service.repo.db.QueryRow(`SELECT first_name, last_name FROM get_user_by_id($1)`, sessionMeta.UserID).Scan(&submitterFirst, &submitterLast)
 	submitterName := strings.TrimSpace(submitterFirst + " " + submitterLast)
-	lower := strings.ToLower(sm.Status)
+	statusLower := strings.ToLower(sessionMeta.Status)
 	var managerName, l1Name string
-	if sm.ManagerReviewerID.Valid {
-		var f, l string
-		_ = s.repo.db.QueryRow(`SELECT first_name, last_name FROM get_user_by_id($1)`, sm.ManagerReviewerID.Int64).Scan(&f, &l)
-		managerName = strings.TrimSpace(f + " " + l)
+	if sessionMeta.ManagerReviewerID.Valid {
+		var firstName, lastName string
+		_ = service.repo.db.QueryRow(`SELECT first_name, last_name FROM get_user_by_id($1)`, sessionMeta.ManagerReviewerID.Int64).Scan(&firstName, &lastName)
+		managerName = strings.TrimSpace(firstName + " " + lastName)
 	}
-	if sm.L1ReviewerID.Valid {
-		var f, l string
-		_ = s.repo.db.QueryRow(`SELECT first_name, last_name FROM get_user_by_id($1)`, sm.L1ReviewerID.Int64).Scan(&f, &l)
-		l1Name = strings.TrimSpace(f + " " + l)
+	if sessionMeta.L1ReviewerID.Valid {
+		var firstName, lastName string
+		_ = service.repo.db.QueryRow(`SELECT first_name, last_name FROM get_user_by_id($1)`, sessionMeta.L1ReviewerID.Int64).Scan(&firstName, &lastName)
+		l1Name = strings.TrimSpace(firstName + " " + lastName)
 	}
-
-	// Parse timestamps (assumed stored as text). Use Asia/Jakarta.
-	loc, _ := time.LoadLocation("Asia/Jakarta")
-	parseTS := func(ns sql.NullString) *time.Time {
-		if !ns.Valid || strings.TrimSpace(ns.String) == "" {
+	locationJakarta, _ := time.LoadLocation("Asia/Jakarta")
+	parseTimestamp := func(nullableString sql.NullString) *time.Time {
+		if !nullableString.Valid || strings.TrimSpace(nullableString.String) == "" {
 			return nil
 		}
 		layouts := []string{"2006-01-02 15:04:05", "2006-01-02 15:04", "2006-01-02T15:04:05Z07:00"}
-		for _, l := range layouts {
-			if t, err := time.ParseInLocation(l, ns.String, loc); err == nil {
-				return &t
+		for _, layout := range layouts {
+			if parsed, err := time.ParseInLocation(layout, nullableString.String, locationJakarta); err == nil {
+				return &parsed
 			}
 		}
 		return nil
 	}
-	submitTime := parseTS(sm.EndDate) // Using EndDate as completion time
-	managerTime := parseTS(sm.ManagerReviewedAt)
-	l1Time := parseTS(sm.L1ReviewedAt)
-
-	// Only include reviewer signatures if status implies review done
-	if !(lower == "escalated" || lower == "verified" || lower == "rejected") {
+	submitTime := parseTimestamp(sessionMeta.EndDate)
+	managerTime := parseTimestamp(sessionMeta.ManagerReviewedAt)
+	l1Time := parseTimestamp(sessionMeta.L1ReviewedAt)
+	if !(statusLower == "escalated" || statusLower == "verified" || statusLower == "rejected") {
 		managerName = ""
 		managerTime = nil
 	}
-	if !(lower == "verified" || lower == "rejected") {
+	if !(statusLower == "verified" || statusLower == "rejected") {
 		l1Name = ""
 		l1Time = nil
 	}
-
 	signatures := BuildSignatures(submitterName, submitTime, managerName, managerTime, l1Name, l1Time)
-	end := time.Now()
+	endTime := time.Now()
 	if submitTime != nil {
-		end = *submitTime
+		endTime = *submitTime
 	}
-	pdfBytes, err := s.GenerateBAPPDFHTML(sessionID, signatures, siteInfo.Name, siteInfo.Group, end)
+	pdfBytes, err := service.GenerateBAPPDFHTML(sessionID, signatures, siteInfo.Name, siteInfo.Group, endTime)
 	if err != nil {
 		return nil, "", err
 	}
@@ -261,30 +269,30 @@ func sanitizeFileFragment(s string) string {
 	}
 	return string(out)
 }
-func safeNullable(ns interface{}) string {
-	switch v := ns.(type) {
+func safeNullable(nullable interface{}) string {
+	switch cast := nullable.(type) {
 	case sql.NullString:
-		if v.Valid {
-			return v.String
+		if cast.Valid {
+			return cast.String
 		}
 		return "-"
 	case *sql.NullString:
-		if v != nil && v.Valid {
-			return v.String
+		if cast != nil && cast.Valid {
+			return cast.String
 		}
 		return "-"
 	default:
 		return "-"
 	}
 }
-func safeNullableInt(ni sql.NullInt64) string {
-	if ni.Valid {
-		return fmt.Sprintf("%d", ni.Int64)
+func safeNullableInt(nullableInt sql.NullInt64) string {
+	if nullableInt.Valid {
+		return fmt.Sprintf("%d", nullableInt.Int64)
 	}
 	return "-"
 }
-func BuildSignatures(submitter string, submitTime *time.Time, manager string, managerTime *time.Time, l1 string, l1Time *time.Time) []string {
-	var sigs []string
+func BuildSignatures(submitter string, submitTime *time.Time, manager string, managerTime *time.Time, level1 string, level1Time *time.Time) []string {
+	var signatures []string
 	format := func(t *time.Time) string {
 		if t == nil {
 			return "-"
@@ -292,13 +300,13 @@ func BuildSignatures(submitter string, submitTime *time.Time, manager string, ma
 		return t.Format("2006-01-02 15:04 WIB")
 	}
 	if submitter != "" {
-		sigs = append(sigs, fmt.Sprintf("Dilaksanakan oleh: %s – %s", submitter, format(submitTime)))
+		signatures = append(signatures, fmt.Sprintf("Dilaksanakan oleh: %s – %s", submitter, format(submitTime)))
 	}
 	if strings.TrimSpace(manager) != "" {
-		sigs = append(sigs, fmt.Sprintf("Disetujui oleh (Mgr): %s – %s", manager, format(managerTime)))
+		signatures = append(signatures, fmt.Sprintf("Disetujui oleh (Mgr): %s – %s", manager, format(managerTime)))
 	}
-	if strings.TrimSpace(l1) != "" {
-		sigs = append(sigs, fmt.Sprintf("Disetujui oleh (L1): %s – %s", l1, format(l1Time)))
+	if strings.TrimSpace(level1) != "" {
+		signatures = append(signatures, fmt.Sprintf("Disetujui oleh (L1): %s – %s", level1, format(level1Time)))
 	}
-	return sigs
+	return signatures
 }

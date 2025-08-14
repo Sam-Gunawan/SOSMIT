@@ -2,6 +2,7 @@
 package user
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"strconv"
@@ -159,35 +160,17 @@ func (handler *Handler) GetUserSiteCardsHandler(context *gin.Context) {
 
 // serializeUser flattens nullable SQL fields into plain JSON values.
 func serializeUser(u *User) gin.H {
-	var siteID interface{}
-	if u.SiteID.Valid {
-		siteID = u.SiteID.Int64
-	} else {
-		siteID = nil
+	ns := func(ns sql.NullString) interface{} {
+		if ns.Valid {
+			return ns.String
+		}
+		return nil
 	}
-	var costCenterID interface{}
-	if u.CostCenterID.Valid {
-		costCenterID = u.CostCenterID.Int64
-	} else {
-		costCenterID = nil
-	}
-	var siteName interface{}
-	if u.SiteName.Valid {
-		siteName = u.SiteName.String
-	} else {
-		siteName = ""
-	}
-	var siteGroup interface{}
-	if u.SiteGroupName.Valid {
-		siteGroup = u.SiteGroupName.String
-	} else {
-		siteGroup = ""
-	}
-	var regionName interface{}
-	if u.RegionName.Valid {
-		regionName = u.RegionName.String
-	} else {
-		regionName = ""
+	ni := func(ni sql.NullInt64) interface{} {
+		if ni.Valid {
+			return ni.Int64
+		}
+		return nil
 	}
 	return gin.H{
 		"user_id":        u.UserID,
@@ -198,10 +181,10 @@ func serializeUser(u *User) gin.H {
 		"position":       u.Position,
 		"department":     u.Department,
 		"division":       u.Division,
-		"site_id":        siteID,
-		"site_name":      siteName,
-		"site_group":     siteGroup,
-		"region_name":    regionName,
-		"cost_center_id": costCenterID,
+		"site_id":        ni(u.SiteID),
+		"site_name":      ns(u.SiteName),
+		"site_group":     ns(u.SiteGroupName),
+		"region_name":    ns(u.RegionName),
+		"cost_center_id": ni(u.CostCenterID),
 	}
 }

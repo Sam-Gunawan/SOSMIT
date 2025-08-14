@@ -2,6 +2,7 @@
 package report
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"strconv"
@@ -11,10 +12,14 @@ import (
 )
 
 // Handler holds the report service.
-type Handler struct{ service *Service }
+type Handler struct {
+	service *Service
+}
 
 // NewHandler creates a new report handler with the provided report service.
-func NewHandler(service *Service) *Handler { return &Handler{service: service} }
+func NewHandler(service *Service) *Handler {
+	return &Handler{service: service}
+}
 
 // GetOpnameStatsHandler retrieves the opname statistics for a given opname session ID.
 func (handler *Handler) GetOpnameStatsHandler(context *gin.Context) {
@@ -55,27 +60,107 @@ func (handler *Handler) GetOpnameStatsHandler(context *gin.Context) {
 }
 
 // GenerateBAPHandler streams the BAP PDF for a session.
-func (handler *Handler) GenerateBAPHandler(c *gin.Context) {
-	sessionIDStr := c.Param("session-id")
+func (handler *Handler) GenerateBAPHandler(context *gin.Context) {
+	sessionIDStr := context.Param("session-id")
 	if sessionIDStr == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "session-id is required"})
+		context.JSON(http.StatusBadRequest, gin.H{"error": "session-id is required"})
 		return
 	}
+
 	sessionID, err := strconv.ParseInt(sessionIDStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session-id"})
+		context.JSON(http.StatusBadRequest, gin.H{"error": "invalid session-id"})
 		return
 	}
+
 	start := time.Now()
 	log.Printf("[REPORT] START GenerateBAP session=%d", sessionID)
+
 	pdfBytes, filename, err := handler.service.GenerateAndAssembleBAP(sessionID)
 	if err != nil {
 		log.Printf("[REPORT] ERROR GenerateBAP session=%d err=%v", sessionID, err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate BAP PDF", "detail": err.Error()})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate BAP PDF", "detail": err.Error()})
 		return
 	}
+
 	log.Printf("[REPORT] DONE GenerateBAP session=%d bytes=%d elapsed=%s", sessionID, len(pdfBytes), time.Since(start))
-	c.Header("Content-Type", "application/pdf")
-	c.Header("Content-Disposition", "attachment; filename="+filename)
-	c.Data(http.StatusOK, "application/pdf", pdfBytes)
+
+	context.Header("Content-Type", "application/pdf")
+	context.Header("Content-Disposition", "attachment; filename="+filename)
+	context.Data(http.StatusOK, "application/pdf", pdfBytes)
+}
+
+// GetBAPRecapHandler returns recap rows (no nullable conversions needed besides basic types)
+func (handler *Handler) GetBAPRecapHandler(context *gin.Context) {
+	sessionIDStr := context.Param("session-id")
+	if sessionIDStr == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "session-id is required"})
+		return
+	}
+
+	sessionID, err := strconv.ParseInt(sessionIDStr, 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "invalid session-id"})
+		return
+	}
+
+	recap, err := handler.service.repo.GetBAPRecap(sessionID)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch recap", "detail": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"recap": recap})
+}
+
+// GetBAPDetailsHandler returns serialized detail rows with nullable fields flattened
+func (handler *Handler) GetBAPDetailsHandler(context *gin.Context) {
+	sessionIDStr := context.Param("session-id")
+	if sessionIDStr == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "session-id is required"})
+		return
+	}
+
+	sessionID, err := strconv.ParseInt(sessionIDStr, 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "invalid session-id"})
+		return
+	}
+
+	details, err := handler.service.repo.GetBAPDetails(sessionID)
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch details", "detail": err.Error()})
+		return
+	}
+
+	// Nullable helpers (allowed one-liners per your guideline)
+	ns := func(ns sql.NullString) interface{} {
+		if ns.Valid {
+			return ns.String
+		}
+		return nil
+	}
+	ni := func(ni sql.NullInt64) interface{} {
+		if ni.Valid {
+			return ni.Int64
+		}
+		return nil
+	}
+
+	serialized := make([]gin.H, 0, len(details))
+	for _, row := range details {
+		serialized = append(serialized, gin.H{
+			"category":       row.Category,
+			"company":        row.Company,
+			"asset_tag":      row.AssetTag,
+			"asset_name":     row.AssetName,
+			"equipments":     ns(row.Equipments),
+			"user_and_pos":   row.UserNameAndPosition,
+			"asset_status":   row.AssetStatus,
+			"action_notes":   ns(row.ActionNotes),
+			"cost_center_id": ni(row.CostCenterID),
+		})
+	}
+
+	context.JSON(http.StatusOK, gin.H{"details": serialized})
 }

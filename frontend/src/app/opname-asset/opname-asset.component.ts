@@ -447,7 +447,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
           existingAsset: existingAsset,
           pendingAsset: pendingAsset,
           availableEquipments: [] as string[], // Initialize as empty, will be loaded asynchronously
-          adaptorSN: parseAdaptorSN(pendingAsset.equipments), // Extract adaptor serial number
+          adaptorSN: parseAdaptorSN(existingAsset.equipments), // Use master asset equipments so adaptor SN is preserved
           assetProcessed: true,
           processingStatus: savedRecord.processingStatus,
           savedChangeReason: savedRecord.assetChanges.changeReason || '',
@@ -523,6 +523,11 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         this.checkScreenSize();
       }, 100); // Small delay to ensure window size is updated
     }
+  }
+
+  // Reload opname updated progress to refresh the most recent saved changes
+  reloadOpnameSession(): void {
+    this.loadOpnameProgress(this.sessionID);
   }
 
   // Getter methods for disabled states
@@ -991,6 +996,14 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }, 0);
   }
 
+  // Adaptor field invalid when adaptor selected but serial number empty
+  isAdaptorInvalid(index: number): boolean {
+    const result = this.searchResults[index];
+    if (!result) return false;
+    if (!this.isEquipmentSelected(index, 'Adaptor')) return false;
+    return !result.adaptorSN || result.adaptorSN.trim() === '';
+  }
+
   // Update adaptor serial number in equipment string (called on blur)
   updateAdaptorInEquipments(index: number): void {
     const result = this.searchResults[index];
@@ -1089,13 +1102,24 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       if (!result || !result.availableEquipments || result.availableEquipments.length === 0) {
         return 'Memuat peralatan...'; // Loading equipments...
       }
-      
+
       if (this.hasEquipmentChanges(result)) {
         return 'Terdapat perubahan dengan data master'; // There are changes
       } else {
         return 'Sesuai dengan data master'; // Matches master data
       }
     }
+  }
+
+  // Check if the "Tidak ada perlengkapan" is checked.
+  // If it is, then disable and uncheck the rest of the checkboxes (done in html), then clear the equipment list.
+  // Exception for the "Tidak ada perlengkapan" checkbox: remains enabled.
+  isNoEquipmentChecked(result: any): boolean {
+    if (result.pendingAsset.equipments.includes('Tidak ada perlengkapan')) {
+      result.pendingAsset.equipments = 'Tidak ada perlengkapan';
+      return true;
+    }
+    return false;
   }
 
 
