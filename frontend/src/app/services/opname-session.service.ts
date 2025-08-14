@@ -72,7 +72,7 @@ export class OpnameSessionService {
               userID: response.user_id,
               status: response.status,
               startDate: formatDate(response.start_date),
-              endDate: formatDate(response.end_date.String),
+              endDate: formatDate(response.end_date),
               managerReviewerID: response.manager_reviewer_id || '',
               managerReviewedAt: response.manager_reviewed_at || '',
               l1ReviewerID: response.l1_reviewer_id || '',
