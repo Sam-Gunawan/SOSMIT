@@ -400,8 +400,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
             // Continue with null site, will fall back to asset data
           }
         }
-        const ownerSiteName = ownerSite ? ownerSite.siteName : asset.siteName;
-        
+        // Do not include owner site if there's an owner department
+        const ownerSiteName = ownerDepartment ? "" : (ownerSite ? ownerSite.siteName : asset.siteName);
+
         // Asset's site group and region: Derived from the sub-site's parent site (asset location, not owner location)
         let assetLocationSite: SiteInfo | null = null;
         if (subSite?.siteID) {

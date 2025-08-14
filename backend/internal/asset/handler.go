@@ -2,12 +2,28 @@
 package asset
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
+
+// Helpers to convert sql.Null* to interface{} for JSON (nil when invalid)
+func nullString(ns sql.NullString) interface{} {
+	if ns.Valid {
+		return ns.String
+	}
+	return nil
+}
+
+func nullInt64(ni sql.NullInt64) interface{} {
+	if ni.Valid {
+		return ni.Int64
+	}
+	return nil
+}
 
 type Handler struct {
 	service *Service
@@ -49,31 +65,31 @@ func (handler *Handler) GetAssetByTagHandler(context *gin.Context) {
 		"asset_tag":           asset.AssetTag,
 		"serial_number":       asset.SerialNumber,
 		"status":              asset.Status,
-		"status_reason":       asset.StatusReason,
+		"status_reason":       nullString(asset.StatusReason),
 		"product_category":    asset.ProductCategory,
 		"product_subcategory": asset.ProductSubcategory,
 		"product_variety":     asset.ProductVariety,
 		"brand_name":          asset.BrandName,
 		"product_name":        asset.ProductName,
 		"condition":           asset.Condition,
-		"condition_notes":     asset.ConditionNotes,
-		"condition_photo_url": asset.ConditionPhotoURL,
-		"location":            asset.Location,
-		"room":                asset.Room,
-		"equipments":          asset.Equipments,
+		"condition_notes":     nullString(asset.ConditionNotes),
+		"condition_photo_url": nullString(asset.ConditionPhotoURL),
+		"location":            nullString(asset.Location),
+		"room":                nullString(asset.Room),
+		"equipments":          nullString(asset.Equipments),
 		"total_cost":          asset.TotalCost,
 		"owner_id":            asset.OwnerID,
 		"owner_name":          asset.OwnerName,
-		"owner_position":      asset.OwnerPosition,
-		"owner_department":    asset.OwnerDepartment,
-		"owner_division":      asset.OwnerDivision,
-		"owner_cost_center":   asset.OwnerCostCenter,
-		"sub_site_id":         asset.SubSiteID,
-		"sub_site_name":       asset.SubSiteName,
-		"site_id":             asset.SiteID,
-		"site_name":           asset.SiteName,
-		"site_group_name":     asset.SiteGroupName,
-		"region_name":         asset.RegionName,
+		"owner_position":      nullString(asset.OwnerPosition),
+		"owner_department":    nullString(asset.OwnerDepartment),
+		"owner_division":      nullString(asset.OwnerDivision),
+		"owner_cost_center":   nullInt64(asset.OwnerCostCenter),
+		"sub_site_id":         nullInt64(asset.SubSiteID),
+		"sub_site_name":       nullString(asset.SubSiteName),
+		"site_id":             nullInt64(asset.SiteID),
+		"site_name":           nullString(asset.SiteName),
+		"site_group_name":     nullString(asset.SiteGroupName),
+		"region_name":         nullString(asset.RegionName),
 	})
 }
 
@@ -106,31 +122,31 @@ func (handler *Handler) GetAssetBySerialNumberHandler(context *gin.Context) {
 		"asset_tag":           asset.AssetTag,
 		"serial_number":       asset.SerialNumber,
 		"status":              asset.Status,
-		"status_reason":       asset.StatusReason,
+		"status_reason":       nullString(asset.StatusReason),
 		"product_category":    asset.ProductCategory,
 		"product_subcategory": asset.ProductSubcategory,
 		"product_variety":     asset.ProductVariety,
 		"brand_name":          asset.BrandName,
 		"product_name":        asset.ProductName,
 		"condition":           asset.Condition,
-		"condition_notes":     asset.ConditionNotes,
-		"condition_photo_url": asset.ConditionPhotoURL,
-		"location":            asset.Location,
-		"room":                asset.Room,
-		"equipments":          asset.Equipments,
+		"condition_notes":     nullString(asset.ConditionNotes),
+		"condition_photo_url": nullString(asset.ConditionPhotoURL),
+		"location":            nullString(asset.Location),
+		"room":                nullString(asset.Room),
+		"equipments":          nullString(asset.Equipments),
 		"owner_id":            asset.OwnerID,
 		"owner_name":          asset.OwnerName,
-		"owner_position":      asset.OwnerPosition,
-		"owner_department":    asset.OwnerDepartment,
-		"owner_division":      asset.OwnerDivision,
-		"owner_cost_center":   asset.OwnerCostCenter,
-		"sub_site_id":         asset.SubSiteID,
+		"owner_position":      nullString(asset.OwnerPosition),
+		"owner_department":    nullString(asset.OwnerDepartment),
+		"owner_division":      nullString(asset.OwnerDivision),
+		"owner_cost_center":   nullInt64(asset.OwnerCostCenter),
+		"sub_site_id":         nullInt64(asset.SubSiteID),
 		"total_cost":          asset.TotalCost,
-		"sub_site_name":       asset.SubSiteName,
-		"site_id":             asset.SiteID,
-		"site_name":           asset.SiteName,
-		"site_group_name":     asset.SiteGroupName,
-		"region_name":         asset.RegionName,
+		"sub_site_name":       nullString(asset.SubSiteName),
+		"site_id":             nullInt64(asset.SiteID),
+		"site_name":           nullString(asset.SiteName),
+		"site_group_name":     nullString(asset.SiteGroupName),
+		"region_name":         nullString(asset.RegionName),
 	})
 }
 

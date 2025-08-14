@@ -10,31 +10,31 @@ type Asset struct {
 	AssetTag           string
 	SerialNumber       string
 	Status             string
-	StatusReason       string
+	StatusReason       sql.NullString
 	ProductCategory    string
 	ProductSubcategory string
 	ProductVariety     string
 	BrandName          string
 	ProductName        string
 	Condition          bool
-	ConditionNotes     string
-	ConditionPhotoURL  string
-	Location           string
-	Room               string
-	Equipments         string
+	ConditionNotes     sql.NullString
+	ConditionPhotoURL  sql.NullString
+	Location           sql.NullString
+	Room               sql.NullString
+	Equipments         sql.NullString
 	TotalCost          float64
-	OwnerID            int64
+	OwnerID            int64  // assuming always set; adjust to NullInt64 if schema allows NULL
 	OwnerName          string // Owner's full name, can be a combination of first and last name
-	OwnerPosition      string
-	OwnerDepartment    string
-	OwnerDivision      string
-	OwnerCostCenter    int64
-	SubSiteID          int64
-	SubSiteName        string
-	SiteID             int64
-	SiteName           string
-	SiteGroupName      string
-	RegionName         string
+	OwnerPosition      sql.NullString
+	OwnerDepartment    sql.NullString
+	OwnerDivision      sql.NullString
+	OwnerCostCenter    sql.NullInt64 // Nullable: VACANT or user without cost center
+	SubSiteID          sql.NullInt64
+	SubSiteName        sql.NullString
+	SiteID             sql.NullInt64
+	SiteName           sql.NullString
+	SiteGroupName      sql.NullString
+	RegionName         sql.NullString
 }
 
 type Repository struct {
