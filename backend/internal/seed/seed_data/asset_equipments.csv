@@ -1,7 +1,7 @@
 product_variety;equipments
-Desktop;Unit, Kabel power, Keyboard, Mouse
-Laptop;Unit, Tas, Kabel power, Adaptor
-Monitor;Unit, Kabel power, Kabel VGA, Kabel HDMI
-Uninterrupted Power Supply;Unit, Kabel power, Kabel UPS
-Personal Digital Assistant;Unit, Simcard, Handstrap, Adaptor, Kabel USB
-Printer/Multifunction;Unit, Tas, Tali tas, Adaptor, Kabel USB, Bracket
+Desktop;Kabel power, Keyboard, Mouse
+Laptop;Tas, Kabel power, Adaptor
+Monitor;Kabel power, Kabel VGA, Kabel HDMI
+Uninterrupted Power Supply;Kabel power, Kabel UPS
+Personal Digital Assistant;Simcard, Handstrap, Adaptor, Kabel USB
+Printer/Multifunction;Tas, Tali tas, Adaptor, Kabel USB, Bracket

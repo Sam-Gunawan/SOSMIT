@@ -236,7 +236,7 @@ func seedUser(db *sql.DB, record []string) error {
 // Expected CSV format for asset.csv:
 // asset_tag [PK], serial_number, status, status_reason, product_category, product_subcategory,
 // product_variety, brand_name, product_name, condition, condition_photo_url, location, room,
-// equipments, owner_id [FK], site_id [FK]
+// equipments, total_cost, owner_id [FK], site_id [FK]
 func seedAsset(db *sql.DB, record []string) error {
 	asset_tag := record[0]
 	serial_number := record[1]
@@ -247,20 +247,14 @@ func seedAsset(db *sql.DB, record []string) error {
 	product_variety := record[6]
 	brand_name := record[7]
 	product_name := record[8]
-	conditionStr := record[9]
+	condition := record[9]
 	condition_photo_url := record[10]
 	location := record[11]
 	room := record[12]
 	equipments := record[13]
-	owner_id := record[14]
-	sub_site_id := record[15]
-
-	// Convert condition to int
-	condition, err := strconv.Atoi(conditionStr)
-	if err != nil {
-		log.Fatalf("Error converting condition '%s' to int: %v\n", conditionStr, err)
-		return err
-	}
+	total_cost := record[14]
+	owner_id := record[15]
+	sub_site_id := record[16]
 
 	// Convert empty string to default value for fields with defaults
 	if status_reason == "" {
@@ -271,10 +265,10 @@ func seedAsset(db *sql.DB, record []string) error {
 		condition_photo_url = "-1"
 	}
 
-	query := `INSERT INTO "Asset" (asset_tag, serial_number, status, status_reason, product_category, product_subcategory, product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, owner_id, sub_site_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) ON CONFLICT (asset_tag) DO NOTHING`
+	query := `INSERT INTO "Asset" (asset_tag, serial_number, status, status_reason, product_category, product_subcategory, product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, total_cost, owner_id, sub_site_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) ON CONFLICT (asset_tag) DO NOTHING`
 
-	_, err = db.Exec(query, asset_tag, serial_number, status, status_reason, product_category, product_subcategory,
-		product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, owner_id, sub_site_id)
+	_, err := db.Exec(query, asset_tag, serial_number, status, status_reason, product_category, product_subcategory,
+		product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, total_cost, owner_id, sub_site_id)
 	if err != nil {
 		log.Fatalf("Error inserting record into Asset table: %v\n", err)
 
