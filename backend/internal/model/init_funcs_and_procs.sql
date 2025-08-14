@@ -1138,7 +1138,7 @@ AS $$
 			CASE 
 				WHEN u.user_id IS NULL THEN 'N/A'
 				WHEN LOWER(u.username) = 'vacant' THEN 'VACANT'
-				ELSE concat_ws(' - ', eff.effective_owner_position, trim(both ' ' FROM concat_ws(' ', u.first_name, u.last_name)))
+				ELSE UPPER(concat_ws(' - ', eff.effective_owner_position, trim(both ' ' FROM concat_ws(' ', u.first_name, u.last_name))))
 			END AS user_name_and_position,
 				eff.effective_status::VARCHAR(20) AS asset_status,
 			NULLIF(COALESCE(ac.action_notes, ''), '') AS action_notes,
@@ -1153,7 +1153,6 @@ AS $$
 			ON a.asset_tag = ac.asset_tag 
 			AND ac.session_id = _session_id
 		LEFT JOIN "User" AS ou ON a.owner_id = ou.user_id -- original owner
-		LEFT JOIN LATERAL public.get_asset_equipments(a.product_variety) AS ae ON TRUE
 		LEFT JOIN LATERAL (
 			SELECT
 				COALESCE((ac."changes"->>'newOwnerID')::INT, a.owner_id) AS effective_owner_id,
@@ -1161,7 +1160,7 @@ AS $$
 				COALESCE(ac."changes"->>'newOwnerDepartment', ou.department) AS effective_owner_department,
 				COALESCE(ac."changes"->>'newOwnerDivision', ou.division) AS effective_owner_division,
 				COALESCE((ac."changes"->>'newOwnerCostCenter')::INT, ou.cost_center_id) AS effective_owner_cost_center,
-				COALESCE(ac."changes"->>'newEquipments', ae.equipments) AS effective_equipments,
+				COALESCE(ac."changes"->>'newEquipments', a.equipments) AS effective_equipments,
 				COALESCE(ac."changes"->>'newStatus', a.status) AS effective_status
 		) eff ON TRUE
 		LEFT JOIN "User" AS u ON u.user_id = eff.effective_owner_id

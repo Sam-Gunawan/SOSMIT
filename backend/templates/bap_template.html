@@ -11,7 +11,7 @@
       }
       h1 {
         text-align: center;
-        font-size: 16px;
+        font-size: 22px;
         margin: 0 0 10px 0;
       }
       h2 {
@@ -59,6 +59,9 @@
       }
       .small {
         font-size: 9px;
+      }
+      .medium {
+        font-size: 12px;
       }
       .opname-info {
         margin:0 0 10px 0;
@@ -155,7 +158,7 @@
     </style>
   </head>
   <body>
-    <ul class="small opname-info">
+    <ul class="medium opname-info">
       <li>PT Surya Madistrindo</li>
       <li>Site: {{ .SiteName }}</li>
     </ul>
@@ -204,12 +207,14 @@
           <td colspan="12">C. ASET IT</td>
         </tr>
         {{ $currentCategory := "" }}
+        {{ $currentCategoryIndex := 0 }}
         {{ range $i, $row := .Recap }}
         {{ if ne $currentCategory $row.Category }}
         <tr class="category-header">
-          <td colspan="12">{{ upper (index $.CategoryLabel $row.Category) }}</td>
+          <td colspan="12">{{ add $currentCategoryIndex 1 }}. {{ upper (index $.CategoryLabel $row.Category) }}</td>
         </tr>
         {{ $currentCategory = $row.Category }}
+        {{ $currentCategoryIndex = add $currentCategoryIndex 1 }}
         {{ end }}
         <tr class="text-center">          
             <td>{{ add $i 1 }}</td>
@@ -277,6 +282,7 @@
         let currentTbody = null;
         let rowsInCurrentPage = 0;
         let currentCategory = "";
+        let categoryCount = 0;
         
         function createNewPage() {
           // Create page container
@@ -328,15 +334,16 @@
         function addCategoryHeader(label) {
           const categoryRow = document.createElement('tr');
           categoryRow.className = 'category-header';
-          categoryRow.innerHTML = `<td colspan="10">${label.toUpperCase()}</td>`;
+          categoryRow.innerHTML = `<td colspan="10">${categoryCount + 1}. ${label.toUpperCase()}</td>`;
           currentTbody.appendChild(categoryRow);
           rowsInCurrentPage++;
+          categoryCount++;
         }
 
         function addDetailRow(detail) {
           const row = document.createElement('tr');
           row.innerHTML = `
-            <td style="white-space:nowrap;">${detail.index}</td>
+            <td style="white-space:nowrap;" class="text-center">${detail.index}</td>
             <td></td>
             <td>${escapeHtml(detail.company)}</td>
             <td class="nowrap">${escapeHtml(detail.assetTag)}</td>
