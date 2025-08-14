@@ -1,34 +1,11 @@
 <main class="preview-wrapper">
     <div class="preview-page">
-        <!-- ERROR MESSAGE -->
-        <!-- <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">
-            <div class="d-flex">
-                <div class="toast-body">
-                    <p>{{ errorMessage }}</p>
-                    <p>Please try again later.</p>
-                </div>
-                <button type="button" class="btn-close btn-close-black m-auto" (click)="showToast = false" aria-label="Close"></button>
-            </div>
-        </div> -->
-
         <section class="preview-content">
             <div class="preview-header">
                 <!-- Unified Search and Filter Container -->
                 <div class="sticky-top">
-                    <!-- Filter Controls - now inside the unified container -->
                     <div class="filter-section" *ngIf="searchResults.length > 0">
-                        <div class="table-header">  
-                            <!-- <h5 *ngIf="dataSource.filteredData.length || (searchResults.length && !hasActiveFilters)">
-                                Assets Found ({{ dataSource.filteredData.length || searchResults.length }})
-                                <span *ngIf="hasActiveFilters" class="filter-indicator">
-                                    - Filtered from {{ searchResults.length }}
-                                </span>
-                            </h5>
-
-                            <h5 *ngIf="dataSource.filteredData.length === 0 && hasActiveFilters" class="text-danger">
-                                Tidak ada aset yang cocok dengan filter saat ini.
-                            </h5> -->
-
+                        <div class="table-header">
                             <button class="btn btn-close" (click)="closePreview()"></button>
                         </div>
 
@@ -366,7 +343,6 @@
                                    [attr.title]="'Filter berdasarkan data terupdate. Data asli akan mengikuti hasil filter.'"></i>
                             </button>
                         </div>
-                        <!-- Updated data table will go here -->
 
                         <div class="table-container" id="updated-data-table">
                             <table mat-table [dataSource]="updatedDataSource" class="assets-table">
