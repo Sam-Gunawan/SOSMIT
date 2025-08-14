@@ -209,8 +209,15 @@ func main() {
 		{
 			// GET /api/report/:session-id/stats
 			reportRoutes.GET("/:session-id/stats", reportHandler.GetOpnameStatsHandler)
+
 			// GET /api/report/:session-id/bap.pdf
 			reportRoutes.GET("/:session-id/bap.pdf", reportHandler.GenerateBAPHandler)
+
+			// PUT /api/report/:asset-change-id/action-notes/add
+			reportRoutes.PUT("/:asset-change-id/action-notes/add", reportHandler.SetActionNotesHandler)
+
+			// DELETE /api/report/:asset-change-id/action-notes/delete
+			reportRoutes.DELETE("/:asset-change-id/action-notes/delete", reportHandler.DeleteActionNotesHandler)
 		}
 
 	}
