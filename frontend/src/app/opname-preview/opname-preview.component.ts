@@ -10,7 +10,7 @@ export interface PreviewTableData {
   assetName: string;
   serialNumber: string;
   equipments: string;
-  regionName: string;
+  // regionName: string;
   siteGroupName: string;
   subSiteName: string;
   siteName: string;
@@ -19,7 +19,9 @@ export interface PreviewTableData {
   position: string;
   division: string;
   department: string;
+  ownerDepartment: string;
   costCenter: number;
+  totalCost: string;
   status: string;
   condition: boolean | null;
   conditionNotes: string;
@@ -53,7 +55,7 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
     return this.filterTarget === 'updated' ? this.updatedDataSource : this.originalDataSource; 
   }
   
-  displayedColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'equipments', 'regionName', 'siteGroupName', 'subSiteName', 'siteName', 'room', 'userName', 'position', 'division', 'department', 'costCenter', 'status', 'condition', 'conditionNotes', 'processingStatus', 'changeReason'];
+  displayedColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'equipments', 'siteGroupName', 'subSiteName', 'ownerDepartment', 'siteName', 'room', 'userName', 'position', 'division', 'department', 'costCenter', 'totalCost', 'status', 'condition', 'conditionNotes', 'processingStatus', 'changeReason'];
 
   // Filter properties
   filterText: string = '';
@@ -121,9 +123,10 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
       assetName: asset.assetName,
       serialNumber: asset.serialNumber,
       equipments: asset.equipments,
-      regionName: asset.regionName,
+      // regionName: asset.regionName,
       siteGroupName: asset.siteGroupName,
       subSiteName: asset.subSiteName,
+      ownerDepartment: asset.assetOwnerDepartment,
       siteName: asset.siteName,
       room: asset.room,
       userName: asset.assetOwnerName,
@@ -131,6 +134,7 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
       division: asset.assetOwnerDivision,
       department: asset.assetOwnerDepartment,
       costCenter: asset.assetOwnerCostCenter,
+      totalCost: asset.totalCost,
       status: asset.assetStatus,
       condition: asset.condition,
       conditionNotes: asset.conditionNotes,
@@ -144,9 +148,10 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
       assetName: asset.assetName,
       serialNumber: asset.serialNumber,
       equipments: asset.equipments,
-      regionName: asset.regionName,
+      // regionName: asset.regionName,
       siteGroupName: asset.siteGroupName,
       subSiteName: asset.subSiteName,
+      ownerDepartment: asset.assetOwnerDepartment,
       siteName: asset.siteName,
       room: asset.room,
       userName: asset.assetOwnerName,
@@ -154,6 +159,7 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
       division: asset.assetOwnerDivision,
       department: asset.assetOwnerDepartment,
       costCenter: asset.assetOwnerCostCenter,
+      totalCost: asset.totalCost,
       status: asset.assetStatus,
       condition: asset.condition,
       conditionNotes: asset.conditionNotes,
