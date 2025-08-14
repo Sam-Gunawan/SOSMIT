@@ -796,6 +796,15 @@ CREATE OR REPLACE PROCEDURE public.delete_asset_change(_session_id INT, _asset_t
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
+		-- Security measures: ensure that the session is still active
+		IF EXISTS (
+			SELECT 1
+			FROM "OpnameSession"
+			WHERE id = _session_id AND "status" <> 'active'
+		) THEN
+			RAISE EXCEPTION 'Session ID: % is not active', _session_id;
+		END IF;
+
 		-- Check if the asset change record exists before attempting to delete
 		IF NOT EXISTS (
 			SELECT 1

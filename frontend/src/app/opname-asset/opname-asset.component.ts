@@ -41,7 +41,7 @@ export interface AssetTableData {
 export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit {
   public readonly serverURL = environment.serverURL; // Expose environment for use in the template
 
-  private allColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'ownerName', 'costCenter', 'condition', 'status', 'processingStatus', 'actions'];
+  allColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'ownerName', 'costCenter', 'condition', 'status', 'processingStatus', 'actions'];
   dataSource = new MatTableDataSource<AssetTableData>([]);
 
   // Getter to return displayed columns based on report mode
@@ -1440,31 +1440,28 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }
 
     const asset = this.searchResults[index]
-    this.searchResults.splice(index, 1); // Remove the asset from the search results
-    this.updateTableDataSource(); // Update the table after removal
-    
-    if (asset.assetProcessed) {
-      // If the asset was processed, remove it from the session
-      this.opnameSessionService.removeAssetFromSession(this.sessionID, asset.existingAsset.assetTag).subscribe({
-        next: () => {
-          // Successfully removed from session
-          this.incrementAssetScanned(-1);
+    this.opnameSessionService.removeAssetFromSession(this.sessionID, asset.existingAsset.assetTag).subscribe({
+      next: () => {
+        // Successfully removed from session
+        this.incrementAssetScanned(-1);
 
-          if (asset.processingStatus === 'pending') {
-            // Decrement pending assets count in local storage
-            this.incrementPendingCount(-1);
-          }
+        this.searchResults.splice(index, 1); // Remove the asset from the search results
+        this.updateTableDataSource(); // Update the table after removal
 
-          this.successMessage = `Asset ${asset.existingAsset.assetTag} removed successfully.`;
-        },
-        error: (error: any) => {
-          console.error('[OpnameAsset] Error removing asset from session:', error);
-          this.errorMessage = 'Gagal menghapus asset. Silakan coba lagi nanti.';
-          this.showToast = true;
-          setTimeout(() => this.showToast = false, 3000);
+        if (asset.processingStatus === 'pending') {
+          // Decrement pending assets count in local storage
+          this.incrementPendingCount(-1);
         }
-      });
-    }
+
+        this.successMessage = `Asset ${asset.existingAsset.assetTag} removed successfully.`;
+      },
+      error: (error: any) => {
+        console.error('[OpnameAsset] Error removing asset from session:', error);
+        this.errorMessage = 'Gagal menghapus asset. Silakan coba lagi nanti.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
+      }
+    });
   }
 
   // Helper method to create asset page data with available equipments
