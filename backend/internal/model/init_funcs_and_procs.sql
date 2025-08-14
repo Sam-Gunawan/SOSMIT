@@ -1141,8 +1141,12 @@ AS $$
 				ELSE concat_ws(' - ', eff.effective_owner_position, trim(both ' ' FROM concat_ws(' ', u.first_name, u.last_name)))
 			END AS user_name_and_position,
 				eff.effective_status::VARCHAR(20) AS asset_status,
-			ac.action_notes,
-			eff.effective_owner_cost_center AS cost_center_id
+			NULLIF(COALESCE(ac.action_notes, ''), '') AS action_notes,
+			CASE 
+				WHEN eff.effective_owner_cost_center IS NULL THEN NULL
+				WHEN eff.effective_owner_cost_center = 0 THEN NULL -- normalize 0 to NULL (VACANT or unset)
+				ELSE eff.effective_owner_cost_center
+			END AS cost_center_id
 		FROM public.categorize_opname_assets(_session_id) AS ca
 		INNER JOIN "Asset" AS a ON ca.asset_tag = a.asset_tag
 		LEFT JOIN "AssetChanges" AS ac 

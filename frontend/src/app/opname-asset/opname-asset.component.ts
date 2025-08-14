@@ -14,7 +14,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { AssetPageComponent } from '../asset-page/asset-page.component';
-import { parseAdaptorSN } from '../utils';
+import { parseAdaptorSN, normalizeCostCenter } from '../utils';
 import { SubSite } from '../model/sub-site.model';
 import { OpnamePreviewComponent } from '../opname-preview/opname-preview.component';
 import { lastValueFrom } from 'rxjs/internal/lastValueFrom';
@@ -866,12 +866,14 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         return full !== '' ? full : matchedUser.username; // fallback when both names empty
       })();
 
+  // Normalize cost center via shared util
+  const normalizedCC = normalizeCostCenter(matchedUser.costCenterID);
       result.pendingAsset = {
         ...result.pendingAsset,
         assetOwner: matchedUser.userID,
         assetOwnerName: displayName,
         assetOwnerPosition: matchedUser.position,
-        assetOwnerCostCenter: Number(matchedUser.costCenterID),
+        assetOwnerCostCenter: normalizedCC as any,
         assetOwnerDepartment: matchedUser.department,
         assetOwnerDivision: matchedUser.division,
       };
@@ -1288,8 +1290,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       assetChanges.newOwnerPosition = pending.assetOwnerPosition;
     }
     if (pending.assetOwnerCostCenter !== existing.assetOwnerCostCenter) {
-      // Ensure cost center is always sent as a number, not string
-      assetChanges.newOwnerCostCenter = Number(pending.assetOwnerCostCenter);
+      assetChanges.newOwnerCostCenter = normalizeCostCenter(pending.assetOwnerCostCenter) as any;
     }
     if (pending.assetOwnerDepartment !== existing.assetOwnerDepartment) {
       assetChanges.newOwnerDepartment = pending.assetOwnerDepartment;
@@ -1370,7 +1371,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       newEquipments: existing.equipments,
       newOwnerID: existing.assetOwner,
       newOwnerPosition: existing.assetOwnerPosition,
-      newOwnerCostCenter: Number(existing.assetOwnerCostCenter), // Ensure it's a number
+  // Cost center normalized via shared util
+  newOwnerCostCenter: normalizeCostCenter(existing.assetOwnerCostCenter) as any,
       newOwnerDepartment: existing.assetOwnerDepartment,
       newOwnerDivision: existing.assetOwnerDivision,
       newOwnerSiteID: existing.siteID,

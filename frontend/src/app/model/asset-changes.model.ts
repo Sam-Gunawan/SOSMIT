@@ -13,7 +13,7 @@ export interface AssetChange {
     newOwnerPosition?: string;
     newOwnerDepartment?: string;
     newOwnerDivision?: string;
-    newOwnerCostCenter?: number;
+    newOwnerCostCenter?: number | null; // null when VACANT / unset
     newOwnerSiteID?: number; // Owner's site (where the owner works)
     newSubSiteID?: number; // Asset's physical location (sub-site)
     changeReason?: string;

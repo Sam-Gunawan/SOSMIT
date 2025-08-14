@@ -149,6 +149,14 @@ func (handler *Handler) GetBAPDetailsHandler(context *gin.Context) {
 
 	serialized := make([]gin.H, 0, len(details))
 	for _, row := range details {
+		var actionNotes interface{} = ns(row.ActionNotes)
+		if actionNotes == nil {
+			actionNotes = "-"
+		}
+		var costCenter interface{} = ni(row.CostCenterID)
+		if costCenter == nil {
+			costCenter = "-"
+		}
 		serialized = append(serialized, gin.H{
 			"category":       row.Category,
 			"company":        row.Company,
@@ -157,8 +165,8 @@ func (handler *Handler) GetBAPDetailsHandler(context *gin.Context) {
 			"equipments":     ns(row.Equipments),
 			"user_and_pos":   row.UserNameAndPosition,
 			"asset_status":   row.AssetStatus,
-			"action_notes":   ns(row.ActionNotes),
-			"cost_center_id": ni(row.CostCenterID),
+			"action_notes":   actionNotes,
+			"cost_center_id": costCenter,
 		})
 	}
 

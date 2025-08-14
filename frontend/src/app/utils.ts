@@ -72,3 +72,20 @@ export function formatRupiah(amount: number): string {
         currency: "IDR"
     }).format(amount);
 }
+
+// Generic normalizer for optional numeric fields that should become null when empty / zero / invalid
+export function normalizeOptionalNumber<T = any>(value: T): number | null {
+    if (value === null || value === undefined) return null;
+    // Treat empty string & pure whitespace as null
+    if (typeof value === 'string') {
+        if (value.trim() === '' || value === '0') return null;
+    }
+    // Treat 0 explicitly as null when semantic indicates 'unset'
+    if (value === 0) return null;
+    const n = Number(value as any);
+    if (isNaN(n)) return null;
+    return n;
+}
+
+// Convenience alias specifically for cost center semantics (VACANT / unset -> null)
+export const normalizeCostCenter = normalizeOptionalNumber;
