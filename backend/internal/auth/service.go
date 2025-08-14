@@ -51,8 +51,23 @@ func (service *Service) Login(username, password string) (string, error) {
 	}
 
 	// Check if the user has access to the system.
-	// Only ADMIN STAFF GENERAL AFFAIRS and L1 SUPPORT positions are allowed.
-	if userCredentials.Position != "ADMIN STAFF GENERAL AFFAIRS" && userCredentials.Position != "L1 SUPPORT" && userCredentials.Position != "AREA MANAGER" {
+	// Only positions listed below have access.
+	// ! Note: This is a temporary measure and should be replaced with a more robust access control system, e.g. storing user roles in the database.
+	allowedPositions := []string{
+		"ADMIN STAFF GENERAL AFFAIRS",
+		"L1 SUPPORT",
+		"AREA MANAGER",
+		"IT SERVICES MANAGER",
+		"FINANCE & ACCOUNTING MANAGER",
+	}
+	hasAccess := false
+	for _, p := range allowedPositions {
+		if strings.EqualFold(strings.ToUpper(userCredentials.Position), strings.ToUpper(p)) {
+			hasAccess = true
+			break
+		}
+	}
+	if !hasAccess {
 		// User does not have the required position to access the system.
 		return "", errors.New("user does not have access to the system")
 	}
@@ -64,7 +79,7 @@ func (service *Service) Login(username, password string) (string, error) {
 		"user_id":  userCredentials.UserID,
 		"username": userCredentials.Username,
 		"position": userCredentials.Position,
-		"exp":      time.Now().Add(time.Hour * 72).Unix(), // Token expires in 72 hours
+		"exp":      time.Now().Add(time.Hour * 720).Unix(), // Token expires in 720 hours (only for educational purposes, unrelated to SM's policies)
 	}
 
 	// Create the token using the claims and the secret key.
