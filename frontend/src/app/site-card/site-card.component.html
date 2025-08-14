@@ -43,20 +43,6 @@
                     </datalist>
                 </div>
                 
-                <!-- <div class="form-item">
-                    <label>Region</label>
-                    <input 
-                        type="text" 
-                        class="form-control" 
-                        [(ngModel)]="searchCriteria.siteRegion"
-                        name="siteRegion"
-                        placeholder="Region"
-                        list="regions">
-                    <datalist id="regions">
-                        <option *ngFor="let region of regionList" [value]="region"></option>
-                    </datalist>
-                </div> -->
-                
                 <div class="form-item">
                     <label>Status</label>
                     <select 
@@ -219,10 +205,6 @@
         <p>Gunakan formulir pencarian di atas untuk mencari site. Anda dapat mencari dengan kombinasi kriteria apa pun, atau biarkan semua kolom kosong untuk melihat semua site.</p>
     </div>
 </section>
-
-<!-- <section *ngIf="errorMessage">
-    <h1 class="error-message">{{ errorMessage }}</h1>
-</section> -->
 
 <!-- ERROR MESSAGE -->
 <div *ngIf="errorMessage && showToast" class="my-toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true">

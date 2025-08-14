@@ -17,6 +17,34 @@ p {
   color: styles.$quaternary-text-color;
 }
 
+.report-wrapper {
+  padding: 20px 30px;
+}
+
+.report-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.report-details {
+  flex-grow: 1;
+}
+
+.status-opname {
+  font-size: 11px !important;
+  font-weight: 600;
+  color: styles.$primary-text-color !important;
+}
+
+.export-search {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  justify-content: center;
+}
+
 // Date dropdown styling
 .date-dropdown-wrapper {
   position: relative;
@@ -56,53 +84,6 @@ p {
   }
 }
 
-.report-wrapper {
-  padding: 20px 30px;
-}
-
-.report-header {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.report-details {
-  flex-grow: 1;
-}
-
-.status-opname {
-  font-size: 11px !important;
-  font-weight: 600;
-  color: styles.$primary-text-color !important;
-}
-
-.export-search {
-  display: flex;
-  flex-direction: column;
-  align-items: end;
-  justify-content: center;
-}
-
-// .buttons {
-//   display: flex;
-//   flex-direction: column;
-//   justify-content: center;
-//   align-items: center;
-//   gap: 10px;
-
-//   .btn {
-//     width: 137px;
-//   }
-
-//   @media (max-width: 768px) {
-//     .btn {
-//       font-size: 0.75rem;
-//       width: 113px;
-//     }
-//   }
-// }
-
 .export-report {
   display: flex;
   flex-direction: row;
@@ -141,22 +122,6 @@ p {
   padding: 10px;
   background-color: styles.$secondary-background-color;
 }
-
-// .card-1 {
-//   background-color: color.adjust(styles.$secondary-background-color, $lightness: -5%);
-// }
-
-// .card-2 {
-//   background-color: color.adjust(styles.$secondary-button-color, $lightness: 10%);
-// }
-
-// .card-3 {
-//   background-color: color.adjust(styles.$secondary-color, $lightness: 20%);
-// }
-
-// .card-4 {
-//   background-color: color.adjust(styles.$tertiary-color, $lightness: -5%);
-// }
 
 // Skeleton loading styles
 .skeleton {
