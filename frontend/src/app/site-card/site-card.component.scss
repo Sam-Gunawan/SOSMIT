@@ -5,6 +5,8 @@
   @include styles.default-styles;
 }
 
+@include styles.search-form-styles;
+
 h1, h2, h3, h4, h5, h6 {
   font-family: styles.$font-family;
   color: styles.$primary-text-color;
@@ -26,9 +28,6 @@ p {
   align-content: center;
   justify-content: center;
 }
-
-// Use global search form styles
-@include styles.search-form-styles;
 
 .site-status {
   font-size: 8px;
@@ -146,7 +145,6 @@ p {
   }
 }
 
-// Use global pagination styles
 @include styles.mat-paginator-styles;
 
 .pagination-container {
