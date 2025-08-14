@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -171,4 +172,92 @@ func (handler *Handler) GetBAPDetailsHandler(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, gin.H{"details": serialized})
+}
+
+// SetActionNotesHandler updates the action note for a specific asset change record
+func (handler *Handler) SetActionNotesHandler(context *gin.Context) {
+	// Security check: ensure user is authorized
+	position, ok := context.Get("position")
+	if !ok {
+		context.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	if strings.ToLower(position.(string)) != "l1 support" {
+		context.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+		return
+	}
+
+	// Get user id from claims
+	userID, ok := context.Get("user_id")
+	if !ok {
+		context.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	assetChangeIDStr := context.Param("asset-change-id")
+	if assetChangeIDStr == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "asset-change-id is required"})
+		return
+	}
+
+	assetChangeID, err := strconv.ParseInt(assetChangeIDStr, 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "invalid asset-change-id"})
+		return
+	}
+
+	var requestBody struct {
+		ActionNotes string `json:"action_notes"`
+	}
+	if err := context.ShouldBindJSON(&requestBody); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
+		return
+	}
+
+	if err := handler.service.SetActionNotes(assetChangeID, userID.(int64), requestBody.ActionNotes); err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to set action notes", "detail": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"status": "success"})
+}
+
+// DeleteActionNotesHandler removes the action note for a specific asset change record
+func (handler *Handler) DeleteActionNotesHandler(context *gin.Context) {
+	// Security check: ensure user is authorized
+	position, ok := context.Get("position")
+	if !ok {
+		context.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+	if strings.ToLower(position.(string)) != "l1 support" {
+		context.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+		return
+	}
+
+	// Get user id from claims
+	userID, ok := context.Get("user_id")
+	if !ok {
+		context.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
+
+	assetChangeIDStr := context.Param("asset-change-id")
+	if assetChangeIDStr == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "asset-change-id is required"})
+		return
+	}
+
+	assetChangeID, err := strconv.ParseInt(assetChangeIDStr, 10, 64)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "invalid asset-change-id"})
+		return
+	}
+
+	if err := handler.service.DeleteActionNotes(assetChangeID, userID.(int64)); err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete action notes", "detail": err.Error()})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"status": "success"})
 }

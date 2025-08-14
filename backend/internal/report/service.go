@@ -269,6 +269,7 @@ func sanitizeFileFragment(s string) string {
 	}
 	return string(out)
 }
+
 func safeNullable(nullable interface{}) string {
 	switch cast := nullable.(type) {
 	case sql.NullString:
@@ -285,12 +286,14 @@ func safeNullable(nullable interface{}) string {
 		return "-"
 	}
 }
+
 func safeNullableInt(nullableInt sql.NullInt64) string {
 	if nullableInt.Valid {
 		return fmt.Sprintf("%d", nullableInt.Int64)
 	}
 	return "-"
 }
+
 func BuildSignatures(submitter string, submitTime *time.Time, manager string, managerTime *time.Time, level1 string, level1Time *time.Time) []string {
 	var signatures []string
 	format := func(t *time.Time) string {
@@ -309,4 +312,16 @@ func BuildSignatures(submitter string, submitTime *time.Time, manager string, ma
 		signatures = append(signatures, fmt.Sprintf("Disetujui oleh (L1): %s – %s", level1, format(level1Time)))
 	}
 	return signatures
+}
+
+// SetActionNotes updates the action note for a specific asset change record
+func (service *Service) SetActionNotes(assetChangeID int64, userID int64, actionNotes string) error {
+	// No logical operations needed yet
+	return service.repo.SetActionNotes(assetChangeID, userID, actionNotes)
+}
+
+// DeleteActionNotes removes the action note for a specific asset change record
+func (service *Service) DeleteActionNotes(assetChangeID int64, userID int64) error {
+	// No logical operations needed yet
+	return service.repo.DeleteActionNotes(assetChangeID, userID)
 }
