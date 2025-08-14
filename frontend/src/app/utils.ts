@@ -65,3 +65,10 @@ export function parseAdaptorSN(equipments: string): string | null {
     // If a match is found, return the serial number; otherwise, return null
     return match? match[1] : null;
 }
+
+export function formatRupiah(amount: number): string {
+    return Intl.NumberFormat('id-ID', {
+        style: "currency",
+        currency: "IDR"
+    }).format(amount);
+}

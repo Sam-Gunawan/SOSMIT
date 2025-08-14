@@ -22,18 +22,19 @@ type Asset struct {
 	Location           string
 	Room               string
 	Equipments         string
+	TotalCost          float64
 	OwnerID            int64
 	OwnerName          string // Owner's full name, can be a combination of first and last name
 	OwnerPosition      string
-	OwnerDepartment    string // Owner's department
-	OwnerDivision      string // Owner's division
+	OwnerDepartment    string
+	OwnerDivision      string
 	OwnerCostCenter    int64
-	SubSiteID          int64  // SubSite where the asset is physically located
-	SubSiteName        string // Name of the SubSite where the asset is physically located
-	SiteID             int64  // Parent Site in hierarchy
-	SiteName           string // Name of the parent Site in hierarchy
-	SiteGroupName      string // Site group where the asset is located
-	RegionName         string // Region where the asset is located
+	SubSiteID          int64
+	SubSiteName        string
+	SiteID             int64
+	SiteName           string
+	SiteGroupName      string
+	RegionName         string
 }
 
 type Repository struct {
@@ -68,6 +69,7 @@ func (repo *Repository) GetAssetByTag(assetTag string) (*Asset, error) {
 		&asset.Location,
 		&asset.Room,
 		&asset.Equipments,
+		&asset.TotalCost,
 		&asset.OwnerID,
 		&asset.OwnerName,
 		&asset.OwnerPosition,
@@ -118,6 +120,7 @@ func (repo *Repository) GetAssetBySerialNumber(serialNumber string) (*Asset, err
 		&asset.Location,
 		&asset.Room,
 		&asset.Equipments,
+		&asset.TotalCost,
 		&asset.OwnerID,
 		&asset.OwnerName,
 		&asset.OwnerPosition,

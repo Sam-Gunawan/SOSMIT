@@ -37,38 +37,7 @@ export class AssetPageComponent implements OnInit {
   // File to upload for condition photo
   conditionPhoto?: File;
 
-  constructor(private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {
-    this.assetPage = {
-      assetTag: 'N/A',
-      assetIcon: '',
-      serialNumber: 'N/A',
-      assetStatus: 'Down',
-      category: 'N/A',
-      subCategory: 'N/A',
-      productVariety: 'N/A',
-      assetBrand: 'N/A',
-      assetName: 'N/A',
-      condition: true,
-      conditionNotes: 'N/A',
-      conditionPhotoURL: '',
-      location: '',
-      room: '',
-      equipments: '',
-      assetOwner: -1,
-      assetOwnerName: 'N/A',
-      assetOwnerPosition: 'N/A',
-      assetOwnerDepartment: 'N/A',
-      assetOwnerDivision: 'N/A',
-      assetOwnerCostCenter: -1,
-      subSiteID: -1,
-      subSiteName: 'N/A',
-      siteID: -1,
-      siteName: 'N/A',
-      siteGroupName: 'N/A',
-      regionName: 'N/A',
-      availableEquipments: [],
-    }; 
-  }
+  constructor(private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {}
   
   ngOnInit(): void {
     this.isLoading = true;

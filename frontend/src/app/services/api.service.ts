@@ -6,7 +6,7 @@
   import { SiteInfo } from '../model/site-info.model';
   import { AssetInfo } from '../model/asset-info.model';
   import { User } from '../model/user.model';
-  import { formatDate, titleCase } from '../utils';
+  import { formatDate, formatRupiah, titleCase } from '../utils';
   import { environment } from '../../environments/environments';
 import { SubSite } from '../model/sub-site.model';
 
@@ -258,10 +258,10 @@ import { SubSite } from '../model/sub-site.model';
           // Map the response to the desired format.
           return {
             assetTag: response.asset_tag,
-            assetIcon: this.getAssetIcon(response.product_variety), // Generate icon path based on product variety
+            assetIcon: this.getAssetIcon(response.product_variety),
             serialNumber: response.serial_number,
             assetStatus: response.status,
-            statusReason: response.status_reason || '-1', // Default to '-1' if status reason is not provided
+            statusReason: response.status_reason || '-1',
             category: response.product_category,
             subCategory: response.product_subcategory,
             productVariety: response.product_variety,
@@ -269,12 +269,13 @@ import { SubSite } from '../model/sub-site.model';
             assetName: response.product_name,
             condition: response.condition,
             conditionNotes: response.condition_notes,
-            conditionPhotoURL: response.condition_photo_url || '', // Default to empty string if condition photo
+            conditionPhotoURL: response.condition_photo_url || '',
             location: response.location,
             room: response.room,
-            equipments: response.equipments || '', // Default to empty string if equipments are not provided
+            equipments: response.equipments || '',
+            totalCost: formatRupiah(response.total_cost),
             assetOwner: response.owner_id,
-            assetOwnerName: titleCase(response.owner_name) || '', // Default to empty string if owner name is not provided
+            assetOwnerName: titleCase(response.owner_name) || '',
             assetOwnerPosition: titleCase(response.owner_position),
             assetOwnerDepartment: titleCase(response.owner_department),
             assetOwnerDivision: titleCase(response.owner_division),
@@ -301,10 +302,9 @@ import { SubSite } from '../model/sub-site.model';
           // Map the response to the desired format.
           return response.assets_on_site.map((asset: any) => ({
             assetTag: asset.AssetTag,
-            assetIcon: this.getAssetIcon(asset.ProductVariety), // Generate icon path based on product variety
             serialNumber: asset.SerialNumber,
             assetStatus: asset.Status,
-            statusReason: asset.StatusReason || '-1', // Default to '-1' if status reason is not provided
+            statusReason: asset.StatusReason || '-1',
             category: asset.ProductCategory,
             subCategory: asset.ProductSubCategory,
             productVariety: asset.ProductVariety,
@@ -312,12 +312,13 @@ import { SubSite } from '../model/sub-site.model';
             assetName: asset.ProductName,
             condition: asset.Condition,
             conditionNotes: asset.ConditionNotes,
-            conditionPhotoURL: asset.ConditionPhotoURL || '', // Default to empty string if condition photo
+            conditionPhotoURL: asset.ConditionPhotoURL || '',
             location: asset.Location,
             room: asset.Room,
-            equipments: asset.Equipments || '', // Default to empty string if equipments are not provided
+            equipments: asset.Equipments || '',
+            totalCost: formatRupiah(asset.TotalCost),
             assetOwner: asset.OwnerID,
-            assetOwnerName: titleCase(asset.OwnerName) || '', // Default to empty string if owner name is not provided
+            assetOwnerName: titleCase(asset.OwnerName) || '',
             assetOwnerPosition: titleCase(asset.OwnerPosition),
             assetOwnerDepartment: titleCase(asset.OwnerDepartment),
             assetOwnerDivision: titleCase(asset.OwnerDivision),
@@ -358,9 +359,10 @@ import { SubSite } from '../model/sub-site.model';
             conditionPhotoURL: response.condition_photo_url,
             location: response.location,
             room: response.room,
-            equipments: response.equipments || '', // Default to empty string if equipments are not provided
+            equipments: response.equipments || '',
+            totalCost: formatRupiah(response.total_cost),
             assetOwner: response.owner_id,
-            assetOwnerName: titleCase(response.owner_name) || '', // Fixed: Apply titleCase here
+            assetOwnerName: titleCase(response.owner_name) || '',
             assetOwnerPosition: titleCase(response.owner_position),
             assetOwnerDepartment: titleCase(response.owner_department),
             assetOwnerDivision: titleCase(response.owner_division),

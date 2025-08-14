@@ -125,6 +125,12 @@ CREATE TABLE "Asset" (
     "location" VARCHAR(255),
     "room" VARCHAR(255),
     "equipments" TEXT, -- e.g. "Monitor, Keyboard, Mouse" (can be empty to show no equipments)
+    "total_cost" INT,
+
+    -- Put this here for now in case there's any business logic changes in the future to prevent multiple refactoring.
+    -- Right now it will be empty; the ones populated at frontend are tied to the owner's department.
+    -- Special edge case for handling different owner_dept and user's dept are not yet discussed as of the time of this code commit.
+    "owner_dept" VARCHAR(255),
 
     -- Foreign key to User (owner of the asset).
     "owner_id" INT NOT NULL REFERENCES "User"("user_id"),
