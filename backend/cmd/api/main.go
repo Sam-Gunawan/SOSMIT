@@ -213,11 +213,11 @@ func main() {
 			// GET /api/report/:session-id/bap.pdf
 			reportRoutes.GET("/:session-id/bap.pdf", reportHandler.GenerateBAPHandler)
 
-			// PUT /api/report/:asset-change-id/action-notes/add
-			reportRoutes.PUT("/:asset-change-id/action-notes/add", reportHandler.SetActionNotesHandler)
+			// PUT /api/report/action-notes/add
+			reportRoutes.PUT("/action-notes/add", reportHandler.SetActionNotesHandler)
 
-			// DELETE /api/report/:asset-change-id/action-notes/delete
-			reportRoutes.DELETE("/:asset-change-id/action-notes/delete", reportHandler.DeleteActionNotesHandler)
+			// DELETE /api/report/action-notes/delete
+			reportRoutes.DELETE("/action-notes/delete", reportHandler.DeleteActionNotesHandler)
 		}
 
 	}

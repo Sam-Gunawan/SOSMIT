@@ -165,15 +165,15 @@ func (repo *Repository) GetOpnameStats(sessionID int64) (*OpnameStats, error) {
 }
 
 // SetActionNotes updates the action note for a specific asset change record
-func (repo *Repository) SetActionNotes(assetChangeID int64, userID int64, actionNotes string) error {
-	query := `CALL set_action_notes($1, $2, $3)`
-	_, err := repo.db.Exec(query, assetChangeID, userID, actionNotes)
+func (repo *Repository) SetActionNotes(assetTag string, sessionID int64, userID int64, actionNotes string) error {
+	query := `CALL set_action_notes($1, $2, $3, $4)`
+	_, err := repo.db.Exec(query, assetTag, sessionID, userID, actionNotes)
 	return err
 }
 
 // DeleteActionNotes removes the action note for a specific asset change record
-func (repo *Repository) DeleteActionNotes(assetChangeID int64, userID int64) error {
-	query := `CALL delete_action_notes($1, $2)`
-	_, err := repo.db.Exec(query, assetChangeID, userID)
+func (repo *Repository) DeleteActionNotes(assetTag string, sessionID int64, userID int64) error {
+	query := `CALL delete_action_notes($1, $2, $3)`
+	_, err := repo.db.Exec(query, assetTag, sessionID, userID)
 	return err
 }

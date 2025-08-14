@@ -315,13 +315,13 @@ func BuildSignatures(submitter string, submitTime *time.Time, manager string, ma
 }
 
 // SetActionNotes updates the action note for a specific asset change record
-func (service *Service) SetActionNotes(assetChangeID int64, userID int64, actionNotes string) error {
+func (service *Service) SetActionNotes(assetTag string, sessionID int64, userID int64, actionNotes string) error {
 	// No logical operations needed yet
-	return service.repo.SetActionNotes(assetChangeID, userID, actionNotes)
+	return service.repo.SetActionNotes(assetTag, sessionID, userID, actionNotes)
 }
 
 // DeleteActionNotes removes the action note for a specific asset change record
-func (service *Service) DeleteActionNotes(assetChangeID int64, userID int64) error {
+func (service *Service) DeleteActionNotes(assetTag string, sessionID int64, userID int64) error {
 	// No logical operations needed yet
-	return service.repo.DeleteActionNotes(assetChangeID, userID)
+	return service.repo.DeleteActionNotes(assetTag, sessionID, userID)
 }

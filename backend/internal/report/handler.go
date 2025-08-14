@@ -194,19 +194,9 @@ func (handler *Handler) SetActionNotesHandler(context *gin.Context) {
 		return
 	}
 
-	assetChangeIDStr := context.Param("asset-change-id")
-	if assetChangeIDStr == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "asset-change-id is required"})
-		return
-	}
-
-	assetChangeID, err := strconv.ParseInt(assetChangeIDStr, 10, 64)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "invalid asset-change-id"})
-		return
-	}
-
 	var requestBody struct {
+		AssetTag    string `json:"asset_tag"`
+		SessionID   int64  `json:"session_id"`
 		ActionNotes string `json:"action_notes"`
 	}
 	if err := context.ShouldBindJSON(&requestBody); err != nil {
@@ -214,7 +204,7 @@ func (handler *Handler) SetActionNotesHandler(context *gin.Context) {
 		return
 	}
 
-	if err := handler.service.SetActionNotes(assetChangeID, userID.(int64), requestBody.ActionNotes); err != nil {
+	if err := handler.service.SetActionNotes(requestBody.AssetTag, requestBody.SessionID, userID.(int64), requestBody.ActionNotes); err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to set action notes", "detail": err.Error()})
 		return
 	}
@@ -242,19 +232,17 @@ func (handler *Handler) DeleteActionNotesHandler(context *gin.Context) {
 		return
 	}
 
-	assetChangeIDStr := context.Param("asset-change-id")
-	if assetChangeIDStr == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "asset-change-id is required"})
+	var requestBody struct {
+		AssetTag  string `json:"asset_tag"`
+		SessionID int64  `json:"session_id"`
+	}
+
+	if err := context.ShouldBindJSON(&requestBody); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "invalid request body"})
 		return
 	}
 
-	assetChangeID, err := strconv.ParseInt(assetChangeIDStr, 10, 64)
-	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "invalid asset-change-id"})
-		return
-	}
-
-	if err := handler.service.DeleteActionNotes(assetChangeID, userID.(int64)); err != nil {
+	if err := handler.service.DeleteActionNotes(requestBody.AssetTag, requestBody.SessionID, userID.(int64)); err != nil {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete action notes", "detail": err.Error()})
 		return
 	}

@@ -17,8 +17,8 @@ DROP PROCEDURE IF EXISTS public.approve_opname_session(INT, INT);
 DROP PROCEDURE IF EXISTS public.reject_opname_session(INT, INT);
 DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(50), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, VARCHAR(255), VARCHAR(100), VARCHAR(100), INT, INT, INT, TEXT, VARCHAR(25));
 DROP PROCEDURE IF EXISTS public.delete_asset_change(INT, VARCHAR(12));
-DROP PROCEDURE IF EXISTS public.set_action_notes(INT, INT, TEXT);
-DROP PROCEDURE IF EXISTS public.delete_action_notes(INT, INT);
+DROP PROCEDURE IF EXISTS public.set_action_notes(VARCHAR(12), INT, INT, TEXT);
+DROP PROCEDURE IF EXISTS public.delete_action_notes(VARCHAR(12), INT, INT);
 DROP FUNCTION IF EXISTS public.get_asset_change_photo(INT, VARCHAR(12));
 DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
 DROP FUNCTION IF EXISTS public.get_all_sites();
@@ -826,7 +826,8 @@ $$;
 
 -- set_action_notes updates the action notes for an asset change
 CREATE OR REPLACE PROCEDURE public.set_action_notes(
-	_id INT,
+	_asset_tag VARCHAR(12),
+	_session_id INT,
 	_current_user_id INT, -- The ID of the user making the request (from JWT)
 	_action_notes TEXT
 )
@@ -844,13 +845,14 @@ AS $$
 
 		UPDATE "AssetChanges"
 		SET action_notes = _action_notes
-		WHERE id = _id;
+		WHERE asset_tag = _asset_tag AND session_id = _session_id;
 	END;
 $$;
 
 -- delete_action_notes deletes the action notes for an asset change
 CREATE OR REPLACE PROCEDURE public.delete_action_notes(
-	_id INT,
+	_asset_tag VARCHAR(12),
+	_session_id INT,
 	_current_user_id INT -- The ID of the user making the request (from JWT)
 )
 	LANGUAGE plpgsql
@@ -867,7 +869,7 @@ AS $$
 
 		UPDATE "AssetChanges"
 		SET action_notes = ''
-		WHERE id = _id;
+		WHERE asset_tag = _asset_tag AND session_id = _session_id;
 	END;
 $$;
 
