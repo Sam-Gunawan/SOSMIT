@@ -38,13 +38,14 @@ CREATE OR REPLACE FUNCTION public.get_credentials(_username VARCHAR(255))
 		user_id INT,
         username VARCHAR(255),
         "password" VARCHAR(255),
+		position VARCHAR(100),
         ou_code VARCHAR(5)
     )
     LANGUAGE plpgsql
 AS $$
     BEGIN
         RETURN QUERY
-        SELECT u.user_id, u.username, u.password, u.ou_code
+        SELECT u.user_id, u.username, u.password, u.position, u.ou_code
         FROM "User" AS u
         WHERE LOWER(u.username) = LOWER(_username) AND LOWER(u.username) <> 'vacant'; -- Block users trying to login using 'vacant' username
     END;
