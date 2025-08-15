@@ -1,0 +1,11 @@
+<h2 mat-dialog-title class="dialog-title">Tindak Lanjut</h2>
+<div mat-dialog-content class="dialog-content">
+    <label for="action-notes" class="form-label mb-1">Catatan</label>
+    <textarea id="action-notes" [(ngModel)]="notes" class="form-control" rows="6" placeholder="Tuliskan tindak lanjut di sini..."></textarea>
+</div>
+<div mat-dialog-actions class="dialog-actions">
+    <button type="button" class="btn btn-outline-danger" (click)="onDelete()" *ngIf="notes.trim() !== ''">Hapus</button>
+    <span class="flex-spacer"></span>
+    <button type="button" class="btn btn-secondary" (click)="onCancel()">Batal</button>
+    <button type="button" class="btn btn-primary" (click)="onSave()" [disabled]="notes.trim() === initialNotes.trim()">Simpan</button>
+</div>

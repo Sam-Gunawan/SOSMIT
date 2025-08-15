@@ -215,7 +215,8 @@ export class OpnameSessionService {
                 newOwnerDivision: changes.newOwnerDivision,
                 newOwnerCostCenter: changes.newOwnerCostCenter,
                 newSubSiteID: changes.newSubSiteID,
-                changeReason: progressItem.change_reason
+                changeReason: progressItem.change_reason,
+                actionNotes: changes.actionNotes || ''
               },
               processingStatus: progressItem.processing_status
             };

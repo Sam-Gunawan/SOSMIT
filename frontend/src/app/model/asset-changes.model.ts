@@ -17,5 +17,6 @@ export interface AssetChange {
     newOwnerSiteID?: number; // Owner's site (where the owner works)
     newSubSiteID?: number; // Asset's physical location (sub-site)
     changeReason?: string;
+    actionNotes?: string; // persisted action / tindak lanjut notes
     processingStatus: 'pending' | 'edited' | 'all_good';
 }

@@ -1,4 +1,7 @@
 import { Component, HostListener, Input, ChangeDetectorRef, OnDestroy, OnChanges, SimpleChanges, AfterViewInit, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { ActionNotesDialogComponent } from '../action-notes-dialog/action-notes-dialog.component';
+import { ReportService } from '../services/report.service';
 import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { AssetInfo } from '../model/asset-info.model';
@@ -43,15 +46,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
   allColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'ownerName', 'costCenter', 'condition', 'status', 'processingStatus', 'actions'];
   dataSource = new MatTableDataSource<AssetTableData>([]);
-
-  // Getter to return displayed columns based on report mode
-  get displayedColumns(): string[] {
-    if (this.isInReport) {
-      // Remove 'actions' column when in report view
-      return this.allColumns.filter(col => col !== 'actions');
-    }
-    return this.allColumns;
-  }
 
   @Input() isInReport: boolean = false; // Flag to check if in report view
   @Input() variant: 'default' | 'compact' = 'default';
@@ -144,8 +138,10 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
 
   constructor(
     private apiService: ApiService,
-    private opnameSessionService: OpnameSessionService,
-    private cdr: ChangeDetectorRef
+  private opnameSessionService: OpnameSessionService,
+  private cdr: ChangeDetectorRef,
+  private dialog: MatDialog,
+  private reportService: ReportService
   ) {
     // Explicitly initialize search fields to ensure they're empty
     this.assetTagQuery = '';
@@ -182,6 +178,59 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }
   }
 
+  // ===== Action Notes Handling =====
+  getActionNotes(index: number): string {
+    const item = this.searchResults[index];
+    return (item as any).actionNotes || ''; // actionNotes stored ad-hoc on result object
+  }
+
+  setActionNotes(index: number, notes: string) {
+    (this.searchResults[index] as any).actionNotes = notes;
+  }
+
+  openActionNotesDialog(index: number, event?: Event) {
+    if (event) event.stopPropagation();
+    const currentNotes = this.getActionNotes(index);
+    const dialogRef = this.dialog.open(ActionNotesDialogComponent, {
+      width: '420px',
+      data: { initialNotes: currentNotes }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (!result) return;
+      if (result.action === 'save') {
+        this.setActionNotes(index, result.notes);
+        this.persistActionNotes(index, result.notes);
+      } else if (result.action === 'delete') {
+        this.setActionNotes(index, '');
+        this.persistActionNotes(index, '');
+      }
+      this.cdr.detectChanges();
+    });
+  }
+
+  private persistActionNotes(index: number, notes: string) {
+    const sessionId = this.sessionID;
+    const assetTag = this.searchResults[index].pendingAsset.assetTag;
+    if (!assetTag || !sessionId) return;
+    // Decide between add/update or delete based on notes content
+    if (notes && notes.trim().length) {
+      this.reportService.setActionNotes(assetTag, sessionId, notes.trim()).subscribe({
+        next: () => {},
+        error: (err: any) => {
+          console.error('Failed to save action notes', err);
+          // revert optimistic change on error
+          this.setActionNotes(index, this.getActionNotes(index));
+        }
+      });
+    } else {
+      this.reportService.deleteActionNotes(assetTag, sessionId).subscribe({
+        next: () => {},
+        error: (err: any) => {
+          console.error('Failed to delete action notes', err);
+        }
+      });
+    }
+  }
   ngOnInit(): void {
     this.isLoading = true;
 
@@ -1463,6 +1512,9 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       }
     });
   }
+
+  // TODO: implement set action notes with modal from angular material
+
 
   // Helper method to create asset page data with available equipments
   createAssetPageData(result: any): AssetInfo & { availableEquipments: string[] } {

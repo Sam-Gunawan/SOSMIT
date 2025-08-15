@@ -923,35 +923,72 @@ table {
   }
   
   .actions-cell {
-    width: 70px;
+    width: 130px;
     text-align: center;
     
-    .btn-remove {
-      background: none;
-      border: none;
-      color: #dc3545;
-      cursor: pointer;
-      padding: 6px;
-      border-radius: 50%;
-      transition: all 0.2s ease;
-      display: inline-flex;
+    .action-buttons {
+      display: flex;
       align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      
-      &:hover {
-        background-color: rgba(220, 53, 69, 0.1);
-        color: #c82333;
-        transform: scale(1.1);
+      justify-content: flex-start;
+      gap: 8px;
+
+      .btn-remove {
+        background: none;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        border-radius: 50%;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        
+        &:hover {
+          background-color: rgba(220, 53, 69, 0.1);
+          color: #c82333;
+          transform: scale(1.1);
+        }
+        
+        &:active {
+          transform: scale(0.95);
+        }
+        
+        i.fa-trash-can {
+          font-size: 14px;
+        }
       }
-      
-      &:active {
-        transform: scale(0.95);
-      }
-      
-      .material-symbols-outlined {
-        font-size: 18px;
+
+      .btn-add-notes {
+        padding: 4px 8px;
+        font-size: 8px;
+        cursor: pointer;
+        border: 1px solid rgba(0, 0, 0, 0.15);
+        background-color: rgba(0, 0, 0, 0.05); // semi-transparent to subtly darken underlying background
+        color: styles.$primary-text-color;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.05s ease;
+        position: relative;
+        max-width: 70px;
+        
+        &:hover {
+          border-color: styles.$primary-color;
+          background-color: rgba(0, 0, 0, 0.15);
+        }
+        
+        &:active {
+          background-color: styles.$primary-color;
+          border-color: styles.$primary-color;
+          color: white;
+        }
+        
+        i.fa-plus {
+          font-size: 9px;
+        }
       }
     }
   }

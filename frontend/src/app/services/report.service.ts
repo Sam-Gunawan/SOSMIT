@@ -22,8 +22,19 @@ export class ReportService {
 		);
 	}
 
-	/** Download BAP PDF for a session as Blob */
+	// Download BAP PDF for a session as Blob
 	downloadBAPPdf(sessionID: number): Observable<Blob> {
 		return this.http.get(`${this.reportApiUrl}/${sessionID}/bap.pdf`, { responseType: 'blob' });
 	}
+
+	setActionNotes(assetTag: string, sessionID: number, actionNotes: string): Observable<any> {
+		return this.http.put(`${this.reportApiUrl}/action-notes/add`, { asset_tag: assetTag, session_id: sessionID, action_notes: actionNotes });
+	}
+
+	deleteActionNotes(assetTag: string, sessionID: number): Observable<any> {
+		return this.http.delete(`${this.reportApiUrl}/action-notes/delete`, { body: { asset_tag: assetTag, session_id: sessionID } });
+	}
+
+	// (Optional future) fetch existing notes if endpoint added
+	// getActionNotes(assetTag: string, sessionID: number): Observable<string> { ... }
 }
