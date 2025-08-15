@@ -12,6 +12,7 @@ type Credentials struct {
 	Username string
 	Password string
 	Position string
+	OuCode   string
 }
 
 // User struct represents a user in the system.
@@ -58,15 +59,15 @@ func NewRepository(db *sql.DB) *Repository {
 
 // GetUserCredentials retrieves a user's credentials by their username from the database.
 // It is a method of the Repository struct, which holds the database connection.
-// It returns a User struct containing the username, password, and position.
+// It returns a User struct containing the username, password, position, and ou code.
 func (repo *Repository) GetUserCredentials(username string) (*Credentials, error) {
 	var credentials Credentials
 
-	// get_credentials returns username, password, position
+	// get_credentials returns username, password, position, ou_code
 	// It takes in a username with VARCHAR(255) type
 	query := `SELECT * FROM get_credentials($1)`
 
-	err := repo.db.QueryRow(query, username).Scan(&credentials.UserID, &credentials.Username, &credentials.Password, &credentials.Position)
+	err := repo.db.QueryRow(query, username).Scan(&credentials.UserID, &credentials.Username, &credentials.Password, &credentials.Position, &credentials.OuCode)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// If no user is found, return nil
