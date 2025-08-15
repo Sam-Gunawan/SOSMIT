@@ -356,6 +356,7 @@ func (handler *Handler) LoadOpnameProgressHandler(context *gin.Context) {
 			"changes":           string(progress.Changes),
 			"change_reason":     progress.ChangeReason,
 			"processing_status": progress.ProcessingStatus,
+			"action_notes":      progress.ActionNotes,
 		}
 		responseProgress = append(responseProgress, progressItem)
 	}

@@ -50,6 +50,7 @@ type OpnameSessionProgress struct {
 	ChangeReason     string `json:"change_reason"`
 	AssetTag         string `json:"asset_tag"`
 	ProcessingStatus string `json:"processing_status"`
+	ActionNotes      string `json:"action_notes"`
 }
 
 type Repository struct {
@@ -239,7 +240,7 @@ func (repo *Repository) LoadOpnameProgress(sessionID int) ([]OpnameSessionProgre
 
 	for rows.Next() {
 		var progress OpnameSessionProgress
-		if err := rows.Scan(&progress.ID, &progress.Changes, &progress.ChangeReason, &progress.AssetTag, &progress.ProcessingStatus); err != nil {
+		if err := rows.Scan(&progress.ID, &progress.Changes, &progress.ChangeReason, &progress.AssetTag, &progress.ProcessingStatus, &progress.ActionNotes); err != nil {
 			log.Printf("❌ Error scanning row for opname progress: %v", err)
 			return nil, err // Row scan failed for some error.
 		}

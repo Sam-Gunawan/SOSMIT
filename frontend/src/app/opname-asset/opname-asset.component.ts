@@ -188,12 +188,12 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     (this.searchResults[index] as any).actionNotes = notes;
   }
 
-  openActionNotesDialog(index: number, event?: Event) {
+  openActionNotesDialog(index: number, assetTag: string, event?: Event) {
     if (event) event.stopPropagation();
     const currentNotes = this.getActionNotes(index);
     const dialogRef = this.dialog.open(ActionNotesDialogComponent, {
       width: '420px',
-      data: { initialNotes: currentNotes }
+      data: { initialNotes: currentNotes, assetTag: assetTag }
     });
     dialogRef.afterClosed().subscribe(result => {
       if (!result) return;
@@ -231,6 +231,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       });
     }
   }
+
   ngOnInit(): void {
     this.isLoading = true;
 
@@ -500,7 +501,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
           assetProcessed: true,
           processingStatus: savedRecord.processingStatus,
           savedChangeReason: savedRecord.assetChanges.changeReason || '',
-          changeReason: savedRecord.assetChanges.changeReason || ''
+          changeReason: savedRecord.assetChanges.changeReason || '',
+          actionNotes: savedRecord.assetChanges.actionNotes || ''
         };
         
         // Add to search results in order

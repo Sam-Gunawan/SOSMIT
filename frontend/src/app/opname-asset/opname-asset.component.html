@@ -233,7 +233,7 @@
             <th mat-header-cell *matHeaderCellDef>Actions</th>
             <td mat-cell *matCellDef="let element" class="actions-cell">
                 <div class="action-buttons">
-                    <button type="button" class="btn btn-sm btn-add-notes" (click)="openActionNotesDialog(element.index, $event)"
+                    <button type="button" class="btn btn-sm btn-add-notes" (click)="openActionNotesDialog(element.index, element.assetTag, $event)"
                             [title]="getActionNotes(element.index) ? 'Edit catatan tindak lanjut' : 'Tambahkan catatan tindak lanjut'">
                         <i class="fa-solid" [ngClass]="getActionNotes(element.index) ? 'fa-pen-to-square' : 'fa-plus'"></i>
                         <span class="add-notes">{{ getActionNotes(element.index) ? 'Edit Note' : 'Add Note' }}</span>

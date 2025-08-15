@@ -19,7 +19,7 @@ export interface OpnameSessionProgress {
         newOwnerCostCenter?: number;
         newSubSiteID?: number;
         changeReason?: string;
-    actionNotes?: string;
+        actionNotes?: string;
     };
     processingStatus: 'pending' | 'edited' | 'all_good';
 }

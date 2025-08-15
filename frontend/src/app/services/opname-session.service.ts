@@ -152,7 +152,7 @@ export class OpnameSessionService {
       new_owner_position: assetChanges.newOwnerPosition,
       new_owner_department: assetChanges.newOwnerDepartment,
       new_owner_division: assetChanges.newOwnerDivision,
-  new_owner_cost_center: (assetChanges.newOwnerCostCenter === 0 ? null : assetChanges.newOwnerCostCenter),
+      new_owner_cost_center: (assetChanges.newOwnerCostCenter === 0 ? null : assetChanges.newOwnerCostCenter),
       new_sub_site_id: assetChanges.newSubSiteID,
       change_reason: assetChanges.changeReason,
       processing_status: assetChanges.processingStatus
@@ -216,7 +216,8 @@ export class OpnameSessionService {
                 newOwnerCostCenter: changes.newOwnerCostCenter,
                 newSubSiteID: changes.newSubSiteID,
                 changeReason: progressItem.change_reason,
-                actionNotes: changes.actionNotes || ''
+                // Prefer the explicit action_notes column returned by backend, fallback to any embedded JSON value
+                actionNotes: (progressItem.action_notes ?? changes.actionNotes ?? '')
               },
               processingStatus: progressItem.processing_status
             };

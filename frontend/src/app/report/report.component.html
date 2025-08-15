@@ -21,10 +21,16 @@
                             <i class="calendar-icon fas fa-calendar-alt"></i>
                         </div>
                     </div>
-                    <div class="export-report" (click)="exportToPDF()">
-                        <img class="export-icon" src="assets/export.svg" alt="Export Report"/>
-                        <p class="export-text">Export to PDF</p>
-                    </div>
+                    <button type="button"
+                                    class="export-report-btn"
+                                    (click)="exportToPDF()"
+                                    [disabled]="!selectedDate"
+                                    [title]="!selectedDate ? 'Select a date first' : 'Export report as PDF'">
+                        <div class="btn-content">
+                            <i class="fa-solid fa-file-arrow-down icon" aria-hidden="true"></i>
+                            <span>Export PDF</span>
+                        </div>
+                    </button>
                 </div>
             </div>
 
@@ -77,322 +83,11 @@
                     <app-opname-asset [variant]="cardVariant" [currentView]="currentView" [showLocation]="showLocation" [siteID]="site.siteID" [isInReport]="true" [sessionID]="sessionID"></app-opname-asset>
                 </div>
 
-                <!-- TODO: Design a "no date selected" display -->
                 <div class="no-date-selected" *ngIf="!selectedDate">
                     <p>Please select a date to view the report.</p>
                     <img class="no-date-icon" src="assets/report-second.jpeg" alt="Report Hamster"/>
                 </div>
             </div>
-        </section>
-
-        <section class="report-pdf" *ngIf="isExporting" #exportSection>
-            <div class="pdf-header">
-                <h2>Opname Report - {{ site.siteName }}</h2>
-                                <p>{{ site.siteGroup }}, {{ site.siteRegion }}</p>
-                <p>GA: {{ site.siteGaName }}</p>
-            </div>
-
-            <hr>
-
-            <table class="pdf-table">
-                <thead>
-                    <tr>
-                        <th rowspan="2">No</th>
-                        <th rowspan="2">Category</th>
-                        <th rowspan="2">Asset Tag</th>
-                        <th rowspan="2">Asset Name</th>
-                        <th rowspan="2">Equipments</th>
-                        <th rowspan="2">User</th>
-                        <th colspan="4">Qty</th>
-                        <th rowspan="2">Status</th>
-                        <th rowspan="2">Notes</th>
-                    </tr>
-                    <tr>
-                        <th>Physical</th>
-                        <th>Data</th>
-                        <th>Unit</th>
-                        <th>Difference</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="12">1. Working</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>Laptop</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>10</td>
-                        <td>10</td>
-                        <td>Unit</td>
-                        <td>-</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>Printer</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>15</td>
-                        <td>15</td>
-                        <td>Unit</td>
-                        <td>-</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                    </tr>
-                    <tr>
-                        <td colspan="12">2. Broken</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>Laptop</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>5</td>
-                        <td>5</td>
-                        <td>Unit</td>
-                        <td>-</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>Printer</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>10</td>
-                        <td>10</td>
-                        <td>Unit</td>
-                        <td>-</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                    </tr>
-                    <tr>
-                        <td colspan="12">3. Administration Issue</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>Laptop</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>11</td>
-                        <td>11</td>
-                        <td>Unit</td>
-                        <td>-</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>Printer</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>1</td>
-                        <td>1</td>
-                        <td>Unit</td>
-                        <td>-</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                    </tr>
-                    <tr>
-                        <td colspan="12">4. Missing</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>Laptop</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>10</td>
-                        <td>11</td>
-                        <td>Unit</td>
-                        <td>1</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>Printer</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                        <td>0</td>
-                        <td>1</td>
-                        <td>Unit</td>
-                        <td>1</td>
-                        <td>Attached</td>
-                        <td>Attached</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="pdf-footer">
-                <p>Notes: ...</p>
-                <p>Signature: </p>
-                <ul>
-                    <li>In review: [GA's Name], [Position]</li>
-                    <li>Reviewed by: [Manager's Name], [Position]</li>
-                    <li>Approved by: [L1's Name], [Position]</li>
-                </ul>
-            </div>
-
-            <div class="pdf-page-break"></div>
-
-            <table class="pdf-table-attachment">
-                <thead>
-                    <tr>
-                        <th rowspan="2">No</th>
-                        <th rowspan="2">Category</th>
-                        <th rowspan="2">Company</th>
-                        <th rowspan="2">Asset Tag</th>
-                        <th rowspan="2">Asset Name</th>
-                        <th rowspan="2">Equipments</th>
-                        <th rowspan="2">User</th>
-                        <th rowspan="2">Status</th>
-                        <th rowspan="2">Notes</th>
-                        <th rowspan="2">Cost Center</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="12">1. Working</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td></td>
-                        <td>Surya Madistrindo</td>
-                        <td>SMPR00005554</td>
-                        <td>Thermal Printer Datecs DPP 350</td>
-                        <td>Tas, Tali tas, Adaptor, Kabel USB</td>
-                        <td>GA - Sitti Rachman</td>
-                        <td>Deployed</td>
-                        <td>-</td>
-                        <td>399</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td></td>
-                        <td>Surya Madistrindo</td>
-                        <td>SMPR00005558</td>
-                        <td>Thermal Printer Datecs DPP 350</td>
-                        <td>Tas, Tali tas, Adaptor, Kabel USB</td>
-                        <td>GA - Sitti Rachman</td>
-                        <td>Deployed</td>
-                        <td>-</td>
-                        <td>399</td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td></td>
-                        <td>Surya Madistrindo</td>
-                        <td>SMTP00010295</td>
-                        <td>Zebra TC26</td>
-                        <td>Adaptor, Kabel USB, Handstrap, Simcard</td>
-                        <td>GA - Sitti Rachman</td>
-                        <td>Deployed</td>
-                        <td>-</td>
-                        <td>399</td>
-                    </tr>
-                    <tr>
-                        <td>4</td>
-                        <td></td>
-                        <td>Surya Madistrindo</td>
-                        <td>SMTP00010397</td>
-                        <td>Zebra TC26</td>
-                        <td>Adaptor, Kabel USB, Handstrap, Simcard</td>
-                        <td>GA - Sitti Rachman</td>
-                        <td>Deployed</td>
-                        <td>-</td>
-                        <td>399</td>
-                    </tr>
-                    <tr>
-                        <td colspan="12">2. Broken</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td></td>
-                        <td>Surya Madistrindo</td>
-                        <td>SMPU00004088-01</td>
-                        <td>APC Back-UPS Pro 550 VA</td>
-                        <td></td>
-                        <td>Vacant</td>
-                        <td>Down</td>
-                        <td>Disposal asset - ajukan pergantian unit jika dibutuhkan</td>
-                        <td>121</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td></td>
-                        <td>Surya Madistrindo</td>
-                        <td>SMPU00004054</td>
-                        <td>APC Back-UPS Pro 550 VA</td>
-                        <td></td>
-                        <td>Vacant</td>
-                        <td>Down</td>
-                        <td>Disposal asset - ajukan pergantian unit jika dibutuhkan</td>
-                        <td>121</td>
-                    </tr>
-                    <tr>
-                        <td colspan="12">3. Administration Issue</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td></td>
-                        <td>Surya Madistrindo</td>
-                        <td>SMPU00004046</td>
-                        <td>APC Back-UPS Pro 550 VA</td>
-                        <td></td>
-                        <td>GA - Sitti Rachman</td>
-                        <td>Deployed</td>
-                        <td>Mutasi asset</td>
-                        <td>121</td>
-                    </tr>
-                    <tr>
-                        <td colspan="12">4. Missing</td>
-                    </tr>
-                    <tr>
-                        <td>1</td>
-                        <td></td>
-                        <td>Surya Madistrindo</td>
-                        <td>SMPC00004046</td>
-                        <td>HP ProDesk 400 G4 SFF</td>
-                        <td></td>
-                        <td>GA - Sitti Rachman</td>
-                        <td>Lost</td>
-                        <td>Penerbitan Kronologis Kejadian</td>
-                        <td>121</td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td></td>
-                        <td>Surya Madistrindo</td>
-                        <td>SMMN00004104</td>
-                        <td>HP LV1911 18,5" LED Backlit Monitor</td>
-                        <td></td>
-                        <td>GA - Sitti Rachman</td>
-                        <td>Lost</td>
-                        <td>Penerbitan Kronologis Kejadian</td>
-                        <td>121</td>
-                    </tr>
-                    <!-- Repeat for each asset -->
-                </tbody>
-            </table>
         </section>
     </div>
 
@@ -406,3 +101,14 @@
     </div>
 </div>
 </main>
+
+<!-- PDF Generation Overlay -->
+<div class="pdf-overlay" *ngIf="isExporting">
+    <div class="pdf-modal" role="alert" aria-live="assertive">
+        <div class="spinner" aria-hidden="true"></div>
+        <div class="text-block">
+            <h6>Generating PDF Report</h6>
+            <p>Please wait while we prepare your file...</p>
+        </div>
+    </div>
+</div>

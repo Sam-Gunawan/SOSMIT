@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { ReportService } from '../services/report.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { SiteInfo } from '../model/site-info.model';
 import { OpnameSession } from '../model/opname-session.model';
 import { OpnameAssetComponent } from '../opname-asset/opname-asset.component';
@@ -54,7 +54,8 @@ export class ReportComponent {
     private opnameSessionService: OpnameSessionService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
-    private reportService: ReportService
+    private reportService: ReportService,
+    private router: Router
   ) {
     this.siteID = Number(this.route.snapshot.paramMap.get('id'));
   }
@@ -65,15 +66,19 @@ export class ReportComponent {
     try {
       const blob = await lastValueFrom(this.reportService.downloadBAPPdf(this.sessionID));
       const url = window.URL.createObjectURL(blob);
+      
       // Attempt to extract filename from content-disposition if present later; fallback generic.
       const a = document.createElement('a');
       const today = new Date();
       const dateStr = today.toLocaleDateString('en-GB').replace(/\//g,'-');
+      
       a.href = url;
       a.download = `BAP_opname_${this.site?.siteName?.replace(/\s+/g,'_') || 'site'}_${dateStr}.pdf`;
       document.body.appendChild(a);
+      
       a.click();
       document.body.removeChild(a);
+      
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error('[Report] PDF download failed', err);
@@ -170,43 +175,55 @@ export class ReportComponent {
   }
 
   async onDateChange() {
+    // User manually picked a date; derive sessionID then push to URL (URL becomes single source of truth)
     const found = this.availableOpnameSessions.find(s => s.endDate === this.selectedDate);
-    this.sessionID = found ? found.sessionID : -1;
+    const newSessionID = found ? found.sessionID : -1;
 
-    if (found) {
-      await this.initOpnameStats();
-    }
+    // If nothing changed, do nothing
+    if (newSessionID === this.sessionID) return;
 
-    this.cdr.detectChanges();
+    // Navigate updating only the session_id param; keep existing others except transient 'from'
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { session_id: newSessionID > -1 ? newSessionID : null, from: undefined },
+      queryParamsHandling: 'merge'
+    });
   }
 
   private handleInputFromURL() {
-    // Check if there's a selectedDate and selectedSessionID in query parameters
-    // This is when a user was redirected after finishing an opname
+    // Single subscription that drives component state from URL params
     this.route.queryParams.subscribe(async params => {
       const selectedSessionID = params['session_id'];
       const from = params['from'];
 
       if (selectedSessionID) {
-        this.sessionID = Number(selectedSessionID);
-        console.log('[Report] Session ID from URL:', this.sessionID);
-        
-        // Find the corresponding date for this session ID
-        const session = this.availableOpnameSessions.find(s => s.sessionID === this.sessionID);
-        if (session) {
-          this.selectedDate = session.endDate;
-          console.log('[Report] Selected date from session:', this.selectedDate);
-          await this.onDateChange();
-          if (from === 'opname_page') {
-            this.successMessage = 'Sesi opname berhasil diselesaikan!';
-            this.showSuccessMessage();
+        const newSessionID = Number(selectedSessionID);
+        if (newSessionID !== this.sessionID) {
+          this.sessionID = newSessionID;
+          const session = this.availableOpnameSessions.find(s => s.sessionID === this.sessionID);
+          if (session) {
+            this.selectedDate = session.endDate;
+            console.log('[Report] Synced from URL -> session:', this.sessionID, 'date:', this.selectedDate);
+            await this.initOpnameStats();
+          } else {
+            console.warn('[Report] No session found for ID from URL:', this.sessionID);
+            this.errorMessage = 'Sesi opname tidak ditemukan.';
           }
-        } else {
-          console.warn('[Report] No session found for ID:', this.sessionID);
-          this.errorMessage = 'Sesi opname tidak ditemukan.';
         }
+      } else {
+        // No session specified -> reset
+        this.sessionID = -1;
+        this.selectedDate = '';
       }
-    })
+
+      if (from === 'opname_page') {
+        this.successMessage = 'Sesi opname berhasil diselesaikan!';
+        this.showSuccessMessage();
+        // Clean up the transient param after showing message
+        this.router.navigate([], { relativeTo: this.route, queryParams: { from: undefined }, queryParamsHandling: 'merge' });
+      }
+      this.cdr.detectChanges();
+    });
   }
 
   private showSuccessMessage() {
@@ -236,29 +253,4 @@ export class ReportComponent {
       this.currentView = view;
     }
   }
-
-  // isExporting: boolean = false;
-  // @ViewChild('exportSection', { static: false }) exportSection!: ElementRef;
-
-  // exportToPDF() {
-  //   if (!this.exportSection) return;
-
-  //   const options = {
-  //     margin: 0.5,
-  //     filename: 'opname-report.pdf',
-  //     image: { type: 'jpeg', quality: 0.98 },
-  //     html2canvas: { scale: 2 },
-  //     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-  //   };
-
-  //   // Clone the export section and inject the export CSS
-  //   // const printContents = this.exportSection.nativeElement.cloneNode(true);
-  //   // const style = document.createElement('link');
-  //   // style.rel = 'stylesheet';
-  //   // style.href = 'assets/report-export.css';
-  //   // printContents.prepend(style);
-
-  //   // html2pdf().from(printContents).set(options).save();
-  //   html2pdf().from(this.exportSection.nativeElement).set(options).save();
-  // }
 }

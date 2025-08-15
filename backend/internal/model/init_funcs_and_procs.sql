@@ -824,6 +824,8 @@ AS $$
 	END;
 $$;
 
+-- get_action_notes 
+
 -- set_action_notes updates the action notes for an asset change
 CREATE OR REPLACE PROCEDURE public.set_action_notes(
 	_asset_tag VARCHAR(12),
@@ -1031,13 +1033,14 @@ CREATE OR REPLACE FUNCTION public.load_opname_progress(_session_id INT)
 		"changes" JSONB,
 		change_reason TEXT,
 		asset_tag VARCHAR(12),
-		processing_status VARCHAR(25)
+		processing_status VARCHAR(25),
+		action_notes TEXT
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT ac.id, ac."changes", ac.change_reason, ac.asset_tag, ac.processing_status
+		SELECT ac.id, ac."changes", ac.change_reason, ac.asset_tag, ac.processing_status, ac.action_notes
 		FROM "AssetChanges" as ac
 		WHERE session_id = _session_id;
 	END;

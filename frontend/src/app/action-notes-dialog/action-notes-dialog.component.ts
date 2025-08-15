@@ -5,6 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 
 export interface ActionNotesDialogData {
   initialNotes: string;
+  assetTag: string;
 }
 
 @Component({
@@ -17,12 +18,14 @@ export interface ActionNotesDialogData {
 export class ActionNotesDialogComponent {
   notes: string;
   initialNotes: string;
+  assetTag: string;
 
   constructor(
     private dialogRef: MatDialogRef<ActionNotesDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: ActionNotesDialogData
   ) {
     this.notes = data.initialNotes || '';
+    this.assetTag = data.assetTag || '';
     this.initialNotes = this.notes;
   }
 
