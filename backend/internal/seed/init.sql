@@ -74,7 +74,7 @@ CREATE TABLE "ApprovalPath" (
     -- Differentiate between opname done by area's GA and IT Asset from HO.
     "from" VARCHAR(10) NOT NULL,
 
-    -- Primary key will be a combination of all 3 (in case multiple approval paths are available at any given site)
+    -- Primary key will be a combination of all 4 (in case multiple approval paths are available at any given site)
     PRIMARY KEY ("site_id", "position", "sequence", "from"),
 
     CONSTRAINT ck_positive_seq CHECK ("sequence" > 0)
@@ -184,8 +184,11 @@ CREATE TABLE "OpnameSession" (
     "l1_reviewer_id" INT REFERENCES "User"("user_id") ON DELETE SET NULL,
     "l1_reviewed_at" TIMESTAMP WITH TIME ZONE,
     
-    -- Foreign key to Site (the site where the opname session is performed).
-    "site_id" INT NOT NULL REFERENCES "Site"("id")
+    -- Foreign key to Site (the site where the opname session is performed @Area).
+    "site_id" INT REFERENCES "Site"("id") ON DELETE SET NULL,
+
+    -- Foreign key to Department (the department where the opname session is performed @HO).
+    "dept_id" INT REFERENCES "Department"("id") ON DELETE SET NULL
 );
 
 -- Asset Changes

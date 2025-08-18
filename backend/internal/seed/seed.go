@@ -178,7 +178,7 @@ func seedSubSite(db *sql.DB, record []string) error {
 // id [PK], dept_name
 func seedDepartment(db *sql.DB, record []string) error {
 	dept_name := record[1]
-	query := `INSERT INTO "Department" (dept_name) VALUES ($1) ON CONFLICT (dept_name) DO NOTHING`
+	query := `INSERT INTO "Department" (dept_name) VALUES ($1) ON CONFLICT (id) DO NOTHING`
 
 	_, err := db.Exec(query, dept_name)
 	if err != nil {
@@ -213,7 +213,8 @@ func seedApprovalPath(db *sql.DB, record []string) error {
 	site_id := record[2]
 	from := record[3]
 
-	query := `INSERT INTO "ApprovalPath" (position, sequence, site_id, from) VALUES ($1, $2, $3, $4) ON CONFLICT (site_id, position, sequence, from) DO NOTHING`
+	query := `INSERT INTO "ApprovalPath" ("position", "sequence", "site_id", "from") VALUES ($1, $2, $3, $4)
+	ON CONFLICT ("site_id", "position", "sequence", "from") DO NOTHING`
 	_, err := db.Exec(query, position, sequence, site_id, from)
 	if err != nil {
 		log.Fatalf("Error inserting record into ApprovalPath table: %v\n", err)
@@ -273,8 +274,20 @@ func seedAsset(db *sql.DB, record []string) error {
 	equipments := record[13]
 	total_cost := record[14]
 	owner_id := record[15]
-	sub_site_id := record[16]
-	dept_id := record[17]
+
+	// Convert empty strings to null for nullable fields
+	var sub_site_id, dept_id *string
+	if record[16] == "" {
+		sub_site_id = nil
+	} else {
+		sub_site_id = &record[16]
+	}
+	if record[17] == "" {
+		dept_id = nil
+	} else {
+		dept_id = &record[17]
+	}
+
 	site_id := record[18]
 
 	// Convert empty string to default value for fields with defaults
@@ -286,7 +299,9 @@ func seedAsset(db *sql.DB, record []string) error {
 		condition_photo_url = "-1"
 	}
 
-	query := `INSERT INTO "Asset" (asset_tag, serial_number, status, status_reason, product_category, product_subcategory, product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, total_cost, owner_id, sub_site_id, dept_id, site_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) ON CONFLICT (asset_tag) DO NOTHING`
+	query := `INSERT INTO "Asset" (asset_tag, serial_number, status, status_reason, product_category, product_subcategory, product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, total_cost, owner_id, sub_site_id, dept_id, site_id)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+	ON CONFLICT (asset_tag) DO NOTHING`
 
 	_, err := db.Exec(query, asset_tag, serial_number, status, status_reason, product_category, product_subcategory,
 		product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, total_cost, owner_id, sub_site_id, dept_id, site_id)

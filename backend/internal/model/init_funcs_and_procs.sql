@@ -2,7 +2,8 @@ DROP FUNCTION IF EXISTS public.get_credentials(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_all_users();
 DROP FUNCTION IF EXISTS public.get_user_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_user_by_username(VARCHAR);
-DROP FUNCTION IF EXISTS public.get_user_site_cards(INT);
+DROP FUNCTION IF EXISTS public.get_latest_opname_status(INT, INT);
+DROP FUNCTION IF EXISTS public.get_user_opname_locations(INT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, TIMESTAMP, TIMESTAMP, VARCHAR, INT, INT);
 DROP FUNCTION IF EXISTS public.get_l1_support_emails();
 DROP FUNCTION IF EXISTS public.get_area_manager_info(INT);
 DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
@@ -38,7 +39,7 @@ CREATE OR REPLACE FUNCTION public.get_credentials(_username VARCHAR(255))
 		user_id INT,
         username VARCHAR(255),
         "password" VARCHAR(255),
-		position VARCHAR(100),
+		"position" VARCHAR(100),
         ou_code VARCHAR(5)
     )
     LANGUAGE plpgsql
@@ -176,77 +177,140 @@ AS $$
 	END;
 $$;
 
--- get_user_site_cards retrieves all the sites a user has access to using their user_id
--- Note: This function assumes that "l1 support" users can see all sites, while others are restricted to their region.
--- It returns site details along with the latest opname session if available.
-CREATE OR REPLACE FUNCTION public.get_user_site_cards(_user_id INT)
+-- get_latest_opname_status retrieves the latest opname session by either its site or department
+CREATE OR REPLACE FUNCTION public.get_latest_opname_status(_site_id INT, _dept_id INT)
+	RETURNS TABLE (
+		session_status VARCHAR(20),
+		session_end_date TIMESTAMP,
+		created_by VARCHAR(255)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT
+			CASE
+				WHEN os.status = 'Active' THEN 'Active'
+				WHEN os.status IN ('Submitted', 'Escalated', 'Verified', 'Rejected')
+					-- TODO: Make the interval dynamic based on user settings.
+					AND COALESCE(os.end_date, os.start_date) > (NOW() - INTERVAL '30 days')
+					THEN os.status
+				ELSE 'Outdated'
+			END AS session_status,
+			os.end_date::TIMESTAMP,
+			(u.first_name || ' ' || u.last_name)::VARCHAR(255) AS created_by
+		FROM "OpnameSession" os
+		LEFT JOIN "User" AS u ON os.user_id = u.user_id
+		WHERE os.site_id = _site_id OR os.dept_id = _dept_id
+		ORDER BY os.start_date DESC
+		LIMIT 1;
+	END;
+$$;
+
+-- get_user_opname_locations retrieves the sites/dept a user has access to using their position and id (from login session)
+-- Pagination and filtering is done here
+-- Note: This functions assumes that "L1 Support" users can see all sites and dept, while others are restriced to their region.
+-- It also assumes that users can only see their own department's sites.
+-- HO mode: shows departments only (for department-level opname)  
+-- Area mode: shows sites only (for site-level opname)
+CREATE OR REPLACE FUNCTION public.get_user_opname_locations(
+	_user_id INT,
+	_position VARCHAR(100),
+	_site_group_name VARCHAR(100),
+	_site_name VARCHAR(100),
+	_sub_site_name VARCHAR(100),
+	_dept_name VARCHAR(100),
+	_created_by VARCHAR(255),
+	_opname_status VARCHAR(20),
+	_from_date TIMESTAMP,
+	_end_date TIMESTAMP,
+	_search_in VARCHAR(10), -- Search in area/HO only
+	_limit INT,
+	_page_number INT
+)
     RETURNS TABLE (
-        site_id INT,
+		dept_name VARCHAR(100),
         site_name VARCHAR(100),
         site_group_name VARCHAR(100),
         region_name VARCHAR(100),
-        site_ga_id INT,
-        opname_session_id INT,
         opname_status VARCHAR(20),
-        last_opname_date TIMESTAMP WITH TIME ZONE
+        last_opname_date TIMESTAMP,
+		last_opname_by VARCHAR(255)
     )
     LANGUAGE plpgsql
 AS $$
 	DECLARE
-		_user_position VARCHAR;
-		_user_region_id INT;
+		v_user_region_id INT;
+		v_user_dept_id INT;
+		v_offset INT := GREATEST(COALESCE(_page_number,1)-1,0) * COALESCE(NULLIF(_limit,0),20);
+		v_search_in VARCHAR(10) := LOWER(COALESCE(_search_in, 'area'));
+		v_user_position VARCHAR(100) := LOWER(COALESCE(_position,''));
 	BEGIN
-		-- Fetch the user's position and region ID into variables first.
-		SELECT
-			LOWER(u.position),
-			r.id
-		INTO
-			_user_position,
-			_user_region_id
+		-- Fetch the user's department and region context
+		SELECT r.id, d.id
+		INTO v_user_region_id, v_user_dept_id
 		FROM "User" AS u
 		LEFT JOIN "Site" AS s ON u.site_id = s.id
 		LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 		LEFT JOIN "Region" AS r ON sg.region_id = r.id
+		LEFT JOIN "Department" AS d ON LOWER(u.department) = LOWER(d.dept_name)
 		WHERE u.user_id = _user_id;
 
-		-- Fetch the site cards based on the user's position and region.
-		-- Show the latest opname session status if available and not outdated.
-		RETURN QUERY
+		IF v_search_in = 'ho' THEN
+			-- HO MODE: Show departments only (site_name = NULL)
+			RETURN QUERY
 			SELECT
-				s.id AS site_id,
-				s.site_name,
-				sg.site_group_name,
-				r.region_name,
-				s.site_ga_id,
-				COALESCE(latest_session.session_id, -1) AS opname_session_id,
-				CASE
-					WHEN latest_session.session_status = 'Active' THEN 'Active'
-					WHEN latest_session.session_status IN ('Submitted', 'Escalated', 'Verified', 'Rejected')
-						-- TODO: Make the interval dynamic based on user settings.
-						AND COALESCE(latest_session.session_end_date, latest_session.session_start_date) > (NOW() - INTERVAL '30 days')
-						THEN latest_session.session_status
-					ELSE 'Outdated'
-				END AS opname_status,
-				COALESCE(latest_session.session_end_date, s.last_opname_date) AS last_opname_date
+				d.dept_name::VARCHAR(100),
+				NULL::VARCHAR(100) AS site_name,
+				NULL::VARCHAR(100) AS site_group_name,
+				NULL::VARCHAR(100) AS region_name,
+				COALESCE(lo.session_status, 'Outdated')::VARCHAR(20) AS opname_status,
+				lo.session_end_date::TIMESTAMP AS last_opname_date,
+				lo.created_by::VARCHAR(255) AS last_opname_by
+			FROM "Department" AS d
+			LEFT JOIN LATERAL get_latest_opname_status(NULL, d.id) lo ON TRUE
+			WHERE 
+				-- Access control: L1 support sees all, others see only their department
+				(v_user_position = 'l1 support' OR d.id = v_user_dept_id)
+				-- Filters
+				AND (_dept_name IS NULL OR _dept_name = '' OR d.dept_name ILIKE '%'||_dept_name||'%')
+				AND (_created_by IS NULL OR _created_by = '' OR lo.created_by ILIKE '%'||_created_by||'%')
+				AND (_from_date IS NULL OR lo.session_end_date >= _from_date)
+				AND (_end_date IS NULL OR lo.session_end_date <= _end_date)
+				AND (_opname_status IS NULL OR _opname_status = '' OR COALESCE(lo.session_status, 'Outdated') = _opname_status)
+			ORDER BY d.dept_name
+			LIMIT COALESCE(NULLIF(_limit,0), 20) OFFSET v_offset;
+		ELSE
+			-- AREA MODE: Show sites only (dept_name = NULL)  
+			RETURN QUERY
+			SELECT
+				NULL::VARCHAR(100) AS dept_name,
+				s.site_name::VARCHAR(100),
+				sg.site_group_name::VARCHAR(100),
+				r.region_name::VARCHAR(100),
+				COALESCE(lo.session_status, 'Outdated')::VARCHAR(20) AS opname_status,
+				lo.session_end_date::TIMESTAMP AS last_opname_date,
+				lo.created_by::VARCHAR(255) AS last_opname_by
 			FROM "Site" AS s
 			INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 			INNER JOIN "Region" AS r ON sg.region_id = r.id
-			LEFT JOIN (
-				-- Get the latest opname session for each site.
-				SELECT DISTINCT ON (os.site_id)
-					os.site_id,
-					os.id AS session_id,
-					os.status AS session_status,
-					os.end_date AS session_end_date,
-					os.start_date AS session_start_date
-				FROM "OpnameSession" AS os
-				ORDER BY os.site_id, os.start_date DESC
-			) AS latest_session ON s.id = latest_session.site_id
+			LEFT JOIN "SubSite" AS ss ON (_sub_site_name IS NOT NULL AND _sub_site_name <> '') AND ss.site_id = s.id
+			LEFT JOIN LATERAL get_latest_opname_status(s.id, NULL) lo ON TRUE
 			WHERE
-				_user_position = 'l1 support'
-				OR
-				(_user_position IN ('admin staff general affairs', 'area manager') AND r.id = _user_region_id)
-			ORDER BY s.site_name;
+				-- Access control: L1 support sees all, area users see only their region and must be managers
+				(v_user_position = 'l1 support' 
+				 OR (v_user_position IN ('general affairs manager', 'area manager') AND r.id = v_user_region_id))
+				-- Filters
+				AND (_site_group_name IS NULL OR _site_group_name = '' OR sg.site_group_name ILIKE '%'||_site_group_name||'%')
+				AND (_site_name IS NULL OR _site_name = '' OR s.site_name ILIKE '%'||_site_name||'%')
+				AND (_sub_site_name IS NULL OR _sub_site_name = '' OR ss.sub_site_name ILIKE '%'||_sub_site_name||'%')
+				AND (_created_by IS NULL OR _created_by = '' OR lo.created_by ILIKE '%'||_created_by||'%')
+				AND (_from_date IS NULL OR lo.session_end_date >= _from_date)
+				AND (_end_date IS NULL OR lo.session_end_date <= _end_date)
+				AND (_opname_status IS NULL OR _opname_status = '' OR COALESCE(lo.session_status, 'Outdated') = _opname_status)
+			ORDER BY s.site_name
+			LIMIT COALESCE(NULLIF(_limit,0), 20) OFFSET v_offset;
+		END IF;
 	END;
 $$;
 
