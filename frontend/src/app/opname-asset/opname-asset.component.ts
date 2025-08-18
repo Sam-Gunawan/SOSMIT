@@ -86,6 +86,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   // Form variables
   isLiked: boolean = true;
   isDisliked: boolean = false;
+  isLost: boolean = false;
   successMessage: string = '';
 
   // File to upload for condition photo
@@ -288,6 +289,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     // Set UI state based on current pendingAsset condition
     this.isLiked = result.pendingAsset.condition === true;
     this.isDisliked = result.pendingAsset.condition === false;
+    this.isLost = result.pendingAsset.condition === false;
     
     this.cdr.detectChanges();
   }
@@ -873,6 +875,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       const result = this.searchResults[this.currentActiveIndex];
       this.isLiked = true;
       this.isDisliked = false;
+      this.isLost = false;
       result.pendingAsset.condition = true;
       this.cdr.detectChanges();
     }
@@ -883,6 +886,18 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       const result = this.searchResults[this.currentActiveIndex];
       this.isLiked = false;
       this.isDisliked = true;
+      this.isLost = false;
+      result.pendingAsset.condition = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  setLost(): void {
+    if (this.currentActiveIndex >= 0) {
+      const result = this.searchResults[this.currentActiveIndex];
+      this.isLiked = false;
+      this.isDisliked = false;
+      this.isLost = true;
       result.pendingAsset.condition = false;
       this.cdr.detectChanges();
     }

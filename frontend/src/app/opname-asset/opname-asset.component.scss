@@ -483,7 +483,11 @@ p {
     margin-bottom: 0;
     white-space: nowrap;
     display: block;
-    
+
+    &#lost-doc {
+      color: styles.$primary-text-color !important;
+    }
+
     @media (max-width: 860px) {
       font-size: 7px;
     }
@@ -709,7 +713,7 @@ p {
 }
 
 .like-btn,
-.dislike-btn {
+.dislike-btn, .loss-btn {
   display: inline-block;
   cursor: pointer;
   padding: 6px 12px;
@@ -744,6 +748,18 @@ p {
 .dislike-btn.active {
   background-color: #dc3545;
   border-color: #dc3545;
+  color: white;
+}
+
+.loss-btn:hover {
+  background-color: #93979a;
+  border-color: #93979a;
+  color: #292929;
+}
+
+.loss-btn.active {
+  background-color: #000000;
+  border-color: #000000;
   color: white;
 }
 

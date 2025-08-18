@@ -490,6 +490,9 @@
                                             <span class="dislike-btn" [class.active]="isDisliked" (click)="setDislike()">
                                                 Bad
                                             </span>
+                                            <span class="loss-btn" [class.active]="isLost" (click)="setLost()">
+                                                Lost
+                                            </span>
                                         </div>
                 
                                         <div *ngIf="isDisliked">
@@ -524,6 +527,41 @@
                                                     [class.is-invalid]="!result.pendingAsset.conditionNotes || result.pendingAsset.conditionNotes === ''"></textarea>
                                                 <div *ngIf="!result.pendingAsset.conditionNotes || result.pendingAsset.conditionNotes === ''" class="invalid-feedback">
                                                     Catatan kondisi wajib diisi jika aset dalam kondisi buruk.
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div *ngIf="isLost">
+                                            <div class="mb-1">
+                                                <label [for]="'condition-photo-' + result.pendingAsset.assetTag" class="form-label">
+                                                    Dokumen Kehilangan <i>(Bukti Email / Laporan Kehilangan)</i>
+                                                </label>
+
+                                                <div class="photo-input mb-3" *ngIf="result.pendingAsset.conditionPhotoURL !== '-1'">
+                                                    <img [src]="serverURL + result.pendingAsset.conditionPhotoURL" 
+                                                        [alt]="'Condition photo for ' + result.pendingAsset.assetTag" 
+                                                        class="img-thumbnail" style="max-width: 300px; max-height: 200px;"> 
+                                                </div>
+
+                                                <input type="file" class="form-control" 
+                                                    [id]="'condition-photo-' + result.pendingAsset.assetTag" 
+                                                    name="conditionPhoto"
+                                                    (change)="onFileSelected($event)"
+                                                    accept="image/*" capture="camera">
+                                                <div class="invalid-feedback" id="lost-doc">
+                                                    Lampirkan dokumen kehilangan jika ada.
+                                                </div>
+                                            </div>
+
+                                            <div class="form-item">
+                                                <label [for]="'condition-notes-' + result.pendingAsset.assetTag" class="form-label mb-0">Notes</label>
+                                                <textarea class="form-control" 
+                                                    [id]="'condition-notes-' + result.pendingAsset.assetTag" 
+                                                    [(ngModel)]="result.pendingAsset.conditionNotes" name="newConditionNotes"
+                                                    style="height: 80px"
+                                                    [class.is-invalid]="!result.pendingAsset.conditionNotes || result.pendingAsset.conditionNotes === ''"></textarea>
+                                                <div *ngIf="!result.pendingAsset.conditionNotes || result.pendingAsset.conditionNotes === ''" class="invalid-feedback">
+                                                    Catatan kondisi wajib diisi jika aset hilang.
                                                 </div>
                                             </div>
                                         </div>
