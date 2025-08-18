@@ -18,29 +18,29 @@ p {
 }
 
 ::ng-deep .mat-mdc-dialog-surface {
-    padding: 20px;
-    border-radius: 10px;
+  padding: 20px;
+  border-radius: 10px;
 }
 
 .reminder-content {
-    padding-bottom: 10px;
+  padding-bottom: 10px;
 }
 
 .reminder-actions {
-    display: flex;
-    justify-content: flex-end;
+  display: flex;
+  justify-content: space-between;
 }
 
 button {
-    border: 0.667px;
-    border-radius: 5px;
-    margin: 4px;
-    padding: 6px 12px;
-    font-size: 12px;
-    background-color: styles.$primary-color;
-    color: white;
+  border: 0.667px;
+  border-radius: 5px;
+  margin: 4px;
+  padding: 6px 12px;
+  font-size: 12px;
+  background-color: styles.$primary-color;
+  color: white;
 }
 
 button:hover {
-    background-color: color.adjust(styles.$primary-color, $lightness: -5%);
+  background-color: color.adjust(styles.$primary-color, $lightness: -5%);
 }
