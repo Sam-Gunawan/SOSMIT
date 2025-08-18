@@ -1,0 +1,46 @@
+@use "../../styles.scss" as styles;
+@use "sass:color";
+
+* {
+  @include styles.default-styles;
+}
+
+h5 {
+  font-family: styles.$font-family;
+  color: styles.$primary-text-color;
+  margin-bottom: 5px;
+}
+
+p {
+  font-size: 12px;
+  margin: 0px;
+  color: #0b2c41;
+}
+
+::ng-deep .mat-mdc-dialog-surface {
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.reminder-content {
+    padding-bottom: 10px;
+}
+
+.reminder-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+button {
+    border: 0.667px;
+    border-radius: 5px;
+    margin: 4px;
+    padding: 6px 12px;
+    font-size: 12px;
+    background-color: styles.$primary-color;
+    color: white;
+}
+
+button:hover {
+    background-color: color.adjust(styles.$primary-color, $lightness: -5%);
+}

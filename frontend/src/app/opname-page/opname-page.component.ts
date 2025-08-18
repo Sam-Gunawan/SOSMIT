@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, HostListener, OnDestroy } from '@angular/core';
+import { Component, OnInit, HostListener, OnDestroy, Inject } from '@angular/core';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import { OpnameAssetComponent } from '../opname-asset/opname-asset.component';
 import { ApiService } from '../services/api.service';
@@ -8,6 +9,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { OpnameSession } from '../model/opname-session.model';
 import { SiteInfo } from '../model/site-info.model';
+import { DurationReminderComponent } from '../duration-reminder/duration-reminder.component';
 
 @Component({
   selector: 'app-opname-page',
@@ -20,7 +22,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   // currentView: 'large' | 'small' = 'large';
   isMobile: boolean = false;
   
-  constructor(private apiService: ApiService, private route: ActivatedRoute, private router: Router, private opnameSessionService: OpnameSessionService) {}
+  constructor(private apiService: ApiService, private route: ActivatedRoute, private router: Router, private opnameSessionService: OpnameSessionService, public dialog: MatDialog) {}
   
   cardVariant: 'default' | 'compact' = 'compact';
   showLocation: boolean = true;
@@ -39,6 +41,15 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     this.initSessionID();
     this.initOpnameSession();
     this.initSiteInfo();
+
+    // Open the duration reminder dialog immediately when page loads
+    const dialogRef = this.dialog.open(DurationReminderComponent, {
+      width: '498px'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+    });
   }
 
   ngOnDestroy() {
