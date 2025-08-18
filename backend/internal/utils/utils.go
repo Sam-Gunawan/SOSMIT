@@ -1,5 +1,4 @@
-// Contains generic helper functions to be used throughout the project
-
+// Generic helper functions for nullable SQL types and safe conversions.
 package utils
 
 import (
@@ -7,6 +6,7 @@ import (
 	"fmt"
 )
 
+// SerializeNS converts sql.NullString to either its string value or nil.
 func SerializeNS(ns sql.NullString) interface{} {
 	if ns.Valid {
 		return ns.String
@@ -14,6 +14,7 @@ func SerializeNS(ns sql.NullString) interface{} {
 	return nil
 }
 
+// SerializeNI converts sql.NullInt64 to either its int64 value or nil.
 func SerializeNI(ni sql.NullInt64) interface{} {
 	if ni.Valid {
 		return ni.Int64
@@ -21,30 +22,24 @@ func SerializeNI(ni sql.NullInt64) interface{} {
 	return nil
 }
 
-// SafeString converts nullable types to string, returning "-" for null values
+// SafeString returns the underlying string or "-" if null/invalid.
 func SafeString(nullable interface{}) string {
 	switch cast := nullable.(type) {
 	case string:
 		return cast
 	case sql.NullString:
-		if cast.Valid {
-			return cast.String
-		}
+		if cast.Valid { return cast.String }
 		return "-"
 	case *sql.NullString:
-		if cast != nil && cast.Valid {
-			return cast.String
-		}
+		if cast != nil && cast.Valid { return cast.String }
 		return "-"
 	default:
 		return "-"
 	}
 }
 
-// SafeIntString converts sql.NullInt64 to string, returning "-" for null values
+// SafeIntString returns the int64 as string or "-" if null.
 func SafeIntString(nullableInt sql.NullInt64) string {
-	if nullableInt.Valid {
-		return fmt.Sprintf("%d", nullableInt.Int64)
-	}
+	if nullableInt.Valid { return fmt.Sprintf("%d", nullableInt.Int64) }
 	return "-"
 }

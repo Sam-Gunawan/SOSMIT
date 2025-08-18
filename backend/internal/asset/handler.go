@@ -2,27 +2,13 @@
 package asset
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"strconv"
 
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/utils"
 	"github.com/gin-gonic/gin"
 )
-
-// Helpers (one-liners allowed by style) to convert sql.Null* to native (nil when invalid)
-func ns(s sql.NullString) interface{} {
-	if s.Valid {
-		return s.String
-	}
-	return nil
-}
-func ni(i sql.NullInt64) interface{} {
-	if i.Valid {
-		return i.Int64
-	}
-	return nil
-}
 
 type Handler struct {
 	service *Service
@@ -44,31 +30,31 @@ func serializeAsset(a *Asset) gin.H {
 		"asset_tag":           a.AssetTag,
 		"serial_number":       a.SerialNumber,
 		"status":              a.Status,
-		"status_reason":       ns(a.StatusReason),
+		"status_reason":       utils.SerializeNS(a.StatusReason),
 		"product_category":    a.ProductCategory,
 		"product_subcategory": a.ProductSubcategory,
 		"product_variety":     a.ProductVariety,
 		"brand_name":          a.BrandName,
 		"product_name":        a.ProductName,
 		"condition":           a.Condition,
-		"condition_notes":     ns(a.ConditionNotes),
-		"condition_photo_url": ns(a.ConditionPhotoURL),
-		"location":            ns(a.Location),
-		"room":                ns(a.Room),
-		"equipments":          ns(a.Equipments),
+		"condition_notes":     utils.SerializeNS(a.ConditionNotes),
+		"condition_photo_url": utils.SerializeNS(a.ConditionPhotoURL),
+		"location":            utils.SerializeNS(a.Location),
+		"room":                utils.SerializeNS(a.Room),
+		"equipments":          utils.SerializeNS(a.Equipments),
 		"total_cost":          a.TotalCost,
 		"owner_id":            a.OwnerID,
 		"owner_name":          a.OwnerName,
-		"owner_position":      ns(a.OwnerPosition),
-		"owner_department":    ns(a.OwnerDepartment),
-		"owner_division":      ns(a.OwnerDivision),
-		"owner_cost_center":   ni(a.OwnerCostCenter),
-		"sub_site_id":         ni(a.SubSiteID),
-		"sub_site_name":       ns(a.SubSiteName),
-		"site_id":             ni(a.SiteID),
-		"site_name":           ns(a.SiteName),
-		"site_group_name":     ns(a.SiteGroupName),
-		"region_name":         ns(a.RegionName),
+		"owner_position":      utils.SerializeNS(a.OwnerPosition),
+		"owner_department":    utils.SerializeNS(a.OwnerDepartment),
+		"owner_division":      utils.SerializeNS(a.OwnerDivision),
+		"owner_cost_center":   utils.SerializeNI(a.OwnerCostCenter),
+		"sub_site_id":         utils.SerializeNI(a.SubSiteID),
+		"sub_site_name":       utils.SerializeNS(a.SubSiteName),
+		"site_id":             utils.SerializeNI(a.SiteID),
+		"site_name":           utils.SerializeNS(a.SiteName),
+		"site_group_name":     utils.SerializeNS(a.SiteGroupName),
+		"region_name":         utils.SerializeNS(a.RegionName),
 	}
 }
 

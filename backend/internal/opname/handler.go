@@ -2,11 +2,12 @@
 package opname
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -102,41 +103,16 @@ func (handler *Handler) GetSessionByIDHandler(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"session_id": session.ID,
-		"start_date": session.StartDate,
-		"end_date": func(ns sql.NullString) interface{} {
-			if ns.Valid {
-				return ns.String
-			}
-			return nil
-		}(session.EndDate),
-		"status":  session.Status,
-		"user_id": session.UserID,
-		"manager_reviewer_id": func(ni sql.NullInt64) interface{} {
-			if ni.Valid {
-				return ni.Int64
-			}
-			return nil
-		}(session.ManagerReviewerID),
-		"manager_reviewed_at": func(ns sql.NullString) interface{} {
-			if ns.Valid {
-				return ns.String
-			}
-			return nil
-		}(session.ManagerReviewedAt),
-		"l1_reviewer_id": func(ni sql.NullInt64) interface{} {
-			if ni.Valid {
-				return ni.Int64
-			}
-			return nil
-		}(session.L1ReviewerID),
-		"l1_reviewed_at": func(ns sql.NullString) interface{} {
-			if ns.Valid {
-				return ns.String
-			}
-			return nil
-		}(session.L1ReviewedAt),
-		"site_id": session.SiteID,
+		"session_id":          session.ID,
+		"start_date":          session.StartDate,
+		"end_date":            utils.SerializeNS(session.EndDate),
+		"status":              session.Status,
+		"user_id":             session.UserID,
+		"manager_reviewer_id": utils.SerializeNI(session.ManagerReviewerID),
+		"manager_reviewed_at": utils.SerializeNS(session.ManagerReviewedAt),
+		"l1_reviewer_id":      utils.SerializeNI(session.L1ReviewerID),
+		"l1_reviewed_at":      utils.SerializeNS(session.L1ReviewedAt),
+		"site_id":             session.SiteID,
 	})
 }
 

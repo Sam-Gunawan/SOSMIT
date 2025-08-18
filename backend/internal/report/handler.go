@@ -2,12 +2,13 @@
 package report
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -134,27 +135,13 @@ func (handler *Handler) GetBAPDetailsHandler(context *gin.Context) {
 		return
 	}
 
-	// Nullable helpers (allowed one-liners per your guideline)
-	ns := func(ns sql.NullString) interface{} {
-		if ns.Valid {
-			return ns.String
-		}
-		return nil
-	}
-	ni := func(ni sql.NullInt64) interface{} {
-		if ni.Valid {
-			return ni.Int64
-		}
-		return nil
-	}
-
 	serialized := make([]gin.H, 0, len(details))
 	for _, row := range details {
-		var actionNotes interface{} = ns(row.ActionNotes)
+		var actionNotes interface{} = utils.SerializeNS(row.ActionNotes)
 		if actionNotes == nil {
 			actionNotes = "-"
 		}
-		var costCenter interface{} = ni(row.CostCenterID)
+		var costCenter interface{} = utils.SerializeNI(row.CostCenterID)
 		if costCenter == nil {
 			costCenter = "-"
 		}
@@ -163,7 +150,7 @@ func (handler *Handler) GetBAPDetailsHandler(context *gin.Context) {
 			"company":        row.Company,
 			"asset_tag":      row.AssetTag,
 			"asset_name":     row.AssetName,
-			"equipments":     ns(row.Equipments),
+			"equipments":     utils.SerializeNS(row.Equipments),
 			"user_and_pos":   row.UserNameAndPosition,
 			"asset_status":   row.AssetStatus,
 			"action_notes":   actionNotes,

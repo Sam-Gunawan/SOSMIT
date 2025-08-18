@@ -2,10 +2,11 @@
 package user
 
 import (
-	"database/sql"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -160,18 +161,6 @@ func (handler *Handler) GetUserSiteCardsHandler(context *gin.Context) {
 
 // serializeUser flattens nullable SQL fields into plain JSON values.
 func serializeUser(u *User) gin.H {
-	ns := func(ns sql.NullString) interface{} {
-		if ns.Valid {
-			return ns.String
-		}
-		return nil
-	}
-	ni := func(ni sql.NullInt64) interface{} {
-		if ni.Valid {
-			return ni.Int64
-		}
-		return nil
-	}
 	return gin.H{
 		"user_id":        u.UserID,
 		"username":       u.Username,
@@ -181,10 +170,10 @@ func serializeUser(u *User) gin.H {
 		"position":       u.Position,
 		"department":     u.Department,
 		"division":       u.Division,
-		"site_id":        ni(u.SiteID),
-		"site_name":      ns(u.SiteName),
-		"site_group":     ns(u.SiteGroupName),
-		"region_name":    ns(u.RegionName),
-		"cost_center_id": ni(u.CostCenterID),
+		"site_id":        utils.SerializeNI(u.SiteID),
+		"site_name":      utils.SerializeNS(u.SiteName),
+		"site_group":     utils.SerializeNS(u.SiteGroupName),
+		"region_name":    utils.SerializeNS(u.RegionName),
+		"cost_center_id": utils.SerializeNI(u.CostCenterID),
 	}
 }

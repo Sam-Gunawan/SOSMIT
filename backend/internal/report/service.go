@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/utils"
+
 	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
 )
 
@@ -129,8 +131,8 @@ func (service *Service) GenerateBAPPDFHTML(sessionID int64, signatures []string,
 
 	templateFunctions := template.FuncMap{
 		"Label":   func(category string) string { return categoryLabel[category] },
-		"Safe":    func(nullable interface{}) string { return safeNullable(nullable) },
-		"SafeInt": func(nullableInt sql.NullInt64) string { return safeNullableInt(nullableInt) },
+		"Safe":    func(nullable interface{}) string { return utils.SafeString(nullable) },
+		"SafeInt": func(nullableInt sql.NullInt64) string { return utils.SafeIntString(nullableInt) },
 		"add":     func(a, b int) int { return a + b },
 		"sub":     func(a, b int) int { return a - b },
 		"len": func(slice interface{}) int {
@@ -268,30 +270,6 @@ func sanitizeFileFragment(s string) string {
 		return "site"
 	}
 	return string(out)
-}
-
-func safeNullable(nullable interface{}) string {
-	switch cast := nullable.(type) {
-	case sql.NullString:
-		if cast.Valid {
-			return cast.String
-		}
-		return "-"
-	case *sql.NullString:
-		if cast != nil && cast.Valid {
-			return cast.String
-		}
-		return "-"
-	default:
-		return "-"
-	}
-}
-
-func safeNullableInt(nullableInt sql.NullInt64) string {
-	if nullableInt.Valid {
-		return fmt.Sprintf("%d", nullableInt.Int64)
-	}
-	return "-"
 }
 
 func BuildSignatures(submitter string, submitTime *time.Time, manager string, managerTime *time.Time, level1 string, level1Time *time.Time) []string {
