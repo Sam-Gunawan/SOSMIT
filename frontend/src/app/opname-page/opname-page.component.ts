@@ -10,11 +10,12 @@ import { Subscription } from 'rxjs';
 import { OpnameSession } from '../model/opname-session.model';
 import { SiteInfo } from '../model/site-info.model';
 import { DurationReminderComponent } from '../duration-reminder/duration-reminder.component';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-opname-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, OpnameAssetComponent],
+  imports: [CommonModule, FormsModule, OpnameAssetComponent, MatProgressBarModule],
   templateUrl: './opname-page.component.html',
   styleUrl: './opname-page.component.scss'
 })
