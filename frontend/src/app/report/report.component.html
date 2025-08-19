@@ -5,8 +5,6 @@
                 <div class="report-details">
                     <h5>Opname Report - {{ site.siteName }}</h5>
                     <p class="status-opname">Opname Status: {{ opnameSession.status }}</p>
-                    <!-- TODO: apply css for site GA -->
-                    <p class="site-ga">GA: {{ site.siteGaName }}</p>
                 </div>
 
                 <div class="export-search">
@@ -80,7 +78,7 @@
                 </div>
 
                 <div class="my-container" *ngIf="selectedDate">
-                    <app-opname-asset [variant]="cardVariant" [currentView]="currentView" [showLocation]="showLocation" [siteID]="site.siteID" [isInReport]="true" [sessionID]="sessionID"></app-opname-asset>
+                    <app-opname-asset [siteID]="site.siteID" [isInReport]="true" [sessionID]="sessionID"></app-opname-asset>
                 </div>
 
                 <div class="no-date-selected" *ngIf="!selectedDate">

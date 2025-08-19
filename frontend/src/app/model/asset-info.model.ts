@@ -3,7 +3,7 @@ export interface AssetInfo {
     assetIcon: string;
     serialNumber: string;
     assetStatus: string;
-    statusReason?: string; // Optional field for status reason
+    statusReason?: string;
     category: string;
     subCategory: string;
     productVariety: string;
@@ -24,7 +24,8 @@ export interface AssetInfo {
     assetOwnerCostCenter: number;
     subSiteID: number | undefined;
     subSiteName: string;
-    siteID: number | undefined;
+    siteID?: number | undefined;
+    deptID?: number | undefined;
     siteName: string;
     siteGroupName: string;
     regionName: string;

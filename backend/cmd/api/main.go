@@ -184,8 +184,8 @@ func main() {
 			// GET /api/opname/:session-id/user-info
 			opnameRoutes.GET("/:session-id/user-info", opnameHandler.GetUserFromOpnameSessionHandler)
 
-			// GET /api/opname/filter/site/:site_id
-			opnameRoutes.GET("/filter/site/:site_id", opnameHandler.GetOpnameOnSiteHandler)
+			// GET /api/opname/filter/location
+			opnameRoutes.GET("/filter/location", opnameHandler.GetOpnameOnLocationHandler)
 
 			// POST /api/opname/start
 			opnameRoutes.POST("/start", opnameHandler.StartNewSessionHandler)
