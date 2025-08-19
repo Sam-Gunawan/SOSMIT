@@ -104,10 +104,26 @@ func extractAndSetClaims(claims jwt.MapClaims, key string, context *gin.Context)
 		context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
 			"error": fmt.Sprintf("invalid %s in token", key),
 		})
-		return fmt.Errorf("invalid %s in token: %s\nError: %v", key, value, ok)
+		return fmt.Errorf("missing %s in token claims", key)
 	}
 
-	// Set the extracted value in the Gin context for the next handler to use.
-	context.Set(key, value)
+	// Special handling for user_id - convert to int
+	if key == "user_id" {
+		switch v := value.(type) {
+		case float64:
+			context.Set(key, int64(v))
+		case int:
+			context.Set(key, int64(v))
+		default:
+			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": fmt.Sprintf("invalid %s type in token", key),
+			})
+			return fmt.Errorf("unexpected %s type: %T", key, value)
+		}
+	} else {
+		// Set the extracted value in the Gin context for the next handler to use.
+		context.Set(key, value)
+	}
+
 	return nil
 }
