@@ -210,7 +210,7 @@ p {
       padding: 6px 16px;
       border: none;
       background-color: #f8f9fa;
-      color: #666;
+      color: styles.$primary-text-color;
       font-size: 10px;
       font-weight: 500;
       cursor: pointer;
@@ -228,6 +228,11 @@ p {
       
       &:first-child {
         border-right: 1px solid #ddd;
+      }
+
+      @media (max-width: 860px) {
+        font-size: 8px;
+        padding: 5px 12px;
       }
     }
 
