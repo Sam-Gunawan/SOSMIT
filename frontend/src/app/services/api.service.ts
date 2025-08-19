@@ -1,5 +1,5 @@
   import { Injectable } from '@angular/core';
-  import { HttpClient } from '@angular/common/http';
+  import { HttpClient, HttpParams } from '@angular/common/http';
   import { Router } from '@angular/router';
   import { Observable } from 'rxjs';
   import { tap, map } from 'rxjs/operators';
@@ -147,28 +147,42 @@ import { SubSite } from '../model/sub-site.model';
       )
     }
 
-    getUserSiteCards(): Observable<SiteInfo[]> {
-      // This method will fetch the site cards that the user has access to.
-      return this.http.get<SiteInfo[]>(`${this.userApiUrl}/site-cards`).pipe(
+    getUserOpnameLocations(filter: any): Observable<any> {
+      // Convert filter object to HttpParams for query parameters
+      let params = new HttpParams();
+      
+      // Add non-null/non-empty parameters to the query string
+      Object.keys(filter).forEach(key => {
+        const value = filter[key];
+        if (value !== null && value !== undefined && value !== '') {
+          params = params.set(key, value.toString());
+        }
+      });
+  
+      return this.http.get(`${this.userApiUrl}/user-locations`, { params }).pipe(
         map((response: any) => {
-          return response.site_cards.map((site: any) => ({
-            siteID: site.SiteID,
-            siteName: site.SiteName,
-            siteGroup: site.SiteGroupName,
-            siteRegion: site.RegionName,
-            siteGaID: site.SiteGaID || 0, // Default to 0 if not provided
-            siteGaName: site.SiteGaName || '',
-            siteGaEmail: site.SiteGaEmail || '',
-            opnameSessionID: site.OpnameSessionID,
-            opnameUserID: site.OpnameUserID || 0,
-            opnameUserName: site.OpnameUserName || '',
-            opnameStatus: site.OpnameStatus,
-            opnameDate: formatDate(new Date(site.OpnameDate))
-          }))
-        }), // Extract site cards from the response
-        tap((siteCards: SiteInfo[]) => {
-          // Log the fetched site cards for debugging purposes.
-          console.log('[ApiService] Fetched site cards:', siteCards);
+          // Handle case where locations might be null, undefined, or empty
+          if (!response || !response.locations || !Array.isArray(response.locations)) {
+            console.warn('[OpnameService] No locations found in response:', response);
+            return { locations: [], totalCount: 0 };
+          }
+          
+          const locations = response.locations.map((location: any) => ({
+            siteId: location.site_id,
+            deptId: location.dept_id,
+            deptName: location.dept_name,
+            siteName: location.site_name,
+            siteGroupName: location.site_group_name,
+            regionName: location.region_name,
+            opnameStatus: location.opname_status,
+            lastOpnameDate: location.last_opname_date,
+            lastOpnameBy: location.last_opname_by
+          }));
+  
+          return {
+            locations: locations,
+            totalCount: response.total_count || 0
+          };
         })
       );
     }

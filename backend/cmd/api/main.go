@@ -123,8 +123,8 @@ func main() {
 			// GET /api/user/:user-id
 			userRoutes.GET("/:user-id", userHandler.GetUserByIDHandler)
 
-			// GET /api/user/site-cards
-			userRoutes.GET("/site-cards", userHandler.GetUserSiteCardsHandler)
+			// GET /api/user/opname-locations
+			userRoutes.GET("/opname-locations", userHandler.GetUserOpnameLocationsHandler)
 
 			// GET /api/user/all
 			userRoutes.GET("/all", userHandler.GetAllUsersHandler)
@@ -165,9 +165,6 @@ func main() {
 
 		opnameRoutes := api.Group("/opname").Use(auth.AuthMiddleware())
 		{
-			// GET /api/opname/user-locations
-			opnameRoutes.GET("/user-locations", opnameHandler.GetUserOpnameLocationsHandler)
-
 			// GET /api/opname/:session-id
 			opnameRoutes.GET("/:session-id", opnameHandler.GetSessionByIDHandler)
 

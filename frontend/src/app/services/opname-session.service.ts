@@ -62,49 +62,6 @@ export class OpnameSessionService {
     localStorage.removeItem('opname_site_id');
   }
 
-  getUserOpnameLocations(filter: any): Observable<any> {
-    // Convert filter object to HttpParams for query parameters
-    let params = new HttpParams();
-    
-    // Add non-null/non-empty parameters to the query string
-    Object.keys(filter).forEach(key => {
-      const value = filter[key];
-      if (value !== null && value !== undefined && value !== '') {
-        params = params.set(key, value.toString());
-      }
-    });
-
-    return this.http.get(`${this.opnameApiUrl}/user-locations`, { params }).pipe(
-      tap((response: any) => {
-        console.log('[OpnameService] Raw API response:', response);
-      }),
-      map((response: any) => {
-        // Handle case where locations might be null, undefined, or empty
-        if (!response || !response.locations || !Array.isArray(response.locations)) {
-          console.warn('[OpnameService] No locations found in response:', response);
-          return { locations: [], totalCount: 0 };
-        }
-        
-        const locations = response.locations.map((location: any) => ({
-          siteId: location.site_id,
-          deptId: location.dept_id,
-          deptName: location.dept_name,
-          siteName: location.site_name,
-          siteGroupName: location.site_group_name,
-          regionName: location.region_name,
-          opnameStatus: location.opname_status,
-          lastOpnameDate: location.last_opname_date,
-          lastOpnameBy: location.last_opname_by
-        }));
-
-        return {
-          locations: locations,
-          totalCount: response.total_count || 0
-        };
-      })
-    );
-  }
-
   getOpnameSession(sessionID: number): Observable<any> {
     // This method will fetch the current stock opname session for the specified site.
     return this.http.get<OpnameSession>(`${this.opnameApiUrl}/${sessionID}`).pipe(

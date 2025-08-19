@@ -43,6 +43,33 @@ type UserSiteCard struct {
 	OpnameDate      string
 }
 
+type OpnameLocations struct {
+	SiteID         sql.NullInt64  `json:"site_id"`
+	DeptID         sql.NullInt64  `json:"dept_id"`
+	DeptName       sql.NullString `json:"dept_name"`
+	SiteName       sql.NullString `json:"site_name"`
+	SiteGroupName  sql.NullString `json:"site_group_name"`
+	RegionName     sql.NullString `json:"region_name"`
+	OpnameStatus   string         `json:"opname_status"`
+	LastOpnameDate sql.NullString `json:"last_opname_date"`
+	LastOpnameBy   sql.NullString `json:"last_opname_by"`
+	TotalCount     int64          `json:"total_count"`
+}
+
+type OpnameLocationFilter struct {
+	SiteGroupName *string `json:"site_group_name" form:"site_group_name"`
+	SiteName      *string `json:"site_name" form:"site_name"`
+	SubSiteName   *string `json:"sub_site_name" form:"sub_site_name"`
+	DeptName      *string `json:"dept_name" form:"dept_name"`
+	CreatedBy     *string `json:"created_by" form:"created_by"`
+	OpnameStatus  *string `json:"opname_status" form:"opname_status"`
+	FromDate      *string `json:"from_date" form:"from_date"`
+	EndDate       *string `json:"end_date" form:"end_date"`
+	SearchIn      *string `json:"search_in" form:"search_in"`
+	Limit         *int    `json:"limit" form:"limit"`
+	PageNum       *int    `json:"page_num" form:"page_num"`
+}
+
 // Repository struct holds the database connection
 // NOTE: We create a Repository struct to encapsulate database operations related to User.
 // This allows us to easily manage database interactions and makes it easier to mock for testing.
@@ -181,49 +208,56 @@ func (repo *Repository) GetUserByUsername(username string) (*User, error) {
 	return &user, nil
 }
 
-// GetUserSiteCards retrieves all the sites a user has access to using their user_id.
-func (repo *Repository) GetUserSiteCards(userID int64) ([]*UserSiteCard, error) {
-	var userSiteCards []*UserSiteCard
+// GetUserOpnameLocations retrieves all the opname locations (with filter and paging) tied to the logged-in user.
+func (repo *Repository) GetUserOpnameLocations(userID int, position string, filter OpnameLocationFilter) ([]OpnameLocations, error) {
+	var locations []OpnameLocations
 
-	query := `SELECT * FROM get_user_site_cards($1)`
+	query := `SELECT * FROM get_user_opname_locations($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
 
-	rows, err := repo.db.Query(query, userID)
+	rows, err := repo.db.Query(
+		query,
+		userID,
+		position,
+		filter.SiteGroupName,
+		filter.SiteName,
+		filter.SubSiteName,
+		filter.DeptName,
+		filter.CreatedBy,
+		filter.OpnameStatus,
+		filter.FromDate,
+		filter.EndDate,
+		filter.SearchIn,
+		filter.Limit,
+		filter.PageNum,
+	)
+
 	if err != nil {
-		log.Printf("❌ Error retrieving user site cards for user_id: %d, error: %v\n", userID, err)
-		return nil, err // Return the error for unexpected cases
-	}
-
-	// Ensure rows are closed after processing
-	defer rows.Close()
-
-	// Iterate through the result set and populate userSiteCards
-	for rows.Next() {
-		var card UserSiteCard
-		err := rows.Scan(
-			&card.SiteID,
-			&card.SiteName,
-			&card.SiteGroupName,
-			&card.RegionName,
-			&card.SiteGaID,
-			&card.OpnameSessionID,
-			&card.OpnameStatus,
-			&card.OpnameDate,
-		)
-		if err != nil {
-			log.Printf("❌ Error scanning user site card for user_id: %d, error: %v\n", userID, err)
-			return nil, err // Return the error for unexpected cases
-		}
-
-		userSiteCards = append(userSiteCards, &card)
-	}
-
-	// Check for any error encountered during iteration
-	if err = rows.Err(); err != nil {
-		log.Printf("❌ Error encountered while iterating user site cards for user_id: %d, error: %v\n", userID, err)
+		log.Printf("❌ Error retrieving opname locations: %v", err)
 		return nil, err
 	}
+	defer rows.Close()
 
-	return userSiteCards, nil
+	for rows.Next() {
+		var location OpnameLocations
+		if err := rows.Scan(
+			&location.SiteID,
+			&location.DeptID,
+			&location.DeptName,
+			&location.SiteName,
+			&location.SiteGroupName,
+			&location.RegionName,
+			&location.OpnameStatus,
+			&location.LastOpnameDate,
+			&location.LastOpnameBy,
+			&location.TotalCount,
+		); err != nil {
+			log.Printf("❌ Error scanning opname location: %v", err)
+			return nil, err
+		}
+		locations = append(locations, location)
+	}
+
+	return locations, nil
 }
 
 // GetL1SupportEmails retrieves all L1 support emails from the database.

@@ -122,40 +122,86 @@ func (handler *Handler) GetUserByIDHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"user": serializeUser(user)})
 }
 
-// GetUserSiteCardsHandler retrieves all the sites a user has access to.
-func (handler *Handler) GetUserSiteCardsHandler(context *gin.Context) {
+// GetUserOpnameLocationsHandler retrieves all the opname locations for a user.
+func (handler *Handler) GetUserOpnameLocationsHandler(context *gin.Context) {
 	// Get the user ID from context (placed by auth middleware)
 	userID, exists := context.Get("user_id")
 	if !exists {
 		context.JSON(http.StatusUnauthorized, gin.H{
-			"error": "user_id not found in context",
+			"error": "user unauthorized, user_id not found in context",
 		})
 		return
 	}
 
-	if userID == nil {
+	position, exists := context.Get("position")
+	if !exists {
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"error": "user unauthorized, position not found in context",
+		})
+		return
+	}
+
+	// Bind the query parameters to the OpnameLocationFilter struct
+	var filter OpnameLocationFilter
+	if err := context.ShouldBindQuery(&filter); err != nil {
+		log.Printf("❌ Error binding query parameters: %v", err)
 		context.JSON(http.StatusBadRequest, gin.H{
-			"error": "user_id is nil",
+			"error": "invalid query parameters: " + err.Error(),
 		})
 		return
 	}
 
-	// Call the service to get user site cards
-	userSiteCards, err := handler.service.GetUserSiteCards(userID.(int64))
-	if err != nil {
+	// Call the service to get the user's opname locations
+	// Handle both int64 and float64 types from JWT claims
+	var userIDInt int
+	switch v := userID.(type) {
+	case int64:
+		userIDInt = int(v)
+	case float64:
+		userIDInt = int(v)
+	default:
 		context.JSON(http.StatusInternalServerError, gin.H{
-			"error": "failed to fetch user site cards: " + err.Error(),
+			"error": "invalid user_id type in context",
 		})
 		return
 	}
 
-	if userSiteCards == nil {
-		// No site cards found, send an empty array
-		userSiteCards = make([]*UserSiteCard, 0)
+	locations, err := handler.service.GetUserOpnameLocations(userIDInt, position.(string), filter)
+	if err != nil {
+		log.Printf("❌ Error retrieving opname locations for user %d: %v", userID, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to retrieve opname locations: " + err.Error(),
+		})
+		return
+	}
+
+	// Serialize the locations to handle nullable SQL fields
+	serializedLocations := make([]gin.H, 0, len(locations))
+	for _, location := range locations {
+		serializedLocation := gin.H{
+			"site_id":          utils.SerializeNI(location.SiteID),
+			"dept_id":          utils.SerializeNI(location.DeptID),
+			"dept_name":        utils.SerializeNS(location.DeptName),
+			"site_name":        utils.SerializeNS(location.SiteName),
+			"site_group_name":  utils.SerializeNS(location.SiteGroupName),
+			"region_name":      utils.SerializeNS(location.RegionName),
+			"opname_status":    location.OpnameStatus,
+			"last_opname_date": utils.SerializeNS(location.LastOpnameDate),
+			"last_opname_by":   utils.SerializeNS(location.LastOpnameBy),
+			"total_count":      location.TotalCount,
+		}
+		serializedLocations = append(serializedLocations, serializedLocation)
 	}
 
 	context.JSON(http.StatusOK, gin.H{
-		"site_cards": userSiteCards,
+		"message":   "successfully retrieved opname locations for logged-in user",
+		"locations": serializedLocations,
+		"total_count": func() int64 {
+			if len(locations) > 0 {
+				return locations[0].TotalCount
+			}
+			return 0
+		}(),
 	})
 }
 

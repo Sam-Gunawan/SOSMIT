@@ -47,7 +47,7 @@ export class SiteCardComponent {
     pageNum: 1 as number
   };
 
-  constructor(private route: Router, private opnameSessionService: OpnameSessionService) {}
+  constructor(private apiService: ApiService, private route: Router, private opnameSessionService: OpnameSessionService) {}
 
   ngOnInit(): void {
     console.log('[SiteCard] ngOnInit called - ready to search opname locations');
@@ -88,7 +88,7 @@ export class SiteCardComponent {
 
     console.log('[SiteCard] Performing search with criteria:', filter);
 
-    this.opnameSessionService.getUserOpnameLocations(filter).subscribe({
+    this.apiService.getUserOpnameLocations(filter).subscribe({
       next: (result) => {
         console.log('[SiteCard] Search results:', result);
         this.opnameLocations = result.locations || [];
