@@ -11,6 +11,7 @@ import (
 
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/asset"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/auth"
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/department"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/email"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/opname"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/report"
@@ -70,6 +71,7 @@ func main() {
 	opnameRepo := opname.NewRepository(db)
 	siteRepo := site.NewRepository(db)
 	reportRepo := report.NewRepository(db)
+	deptRepo := department.NewRepository(db)
 
 	// Initialize the services
 	uploadService := upload.NewService()
@@ -78,6 +80,7 @@ func main() {
 	userService := user.NewService(userRepo)
 	assetService := asset.NewService(assetRepo)
 	siteService := site.NewService(siteRepo)
+	deptService := department.NewService(deptRepo)
 	reportService := report.NewService(reportRepo)
 	opnameService := opname.NewService(opnameRepo, uploadService, userRepo, siteRepo, emailService, reportService)
 
@@ -87,6 +90,7 @@ func main() {
 	assetHandler := asset.NewHandler(assetService)
 	opnameHandler := opname.NewHandler(opnameService)
 	siteHandler := site.NewHandler(siteService)
+	deptHandler := department.NewHandler(deptService)
 	uploadHandler := upload.NewHandler(uploadService)
 	reportHandler := report.NewHandler(reportService)
 
@@ -149,6 +153,12 @@ func main() {
 
 			// GET /api/site/all-sub-sites
 			siteRoutes.GET("/all-sub-sites", siteHandler.GetAllSubSitesHandler)
+		}
+
+		deptRoutes := api.Group("/department").Use(auth.AuthMiddleware())
+		{
+			// GET /api/department/:id
+			deptRoutes.GET("/:id", deptHandler.GetDeptByIDHandler)
 		}
 
 		assetRoutes := api.Group("/asset").Use(auth.AuthMiddleware())

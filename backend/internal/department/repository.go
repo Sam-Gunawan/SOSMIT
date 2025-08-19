@@ -4,6 +4,7 @@ package department
 
 import (
 	"database/sql"
+	"log"
 )
 
 // Repository is the struct for the department repository
@@ -19,4 +20,26 @@ func NewRepository(db *sql.DB) *Repository {
 type Department struct {
 	DepartmentID   int64
 	DepartmentName string
+	SiteName       string
+	SiteGroupName  string
+	RegionName     string
+}
+
+// GetDeptByID retrieves department details by its ID
+func (repo *Repository) GetDeptByID(deptID int64) (*Department, error) {
+	var dept Department
+	query := `SELECT dept_id, dept_name, site_name, site_group_name, region_name FROM get_dept_by_id($1)`
+	err := repo.db.QueryRow(query, deptID).Scan(
+		&dept.DepartmentID,
+		&dept.DepartmentName,
+		&dept.SiteName,
+		&dept.SiteGroupName,
+		&dept.RegionName,
+	)
+	if err != nil {
+		log.Printf("❌ Error retrieving department by ID %d: %v", deptID, err)
+		return nil, err
+	}
+
+	return &dept, nil
 }
