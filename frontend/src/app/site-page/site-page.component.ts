@@ -40,41 +40,6 @@ import { OpnameSession } from '../model/opname-session.model';
       };
     }
 
-    ngOnInit(): void {
-      this.fetchSitePage(); // Fetch site page data when the component initializes
-    } 
-
-    fetchSitePage(): void {
-      this.isLoading = true; // Set loading state to true before fetching data
-      this.apiService.getUserSiteCards().subscribe({
-        next: (siteCardsList) => {
-          this.siteList = siteCardsList; // Update the siteList with the fetched data
-          console.log('[SitePage] Site cards fetched successfully:', this.siteList);
-          const id = Number(this.route.snapshot.paramMap.get('id'));
-          const fetchedSite = this.siteList?.find((site: SiteInfo) => site.siteID === id);
-          this.isLoading = false; // Set loading state to false after data is fetched
-          if (fetchedSite) {
-            this.sitePage = fetchedSite; // Set the sitePage to the fetched site
-          } else {
-            this.errorMessage = 'Site tidak ditemukan.';
-            this.showToast = true;
-            setTimeout(() => this.showToast = false, 3000);
-            console.error('[SitePage] Site not found for ID:', id);
-            return
-          }
-          console.log('sitePage', this.sitePage);
-        },
-        error: (error) => {
-          // Handle the error appropriately, e.g., show a message to the user
-          console.error('[SitePage] Failed to fetch site cards:', error);
-          this.isLoading = false; // Set loading state to false even if there's an error
-          this.errorMessage = 'Gagal memuat kartu site. Silakan coba lagi nanti.';
-          this.showToast = true;
-          setTimeout(() => this.showToast = false, 3000);
-        }
-      });
-    }
-
     toggleFloatingMenu(): void {
       this.floatingMenuExpanded = !this.floatingMenuExpanded;
     }

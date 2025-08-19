@@ -159,7 +159,7 @@ import { SubSite } from '../model/sub-site.model';
         }
       });
   
-      return this.http.get(`${this.userApiUrl}/user-locations`, { params }).pipe(
+      return this.http.get(`${this.userApiUrl}/opname-locations`, { params }).pipe(
         map((response: any) => {
           // Handle case where locations might be null, undefined, or empty
           if (!response || !response.locations || !Array.isArray(response.locations)) {
