@@ -8,6 +8,30 @@ import (
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
 )
 
+type OpnameLocations struct {
+	DeptName       sql.NullString `json:"dept_name"`
+	SiteName       sql.NullString `json:"site_name"`
+	SiteGroupName  sql.NullString `json:"site_group_name"`
+	RegionName     sql.NullString `json:"region_name"`
+	OpnameStatus   string         `json:"opname_status"`
+	LastOpnameDate sql.NullString `json:"last_opname_date"`
+	LastOpnameBy   sql.NullString `json:"last_opname_by"`
+}
+
+type OpnameLocationFilter struct {
+	SiteGroupName *string `json:"site_group_name" form:"site_group_name"`
+	SiteName      *string `json:"site_name" form:"site_name"`
+	SubSiteName   *string `json:"sub_site_name" form:"sub_site_name"`
+	DeptName      *string `json:"dept_name" form:"dept_name"`
+	CreatedBy     *string `json:"created_by" form:"created_by"`
+	OpnameStatus  *string `json:"opname_status" form:"opname_status"`
+	FromDate      *string `json:"from_date" form:"from_date"`
+	EndDate       *string `json:"end_date" form:"end_date"`
+	SearchIn      *string `json:"search_in" form:"search_in"`
+	Limit         *int    `json:"limit" form:"limit"`
+	PageNum       *int    `json:"page_num" form:"page_num"`
+}
+
 type OpnameSession struct {
 	ID                int            `json:"id"`
 	StartDate         string         `json:"start_date"`
@@ -62,6 +86,55 @@ func NewRepository(db *sql.DB) *Repository {
 	return &Repository{
 		db: db,
 	}
+}
+
+// GetUserOpnameLocations retrieves all the opname locations (with filter and paging) tied to the logged-in user.
+func (repo *Repository) GetUserOpnameLocations(userID int, position string, filter OpnameLocationFilter) ([]OpnameLocations, error) {
+	var locations []OpnameLocations
+
+	query := `SELECT * FROM get_user_opname_locations($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
+
+	rows, err := repo.db.Query(
+		query,
+		userID,
+		position,
+		filter.SiteGroupName,
+		filter.SiteName,
+		filter.SubSiteName,
+		filter.DeptName,
+		filter.CreatedBy,
+		filter.OpnameStatus,
+		filter.FromDate,
+		filter.EndDate,
+		filter.SearchIn,
+		filter.Limit,
+		filter.PageNum,
+	)
+
+	if err != nil {
+		log.Printf("❌ Error retrieving opname locations: %v", err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var location OpnameLocations
+		if err := rows.Scan(
+			&location.DeptName,
+			&location.SiteName,
+			&location.SiteGroupName,
+			&location.RegionName,
+			&location.OpnameStatus,
+			&location.LastOpnameDate,
+			&location.LastOpnameBy,
+		); err != nil {
+			log.Printf("❌ Error scanning opname location: %v", err)
+			return nil, err
+		}
+		locations = append(locations, location)
+	}
+
+	return locations, nil
 }
 
 // CreateNewSession creates a new opname session in the database.

@@ -41,6 +41,24 @@ func NewService(repo *Repository, uploadService *upload.Service, userRepo *user.
 	}
 }
 
+// GetUserOpnameLocation retrieves all the opname locations for a user.
+func (service *Service) GetUserOpnameLocations(userID int, position string, filter OpnameLocationFilter) ([]OpnameLocations, error) {
+	// Validate userID
+	if userID <= 0 {
+		log.Printf("⚠ Invalid userID: %d", userID)
+		return nil, errors.New("invalid userID")
+	}
+
+	// Call the repository to get the user's opname locations
+	locations, err := service.repo.GetUserOpnameLocations(userID, position, filter)
+	if err != nil {
+		log.Printf("❌ Error retrieving opname locations for user %d: %v", userID, err)
+		return nil, err
+	}
+
+	return locations, nil
+}
+
 // StartNewSession creates a new opname session for a user at a specific site.
 func (service *Service) StartNewSession(userID int, siteID int) (int, error) {
 	// Validate userID and siteID

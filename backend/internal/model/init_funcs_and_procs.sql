@@ -299,7 +299,7 @@ AS $$
 			WHERE
 				-- Access control: L1 support sees all, area users see only their region and must be managers
 				(v_user_position = 'l1 support' 
-				 OR (v_user_position IN ('general affairs manager', 'area manager') AND r.id = v_user_region_id))
+				 OR (v_user_position IN ('admin staff general affairs', 'area manager') AND r.id = v_user_region_id))
 				-- Filters
 				AND (_site_group_name IS NULL OR _site_group_name = '' OR sg.site_group_name ILIKE '%'||_site_group_name||'%')
 				AND (_site_name IS NULL OR _site_name = '' OR s.site_name ILIKE '%'||_site_name||'%')

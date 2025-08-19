@@ -27,7 +27,7 @@ export class SiteCardComponent {
   allUsers: User[] = []; // List of all users for filtering
   isLoading: boolean = false;
   errorMessage: string = '';
-  filter = input<string>(''); // Input property to filter site cards
+  filter = {} as any; // Input property to filter site cards
   showToast: boolean = false;
   hasSearched: boolean = false; // Track if user has performed a search
   showSearchForm: boolean = false; // Track if search form is visible on mobile
@@ -45,15 +45,42 @@ export class SiteCardComponent {
     opnameFromDate: null as Date | null, // From date picker
     opnameToDate: null as Date | null,   // To date picker
     opnameBy: '', // User ID for last opname by
-    opnameByName: '' // User name for last opname by
+    opnameByName: '', // User name for last opname by
+    deptName: '',
+    subSiteName: '',
+    createdBy: '',
+    searchIn: 'area',
+    limit: 5 as number | null,
+    pageNum: 1 as number | null
   };
 
   constructor(private apiService: ApiService, private route: Router, private opnameSessionService: OpnameSessionService) {}
 
   ngOnInit(): void {
     // Fetch users for the dropdown first
-    this.fetchUsers();
+    // this.fetchUsers();
     console.log('[SiteCard] ngOnInit called - users will be fetched, site data loaded on search');
+    this.filter = {
+      site_group_name: this.searchCriteria.siteGroup,
+      site_name: this.searchCriteria.siteName,
+      sub_site_name: this.searchCriteria.subSiteName,
+      dept_name: this.searchCriteria.deptName,
+      created_by: this.searchCriteria.createdBy,
+      opname_status: this.searchCriteria.opnameStatus,
+      from_date: this.searchCriteria.opnameFromDate,
+      end_date: this.searchCriteria.opnameToDate,
+      search_in: this.searchCriteria.searchIn,
+      limit: this.searchCriteria.limit,
+      page_num: this.searchCriteria.pageNum
+    }
+    this.opnameSessionService.getUserOpnameLocations(this.filter).subscribe({
+      next: (locations) => {
+        console.log('[SiteCard] User opname locations fetched successfully:', locations);
+      },
+      error: (error) => {
+        console.error('[SiteCard] Error fetching user opname locations:', error);
+      }
+    });
   }
 
   fetchUsers(): void {
@@ -324,7 +351,13 @@ export class SiteCardComponent {
       opnameFromDate: null,
       opnameToDate: null,
       opnameBy: '',
-      opnameByName: ''
+      opnameByName: '',
+      subSiteName: '',
+      deptName: '',
+      createdBy: '',
+      searchIn: '',
+      limit: 5,
+      pageNum: 1
     };
     this.filteredSiteCardList = [];
     this.paginatedSiteCardList = [];

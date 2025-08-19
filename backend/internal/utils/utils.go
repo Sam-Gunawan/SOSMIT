@@ -28,10 +28,14 @@ func SafeString(nullable interface{}) string {
 	case string:
 		return cast
 	case sql.NullString:
-		if cast.Valid { return cast.String }
+		if cast.Valid {
+			return cast.String
+		}
 		return "-"
 	case *sql.NullString:
-		if cast != nil && cast.Valid { return cast.String }
+		if cast != nil && cast.Valid {
+			return cast.String
+		}
 		return "-"
 	default:
 		return "-"
@@ -40,6 +44,8 @@ func SafeString(nullable interface{}) string {
 
 // SafeIntString returns the int64 as string or "-" if null.
 func SafeIntString(nullableInt sql.NullInt64) string {
-	if nullableInt.Valid { return fmt.Sprintf("%d", nullableInt.Int64) }
+	if nullableInt.Valid {
+		return fmt.Sprintf("%d", nullableInt.Int64)
+	}
 	return "-"
 }

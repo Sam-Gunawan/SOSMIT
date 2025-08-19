@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { tap, map } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { OpnameSession } from '../model/opname-session.model';
@@ -60,6 +60,42 @@ export class OpnameSessionService {
 
   clearSiteId(): void {
     localStorage.removeItem('opname_site_id');
+  }
+
+  getUserOpnameLocations(filter: any): Observable<any> {
+    // Convert filter object to HttpParams for query parameters
+    let params = new HttpParams();
+    
+    // Add non-null/non-empty parameters to the query string
+    Object.keys(filter).forEach(key => {
+      const value = filter[key];
+      if (value !== null && value !== undefined && value !== '') {
+        params = params.set(key, value.toString());
+      }
+    });
+
+    return this.http.get(`${this.opnameApiUrl}/user-locations`, { params }).pipe(
+      tap((response: any) => {
+        console.log('[OpnameService] Raw API response:', response);
+      }),
+      map((response: any) => {
+        // Handle case where locations might be null, undefined, or empty
+        if (!response || !response.locations || !Array.isArray(response.locations)) {
+          console.warn('[OpnameService] No locations found in response:', response);
+          return [];
+        }
+        
+        return response.locations.map((location: any) => ({
+          deptName: location.dept_name,
+          siteName: location.site_name,
+          siteGroupName: location.site_group_name,
+          regionName: location.region_name,
+          opnameStatus: location.opname_status,
+          lastOpnameDate: location.last_opname_date,
+          lastOpnameBy: location.last_opname_by
+        }));
+      })
+    );
   }
 
   getOpnameSession(sessionID: number): Observable<any> {

@@ -37,6 +37,65 @@ func validateSessionID(sessionIDstr string) (int, error) {
 	return sessionID, nil
 }
 
+// GetUserOpnameLocationsHandler retrieves all the opname locations for a user.
+func (handler *Handler) GetUserOpnameLocationsHandler(context *gin.Context) {
+	// Get the user ID from context (placed by auth middleware)
+	userID, exists := context.Get("user_id")
+	if !exists {
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"error": "user unauthorized, user_id not found in context",
+		})
+		return
+	}
+
+	position, exists := context.Get("position")
+	if !exists {
+		context.JSON(http.StatusUnauthorized, gin.H{
+			"error": "user unauthorized, position not found in context",
+		})
+		return
+	}
+
+	// Bind the query parameters to the OpnameLocationFilter struct
+	var filter OpnameLocationFilter
+	if err := context.ShouldBindQuery(&filter); err != nil {
+		log.Printf("❌ Error binding query parameters: %v", err)
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid query parameters: " + err.Error(),
+		})
+		return
+	}
+
+	// Call the service to get the user's opname locations
+	// Handle both int64 and float64 types from JWT claims
+	var userIDInt int
+	switch v := userID.(type) {
+	case int64:
+		userIDInt = int(v)
+	case float64:
+		userIDInt = int(v)
+	default:
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "invalid user_id type in context",
+		})
+		return
+	}
+
+	locations, err := handler.service.GetUserOpnameLocations(userIDInt, position.(string), filter)
+	if err != nil {
+		log.Printf("❌ Error retrieving opname locations for user %d: %v", userID, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to retrieve opname locations: " + err.Error(),
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{
+		"message":   "successfully retrieved opname locations for logged-in user",
+		"locations": locations,
+	})
+}
+
 // StartNewSessionHandler handles the creation of a new opname session.
 func (handler *Handler) StartNewSessionHandler(context *gin.Context) {
 	// Bind the request body to StartNewSessionRequest struct

@@ -165,6 +165,9 @@ func main() {
 
 		opnameRoutes := api.Group("/opname").Use(auth.AuthMiddleware())
 		{
+			// GET /api/opname/user-locations
+			opnameRoutes.GET("/user-locations", opnameHandler.GetUserOpnameLocationsHandler)
+
 			// GET /api/opname/:session-id
 			opnameRoutes.GET("/:session-id", opnameHandler.GetSessionByIDHandler)
 
