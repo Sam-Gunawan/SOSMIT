@@ -201,17 +201,17 @@ p {
   .toggle-buttons {
     display: flex;
     gap: 0;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    border: 1px solid styles.$primary-color;
+    border-radius: 8px;
     overflow: hidden;
     
     .toggle-btn {
       flex: 1;
-      padding: 8px 16px;
+      padding: 6px 16px;
       border: none;
       background-color: #f8f9fa;
       color: #666;
-      font-size: 14px;
+      font-size: 10px;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s ease;
@@ -229,6 +229,16 @@ p {
       &:first-child {
         border-right: 1px solid #ddd;
       }
+    }
+
+    .area-btn {
+      border-top-right-radius: 0px;
+      border-bottom-right-radius: 0px;
+    }
+
+    .ho-btn {
+      border-top-left-radius: 0px;
+      border-bottom-left-radius: 0px;
     }
   }
 }
