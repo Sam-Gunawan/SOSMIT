@@ -6,7 +6,7 @@
   import { SiteInfo } from '../model/site-info.model';
   import { AssetInfo } from '../model/asset-info.model';
   import { User } from '../model/user.model';
-  import { formatDate, formatRupiah, titleCase } from '../utils';
+  import { formatDate, formatRupiah, titleCase, buildHttpParams } from '../utils';
   import { environment } from '../../environments/environments';
 import { SubSite } from '../model/sub-site.model';
 import { Department } from '../model/dept.model';
@@ -142,16 +142,8 @@ import { Department } from '../model/dept.model';
     }
 
     getUserOpnameLocations(filter: any): Observable<any> {
-      // Convert filter object to HttpParams for query parameters
-      let params = new HttpParams();
-      
-      // Add non-null/non-empty parameters to the query string
-      Object.keys(filter).forEach(key => {
-        const value = filter[key];
-        if (value !== null && value !== undefined && value !== '') {
-          params = params.set(key, value.toString());
-        }
-      });
+      // Convert filter object to HttpParams for query parameters using utility function
+      const params = buildHttpParams(filter);
   
       return this.http.get(`${this.userApiUrl}/opname-locations`, { params }).pipe(
         map((response: any) => {
@@ -312,11 +304,14 @@ import { Department } from '../model/dept.model';
       );
     }
 
-    getAssetsOnSite(siteID: number): Observable<any> {
-      // This method will fetch all assets on a specific site.
-      return this.http.get<AssetInfo[]>(`${this.siteApiUrl}/${siteID}/assets`).pipe(
+    getAssetsOnLocation(siteID: number | null, deptID: number | null): Observable<any> {
+      // This method will fetch all assets on a specific location.
+      // Use the utility function to build query parameters, excluding null, undefined, empty, and zero values
+      const params = buildHttpParams({ site_id: siteID, dept_id: deptID });
+      
+      return this.http.get<AssetInfo[]>(`${this.siteApiUrl}/assets`, { params }).pipe(
         map((response: any) => {
-          const list = response.assets_on_site || [];
+          const list = response.assets_on_location || [];
           return list.map((asset: any) => ({
             assetTag: asset.asset_tag ?? asset.AssetTag,
             serialNumber: asset.serial_number ?? asset.SerialNumber,

@@ -8,7 +8,7 @@ DROP FUNCTION IF EXISTS public.get_l1_support_emails();
 DROP FUNCTION IF EXISTS public.get_area_manager_info(INT);
 DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_asset_by_serial_number(VARCHAR);
-DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
+DROP FUNCTION IF EXISTS public.get_assets_by_location(INT, INT);
 DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT);
 DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT, INT);
 DROP FUNCTION IF EXISTS public.get_opname_session_by_id(INT);
@@ -18,6 +18,7 @@ DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.approve_opname_session(INT, INT);
 DROP PROCEDURE IF EXISTS public.reject_opname_session(INT, INT);
 DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(50), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, VARCHAR(255), VARCHAR(100), VARCHAR(100), INT, INT, INT, TEXT, VARCHAR(25));
+DROP FUNCTION IF EXISTS public.get_asset_change(INT, VARCHAR);
 DROP PROCEDURE IF EXISTS public.delete_asset_change(INT, VARCHAR(12));
 DROP PROCEDURE IF EXISTS public.set_action_notes(VARCHAR(12), INT, INT, TEXT);
 DROP PROCEDURE IF EXISTS public.delete_action_notes(VARCHAR(12), INT, INT);
@@ -32,7 +33,10 @@ DROP FUNCTION IF EXISTS public.get_sub_sites_by_site_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
 DROP FUNCTION IF EXISTS public.get_finished_opnames_by_location_id(INT, INT);
 DROP FUNCTION IF EXISTS public.get_asset_equipments(VARCHAR(50));
+DROP FUNCTION IF EXISTS public.categorize_opname_assets(INT);
 DROP FUNCTION IF EXISTS public.get_opname_stats(INT);
+DROP FUNCTION IF EXISTS public.get_opname_bap_recap(INT);
+DROP FUNCTION IF EXISTS public.get_opname_bap_details(INT);
 
 -- get_credentials retrieves user credentials by username (for login auth)
 -- ! email not implemented yet
@@ -403,21 +407,22 @@ AS $$
 				a.owner_id,
 				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
 				u.position AS owner_position,
-				u.department AS owner_department,
+				d.dept_name AS owner_department, -- NOTE: 'owner department' is regarded as asset's location in HO, not owner's actual department
 				u.division AS owner_division,
 				u.cost_center_id AS owner_cost_center,
 				a.sub_site_id,
 				ss.sub_site_name AS sub_site_name,
-				s.id AS site_id,
+				a.site_id AS site_id,
 				s.site_name AS site_name,
 				sg.site_group_name AS site_group_name,
 				r.region_name AS region_name
 			FROM "Asset" AS a
 			LEFT JOIN "User" AS u ON a.owner_id = u.user_id
 			LEFT JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
-			LEFT JOIN "Site" AS s ON ss.site_id = s.id
+			LEFT JOIN "Site" AS s ON a.site_id = s.id
 			LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 			LEFT JOIN "Region" AS r ON sg.region_id = r.id
+			LEFT JOIN "Department" AS d ON LOWER(u.department) = LOWER(d.dept_name)
 			WHERE a.asset_tag = _asset_tag;
 	END;
 $$;
@@ -466,38 +471,53 @@ AS $$
 				a.owner_id,
 				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
 				u.position AS owner_position,
-				u.department AS owner_department,
+				d.dept_name AS owner_department, -- NOTE: 'owner department' is regarded as asset's location in HO, not owner's actual department
 				u.division AS owner_division,
 				u.cost_center_id AS owner_cost_center,
 				a.sub_site_id,
 				ss.sub_site_name AS sub_site_name,
-				s.id AS site_id,
+				a.site_id AS site_id,
 				s.site_name AS site_name,
 				sg.site_group_name AS site_group_name,
 				r.region_name AS region_name
 			FROM "Asset" AS a
 			LEFT JOIN "User" AS u ON a.owner_id = u.user_id
 			LEFT JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
-			LEFT JOIN "Site" AS s ON ss.site_id = s.id
+			LEFT JOIN "Site" AS s ON a.site_id = s.id
 			LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 			LEFT JOIN "Region" AS r ON sg.region_id = r.id
+			LEFT JOIN "Department" AS d ON LOWER(u.department) = LOWER(d.dept_name)
 			WHERE a.serial_number = _serial_number;
 	END;
 $$;
 
--- get_assets_by_site retrieves all assets for a given site (aggregates from all sub-sites)
-CREATE OR REPLACE FUNCTION public.get_assets_by_site(_site_id INT)
+-- get_assets_by_location retrieves all assets for a given location (aggregates from all sub-sites for 'area' assets)
+CREATE OR REPLACE FUNCTION public.get_assets_by_location(_site_id INT DEFAULT NULL, _dept_id INT DEFAULT NULL)
 	RETURNS TABLE (
 		asset_tag VARCHAR(12)
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
-		RETURN QUERY
-			SELECT a.asset_tag
-			FROM "Asset" AS a
-			INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
-			WHERE ss.site_id = _site_id;
+		-- Ensure only either site id or dept id is provided, not both
+		IF (_site_id IS NOT NULL AND _dept_id IS NOT NULL) OR (_site_id IS NULL AND _dept_id IS NULL) THEN
+			RAISE EXCEPTION 'Only one of site_id or dept_id must be provided';
+		END IF;
+
+		IF _site_id IS NOT NULL THEN
+			-- Fetch assets by site (aggregate via sub-sites)
+			RETURN QUERY
+				SELECT a.asset_tag
+				FROM "Asset" AS a
+				INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
+				WHERE ss.site_id = _site_id;
+		ELSE
+			-- Fetch assets by department (match owner's department to Department table)
+			RETURN QUERY
+				SELECT a.asset_tag
+				FROM "Asset" AS a
+				WHERE a.dept_id = _dept_id;
+		END IF;
 	END;
 $$;
 

@@ -3,7 +3,9 @@ package utils
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+	"strconv"
 )
 
 // SerializeNS converts sql.NullString to either its string value or nil.
@@ -57,4 +59,30 @@ func ParseNullableInt(nullableInt *int) sql.NullInt64 {
 		return sql.NullInt64{Int64: int64(*nullableInt), Valid: true}
 	}
 	return sql.NullInt64{Valid: false}
+}
+
+// Helper function to parse optional query params for location requests (site and dept id)
+func ParseLocationParams(siteIDParam, deptIDParam string) (siteID *int, deptID *int, err error) {
+	// Read optional query params: /api/opname/location?site_id=1&dept_id=2
+	if siteIDParam != "" {
+		if parsedSiteID, err := strconv.Atoi(siteIDParam); err != nil {
+			return nil, nil, errors.New("invalid site_id, must be an integer: " + err.Error())
+		} else {
+			siteID = &parsedSiteID
+		}
+	}
+
+	if deptIDParam != "" {
+		if parsedDeptID, err := strconv.Atoi(deptIDParam); err != nil {
+			return nil, nil, errors.New("invalid dept_id, must be an integer: " + err.Error())
+		} else {
+			deptID = &parsedDeptID
+		}
+	}
+
+	if siteID == nil && deptID == nil {
+		return nil, nil, errors.New("at least one of site_id or dept_id must be provided")
+	}
+
+	return siteID, deptID, nil
 }

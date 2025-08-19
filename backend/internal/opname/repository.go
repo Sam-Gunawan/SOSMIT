@@ -308,9 +308,8 @@ type OpnameFilter struct {
 // GetOpnameOnLocation retrieves all opname sessions for a specific site.
 // Only non-active sessions are returned.
 func (repo *Repository) GetOpnameOnLocation(siteID *int, deptID *int) ([]OpnameFilter, error) {
-	var siteIDParam, deptIDParam sql.NullInt64
-	siteIDParam = utils.ParseNullableInt(siteID)
-	deptIDParam = utils.ParseNullableInt(deptID)
+	siteIDParam := utils.ParseNullableInt(siteID)
+	deptIDParam := utils.ParseNullableInt(deptID)
 
 	query := `SELECT * FROM get_finished_opnames_by_location_id($1, $2)`
 

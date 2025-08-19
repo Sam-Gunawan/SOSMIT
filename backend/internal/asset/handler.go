@@ -4,7 +4,6 @@ package asset
 import (
 	"log"
 	"net/http"
-	"strconv"
 
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/utils"
 	"github.com/gin-gonic/gin"
@@ -118,34 +117,32 @@ func (handler *Handler) GetAssetBySerialNumberHandler(context *gin.Context) {
 	context.JSON(http.StatusOK, serializeAsset(asset))
 }
 
-// GetAssetsBySiteHandler retrieves all assets for a given site.
-func (handler *Handler) GetAssetsOnSiteHandler(context *gin.Context) {
-	siteID := context.Param("site-id")
-	if siteID == "" {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "site-id is required"})
-		log.Printf("⚠ site-id is required but not provided")
-		return
-	}
+// GetAssetsOnLocationHandler retrieves all assets for a given location.
+func (handler *Handler) GetAssetsOnLocationHandler(context *gin.Context) {
+	// Retrieve the site or dept id from query params
+	siteIDStr := context.Query("site_id")
+	deptIDStr := context.Query("dept_id")
 
-	siteIDInt, err := strconv.Atoi(siteID)
+	siteID, deptID, err := utils.ParseLocationParams(siteIDStr, deptIDStr)
 	if err != nil {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "invalid site-id, must be an integer"})
-		log.Printf("⚠ invalid site-id: %s | can't convert to integer!", siteID)
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	assetsOnSite, err := handler.service.GetAssetsOnSite(int64(siteIDInt))
+	assetsOnLocation, err := handler.service.GetAssetsOnLocation(siteID, deptID)
 	if err != nil {
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch assets for site: " + err.Error()})
-		log.Printf("❌ Error fetching assets for site-id %s: %v", siteID, err)
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch assets for location: " + err.Error()})
+		log.Printf("❌ Error fetching assets for location - site-id: %v, dept-id: %v: %v", siteID, deptID, err)
 		return
 	}
-	if assetsOnSite == nil {
-		assetsOnSite = make([]*Asset, 0)
-		log.Printf("⚠ No assets found for site-id: %s", siteID)
+	if assetsOnLocation == nil {
+		assetsOnLocation = make([]*Asset, 0)
+		log.Printf("⚠ No assets found for location - site-id: %v, dept-id: %v", siteID, deptID)
 	}
 
-	context.JSON(http.StatusOK, gin.H{"assets_on_site": serializeAssets(assetsOnSite)})
+	context.JSON(http.StatusOK, gin.H{"assets_on_location": serializeAssets(assetsOnLocation)})
 }
 
 // GetAssetEquipmentsHandler retrieves all equipments for a given product variety.

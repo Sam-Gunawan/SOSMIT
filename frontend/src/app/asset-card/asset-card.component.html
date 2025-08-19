@@ -116,7 +116,7 @@
 </section>
 
 <!-- Search results -->
-<section class="asset-list-layout" *ngIf="!isLoading && hasSearched && paginatedAssetsOnSite && paginatedAssetsOnSite.length > 0">
+<section class="asset-list-layout" *ngIf="!isLoading && hasSearched && paginatedAssetsOnLocation && paginatedAssetsOnLocation.length > 0">
     <div class="results-header">
         <h6 class="header-title">Search Results ({{ totalItems }} asset{{ totalItems !== 1 ? 's' : '' }} found)</h6>
         <!-- Pagination -->
@@ -132,12 +132,12 @@
         </div>
     </div>
     
-    <div class="asset-list" *ngFor="let assetCard of paginatedAssetsOnSite">
+    <div class="asset-list" *ngFor="let assetCard of paginatedAssetsOnLocation">
         <div class="list-body" type="button" data-bs-toggle="modal" [attr.data-bs-target]="'#modal-' + assetCard.assetTag">
             <div class="first-column">
                 <h6 class="asset-tag">{{ assetCard.assetTag }}</h6>
                 <p class="serial-number">S/N: {{ assetCard.serialNumber }}</p>
-                <p class="site-name">{{ assetCard.subSiteName }}</p>
+                <p class="site-name">{{ assetCard.subSiteName ? assetCard.subSiteName : assetCard.siteName }}</p>
                 <p class="asset-owner">User: {{ assetCard.assetOwnerName }}</p>
             </div>
     
@@ -182,7 +182,7 @@
 </section>
 
 <!-- No results found -->
-<section class="empty-search" *ngIf="!isLoading && hasSearched && filteredAssetsOnSite && filteredAssetsOnSite.length === 0">
+<section class="empty-search" *ngIf="!isLoading && hasSearched && filteredAssetsOnLocation && filteredAssetsOnLocation.length === 0">
     <div class="not-found-message">
         <h4>No assets found</h4>
         <p>Tidak ada asset yang cocok dengan kriteria pencarian Anda. Silakan ubah filter dan coba lagi.
@@ -191,7 +191,7 @@
 </section>
 
 <!-- Initial state - no search performed -->
-<section class="initial-state" *ngIf="!isLoading && !hasSearched && originalAssetsOnSite && originalAssetsOnSite.length > 0">
+<section class="initial-state" *ngIf="!isLoading && !hasSearched && originalAssetsOnLocation && originalAssetsOnLocation.length > 0">
     <div class="welcome-message">
         <h4>Ready to search</h4>
         <p>Gunakan formulir pencarian di atas untuk mencari asset. Anda dapat mencari dengan kombinasi kriteria apa pun, atau biarkan semua kolom kosong untuk melihat semua asset.</p>
@@ -199,9 +199,9 @@
 </section>
 
 <!-- NO ASSETS FOUND FOR THE SITE MESSAGE -->
-<section *ngIf="!hasSearched && assetsOnSite && assetsOnSite.length === 0">
+<section *ngIf="!hasSearched && assetsOnLocation && assetsOnLocation.length === 0">
     <div class="no-assets-message">
-        <p>Tidak ada asset yang ditemukan untuk site ini</p>
+        <p>Tidak ada asset yang ditemukan untuk lokasi ini</p>
     </div>
 </section>
 

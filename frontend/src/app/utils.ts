@@ -1,3 +1,5 @@
+import { HttpParams } from '@angular/common/http';
+
 export function titleCase(str: string | undefined): string {
     if (str === undefined || !str) {
         return ''
@@ -89,3 +91,33 @@ export function normalizeOptionalNumber<T = any>(value: T): number | null {
 
 // Convenience alias specifically for cost center semantics (VACANT / unset -> null)
 export const normalizeCostCenter = normalizeOptionalNumber;
+
+/**
+ * Generic utility to build HttpParams from an object, filtering out null/undefined/empty/zero values
+ * @param filter - Object with key-value pairs to convert to query parameters
+ * @param excludeZero - Whether to exclude zero values (default: true for backward compatibility)
+ * @returns HttpParams object ready for use in HTTP requests
+ */
+export function buildHttpParams(filter: Record<string, any>, excludeZero: boolean = true): HttpParams {
+  let params = new HttpParams();
+  
+  // Add non-null/non-empty parameters to the query string
+  Object.keys(filter).forEach(key => {
+    const value = filter[key];
+    
+    // Skip null, undefined, or empty string values
+    if (value === null || value === undefined || value === '') {
+      return;
+    }
+    
+    // Skip zero values if excludeZero is true
+    if (excludeZero && value === 0) {
+      return;
+    }
+    
+    // Add valid parameter
+    params = params.set(key, value.toString());
+  });
+  
+  return params;
+}

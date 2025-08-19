@@ -388,34 +388,10 @@ func (handler *Handler) GetOpnameOnLocationHandler(context *gin.Context) {
 	siteIDStr := context.Query("site_id")
 	deptIDStr := context.Query("dept_id")
 
-	var siteID *int
-	var deptID *int
-
-	if siteIDStr != "" {
-		if parsedSiteID, err := strconv.Atoi(siteIDStr); err != nil {
-			context.JSON(http.StatusBadRequest, gin.H{
-				"error": "invalid site_id, must be an integer",
-			})
-			return
-		} else {
-			siteID = &parsedSiteID
-		}
-	}
-
-	if deptIDStr != "" {
-		if parsedDeptID, err := strconv.Atoi(deptIDStr); err != nil {
-			context.JSON(http.StatusBadRequest, gin.H{
-				"error": "invalid dept_id, must be an integer",
-			})
-			return
-		} else {
-			deptID = &parsedDeptID
-		}
-	}
-
-	if siteID == nil && deptID == nil {
+	siteID, deptID, err := utils.ParseLocationParams(siteIDStr, deptIDStr)
+	if err != nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"error": "at least one of site_id or dept_id must be provided",
+			"error": err.Error(),
 		})
 		return
 	}

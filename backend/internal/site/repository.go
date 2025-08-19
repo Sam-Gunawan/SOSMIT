@@ -32,7 +32,7 @@ func NewRepository(db *sql.DB) *Repository {
 func (repo *Repository) GetAllSites() ([]*Site, error) {
 	var allSites []*Site
 
-	rows, err := repo.db.Query("SELECT site_id, site_name, site_group_name, region_name, site_ga_id, site_ga_name, site_ga_email FROM get_all_sites()")
+	rows, err := repo.db.Query("SELECT site_id, site_name, site_group_name, region_name FROM get_all_sites()")
 	if err != nil {
 		log.Printf("❌ Error retrieving all sites, error: %v\n", err)
 		return nil, err

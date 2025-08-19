@@ -15,11 +15,13 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 })
 export class AssetCardComponent {
   @Input() showHeader: boolean = true;
+  @Input() siteID: number = -1;
+  @Input() deptID: number = -1;
 
-  assetsOnSite: AssetInfo[] = [];
-  originalAssetsOnSite: AssetInfo[] = []; // Keep original data
-  filteredAssetsOnSite: AssetInfo[] = [];
-  paginatedAssetsOnSite: AssetInfo[] = []; // For displaying paginated results
+  assetsOnLocation: AssetInfo[] = []; // This will be populated from the backend
+  originalAssetsOnLocation: AssetInfo[] = []; // Keep original data
+  filteredAssetsOnLocation: AssetInfo[] = [];
+  paginatedAssetsOnLocation: AssetInfo[] = []; // For displaying paginated results
   isLoading: boolean = true;
   errorMessage: string = '';
   showToast: boolean = false;
@@ -49,33 +51,30 @@ export class AssetCardComponent {
   constructor(private apiService: ApiService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
-    this.fetchAssetsOnSite(); // Fetch assets when the component initializes
+    this.initAssetsOnLocation(); // Fetch assets when the component initializes
     this.fetchSubSiteNames();
   }
 
-  fetchAssetsOnSite(): void {
+  initAssetsOnLocation(): void {
     this.isLoading = true;
-    const siteID = Number(this.route.snapshot.paramMap.get('id'));
-    this.apiService.getAssetsOnSite(siteID).subscribe({
-      next: (assets) => {
-        this.assetsOnSite = assets;
-        this.originalAssetsOnSite = [...assets]; // Keep original copy
-        this.filteredAssetsOnSite = [...assets];
-        this.totalItems = assets.length;
+    this.apiService.getAssetsOnLocation(this.siteID, this.deptID).subscribe({
+      next: (assets: AssetInfo[]) => {
+        this.assetsOnLocation = assets;
+        this.originalAssetsOnLocation = [...this.assetsOnLocation]; // Keep original copy
+        this.filteredAssetsOnLocation = [...this.assetsOnLocation];
+        this.totalItems = this.assetsOnLocation.length;
         this.updatePaginatedList();
         
         // Populate unique values for datalist options
         this.populateUniqueValues();
-        
         this.isLoading = false;
-        console.log('[AssetCard] Assets fetched successfully:', this.assetsOnSite);
       },
       error: (error) => {
-        this.errorMessage = 'Gagal memuat asset. Silakan coba lagi nanti.';
+        this.isLoading = false;
+        console.error('[SitePage] Error loading assets:', error.error.error);
+        this.errorMessage = error.error.error || 'Gagal memuat aset. Silakan coba lagi';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
-        this.isLoading = false;
-        console.error('[AssetCard] Error fetching assets:', error);
       }
     });
   }
@@ -114,7 +113,7 @@ export class AssetCardComponent {
 
   private populateUniqueValues(): void {
     // Populate unique values for all datalist options
-    this.uniqueOwnerNames = this.getUniqueValuesFromObj(this.originalAssetsOnSite, 'assetOwnerName');
+    this.uniqueOwnerNames = this.getUniqueValuesFromObj(this.originalAssetsOnLocation, 'assetOwnerName');
   }
 
   private filterAssetsByField(assetList: AssetInfo[], fieldName: keyof AssetInfo, criteria: string): AssetInfo[] {
@@ -142,7 +141,7 @@ export class AssetCardComponent {
 
   performAdvancedSearch(): void {
     this.hasSearched = true;
-    let filteredList = [...this.originalAssetsOnSite];
+    let filteredList = [...this.originalAssetsOnLocation];
 
     // Filter using the helper method
     if (this.searchCriteria.assetTag?.trim()) {
@@ -167,7 +166,7 @@ export class AssetCardComponent {
       filteredList = this.filterAssetsByField(filteredList, 'condition', this.searchCriteria.condition);
     }
 
-    this.filteredAssetsOnSite = filteredList;
+    this.filteredAssetsOnLocation = filteredList;
     this.totalItems = filteredList.length;
     this.pageIndex = 0; // Reset to first page
     this.updatePaginatedList();
@@ -181,7 +180,7 @@ export class AssetCardComponent {
   updatePaginatedList(): void {
     const startIndex = this.pageIndex * this.pageSize;
     const endIndex = startIndex + this.pageSize;
-    this.paginatedAssetsOnSite = this.filteredAssetsOnSite.slice(startIndex, endIndex);
+    this.paginatedAssetsOnLocation = this.filteredAssetsOnLocation.slice(startIndex, endIndex);
   }
 
   onPageChange(event: PageEvent): void {
@@ -209,9 +208,9 @@ export class AssetCardComponent {
     this.hasSearched = false;
     
     // If we have searched before, reset to show all assets
-    if (this.originalAssetsOnSite.length > 0) {
-      this.filteredAssetsOnSite = [...this.originalAssetsOnSite];
-      this.totalItems = this.originalAssetsOnSite.length;
+    if (this.originalAssetsOnLocation.length > 0) {
+      this.filteredAssetsOnLocation = [...this.originalAssetsOnLocation];
+      this.totalItems = this.originalAssetsOnLocation.length;
       this.pageIndex = 0;
       this.updatePaginatedList();
     }
