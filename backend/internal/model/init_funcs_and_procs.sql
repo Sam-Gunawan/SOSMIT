@@ -229,13 +229,16 @@ CREATE OR REPLACE FUNCTION public.get_user_opname_locations(
 	_page_number INT
 )
     RETURNS TABLE (
+		site_id INT,
+		dept_id INT,
 		dept_name VARCHAR(100),
         site_name VARCHAR(100),
         site_group_name VARCHAR(100),
         region_name VARCHAR(100),
         opname_status VARCHAR(20),
         last_opname_date TIMESTAMP,
-		last_opname_by VARCHAR(255)
+		last_opname_by VARCHAR(255),
+		total_count BIGINT
     )
     LANGUAGE plpgsql
 AS $$
@@ -260,13 +263,16 @@ AS $$
 			-- HO MODE: Show departments only (site_name = NULL)
 			RETURN QUERY
 			SELECT
+				25::INT AS site_id, -- Head office site ID is always 25
+				d.id::INT AS dept_id,
 				d.dept_name::VARCHAR(100),
 				NULL::VARCHAR(100) AS site_name,
 				NULL::VARCHAR(100) AS site_group_name,
 				NULL::VARCHAR(100) AS region_name,
 				COALESCE(lo.session_status, 'Outdated')::VARCHAR(20) AS opname_status,
 				lo.session_end_date::TIMESTAMP AS last_opname_date,
-				lo.created_by::VARCHAR(255) AS last_opname_by
+				lo.created_by::VARCHAR(255) AS last_opname_by,
+				COUNT(*) OVER()::BIGINT AS total_count
 			FROM "Department" AS d
 			LEFT JOIN LATERAL get_latest_opname_status(NULL, d.id) lo ON TRUE
 			WHERE 
@@ -284,13 +290,16 @@ AS $$
 			-- AREA MODE: Show sites only (dept_name = NULL)  
 			RETURN QUERY
 			SELECT
+				s.id::INT AS site_id,
+				NULL::INT AS dept_id,
 				NULL::VARCHAR(100) AS dept_name,
 				s.site_name::VARCHAR(100),
 				sg.site_group_name::VARCHAR(100),
 				r.region_name::VARCHAR(100),
 				COALESCE(lo.session_status, 'Outdated')::VARCHAR(20) AS opname_status,
 				lo.session_end_date::TIMESTAMP AS last_opname_date,
-				lo.created_by::VARCHAR(255) AS last_opname_by
+				lo.created_by::VARCHAR(255) AS last_opname_by,
+				COUNT(*) OVER()::BIGINT AS total_count
 			FROM "Site" AS s
 			INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 			INNER JOIN "Region" AS r ON sg.region_id = r.id

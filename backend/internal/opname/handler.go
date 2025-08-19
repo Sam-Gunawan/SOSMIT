@@ -90,9 +90,33 @@ func (handler *Handler) GetUserOpnameLocationsHandler(context *gin.Context) {
 		return
 	}
 
+	// Serialize the locations to handle nullable SQL fields
+	serializedLocations := make([]gin.H, 0, len(locations))
+	for _, location := range locations {
+		serializedLocation := gin.H{
+			"site_id":          utils.SerializeNI(location.SiteID),
+			"dept_id":          utils.SerializeNI(location.DeptID),
+			"dept_name":        utils.SerializeNS(location.DeptName),
+			"site_name":        utils.SerializeNS(location.SiteName),
+			"site_group_name":  utils.SerializeNS(location.SiteGroupName),
+			"region_name":      utils.SerializeNS(location.RegionName),
+			"opname_status":    location.OpnameStatus,
+			"last_opname_date": utils.SerializeNS(location.LastOpnameDate),
+			"last_opname_by":   utils.SerializeNS(location.LastOpnameBy),
+			"total_count":      location.TotalCount,
+		}
+		serializedLocations = append(serializedLocations, serializedLocation)
+	}
+
 	context.JSON(http.StatusOK, gin.H{
 		"message":   "successfully retrieved opname locations for logged-in user",
-		"locations": locations,
+		"locations": serializedLocations,
+		"total_count": func() int64 {
+			if len(locations) > 0 {
+				return locations[0].TotalCount
+			}
+			return 0
+		}(),
 	})
 }
 

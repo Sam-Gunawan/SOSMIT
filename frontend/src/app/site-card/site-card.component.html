@@ -9,22 +9,71 @@
 
     <!-- Search form container -->
     <div class="search-form-container" [ngClass]="{'mobile-hidden': !showSearchForm}">
-        <h6 class="search-title">Site Search</h6>
+        <h6 class="search-title">Opname Location Search</h6>
         
-        <form class="compact-search-form" (ngSubmit)="performAdvancedSearch()">
+        <form class="compact-search-form" (ngSubmit)="onSearchSubmit()">
+            <!-- HO/Area Toggle -->
+            <div class="form-item toggle-section">
+                <label>Search In:</label>
+                <div class="toggle-buttons">
+                    <button type="button" 
+                            class="btn toggle-btn" 
+                            [class.active]="searchCriteria.searchIn === 'area'"
+                            (click)="toggleSearchMode('area')">
+                        Area
+                    </button>
+                    <button type="button" 
+                            class="btn toggle-btn" 
+                            [class.active]="searchCriteria.searchIn === 'ho'"
+                            (click)="toggleSearchMode('ho')">
+                        Head Office
+                    </button>
+                </div>
+            </div>
+            
             <div class="form-grid">
-                <div class="form-item">
+                <!-- Site Name (for Area mode) -->
+                <div class="form-item" *ngIf="searchCriteria.searchIn === 'area'">
+                    <label>Site Name</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="searchCriteria.siteName"
+                        name="siteName"
+                        placeholder="Site name">
+                </div>
+
+                <!-- Site Group (for Area mode) -->
+                <div class="form-item" *ngIf="searchCriteria.searchIn === 'area'">
                     <label>Site Group</label>
                     <input 
                         type="text" 
                         class="form-control" 
-                        [(ngModel)]="searchCriteria.siteGroup"
-                        name="siteGroup"
-                        placeholder="Site group"
-                        list="siteGroups">
-                    <datalist id="siteGroups">
-                        <option *ngFor="let group of siteGroupList" [value]="group"></option>
-                    </datalist>
+                        [(ngModel)]="searchCriteria.siteGroupName"
+                        name="siteGroupName"
+                        placeholder="Site group">
+                </div>
+
+                <!-- Department Name (for HO mode) -->
+                <div class="form-item" *ngIf="searchCriteria.searchIn === 'ho'">
+                    <label>Department Name</label>
+                    <input 
+                        type="text" 
+                        class="form-control"
+                        [(ngModel)]="searchCriteria.deptName"
+                        name="deptName"
+                        placeholder="Department name">
+                </div>
+
+                <!-- Sub Site Name (for Area mode) -->
+                <div class="form-item" *ngIf="searchCriteria.searchIn === 'area'">
+                    <label>Sub Site</label>
+                    <input 
+                        type="text" 
+                        class="form-control"
+                        [(ngModel)]="searchCriteria.subSiteName"
+                        name="subSiteName"
+                        placeholder="Sub site name">
                 </div>
 
                 <div class="form-item">
@@ -32,8 +81,8 @@
                     <input 
                         type="text" 
                         class="form-control" 
-                        [(ngModel)]="searchCriteria.opnameByName"
-                        name="opnameByName"
+                        [(ngModel)]="searchCriteria.createdBy"
+                        name="createdBy"
                         placeholder="Search by user name"
                         list="users">
                     <datalist id="users">
@@ -58,28 +107,14 @@
                         <option value="Outdated">Outdated</option>
                     </select>
                 </div>
-
-                <div class="form-item">
-                    <label>Owner Site</label>
-                    <input 
-                        type="text" 
-                        class="form-control" 
-                        [(ngModel)]="searchCriteria.siteName"
-                        name="siteName"
-                        placeholder="Owner site"
-                        list="siteNames">
-                    <datalist id="siteNames">
-                        <option *ngFor="let site of originalSiteCardList" [value]="site.siteName"></option>
-                    </datalist>
-                </div>
                 
                 <div class="form-item">
                     <label>From Date</label>
                     <input 
                         type="date" 
                         class="form-control" 
-                        [(ngModel)]="searchCriteria.opnameFromDate"
-                        name="opnameFromDate">
+                        [(ngModel)]="searchCriteria.fromDate"
+                        name="fromDate">
                 </div>
                 
                 <div class="form-item">
@@ -87,34 +122,8 @@
                     <input 
                         type="date" 
                         class="form-control" 
-                        [(ngModel)]="searchCriteria.opnameToDate"
-                        name="opnameToDate">
-                </div>
-
-                <div class="form-item">
-                    <label>Site+</label>
-                    <input 
-                        type="text" 
-                        class="form-control"
-                        name="subSiteName"
-                        placeholder="Site+"
-                        list="subSiteNames">
-                    <datalist id="subSiteNames">
-                        <option *ngFor="let site of originalSiteCardList"></option>
-                    </datalist>
-                </div>
-
-                <div class="form-item">
-                    <label>Owner Dept.</label>
-                    <input 
-                        type="text" 
-                        class="form-control"
-                        name="departmentName"
-                        placeholder="Owner department"
-                        list="departmentNames">
-                    <datalist id="departmentNames">
-                        <option *ngFor="let site of originalSiteCardList"></option>
-                    </datalist>
+                        [(ngModel)]="searchCriteria.endDate"
+                        name="endDate">
                 </div>
             </div>
             
@@ -135,9 +144,9 @@
 </section>
 
 <!-- Search results -->
-<section class="site-list-layout" *ngIf="!isLoading && hasSearched && paginatedSiteCardList && paginatedSiteCardList.length > 0">
+<section class="site-list-layout" *ngIf="!isLoading && hasSearched && opnameLocations && opnameLocations.length > 0">
     <div class="results-header">
-        <h6 class="header-title">Search Results ({{ totalItems }} site{{ totalItems !== 1 ? 's' : '' }} found)</h6>
+        <h6 class="header-title">Search Results ({{ totalItems }} location{{ totalItems !== 1 ? 's' : '' }} found)</h6>
         <!-- Pagination -->
         <div class="pagination-container">
             <mat-paginator
@@ -151,28 +160,39 @@
         </div>
     </div>
     
-    <div class="site-list" *ngFor="let siteCard of paginatedSiteCardList" (click)="goToSite(siteCard.siteID)">
+    <div class="site-list" *ngFor="let location of opnameLocations" 
+         (click)="onLocationClick(location)"
+         style="cursor: pointer;">
         <div class="first-column">
-            <h6 class="site-name">{{ siteCard.siteName }}</h6>
-            <p class="site-details">{{ siteCard.siteGroup }} • {{ siteCard.siteRegion }}</p>
-            <p class="opname-date">Last Opname: {{ siteCard.opnameDate }}</p>
+            <h6 class="site-name">
+                {{ searchCriteria.searchIn === 'ho' ? (location.deptName || 'Unknown Department') : (location.siteName || 'Unknown Site') }}
+            </h6>
+            <p class="site-details">
+                {{ searchCriteria.searchIn === 'ho' ? 'Head Office' : ((location.siteGroupName || 'Unknown Group') + ' • ' + (location.regionName || 'Unknown Region')) }}
+            </p>
+            <p class="opname-date">
+                Last Opname: {{ (location.lastOpnameDate | date:'short') || 'No opname yet'}}
+            </p>
             <p class="opname-user">
-                Created by: {{ getUserDisplayName(siteCard.opnameUserID) }}
+                Created by: {{ location.lastOpnameBy || 'Unknown user' }}
             </p>
         </div>
 
         <div class="second-column">
-            <span
-                class="site-status"
-                [ngClass]="{
-                    'status-active': siteCard.opnameStatus === 'Active',
-                    'status-submitted': siteCard.opnameStatus === 'Submitted',
-                    'status-escalated': siteCard.opnameStatus === 'Escalated',
-                    'status-verified': siteCard.opnameStatus === 'Verified',
-                    'status-rejected': siteCard.opnameStatus === 'Rejected',
-                    'status-outdated': siteCard.opnameStatus === 'Outdated'
-                }">
-                {{ siteCard.opnameStatus }}
+            <span class="site-status" 
+                  *ngIf="location.opnameStatus"
+                  [ngClass]="{
+                      'status-active': location.opnameStatus === 'Active',
+                      'status-submitted': location.opnameStatus === 'Submitted',
+                      'status-escalated': location.opnameStatus === 'Escalated',
+                      'status-verified': location.opnameStatus === 'Verified',
+                      'status-rejected': location.opnameStatus === 'Rejected',
+                      'status-outdated': location.opnameStatus === 'Outdated'
+                  }">
+                {{ location.opnameStatus }}
+            </span>
+            <span class="site-status status-new" *ngIf="!location.opnameStatus">
+                No Opname Yet
             </span>
         </div>
     </div>
@@ -191,18 +211,18 @@
 </section>
 
 <!-- No results found -->
-<section class="empty-search" *ngIf="!isLoading && hasSearched && filteredSiteCardList && filteredSiteCardList.length === 0">
+<section class="empty-search" *ngIf="!isLoading && hasSearched && opnameLocations && opnameLocations.length === 0">
     <div class="not-found-message">
-        <h4>No sites found</h4>
-        <p>Tidak ada site yang cocok dengan kriteria pencarian Anda. Silakan ubah filter dan coba lagi.</p>
+        <h4>No locations found</h4>
+        <p>Tidak ada lokasi yang cocok dengan kriteria pencarian Anda. Silakan ubah filter dan coba lagi.</p>
     </div>
 </section>
 
 <!-- Initial state - no search performed -->
 <section class="initial-state" *ngIf="!isLoading && !hasSearched">
     <div class="welcome-message">
-        <h4>Ready to search</h4>
-        <p>Gunakan formulir pencarian di atas untuk mencari site. Anda dapat mencari dengan kombinasi kriteria apa pun, atau biarkan semua kolom kosong untuk melihat semua site.</p>
+        <h4>Ready to search opname locations</h4>
+        <p>Gunakan formulir pencarian di atas untuk mencari lokasi opname.</p>
     </div>
 </section>
 

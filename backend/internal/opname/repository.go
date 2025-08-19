@@ -9,6 +9,8 @@ import (
 )
 
 type OpnameLocations struct {
+	SiteID         sql.NullInt64  `json:"site_id"`
+	DeptID         sql.NullInt64  `json:"dept_id"`
 	DeptName       sql.NullString `json:"dept_name"`
 	SiteName       sql.NullString `json:"site_name"`
 	SiteGroupName  sql.NullString `json:"site_group_name"`
@@ -16,6 +18,7 @@ type OpnameLocations struct {
 	OpnameStatus   string         `json:"opname_status"`
 	LastOpnameDate sql.NullString `json:"last_opname_date"`
 	LastOpnameBy   sql.NullString `json:"last_opname_by"`
+	TotalCount     int64          `json:"total_count"`
 }
 
 type OpnameLocationFilter struct {
@@ -120,6 +123,8 @@ func (repo *Repository) GetUserOpnameLocations(userID int, position string, filt
 	for rows.Next() {
 		var location OpnameLocations
 		if err := rows.Scan(
+			&location.SiteID,
+			&location.DeptID,
 			&location.DeptName,
 			&location.SiteName,
 			&location.SiteGroupName,
@@ -127,6 +132,7 @@ func (repo *Repository) GetUserOpnameLocations(userID int, position string, filt
 			&location.OpnameStatus,
 			&location.LastOpnameDate,
 			&location.LastOpnameBy,
+			&location.TotalCount,
 		); err != nil {
 			log.Printf("❌ Error scanning opname location: %v", err)
 			return nil, err

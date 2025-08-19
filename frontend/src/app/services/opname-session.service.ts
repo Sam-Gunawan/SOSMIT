@@ -82,10 +82,12 @@ export class OpnameSessionService {
         // Handle case where locations might be null, undefined, or empty
         if (!response || !response.locations || !Array.isArray(response.locations)) {
           console.warn('[OpnameService] No locations found in response:', response);
-          return [];
+          return { locations: [], totalCount: 0 };
         }
         
-        return response.locations.map((location: any) => ({
+        const locations = response.locations.map((location: any) => ({
+          siteId: location.site_id,
+          deptId: location.dept_id,
           deptName: location.dept_name,
           siteName: location.site_name,
           siteGroupName: location.site_group_name,
@@ -94,6 +96,11 @@ export class OpnameSessionService {
           lastOpnameDate: location.last_opname_date,
           lastOpnameBy: location.last_opname_by
         }));
+
+        return {
+          locations: locations,
+          totalCount: response.total_count || 0
+        };
       })
     );
   }
