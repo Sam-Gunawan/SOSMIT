@@ -9,6 +9,7 @@
   import { formatDate, formatRupiah, titleCase } from '../utils';
   import { environment } from '../../environments/environments';
 import { SubSite } from '../model/sub-site.model';
+import { Department } from '../model/dept.model';
 
   @Injectable({
     providedIn: 'root'
@@ -17,6 +18,7 @@ import { SubSite } from '../model/sub-site.model';
     // This service will handle API calls, such as login, fetching data, etc.
     private authApiUrl = `${environment.serverURL}/api/auth`
     private userApiUrl = `${environment.serverURL}/api/user`
+    private deptApiUrl = `${environment.serverURL}/api/department`
     private siteApiUrl = `${environment.serverURL}/api/site`
     private assetApiUrl = `${environment.serverURL}/api/asset`
     private uploadApiUrl = `${environment.serverURL}/api/upload`
@@ -160,8 +162,8 @@ import { SubSite } from '../model/sub-site.model';
           }
           
           const locations = response.locations.map((location: any) => ({
-            siteId: location.site_id,
-            deptId: location.dept_id,
+            siteID: location.site_id,
+            deptID: location.dept_id,
             deptName: location.dept_name,
             siteName: location.site_name,
             siteGroupName: location.site_group_name,
@@ -177,6 +179,23 @@ import { SubSite } from '../model/sub-site.model';
           };
         })
       );
+    }
+
+    getDeptByID(deptID: number): Observable<Department> {
+      // This method will fetch a specific department by its ID.
+      return this.http.get<Department>(`${this.deptApiUrl}/${deptID}`).pipe(
+        map((response: any) => {
+          console.log(response)
+          return {
+            deptID: response.dept_id,
+            deptName: response.dept_name,
+            siteName: response.site_name,
+            siteGroupName: response.site_group_name,
+            regionName: response.region_name,
+            opnameSessionID: -1,
+          }
+        })
+      )
     }
 
     getSiteByID(siteID: number): Observable<SiteInfo> {

@@ -18,11 +18,11 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 type Department struct {
-	DepartmentID   int64
-	DepartmentName string
-	SiteName       string
-	SiteGroupName  string
-	RegionName     string
+	DepartmentID   int64  `json:"dept_id"`
+	DepartmentName string `json:"dept_name"`
+	SiteName       string `json:"site_name"`
+	SiteGroupName  string `json:"site_group_name"`
+	RegionName     string `json:"region_name"`
 }
 
 // GetDeptByID retrieves department details by its ID
