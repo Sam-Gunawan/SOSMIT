@@ -252,3 +252,16 @@ p {
   border-color: #1976d2 !important;
   color: #1976d2;
 }
+
+::ng-deep .mat-mdc-autocomplete-panel {
+  background-color: white !important;
+}
+
+::ng-deep .mat-mdc-option {
+  min-height: 24px !important;
+  background-color: white;
+
+  .mdc-list-item__primary-text {
+    font-size: 9px !important;
+  }
+}
