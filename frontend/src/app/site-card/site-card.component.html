@@ -81,14 +81,12 @@
                     <input 
                         type="text" 
                         class="form-control" 
-                        [(ngModel)]="searchCriteria.createdBy"
-                        name="createdBy"3
+                        [formControl]="createdByControl"
                         placeholder="Search by user name"
-                        list="users"
                         [matAutocomplete]="auto">
-                    <mat-autocomplete #auto="matAutocomplete">
-                        @for (user of allUsers; track user) {
-                            <mat-option [value]="user.firstName + ' ' + user.lastName">
+                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
+                        @for (user of filteredUsers | async; track user.username) {
+                            <mat-option [value]="user">
                                 {{ user.firstName }} {{ user.lastName }} ({{ user.username }})
                             </mat-option>
                         }

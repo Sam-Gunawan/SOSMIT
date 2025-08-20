@@ -1,6 +1,6 @@
 import { Component, input, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { SiteInfo } from '../model/site-info.model';
 import { User } from '../model/user.model';
 import { ApiService } from '../services/api.service';
@@ -13,16 +13,23 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { MatOptionModule } from '@angular/material/core';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { Observable } from 'rxjs';
+import { map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'app-site-card',
-  imports: [CommonModule, FormsModule, MatPaginatorModule, MatDatepickerModule, MatInputModule, MatFormFieldModule, MatNativeDateModule, MatOptionModule, MatAutocompleteModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, MatPaginatorModule, MatDatepickerModule, MatInputModule, MatFormFieldModule, MatNativeDateModule, MatOptionModule, MatAutocompleteModule],
   templateUrl: './site-card.component.html',
   styleUrl: './site-card.component.scss'
 })
 export class SiteCardComponent {
   opnameLocations: any[] = []; // Single source of truth from backend
   allUsers: User[] = []; // List of all users for filtering
+  
+  // FormControl for autocomplete
+  createdByControl = new FormControl('');
+  filteredUsers!: Observable<User[]>;
+  
   isLoading: boolean = false;
   errorMessage: string = '';
   showToast: boolean = false;
@@ -54,6 +61,51 @@ export class SiteCardComponent {
   ngOnInit(): void {
     console.log('[SiteCard] ngOnInit called - ready to search opname locations');
     // No automatic search - user must click search to get results
+
+    this.apiService.getAllUsers().subscribe({
+      next: (users) => {
+        this.allUsers = users;
+        // Set up the filtered users observable after users are loaded
+        this.filteredUsers = this.createdByControl.valueChanges.pipe(
+          startWith(''),
+          map(value => this._filterUsers(value || ''))
+        );
+      },
+      error: (error) => {
+        console.error('[SiteCard] Error fetching users:', error);
+      }
+    });
+  }
+
+  // Filter function for autocomplete
+  private _filterUsers(value: string | User | null): User[] {
+    if (!value) return this.allUsers;
+
+    const filterValue = typeof value === 'string' 
+      ? value.toLowerCase() 
+      : (value.firstName + ' ' + value.lastName).toLowerCase();
+    
+    return this.allUsers.filter(user => 
+      (user.firstName + ' ' + user.lastName).toLowerCase().includes(filterValue) ||
+      user.username.toLowerCase().includes(filterValue)
+    );
+  }
+
+  // Display function for autocomplete
+  displayFn(user: User): string {
+    return user ? user.firstName + ' ' + user.lastName : '';
+  }
+
+  // Get the selected user's full name for search
+  private getCreatedByValue(): string {
+    const selectedUser = this.createdByControl.value;
+    if (typeof selectedUser === 'string') {
+      return selectedUser;
+    } else if (selectedUser && typeof selectedUser === 'object') {
+      const user = selectedUser as User;
+      return user.firstName + ' ' + user.lastName;
+    }
+    return '';
   }
 
   // Toggle between HO and Area search modes
@@ -79,7 +131,7 @@ export class SiteCardComponent {
       site_name: this.searchCriteria.siteName || null,
       sub_site_name: this.searchCriteria.subSiteName || null,
       dept_name: this.searchCriteria.deptName || null,
-      created_by: this.searchCriteria.createdBy || null,
+      created_by: this.getCreatedByValue() || null,
       opname_status: this.searchCriteria.opnameStatus || null,
       from_date: this.searchCriteria.fromDate || null,
       end_date: this.searchCriteria.endDate || null,
@@ -146,6 +198,10 @@ export class SiteCardComponent {
       limit: 5,
       pageNum: 1
     };
+    
+    // Reset the autocomplete FormControl
+    this.createdByControl.setValue('');
+    
     this.opnameLocations = [];
     this.hasSearched = false;
     this.pageIndex = 0;
