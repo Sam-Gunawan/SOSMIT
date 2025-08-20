@@ -12,8 +12,8 @@
         <section class="site-content">
             <div class="site-information">
                 <div class="basic-info">
-                    <h5 class="site-name">{{ sitePage.siteName }}</h5>
-                    <p class="site-location">{{ sitePage.siteGroup }}, {{ sitePage.siteRegion }}</p>
+                    <h5 class="site-name">{{ site.siteName }}</h5>
+                    <p class="site-location">{{ site.siteGroupName }}, {{ site.regionName }}</p>
                     
                     <div class="export-container">
                         <i class="fas fa-download"></i>
@@ -21,19 +21,19 @@
                     </div>
                 </div>
                 <div class="opname-info">
-                    <span 
+                    <!-- <span 
                         class="site-status"
                         [ngClass]="{
-                            'status-active': sitePage.opnameStatus === 'Active',
-                            'status-submitted': sitePage.opnameStatus === 'Submitted',
-                            'status-escalated': sitePage.opnameStatus === 'Escalated',
-                            'status-verified': sitePage.opnameStatus === 'Verified',
-                            'status-rejected': sitePage.opnameStatus === 'Rejected',
-                            'status-outdated': sitePage.opnameStatus === 'Outdated'
+                            'status-active': site.opnameStatus === 'Active',
+                            'status-submitted': site.opnameStatus === 'Submitted',
+                            'status-escalated': site.opnameStatus === 'Escalated',
+                            'status-verified': site.opnameStatus === 'Verified',
+                            'status-rejected': site.opnameStatus === 'Rejected',
+                            'status-outdated': site.opnameStatus === 'Outdated'
                         }">
-                        {{ sitePage.opnameStatus }}
+                        {{ site.opnameStatus }}
                     </span>
-                    <p class="opname-date">Last Opname on {{ sitePage.opnameDate }}</p>
+                    <p class="opname-date">Last Opname on {{ site.opnameDate }}</p> -->
                 </div>
             </div>
 

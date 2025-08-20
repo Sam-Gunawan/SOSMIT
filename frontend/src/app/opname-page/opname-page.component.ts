@@ -17,13 +17,8 @@ import { SiteInfo } from '../model/site-info.model';
   styleUrl: './opname-page.component.scss'
 })
 export class OpnamePageComponent implements OnInit, OnDestroy {
-  // currentView: 'large' | 'small' = 'large';
-  isMobile: boolean = false;
-  
   constructor(private apiService: ApiService, private route: ActivatedRoute, private router: Router, private opnameSessionService: OpnameSessionService) {}
   
-  cardVariant: 'default' | 'compact' = 'compact';
-  showLocation: boolean = true;
   opnameSession: OpnameSession = {} as OpnameSession;
   site: SiteInfo = {} as SiteInfo;
   sessionID: number = -1; // Default value, will be set later
@@ -101,10 +96,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     this.opnameSessionService.getOpnameSession(this.sessionID).subscribe({
       next: (session) => {
         this.opnameSession = session;
-        this.isLoading = false; // Set loading state to false after fetching session
-        
-        // Update responsive settings based on screen size
-        this.updateResponsiveSettings();
+        this.isLoading = false; // Set loading state to false after fetching session  
       },
       error: (error) => {
         this.isLoading = false; // Set loading state to false on error
@@ -131,12 +123,6 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     });
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize(event: any) {
-    // this.checkScreenSize();
-    this.updateResponsiveSettings();
-  }
-
   cancelOpnameSession() {
     // Close the modal first
     this.closeModal('opnameCanceled');
@@ -152,7 +138,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     
     this.isLoading = true; // Set loading state to true before cancelling
     this.opnameSessionService.cancelOpnameSession(this.sessionID).subscribe({
-      next: (response) => {
+      next: () => {
         this.isLoading = false; // Set loading state to false after cancelling
         
         // Clear the session from the service and localStorage
@@ -238,18 +224,6 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
         console.error('[OpnamePage] Error finishing opname session:', error);
       }
     });
-  }
-
-  private updateResponsiveSettings() {
-    if (window.innerWidth >= 768) {
-      // Large screens: use compact variant with location
-      this.cardVariant = 'compact';
-      this.showLocation = true;
-    } else {
-      // Small screens: use default variant without location
-      this.cardVariant = 'default';
-      this.showLocation = false;
-    }
   }
 
   openModal(modalId: string) {

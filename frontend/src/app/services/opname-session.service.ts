@@ -86,9 +86,9 @@ export class OpnameSessionService {
     );
   }
 
-  startNewOpname(siteID: number): Observable<any> {
+  startNewOpname(siteID: number, deptID: number): Observable<any> {
     // This method will start a new stock opname session for the specified site.
-    return this.http.post(`${this.opnameApiUrl}/start`, {site_id: siteID}).pipe(
+    return this.http.post(`${this.opnameApiUrl}/start`, {site_id: siteID, dept_id: deptID}).pipe(
       map((response: any) => {
           return {
           opnameSessionID: response.session_id,
@@ -233,10 +233,9 @@ export class OpnameSessionService {
     );
   }
 
-  getOpnameOnSite(siteID: number): Observable<OpnameSession[]> {
-    // This method will fetch all opname sessions for a specific site.
-    console.log('[OpnameService] Fetching opname sessions for site ID:', siteID);
-    return this.http.get<any>(`${this.opnameApiUrl}/filter/site/${siteID}`).pipe(
+  getOpnameOnLocation(siteID: number, deptID: number): Observable<OpnameSession[]> {
+    // This method will fetch all opname sessions for a specific location.
+    return this.http.get<any>(`${this.opnameApiUrl}/filter/location`, { params: { site_id: siteID, dept_id: deptID } }).pipe(
       map((response: any) => {
         // The backend returns { message: string, sessions: array }
         const sessions = response.sessions || [];

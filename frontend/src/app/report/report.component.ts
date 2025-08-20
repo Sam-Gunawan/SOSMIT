@@ -23,10 +23,8 @@ import { lastValueFrom } from 'rxjs';
 export class ReportComponent {
   @Input() selectedDate: string = ''; // Track selected date for filtering
   
-  currentView: 'list' | 'card' = 'card';
-  isMobile: boolean = false;
-  screenSize: 'large' | 'small' = 'large';
   siteID: number = -1;
+  deptID: number = -1;
   site: SiteInfo = {} as SiteInfo;
   opnameSession: OpnameSession = {} as OpnameSession;
   sessionID: number = -1;
@@ -35,7 +33,6 @@ export class ReportComponent {
   showSuccessToast: boolean = false;
   isExporting: boolean = false;
   isLoading: boolean = false;
-  @ViewChild('exportSection', { static: false }) exportSection!: ElementRef;
 
   // Wrap both sessionID and endDate into an object
   availableOpnameSessions: { sessionID: number, endDate: string }[] = [];
@@ -45,9 +42,6 @@ export class ReportComponent {
 
   // Opname statistics
   opnameStats: OpnameStats = {} as OpnameStats;
-  
-  cardVariant: 'default' | 'compact' = 'compact';
-  showLocation: boolean = true;
 
   constructor(
     private apiService: ApiService,
@@ -90,14 +84,8 @@ export class ReportComponent {
   }
 
   ngOnInit() {
-    this.checkScreenSize();
     this.initSiteInfo();
     this.initAvailableOpnames();
-  }
-
-  @HostListener('window:resize', ['$event'])
-  onResize(event: Event) {
-    this.checkScreenSize();
   }
 
   initSiteInfo() {
@@ -113,7 +101,7 @@ export class ReportComponent {
   }
 
   initAvailableOpnames() {
-    this.opnameSessionService.getOpnameOnSite(this.siteID).subscribe({
+    this.opnameSessionService.getOpnameOnLocation(this.siteID, this.deptID).subscribe({
       next: (sessions) => {
         this.availableOpnameSessions = sessions.map(session => ({
           sessionID: Number(session.sessionID),
@@ -232,25 +220,5 @@ export class ReportComponent {
       this.showSuccessToast = false;
       this.successMessage = ''; // Clear message after showing
     }, 5000); // Show for 5 seconds
-  }
-
-  private checkScreenSize() {
-    const newIsMobile = window.innerWidth < 768; // Define mobile breakpoint
-    const newScreenSize = newIsMobile ? 'small' : 'large';
-    const newCurrentView = newIsMobile ? 'list' : 'card';
-    
-    // Only update if values have changed
-    if (this.isMobile !== newIsMobile || this.screenSize !== newScreenSize || this.currentView !== newCurrentView) {
-      this.isMobile = newIsMobile;
-      this.screenSize = newScreenSize;
-      this.currentView = newCurrentView;
-      this.cdr.detectChanges(); // Only trigger change detection when needed
-    }
-  }
-
-  toggleView(view: 'card' | 'list') {
-    if (!this.isMobile) { // Only allow toggle on desktop view
-      this.currentView = view;
-    }
   }
 }

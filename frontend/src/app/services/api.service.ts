@@ -127,17 +127,9 @@ import { SubSite } from '../model/sub-site.model';
           return response.sites.map((site: any) => ({
             siteID: site.SiteID,
             siteName: site.SiteName,
-            siteGroup: site.SiteGroupName,
-            siteRegion: site.RegionName,
-            siteGaID: site.SiteGaID,
-            siteGaName: titleCase(site.SiteGaName),
-            siteGaEmail: site.SiteGaEmail,
-            // Default opname fields for sites list
-            opnameSessionID: 0,
-            opnameUserID: 0,
-            opnameUserName: '',
-            opnameStatus: '',
-            opnameDate: ''
+            siteGroupName: site.SiteGroupName,
+            regionName: site.RegionName,
+            opnameSessionID: -1,
           }));
         }),
         tap((sites: SiteInfo[]) => {
@@ -195,17 +187,9 @@ import { SubSite } from '../model/sub-site.model';
           return {
             siteID: response.site_id,
             siteName: response.site_name,
-            siteGroup: response.site_group_name,
-            siteRegion: response.region_name,
-            siteGaID: response.site_ga_id,
-            siteGaName: titleCase(response.site_ga_name),
-            siteGaEmail: response.site_ga_email,
-            // Default opname fields for individual site fetch
-            opnameSessionID: 0,
-            opnameUserID: 0,
-            opnameUserName: '',
-            opnameStatus: '',
-            opnameDate: ''
+            siteGroupName: response.site_group_name,
+            regionName: response.region_name,
+            opnameSessionID: -1,
           };
         }),
         tap((siteInfo: SiteInfo) => {

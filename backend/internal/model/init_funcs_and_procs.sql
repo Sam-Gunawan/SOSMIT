@@ -10,6 +10,7 @@ DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_asset_by_serial_number(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
 DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT);
+DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT, INT);
 DROP FUNCTION IF EXISTS public.get_opname_session_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_user_from_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.finish_opname_session(INT);
@@ -25,10 +26,11 @@ DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
 DROP FUNCTION IF EXISTS public.get_all_sites();
 DROP FUNCTION IF EXISTS public.get_all_sub_sites();
 DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
+DROP FUNCTION IF EXISTS public.get_dept_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_sub_site_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_sub_sites_by_site_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
-DROP FUNCTION IF EXISTS public.get_opname_by_site_id(INT);
+DROP FUNCTION IF EXISTS public.get_finished_opnames_by_location_id(INT, INT);
 DROP FUNCTION IF EXISTS public.get_asset_equipments(VARCHAR(50));
 DROP FUNCTION IF EXISTS public.get_opname_stats(INT);
 
@@ -499,41 +501,48 @@ AS $$
 	END;
 $$;
 
--- create_new_opname_session creates a new opname session for a site
+-- create_new_opname_session creates a new opname session for a site or department
 CREATE OR REPLACE FUNCTION public.create_new_opname_session(
 	-- The ID of the user creating the session (from JWT).
 	_user_id INT,
-	-- The ID of the site for which the session is being created (from request body).
-	_site_id INT
+	-- The ID of the site for which the session is being created (NULL for department sessions).
+	_site_id INT DEFAULT NULL,
+	-- The ID of the department for which the session is being created (NULL for site sessions).
+	_dept_id INT DEFAULT NULL
 ) RETURNS INT -- Returns the new session ID, or 0 if it fails.
 	LANGUAGE plpgsql
 AS $$
 	DECLARE
-		-- Local variable to count existing ongoing sessions for the site.
+		-- Local variable to count existing ongoing sessions for the site or department.
 		-- Sessions in 'Active', 'Submitted', and 'Escalated' status are considered ongoing.
 		_ongoing_session_count INT;
 		_new_session_id INT := 0; -- Initialize to 0, will be set if a new session is created.
 	BEGIN
-		-- Check if there are any active opname sessions for the site.
-		-- Count how many rows in "OpnameSession" have the same site_id and status 'Active', 'Submitted', or 'Escalated'.
+		-- Validate that exactly one of site_id or dept_id is provided
+		IF (_site_id IS NULL AND _dept_id IS NULL) OR (_site_id IS NOT NULL AND _dept_id IS NOT NULL) THEN
+			RAISE EXCEPTION 'Exactly one of site_id or dept_id must be provided';
+		END IF;
+
+		-- Check if there are any active opname sessions for the site or department.
 		SELECT COUNT(*)
 		INTO _ongoing_session_count
 		FROM "OpnameSession"
-		WHERE site_id = _site_id AND "status" IN ('Active', 'Submitted', 'Escalated');
+		WHERE (_site_id IS NOT NULL AND site_id = _site_id OR _dept_id IS NOT NULL AND dept_id = _dept_id) 
+		  AND "status" IN ('Active', 'Submitted', 'Escalated');
 
 		-- If there are no ongoing sessions, proceed to create a new one.
 		IF _ongoing_session_count = 0 THEN
 			-- Insert a new opname session into the OpnameSession table.
-			INSERT INTO "OpnameSession" (user_id, site_id, "status", start_date)
-			VALUES (_user_id, _site_id, 'Active', NOW())
+			INSERT INTO "OpnameSession" (user_id, site_id, dept_id, "status", start_date)
+			VALUES (_user_id, _site_id, _dept_id, 'Active', NOW())
 			-- Get the ID of the newly created session.
 			-- The 'RETURNING' clause allows us to capture the new session ID.
 			RETURNING id INTO _new_session_id;
 
-			RAISE NOTICE 'New opname session created with ID: %', _new_session_id;
+			RAISE NOTICE 'New opname session created with ID: %, site_id: %, dept_id: %', _new_session_id, _site_id, _dept_id;
 		ELSE
 			-- If there is already an active session, do nothing. _new_session_id will remain 0.
-			RAISE NOTICE 'An ongoing opname session already exists for site ID: %, cannot create a new one.', _site_id;
+			RAISE NOTICE 'An ongoing opname session already exists for site_id: %, dept_id: %, cannot create a new one.', _site_id, _dept_id;
 		END IF;
 
 		RETURN _new_session_id;
@@ -551,7 +560,8 @@ CREATE OR REPLACE FUNCTION public.get_opname_session_by_id(_session_id INT)
 		manager_reviewed_at TIMESTAMP WITH TIME ZONE,
 		l1_reviewer_id INT,
 		l1_reviewed_at TIMESTAMP WITH TIME ZONE,
-		site_id INT
+		site_id INT,
+		dept_id INT
 	)
 	LANGUAGE plpgsql
 AS $$
@@ -559,7 +569,7 @@ AS $$
 		RETURN QUERY
 		SELECT os.id, os."start_date", os.end_date, os."status", os.user_id,
 		 	os.manager_reviewer_id, os.manager_reviewed_at, os.l1_reviewer_id, os.l1_reviewed_at,
-			os.site_id
+			os.site_id, os.dept_id
 		FROM "OpnameSession" AS os
 		WHERE os.id = _session_id;
 	END;
@@ -897,8 +907,6 @@ AS $$
 	END;
 $$;
 
--- get_action_notes 
-
 -- set_action_notes updates the action notes for an asset change
 CREATE OR REPLACE PROCEDURE public.set_action_notes(
 	_asset_tag VARCHAR(12),
@@ -1066,6 +1074,32 @@ AS $$
 	END;
 $$;
 
+-- get_dept_by_id retrieves department details by department ID
+CREATE OR REPLACE FUNCTION public.get_dept_by_id(_dept_id INT)
+	RETURNS TABLE (
+		dept_id INT,
+		dept_name VARCHAR(100),
+		site_name VARCHAR(100),
+		site_group_name VARCHAR(100),
+		region_name VARCHAR(100)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT d.id AS dept_id,
+			d.dept_name,
+			s.site_name,
+			sg.site_group_name,
+			r.region_name
+		FROM "Department" AS d
+		INNER JOIN "Site" AS s ON d.site_id = s.id
+		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+		INNER JOIN "Region" AS r ON sg.region_id = r.id
+		WHERE d.id = _dept_id AND LOWER(s.site_name) = 'head office jakarta';
+	END;
+$$;
+
 -- get_sub_site_by_id retrieves sub-site details by sub-site ID
 CREATE OR REPLACE FUNCTION public.get_sub_site_by_id(_sub_site_id INT)
 	RETURNS TABLE (
@@ -1119,20 +1153,29 @@ AS $$
 	END;
 $$;
 
--- get_opname_by_site_id retrieves all opname sessions for a specific site
+-- get_finished_opnames_by_location_id retrieves all opname sessions for a specific site or department
 -- ! This function is only for report page, it will only return sessions that are not 'Active'
-CREATE OR REPLACE FUNCTION public.get_opname_by_site_id(_site_id INT)
+CREATE OR REPLACE FUNCTION public.get_finished_opnames_by_location_id(_site_id INT DEFAULT NULL, _dept_id INT DEFAULT NULL)
 	RETURNS TABLE (
 		session_id INT,
-		completed_date DATE
+		completed_date DATE,
+		site_id INT,
+		dept_id INT
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
+		-- Validate that exactly one of site_id or dept_id is provided
+		IF (_site_id IS NULL AND _dept_id IS NULL) OR (_site_id IS NOT NULL AND _dept_id IS NOT NULL) THEN
+			RAISE EXCEPTION 'Exactly one of site_id or dept_id must be provided';
+		END IF;
+
 		RETURN QUERY
-		SELECT os.id, DATE(os.end_date) AS completed_date
+		SELECT os.id, DATE(os.end_date) AS completed_date, os.site_id, os.dept_id
 		FROM "OpnameSession" AS os
-		WHERE os.site_id = _site_id AND os.status != 'Active';
+		WHERE (_site_id IS NOT NULL AND os.site_id = _site_id OR _dept_id IS NOT NULL AND os.dept_id = _dept_id) 
+		  AND os.status != 'Active'
+		ORDER BY os.end_date DESC;
 	END;
 $$;
 

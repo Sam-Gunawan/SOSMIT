@@ -49,3 +49,12 @@ func SafeIntString(nullableInt sql.NullInt64) string {
 	}
 	return "-"
 }
+
+// Helper function to parse nullable integers
+func ParseNullableInt(nullableInt *int) sql.NullInt64 {
+	// If non-nil and positive...
+	if nullableInt != nil && *nullableInt > 0 {
+		return sql.NullInt64{Int64: int64(*nullableInt), Valid: true}
+	}
+	return sql.NullInt64{Valid: false}
+}

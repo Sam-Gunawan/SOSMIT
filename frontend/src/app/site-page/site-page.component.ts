@@ -6,6 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SiteInfo } from '../model/site-info.model';
 import { AssetCardComponent } from '../asset-card/asset-card.component';
 import { OpnameSession } from '../model/opname-session.model';
+import { Department } from '../model/dept.model';
 
   @Component({
     selector: 'app- site-page',
@@ -14,31 +15,17 @@ import { OpnameSession } from '../model/opname-session.model';
     styleUrl: './site-page.component.scss'
   })
   export class SitePageComponent {
-    sitePage: SiteInfo;
+    site: SiteInfo = {} as SiteInfo;
+    dept: Department = {} as Department;
     siteList?: SiteInfo[] = []; // Initialize siteList as an empty array
-    isLoading: boolean = true; // Loading state to show a spinner or loading indicator
+    isLoading: boolean = false; // Loading state to show a spinner or loading indicator
     errorMessage: string = '';
     opnameLoading: boolean = false; // Loading state for starting a new opname session
     opnameSession?: OpnameSession; // Optional opname session to hold the current session data
     showToast: boolean = false;
     floatingMenuExpanded: boolean = false; // Track floating menu expanded state
 
-    constructor(private route: ActivatedRoute, private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService) {
-      this.sitePage = {
-        siteID: -1,
-        siteName: '',
-        siteGroup: '',
-        siteRegion: '',
-        siteGaID: -1,
-        siteGaName: '',
-        siteGaEmail: '',
-        opnameSessionID: -1,
-        opnameUserID: -1,
-        opnameUserName: '',
-        opnameStatus: '',
-        opnameDate: ''
-      };
-    }
+    constructor(private router: Router, private opnameSessionService: OpnameSessionService) {}
 
     toggleFloatingMenu(): void {
       this.floatingMenuExpanded = !this.floatingMenuExpanded;
@@ -58,7 +45,6 @@ import { OpnameSession } from '../model/opname-session.model';
     startNewOpname(): void {
       // Prevent multiple simultaneous requests
       if (this.opnameLoading) {
-        console.log('[SitePage] Request already in progress, ignoring duplicate click');
         return;
       }
 
@@ -66,22 +52,20 @@ import { OpnameSession } from '../model/opname-session.model';
       this.opnameLoading = true; // Set loading state to true before starting the request
       this.errorMessage = ''; // Clear any previous errors
       
-      console.log('[SitePage] Starting new opname for site ID:', this.sitePage.siteID);
       
-      this.opnameSessionService.startNewOpname(this.sitePage.siteID).subscribe({
+      this.opnameSessionService.startNewOpname(this.site.siteID, this.dept.deptID).subscribe({
         next: (response) => {
           this.opnameLoading = false; // Set loading state to false after starting opname
-          console.log('[SitePage] New opname session started successfully:', response);
           
-          // Update the sitePage with the new opname session ID.
-          this.sitePage.opnameSessionID = response.opnameSessionID;
+          // Update the site with the new opname session ID.
+          this.site.opnameSessionID = response.opnameSessionID;
 
           // Store the session ID and site ID in the service
           this.opnameSessionService.setSessionId(response.opnameSessionID);
-          this.opnameSessionService.setSiteId(this.sitePage.siteID);
+          this.opnameSessionService.setSiteId(this.site.siteID);
 
           // Redirect to the opname page using router state
-          this.router.navigate(['/site', this.sitePage.siteID, 'opname'], {
+          this.router.navigate(['/site', this.site.siteID, 'opname'], {
             state: { sessionID: response.opnameSessionID }
           });
         },
@@ -100,14 +84,13 @@ import { OpnameSession } from '../model/opname-session.model';
       // This method will continue an existing stock opname session for the current site.
       // Prevent multiple simultaneous requests
       if (this.opnameLoading) {
-        console.log('[SitePage] Request already in progress, ignoring duplicate click');
         return;
       }
       
       this.opnameLoading = true;
       this.errorMessage = ''; // Clear any previous errors
       
-      if (this.sitePage.opnameSessionID <= 0) {
+      if (this.site.opnameSessionID <= 0) {
         this.opnameLoading = false;
         this.errorMessage = 'Tidak ada sesi opname yang tersedia.';
         console.error('[SitePage] No opname session ID to continue');
@@ -116,15 +99,14 @@ import { OpnameSession } from '../model/opname-session.model';
         return;
       }
       
-      this.opnameSessionService.getOpnameSession(this.sitePage.opnameSessionID).subscribe({
+      this.opnameSessionService.getOpnameSession(this.site.opnameSessionID).subscribe({
         next: (opnameSession) => {
           this.opnameSession = opnameSession; // Store the current opname session data
           this.opnameLoading = false; // Set loading state to false after fetching session
-          console.log('[SitePage] Current opname session:', this.opnameSession);
           
           // Only continue if the session is active - MOVED THIS INSIDE THE SUCCESS CALLBACK
           if (this.opnameSession && this.opnameSession.status === 'Active') {
-            this.opnameSessionService.continueOpname(this.sitePage.opnameSessionID, this.sitePage.siteID, this.router);
+            this.opnameSessionService.continueOpname(this.site.opnameSessionID, this.site.siteID, this.router);
           } else {
             const status = this.opnameSession ? this.opnameSession.status : 'unknown';
             console.error('[SitePage] Opname session is not active:', status);
@@ -145,7 +127,7 @@ import { OpnameSession } from '../model/opname-session.model';
 
     goToReport(): void {
       // Navigate to the report page for the current site
-      const siteID = this.sitePage.siteID;
+      const siteID = this.site.siteID;
       if (siteID > 0) {
         this.router.navigate(['/site', siteID, 'report']);
       } else {

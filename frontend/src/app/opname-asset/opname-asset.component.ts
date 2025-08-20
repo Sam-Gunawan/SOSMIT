@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, ChangeDetectorRef, OnDestroy, OnChanges, SimpleChanges, AfterViewInit, ViewChild } from '@angular/core';
+import { Component, HostListener, Input, ChangeDetectorRef, OnChanges, SimpleChanges, AfterViewInit, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActionNotesDialogComponent } from '../action-notes-dialog/action-notes-dialog.component';
 import { ReportService } from '../services/report.service';
@@ -41,18 +41,16 @@ export interface AssetTableData {
   templateUrl: './opname-asset.component.html',
   styleUrl: './opname-asset.component.scss'
 })
-export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit {
+export class OpnameAssetComponent implements OnChanges, AfterViewInit {
   public readonly serverURL = environment.serverURL; // Expose environment for use in the template
 
   allColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'ownerName', 'costCenter', 'condition', 'status', 'processingStatus', 'actions'];
   dataSource = new MatTableDataSource<AssetTableData>([]);
 
   @Input() isInReport: boolean = false; // Flag to check if in report view
-  @Input() variant: 'default' | 'compact' = 'default';
-  @Input() showLocation: boolean = false;
   @Input() sessionID: number = -1; // Session ID for the current opname session
   @Input() siteID: number = -1; // Site ID for the current opname session
-  @Input() currentView: 'card' | 'list' = 'card';
+  @Input() deptID: number = -1;
   @ViewChild(MatSort) sort!: MatSort;
   @ViewChild(MatPaginator) paginator!: MatPaginator;
 
@@ -91,12 +89,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   // File to upload for condition photo
   conditionPhoto?: File;
 
-  // Flags for responsive design
-  screenSize: 'large' | 'small' = 'large'; // Default to large screen
-  isMobile: boolean = false;
-  actualVariant: 'default' | 'compact' = 'default';
-  actualShowLocation: boolean = true;
-
   // Other properties
   opnameSession: OpnameSession = {} as OpnameSession;
   allUsers: User[] = []; // List of all users in the company
@@ -104,8 +96,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   allSubSites: SubSite[] = []; // List of all sub-sites for a given site
   isLoading: boolean = false; // Loading state for fetching assets
   errorMessage: string = ''; // Error message for fetching assets
-  private resizeCheckInterval?: number; // Interval for periodic size checks
-
+  
   // Filter properties
   filterText: string = '';
   filterCondition: string = '';
@@ -159,20 +150,17 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   private connectTableComponents(): void {
     // Only try to connect if the table exists (searchResults.length > 0)
     if (this.searchResults.length === 0) {
-      console.log('[OpnameAsset] Table not rendered yet, will connect when data is loaded');
       return;
     }
 
     if (this.sort) {
       this.dataSource.sort = this.sort;
-      console.log('[OpnameAsset] Sort connected successfully');
     } else {
       console.error('[OpnameAsset] MatSort not found!');
     }
 
     if (this.paginator) {
       this.dataSource.paginator = this.paginator;
-      console.log('[OpnameAsset] Paginator connected successfully');
     } else {
       console.error('[OpnameAsset] MatPaginator not found!');
     }
@@ -241,8 +229,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       return;
     }
         
-    this.checkScreenSize();
-    this.updateResponsiveSettings();
     this.getAllUsers();
     this.getAllSites();
     this.getAllSubSites();
@@ -255,11 +241,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       this.initOpnameData(); // Delayed initialization to ensure all inputs are set
     }, 0) // Use 0 to ensure it runs after the current call stack
     
-    // Set up periodic window size checking to catch missed events
-    this.resizeCheckInterval = window.setInterval(() => {
-      this.checkScreenSize();
-      this.updateResponsiveSettings();
-    }, 1000); // Check every second
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -268,13 +249,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
       this.isLoading = true;
       this.errorMessage = '';
       this.initOpnameData();
-    }
-  }
-
-  ngOnDestroy(): void {
-    // Clean up the interval
-    if (this.resizeCheckInterval) {
-      clearInterval(this.resizeCheckInterval);
     }
   }
 
@@ -463,8 +437,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
             // Continue with null site, will fall back to asset data
           }
         }
-        const siteGroupName = assetLocationSite ? assetLocationSite.siteGroup : asset.siteGroupName;
-        const regionName = assetLocationSite ? assetLocationSite.siteRegion : asset.regionName;
+        const siteGroupName = assetLocationSite ? assetLocationSite.siteGroupName : asset.siteGroupName;
+        const regionName = assetLocationSite ? assetLocationSite.regionName : asset.regionName;
 
         // Populate pending asset and apply changes from savedRecord
         const pendingAsset: AssetInfo = {
@@ -536,9 +510,7 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     this.opnameSessionService.getOpnameSession(this.sessionID).subscribe({
       next: (session: OpnameSession) => {
         this.opnameSession = session;
-        this.actualVariant = this.variant;
-        this.actualShowLocation = this.showLocation;
-        
+    
         // Load progress and then initialize form data when done
         this.loadOpnameProgress(this.sessionID);
       },
@@ -549,31 +521,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         setTimeout(() => this.showToast = false, 3000);
       }
     });
-  }
-
-  @HostListener('window:resize', ['$event']) 
-  onResize(event: any) {
-    this.updateResponsiveSettings();
-    this.checkScreenSize();
-  }
-
-  @HostListener('window:focus', ['$event'])
-  onWindowFocus(event: any) {
-    // Window regained focus (possibly from maximize)
-    this.updateResponsiveSettings();
-    this.checkScreenSize();
-  }
-
-  @HostListener('document:visibilitychange', ['$event'])
-  onVisibilityChange(event: any) {
-    // Document visibility changed (minimize/restore)
-    if (!document.hidden) {
-      // Window became visible again
-      setTimeout(() => {
-        this.updateResponsiveSettings();
-        this.checkScreenSize();
-      }, 100); // Small delay to ensure window size is updated
-    }
   }
 
   // Reload opname updated progress to refresh the most recent saved changes
@@ -606,11 +553,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
     }));
 
     this.dataSource.data = tableData;
-    
-    // On mobile, automatically show filter form when search results are available
-    if (this.isMobile && this.searchResults.length > 0) {
-      this.showFilterForm = true;
-    }
     
     // Connect paginator and sort after data is set and DOM is updated
     setTimeout(() => {
@@ -971,8 +913,8 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
         ...result.pendingAsset,
         subSiteID: matchedSubSite.subSiteID,
         subSiteName: matchedSubSite.subSiteName,
-        siteGroupName: matchedSite.siteGroup,
-        regionName: matchedSite.siteRegion,
+        siteGroupName: matchedSite.siteGroupName,
+        regionName: matchedSite.regionName,
         // Update owner's site information when owner changes
         siteID: matchedSite.siteID,
         siteName: matchedSite.siteName,
@@ -1595,61 +1537,6 @@ export class OpnameAssetComponent implements OnDestroy, OnChanges, AfterViewInit
   getAllAssets(): AssetInfo[] {
     // Return all assets (can be used as fallback)
     return this.searchResults.map(result => result.pendingAsset);
-  }
-
-  private checkScreenSize() {
-    const newIsMobile = window.innerWidth < 860; // Define mobile breakpoint
-    const newScreenSize = newIsMobile ? 'small' : 'large';
-    let newCurrentView = this.currentView;
-    if (!this.isInReport) {
-      newCurrentView = newIsMobile ? 'list' : 'card'; // Default to list view on mobile
-    }
-    
-    // Only update if values have changed and NOT in report page
-    if (this.isMobile !== newIsMobile || this.screenSize !== newScreenSize || this.currentView !== newCurrentView) {
-      this.isMobile = newIsMobile;
-      this.screenSize = newScreenSize;
-
-      if (!this.isInReport) {
-        this.currentView = newCurrentView
-      }
-
-      this.cdr.detectChanges(); // Only trigger change detection when needed
-    }
-  }
-
-  toggleView(view: 'card' | 'list') {
-    if (!this.isMobile) { // Only allow toggle on desktop view
-      this.currentView = view;
-    }
-  }
-
-  private updateResponsiveSettings() {
-    const previousIsMobile = this.isMobile;
-    this.isMobile = window.innerWidth <= 860;
-    
-    // Handle form visibility based on screen size
-    if (!this.isMobile) {
-      // On desktop, always show both forms
-      this.showSearchForm = true;
-      this.showFilterForm = true;
-    } else {
-      // On mobile, manage form visibility intelligently
-      if (!previousIsMobile) { // Just switched to mobile
-        this.showSearchForm = false;
-        this.showFilterForm = this.searchResults.length > 0;
-      }
-    }
-    
-    const newActualVariant = window.innerWidth >= 1000 ? this.variant : 'default';
-    const newActualShowLocation = window.innerWidth >= 1000 ? this.showLocation : false;
-    
-    // Only update if values have changed
-    if (this.actualVariant !== newActualVariant || this.actualShowLocation !== newActualShowLocation) {
-      this.actualVariant = newActualVariant;
-      this.actualShowLocation = newActualShowLocation;
-      this.cdr.detectChanges(); // Only trigger change detection when needed
-    }
   }
 
   private closeBootstrapModal(modalId: string): void {

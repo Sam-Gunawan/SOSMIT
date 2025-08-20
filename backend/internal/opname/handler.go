@@ -23,8 +23,9 @@ func NewHandler(service *Service) *Handler {
 	}
 }
 
-type StartNewSessionRequest struct {
-	SiteID int `json:"site_id" binding:"required"`
+type RequestWithLocation struct {
+	SiteID *int `json:"site_id"`
+	DeptID *int `json:"dept_id"`
 }
 
 // validateSessionID checks if the session ID is valid and returns an error if not.
@@ -39,8 +40,8 @@ func validateSessionID(sessionIDstr string) (int, error) {
 
 // StartNewSessionHandler handles the creation of a new opname session.
 func (handler *Handler) StartNewSessionHandler(context *gin.Context) {
-	// Bind the request body to StartNewSessionRequest struct
-	var request StartNewSessionRequest
+	// Bind the request body to RequestWithLocation struct
+	var request RequestWithLocation
 	if err := context.ShouldBindJSON(&request); err != nil {
 		log.Printf("❌ Error binding request body: %v", err)
 		context.JSON(http.StatusBadRequest, gin.H{
@@ -59,7 +60,7 @@ func (handler *Handler) StartNewSessionHandler(context *gin.Context) {
 	}
 
 	// Call the service with the validated user ID and site ID
-	newSessionID, err := handler.service.StartNewSession(int(userID.(int64)), request.SiteID)
+	newSessionID, err := handler.service.StartNewSession(int(userID.(int64)), request.SiteID, request.DeptID)
 	if err != nil {
 		context.JSON(http.StatusConflict, gin.H{
 			"error": "failed to start new opname: " + err.Error(),
@@ -381,41 +382,65 @@ func (handler *Handler) FinishOpnameSessionHandler(context *gin.Context) {
 	})
 }
 
-// GetOpnameOnSiteHandler retrieves all opname sessions for a specific site.
-func (handler *Handler) GetOpnameOnSiteHandler(context *gin.Context) {
-	// Get the site ID from the URL parameter
-	siteIDstr := context.Param("site_id")
-	siteID, err := strconv.Atoi(siteIDstr)
-	if err != nil || siteID <= 0 {
-		log.Printf("⚠ Invalid site ID: %s", siteIDstr)
+// GetOpnameOnLocationHandler retrieves all opname sessions for a specific location.
+func (handler *Handler) GetOpnameOnLocationHandler(context *gin.Context) {
+	// Read optional query params: /api/opname/location?site_id=1&dept_id=2
+	siteIDStr := context.Query("site_id")
+	deptIDStr := context.Query("dept_id")
+
+	var siteID *int
+	var deptID *int
+
+	if siteIDStr != "" {
+		if parsedSiteID, err := strconv.Atoi(siteIDStr); err != nil {
+			context.JSON(http.StatusBadRequest, gin.H{
+				"error": "invalid site_id, must be an integer",
+			})
+			return
+		} else {
+			siteID = &parsedSiteID
+		}
+	}
+
+	if deptIDStr != "" {
+		if parsedDeptID, err := strconv.Atoi(deptIDStr); err != nil {
+			context.JSON(http.StatusBadRequest, gin.H{
+				"error": "invalid dept_id, must be an integer",
+			})
+			return
+		} else {
+			deptID = &parsedDeptID
+		}
+	}
+
+	if siteID == nil && deptID == nil {
 		context.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid site_id, must be a positive integer",
+			"error": "at least one of site_id or dept_id must be provided",
 		})
 		return
 	}
 
-	// Call the service to get all opname sessions for the site
-	sessions, err := handler.service.GetOpnameOnSite(siteID)
+	sessions, err := handler.service.GetOpnameOnLocation(siteID, deptID)
 	if err != nil {
-		log.Printf("❌ Error retrieving opname sessions for site %d: %v", siteID, err)
+		log.Printf("❌ Error retrieving opname sessions for site %v dept %v: %v", utils.ParseNullableInt(siteID), utils.ParseNullableInt(deptID), err)
 		context.JSON(http.StatusInternalServerError, gin.H{
 			"error": "failed to retrieve opname sessions: " + err.Error(),
 		})
 		return
 	}
 	if len(sessions) == 0 {
-		log.Printf("⚠ No opname sessions found for site %d", siteID)
+		log.Printf("⚠ No opname sessions found for site %v dept %v", utils.ParseNullableInt(siteID), utils.ParseNullableInt(deptID))
 		context.JSON(http.StatusOK, gin.H{
-			"message":  "No opname sessions found for this site",
+			"message":  "No opname sessions found for this filter",
 			"sessions": []OpnameFilter{},
 		})
 		return
 	}
 
-	// If successful, return the list of sessions
-	log.Printf("✅ Retrieved %d opname sessions for site %d", len(sessions), siteID)
+	log.Printf("✅ Retrieved %d opname sessions for site %v dept %v",
+		len(sessions), utils.ParseNullableInt(siteID), utils.ParseNullableInt(deptID))
 	context.JSON(http.StatusOK, gin.H{
-		"message":  fmt.Sprintf("Retrieved %d opname sessions for site %d", len(sessions), siteID),
+		"message":  fmt.Sprintf("Retrieved %d opname sessions", len(sessions)),
 		"sessions": sessions,
 	})
 }
