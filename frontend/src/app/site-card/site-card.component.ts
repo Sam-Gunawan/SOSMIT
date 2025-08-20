@@ -11,10 +11,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatNativeDateModule } from '@angular/material/core';
 import { OpnameSessionService } from '../services/opname-session.service';
+import { MatOptionModule } from '@angular/material/core';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-site-card',
-  imports: [CommonModule, FormsModule, MatPaginatorModule, MatDatepickerModule, MatInputModule, MatFormFieldModule, MatNativeDateModule],
+  imports: [CommonModule, FormsModule, MatPaginatorModule, MatDatepickerModule, MatInputModule, MatFormFieldModule, MatNativeDateModule, MatOptionModule, MatAutocompleteModule],
   templateUrl: './site-card.component.html',
   styleUrl: './site-card.component.scss'
 })

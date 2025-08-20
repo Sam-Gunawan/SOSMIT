@@ -76,20 +76,28 @@
                         placeholder="Sub site name">
                 </div>
 
-                <div class="form-item">
+                <div class="form-item" matAutocompleteOrigin #origin="matAutocompleteOrigin">
                     <label>Created By</label>
                     <input 
                         type="text" 
                         class="form-control" 
                         [(ngModel)]="searchCriteria.createdBy"
-                        name="createdBy"
+                        name="createdBy"3
                         placeholder="Search by user name"
-                        list="users">
-                    <datalist id="users">
+                        list="users"
+                        [matAutocomplete]="auto">
+                    <mat-autocomplete #auto="matAutocomplete">
+                        @for (user of allUsers; track user) {
+                            <mat-option [value]="user.firstName + ' ' + user.lastName">
+                                {{ user.firstName }} {{ user.lastName }} ({{ user.username }})
+                            </mat-option>
+                        }
+                    </mat-autocomplete>
+                    <!-- <datalist id="users">
                         <option *ngFor="let user of allUsers" [value]="user.firstName + ' ' + user.lastName">
                             {{ user.firstName }} {{ user.lastName }} ({{ user.username }})
                         </option>
-                    </datalist>
+                    </datalist> -->
                 </div>
                 
                 <div class="form-item">
