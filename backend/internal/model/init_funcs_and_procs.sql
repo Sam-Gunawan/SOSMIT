@@ -1012,22 +1012,16 @@ CREATE OR REPLACE FUNCTION public.get_all_sites()
 		site_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
-		region_name VARCHAR(100),
-		site_ga_id INT,
-		site_ga_name VARCHAR(255),
-		site_ga_email VARCHAR(255)
+		region_name VARCHAR(100)
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT s.id, s.site_name, sg.site_group_name, r.region_name, s.site_ga_id,
-			(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS site_ga_name,
-			u.email AS site_ga_email
+		SELECT s.id, s.site_name, sg.site_group_name, r.region_name
 		FROM "Site" AS s
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-		INNER JOIN "Region" AS r ON sg.region_id = r.id
-		INNER JOIN "User" AS u ON s.site_ga_id = u.user_id;
+		INNER JOIN "Region" AS r ON sg.region_id = r.id;
 	END;
 $$;
 
@@ -1054,22 +1048,16 @@ CREATE OR REPLACE FUNCTION public.get_site_by_id(_site_id INT)
 		site_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
-		region_name VARCHAR(100),
-		site_ga_id INT,
-		site_ga_name VARCHAR(255),
-		site_ga_email VARCHAR(255)
+		region_name VARCHAR(100)
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT s.id, s.site_name, sg.site_group_name, r.region_name, s.site_ga_id,
-			(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS site_ga_name,
-			u.email AS site_ga_email
+		SELECT s.id, s.site_name, sg.site_group_name, r.region_name
 		FROM "Site" AS s
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 		INNER JOIN "Region" AS r ON sg.region_id = r.id
-		INNER JOIN "User" AS u ON s.site_ga_id = u.user_id
 		WHERE s.id = _site_id;
 	END;
 $$;
@@ -1093,10 +1081,10 @@ AS $$
 			sg.site_group_name,
 			r.region_name
 		FROM "Department" AS d
-		INNER JOIN "Site" AS s ON d.site_id = s.id
+		INNER JOIN "Site" AS s ON LOWER(s.site_name) = 'head office jakarta'
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 		INNER JOIN "Region" AS r ON sg.region_id = r.id
-		WHERE d.id = _dept_id AND LOWER(s.site_name) = 'head office jakarta';
+		WHERE d.id = _dept_id;
 	END;
 $$;
 

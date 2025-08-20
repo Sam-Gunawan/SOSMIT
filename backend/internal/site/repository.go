@@ -15,9 +15,6 @@ type Site struct {
 	SiteName      string
 	SiteGroupName string
 	RegionName    string
-	SiteGaID      string
-	SiteGaName    string
-	SiteGaEmail   string
 }
 
 type SubSite struct {
@@ -44,7 +41,7 @@ func (repo *Repository) GetAllSites() ([]*Site, error) {
 
 	for rows.Next() {
 		var site Site
-		if err := rows.Scan(&site.SiteID, &site.SiteName, &site.SiteGroupName, &site.RegionName, &site.SiteGaID, &site.SiteGaName, &site.SiteGaEmail); err != nil {
+		if err := rows.Scan(&site.SiteID, &site.SiteName, &site.SiteGroupName, &site.RegionName); err != nil {
 			return nil, err
 		}
 		allSites = append(allSites, &site)
@@ -58,7 +55,7 @@ func (repo *Repository) GetSiteByID(siteID int) (*Site, error) {
 	var site Site
 
 	query := `SELECT * FROM get_site_by_id($1)`
-	err := repo.db.QueryRow(query, siteID).Scan(&site.SiteID, &site.SiteName, &site.SiteGroupName, &site.RegionName, &site.SiteGaID, &site.SiteGaName, &site.SiteGaEmail)
+	err := repo.db.QueryRow(query, siteID).Scan(&site.SiteID, &site.SiteName, &site.SiteGroupName, &site.RegionName)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("⚠ No site found with ID: %d\n", siteID)

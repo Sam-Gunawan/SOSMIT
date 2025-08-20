@@ -7,7 +7,6 @@ import { OpnamePageComponent } from '../opname-page/opname-page.component';
 import { SearchPageComponent } from '../search-page/search-page.component';
 import { ReportComponent } from '../report/report.component';
 import { OpnameReviewPageComponent } from '../opname-review-page/opname-review-page.component';
-import { OpnamePreviewComponent } from '../opname-preview/opname-preview.component';
 
 const authGuard: CanActivateFn = () => {
     const token = localStorage.getItem('auth_token');
@@ -26,10 +25,9 @@ export const routes: Routes = [
         children: [
             { path: '', component: DashboardComponent, canActivate: [authGuard], pathMatch: 'full' },
             { path: 'search', component: SearchPageComponent, canActivate: [authGuard] },
-            { path: 'site/:id', component: SitePageComponent, canActivate: [authGuard] },
+            { path: 'location', component: SitePageComponent, canActivate: [authGuard] },
             { path: 'site/:id/opname', component: OpnamePageComponent, canActivate: [authGuard]},
             { path: 'site/:id/report', component: ReportComponent, canActivate: [authGuard]},
-            { path: 'preview', component: OpnamePreviewComponent} // will change part later, this is just for testing
         ]
     },
     { path: 'opname/:session-id/review', component: OpnameReviewPageComponent, canActivate: [authGuard] }

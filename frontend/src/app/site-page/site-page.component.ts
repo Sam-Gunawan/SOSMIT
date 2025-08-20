@@ -1,12 +1,12 @@
-import { Component, input, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SiteInfo } from '../model/site-info.model';
 import { AssetCardComponent } from '../asset-card/asset-card.component';
 import { OpnameSession } from '../model/opname-session.model';
 import { Department } from '../model/dept.model';
+import { ApiService } from '../services/api.service';
 
   @Component({
     selector: 'app- site-page',
@@ -14,9 +14,8 @@ import { Department } from '../model/dept.model';
     templateUrl: './site-page.component.html',
     styleUrl: './site-page.component.scss'
   })
-  export class SitePageComponent {
-    site: SiteInfo = {} as SiteInfo;
-    dept: Department = {} as Department;
+  export class SitePageComponent implements OnInit{
+    location = {} as any;
     siteList?: SiteInfo[] = []; // Initialize siteList as an empty array
     isLoading: boolean = false; // Loading state to show a spinner or loading indicator
     errorMessage: string = '';
@@ -25,7 +24,16 @@ import { Department } from '../model/dept.model';
     showToast: boolean = false;
     floatingMenuExpanded: boolean = false; // Track floating menu expanded state
 
-    constructor(private router: Router, private opnameSessionService: OpnameSessionService) {}
+    constructor(
+      private route: ActivatedRoute,
+      private router: Router,
+      private opnameSessionService: OpnameSessionService,
+      private apiService: ApiService,
+    ) {}
+
+    ngOnInit(): void {
+      this.getLocationInfo();
+    }
 
     toggleFloatingMenu(): void {
       this.floatingMenuExpanded = !this.floatingMenuExpanded;
@@ -42,6 +50,55 @@ import { Department } from '../model/dept.model';
       }
     }
 
+    getLocationInfo(): void {
+      this.isLoading = true;
+      this.route.queryParamMap.subscribe(params => {
+          // Check whether any params are provided or whether both site_id and dept_id are provided. If invalid, then throw an error
+          // In other words, the params must be exactly one (either site id or dept id provided)
+          if (params.keys.length !== 1) {
+            this.errorMessage = 'Halaman lokasi invalid.';
+            this.showToast = true;
+            setTimeout(() => this.showToast = false, 3000);
+          }
+
+          if (params.keys.indexOf('site_id') !== -1) {
+            const siteID = Number(params.get('site_id'))
+            this.apiService.getSiteByID(siteID).subscribe({
+                next: (site: SiteInfo) => {
+                  this.location = site;
+                  this.isLoading = false;
+                },
+                error: (error) => {
+                  this.isLoading = false;
+                  console.error('[SitePage] Error loading site info:', error.error.error);
+                  this.errorMessage = error.error.error || 'Gagal memuat halaman lokasi. Silakan coba lagi';
+                  this.showToast = true;
+                  setTimeout(() => this.showToast = false, 3000);
+                }
+              }
+            )
+          } else if (params.keys.indexOf('dept_id') !== -1) {
+            const deptID = Number(params.get('dept_id'))
+            this.apiService.getDeptByID(deptID).subscribe({
+                next: (dept: Department) => {
+                  this.location = dept;
+                  this.isLoading = false;
+                  console.log('[SitePage] Department info loaded:', this.location);
+                },
+                error: (error) => {
+                  this.isLoading = false;
+                  console.error('[SitePage] Error loading site info:', error.error.error);
+                  this.errorMessage = error.error.error || 'Gagal memuat halaman lokasi. Silakan coba lagi';
+                  this.showToast = true;
+                  setTimeout(() => this.showToast = false, 3000);
+                }
+              }
+            )
+          }
+        }
+      )
+    }
+
     startNewOpname(): void {
       // Prevent multiple simultaneous requests
       if (this.opnameLoading) {
@@ -51,21 +108,21 @@ import { Department } from '../model/dept.model';
       // This method will start a new stock opname session for the current site.
       this.opnameLoading = true; // Set loading state to true before starting the request
       this.errorMessage = ''; // Clear any previous errors
-      
-      
-      this.opnameSessionService.startNewOpname(this.site.siteID, this.dept.deptID).subscribe({
+
+
+      this.opnameSessionService.startNewOpname(this.location.siteID, this.location.deptID).subscribe({
         next: (response) => {
           this.opnameLoading = false; // Set loading state to false after starting opname
-          
-          // Update the site with the new opname session ID.
-          this.site.opnameSessionID = response.opnameSessionID;
+
+          // Update the location with the new opname session ID.
+          this.location.opnameSessionID = response.opnameSessionID;
 
           // Store the session ID and site ID in the service
           this.opnameSessionService.setSessionId(response.opnameSessionID);
-          this.opnameSessionService.setSiteId(this.site.siteID);
+          this.opnameSessionService.setSiteId(this.location.siteID);
 
           // Redirect to the opname page using router state
-          this.router.navigate(['/site', this.site.siteID, 'opname'], {
+          this.router.navigate(['/site', this.location.siteID, 'opname'], {
             state: { sessionID: response.opnameSessionID }
           });
         },
@@ -89,8 +146,8 @@ import { Department } from '../model/dept.model';
       
       this.opnameLoading = true;
       this.errorMessage = ''; // Clear any previous errors
-      
-      if (this.site.opnameSessionID <= 0) {
+
+      if (this.location.opnameSessionID <= 0) {
         this.opnameLoading = false;
         this.errorMessage = 'Tidak ada sesi opname yang tersedia.';
         console.error('[SitePage] No opname session ID to continue');
@@ -98,15 +155,15 @@ import { Department } from '../model/dept.model';
         setTimeout(() => this.showToast = false, 3000);
         return;
       }
-      
-      this.opnameSessionService.getOpnameSession(this.site.opnameSessionID).subscribe({
+
+      this.opnameSessionService.getOpnameSession(this.location.opnameSessionID).subscribe({
         next: (opnameSession) => {
           this.opnameSession = opnameSession; // Store the current opname session data
           this.opnameLoading = false; // Set loading state to false after fetching session
           
           // Only continue if the session is active - MOVED THIS INSIDE THE SUCCESS CALLBACK
           if (this.opnameSession && this.opnameSession.status === 'Active') {
-            this.opnameSessionService.continueOpname(this.site.opnameSessionID, this.site.siteID, this.router);
+            this.opnameSessionService.continueOpname(this.location.opnameSessionID, this.location.siteID, this.router);
           } else {
             const status = this.opnameSession ? this.opnameSession.status : 'unknown';
             console.error('[SitePage] Opname session is not active:', status);
@@ -127,7 +184,7 @@ import { Department } from '../model/dept.model';
 
     goToReport(): void {
       // Navigate to the report page for the current site
-      const siteID = this.site.siteID;
+      const siteID = this.location.siteID;
       if (siteID > 0) {
         this.router.navigate(['/site', siteID, 'report']);
       } else {

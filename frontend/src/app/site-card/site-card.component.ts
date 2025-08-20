@@ -155,15 +155,22 @@ export class SiteCardComponent {
   // Handle click on location (either site or department)
   onLocationClick(location: any): void {
     if (this.searchCriteria.searchIn === 'ho') {
-      // For HO mode (departments), use site ID 25
-      this.goToSite(25);
+      this.goToDept(location.deptID)
     } else {
-      // For area mode (sites), use the actual site ID
-      this.goToSite(location.siteId);
+      this.goToSite(location.siteID);
     }
   }
 
   goToSite(id: number): void {
-    this.route.navigate(['site', `${id}`])
+    this.route.navigate(['location'], {
+      queryParams: { site_id: `${id}`}
+    })
   }
+
+  goToDept(id: number): void {
+    this.route.navigate(['location'], {
+      queryParams: { dept_id: `${id}`}
+    })
+  }
+
 }
