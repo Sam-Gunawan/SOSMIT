@@ -237,13 +237,11 @@ p {
     }
 
     .area-btn {
-      border-top-right-radius: 0px;
-      border-bottom-right-radius: 0px;
+      border-radius: 6px 0 0 6px;
     }
 
     .ho-btn {
-      border-top-left-radius: 0px;
-      border-bottom-left-radius: 0px;
+      border-radius: 0 6px 6px 0;
     }
   }
 }
