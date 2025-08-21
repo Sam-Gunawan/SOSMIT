@@ -38,11 +38,12 @@ func (handler *Handler) GetDeptByIDHandler(context *gin.Context) {
 
 	log.Printf("✅ Successfully retrieved department by ID %d", deptID)
 	context.JSON(http.StatusOK, gin.H{
-		"message":         "successfully retrieved department details with id: " + deptIDstr,
-		"dept_id":         department.DepartmentID,
-		"dept_name":       department.DepartmentName,
-		"site_name":       department.SiteName,
-		"site_group_name": department.SiteGroupName,
-		"region_name":     department.RegionName,
+		"message":           "successfully retrieved department details with id: " + deptIDstr,
+		"dept_id":           department.DepartmentID,
+		"dept_name":         department.DepartmentName,
+		"site_name":         department.SiteName,
+		"site_group_name":   department.SiteGroupName,
+		"region_name":       department.RegionName,
+		"opname_session_id": department.OpnameSessionID,
 	})
 }

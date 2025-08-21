@@ -21,7 +21,7 @@
                     </div>
                 </div>
                 <div class="opname-info">
-                    <!-- <span 
+                    <span 
                         class="site-status"
                         [ngClass]="{
                             'status-active': location.opnameStatus === 'Active',
@@ -31,9 +31,9 @@
                             'status-rejected': location.opnameStatus === 'Rejected',
                             'status-outdated': location.opnameStatus === 'Outdated'
                         }">
-                        {{ location.opnameStatus }}
+                        {{ location.opnameStatus || 'Loading...' }}
                     </span>
-                    <p class="opname-date">Last Opname on {{ location.opnameDate }}</p> -->
+                    <p class="opname-date">{{ location.opnameDate ? 'Last Opname on ' + location.opnameDate : 'No previous opname' }}</p>
                 </div>
             </div>
 

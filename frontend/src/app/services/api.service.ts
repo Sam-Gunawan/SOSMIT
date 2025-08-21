@@ -127,11 +127,11 @@ import { Department } from '../model/dept.model';
         map((response: any) => {
           // Map the response to the desired format.
           return response.sites.map((site: any) => ({
-            siteID: site.SiteID,
-            siteName: site.SiteName,
-            siteGroupName: site.SiteGroupName,
-            regionName: site.RegionName,
-            opnameSessionID: -1,
+            siteID: site.site_id,
+            siteName: site.site_name,
+            siteGroupName: site.site_group_name,
+            regionName: site.region_name,
+            opnameSessionID: site.opname_session_id,
           }));
         }),
         tap((sites: SiteInfo[]) => {
@@ -184,7 +184,7 @@ import { Department } from '../model/dept.model';
             siteName: response.site_name,
             siteGroupName: response.site_group_name,
             regionName: response.region_name,
-            opnameSessionID: -1,
+            opnameSessionID: response.opname_session_id,
           }
         })
       )
@@ -200,12 +200,33 @@ import { Department } from '../model/dept.model';
             siteName: response.site_name,
             siteGroupName: response.site_group_name,
             regionName: response.region_name,
-            opnameSessionID: -1,
+            opnameSessionID: response.opname_session_id,
           };
         }),
         tap((siteInfo: SiteInfo) => {
           // Log the fetched site info for debugging purposes.
           console.log('[ApiService] Fetched site info:', siteInfo);
+        })
+      );
+    }
+
+    getLatestOpnameStatus(siteID?: number, deptID?: number): Observable<{status: string, date: string}> {
+      // This method will fetch the latest opname status for a site or department
+      const params = buildHttpParams({ site_id: siteID, dept_id: deptID });
+      
+      return this.http.get<any>(`${this.userApiUrl}/opname-locations`, { params }).pipe(
+        map((response: any) => {
+          // Extract the first location's status info
+          const locations = response?.locations || [];
+          if (locations.length > 0) {
+            const location = locations[0];
+            const dateString = location.last_opname_date ? formatDate(location.last_opname_date) : '';
+            return {
+              status: (location.opname_status || 'Outdated') as string,
+              date: dateString || ''
+            };
+          }
+          return { status: 'Outdated', date: '' };
         })
       );
     }

@@ -11,10 +11,11 @@ type Repository struct {
 }
 
 type Site struct {
-	SiteID        int
-	SiteName      string
-	SiteGroupName string
-	RegionName    string
+	SiteID          int    `json:"site_id"`
+	SiteName        string `json:"site_name"`
+	SiteGroupName   string `json:"site_group_name"`
+	RegionName      string `json:"region_name"`
+	OpnameSessionID int    `json:"opname_session_id"`
 }
 
 type SubSite struct {
@@ -55,7 +56,7 @@ func (repo *Repository) GetSiteByID(siteID int) (*Site, error) {
 	var site Site
 
 	query := `SELECT * FROM get_site_by_id($1)`
-	err := repo.db.QueryRow(query, siteID).Scan(&site.SiteID, &site.SiteName, &site.SiteGroupName, &site.RegionName)
+	err := repo.db.QueryRow(query, siteID).Scan(&site.SiteID, &site.SiteName, &site.SiteGroupName, &site.RegionName, &site.OpnameSessionID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("⚠ No site found with ID: %d\n", siteID)

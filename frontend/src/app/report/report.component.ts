@@ -51,7 +51,25 @@ export class ReportComponent {
     private reportService: ReportService,
     private router: Router
   ) {
-    this.siteID = Number(this.route.snapshot.paramMap.get('id'));
+    // Only handle query parameter navigation: /location/report?site_id=... or dept_id=...
+    const querySiteId = this.route.snapshot.queryParamMap.get('site_id');
+    const queryDeptId = this.route.snapshot.queryParamMap.get('dept_id');
+    const querySessionId = this.route.snapshot.queryParamMap.get('session_id');
+    
+    if (querySiteId) {
+      this.siteID = Number(querySiteId);
+      if (querySessionId) {
+        this.sessionID = Number(querySessionId);
+      }
+    } else if (queryDeptId) {
+      // Department-based query parameter routing
+      this.deptID = Number(queryDeptId);
+      if (querySessionId) {
+        this.sessionID = Number(querySessionId);
+      }
+    }
+    
+    console.log('[Report] Initialized with siteID:', this.siteID, 'deptID:', this.deptID, 'sessionID:', this.sessionID);
   }
 
   async exportToPDF() {
@@ -89,15 +107,21 @@ export class ReportComponent {
   }
 
   initSiteInfo() {
-    this.apiService.getSiteByID(this.siteID).subscribe({
-      next: (site) => {
-        this.site = site;
-        console.log('[Report] Site info fetched successfully:', this.site);
-      },
-      error: (error) => {
-        console.error('[Report] Error fetching site info:', error);
-      }
-    });
+    if (this.siteID > 0) {
+      this.apiService.getSiteByID(this.siteID).subscribe({
+        next: (site) => {
+          this.site = site;
+          console.log('[Report] Site info fetched successfully:', this.site);
+        },
+        error: (error) => {
+          console.error('[Report] Error fetching site info:', error);
+        }
+      });
+    } else if (this.deptID > 0) {
+      // For department-based opnames, we might not need site info
+      // or we could fetch department info instead
+      console.log('[Report] Department-based opname, skipping site info fetch');
+    }
   }
 
   initAvailableOpnames() {

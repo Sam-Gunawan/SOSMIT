@@ -4,4 +4,6 @@ export interface SiteInfo {
     siteGroupName: string;  
     regionName: string; 
     opnameSessionID: number;
+    opnameStatus?: string;
+    opnameDate?: string;
 }

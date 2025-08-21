@@ -84,10 +84,11 @@ func (handler *Handler) GetSiteByIDHandler(context *gin.Context) {
 
 	log.Printf("Successfully retrieved site by ID: %v", siteID)
 	context.JSON(http.StatusOK, gin.H{
-		"site_id":         site.SiteID,
-		"site_name":       site.SiteName,
-		"site_group_name": site.SiteGroupName,
-		"region_name":     site.RegionName,
+		"site_id":           site.SiteID,
+		"site_name":         site.SiteName,
+		"site_group_name":   site.SiteGroupName,
+		"region_name":       site.RegionName,
+		"opname_session_id": site.OpnameSessionID,
 	})
 }
 

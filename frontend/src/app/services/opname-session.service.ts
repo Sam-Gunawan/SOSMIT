@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 import { OpnameSession } from '../model/opname-session.model';
 import { AssetChange } from '../model/asset-changes.model';
 import { OpnameSessionProgress } from '../model/opname-session-progress.model';
-import { formatDate } from '../utils';
+import { formatDate, buildHttpParams } from '../utils';
 
 @Injectable({ providedIn: 'root' })
 export class OpnameSessionService {
@@ -45,21 +45,60 @@ export class OpnameSessionService {
     this.sessionIDSubject.next(null);
     // Clear from localStorage
     localStorage.removeItem('opname_session_id');
-    this.clearSiteId(); // Also clear the site ID
+    this.clearLocationId(); // Also clear the location ID (site or dept)
   }
 
-  // Store and retrieve siteID for the current opname session
+  // Store and retrieve location ID (either siteID or deptID) for the current opname session
+  setLocationId(locationId: number, locationType: 'site' | 'dept'): void {
+    // Clear any existing location data first
+    this.clearLocationId();
+    
+    // Store the new location
+    localStorage.setItem('opname_location_id', locationId.toString());
+    localStorage.setItem('opname_location_type', locationType);
+  }
+
+  getLocationId(): { id: number | null, type: 'site' | 'dept' | null } {
+    const storedId = localStorage.getItem('opname_location_id');
+    const storedType = localStorage.getItem('opname_location_type');
+    
+    if (!storedId || !storedType) {
+      return { id: null, type: null };
+    }
+    
+    return {
+      id: Number(storedId),
+      type: storedType as 'site' | 'dept'
+    };
+  }
+
+  clearLocationId(): void {
+    localStorage.removeItem('opname_location_id');
+    localStorage.removeItem('opname_location_type');
+  }
+
+  // Legacy methods for backward compatibility - these will delegate to the new location methods
   setSiteId(siteId: number): void {
-    localStorage.setItem('opname_site_id', siteId.toString());
+    this.setLocationId(siteId, 'site');
   }
 
   getSiteId(): number | null {
-    const storedId = localStorage.getItem('opname_site_id');
-    return storedId ? Number(storedId) : null;
+    const location = this.getLocationId();
+    return location.type === 'site' ? location.id : null;
   }
 
   clearSiteId(): void {
-    localStorage.removeItem('opname_site_id');
+    this.clearLocationId();
+  }
+
+  // New methods for department ID
+  setDeptId(deptId: number): void {
+    this.setLocationId(deptId, 'dept');
+  }
+
+  getDeptId(): number | null {
+    const location = this.getLocationId();
+    return location.type === 'dept' ? location.id : null;
   }
 
   getOpnameSession(sessionID: number): Observable<any> {
@@ -69,6 +108,7 @@ export class OpnameSessionService {
             return {
               sessionID: response.session_id,
               siteID: response.site_id,
+              deptID: response.dept_id,
               userID: response.user_id,
               status: response.status,
               startDate: formatDate(response.start_date),
@@ -86,8 +126,8 @@ export class OpnameSessionService {
     );
   }
 
-  startNewOpname(siteID: number, deptID: number): Observable<any> {
-    // This method will start a new stock opname session for the specified site.
+  startNewOpname(siteID: number | null, deptID: number | null): Observable<any> {
+    // This method will start a new stock opname session for the specified location.
     return this.http.post(`${this.opnameApiUrl}/start`, {site_id: siteID, dept_id: deptID}).pipe(
       map((response: any) => {
           return {
@@ -122,14 +162,24 @@ export class OpnameSessionService {
       );
   }
 
-  continueOpname(sessionID: number, siteID: number, router: Router): void {
+  continueOpname(sessionID: number, locationId: number, locationType: 'site' | 'dept', router: Router): void {
     // This method will continue an existing stock opname session.
-    console.log('[OpnameService] Continuing opname session:', sessionID);
+    console.log('[OpnameService] Continuing opname session:', sessionID, 'for', locationType, locationId);
     this.setSessionId(sessionID); // Ensure the session ID is set in the service
-    this.setSiteId(siteID);       // Also store the site ID
-    router.navigate(['/site', siteID, 'opname'], {
-        state: { sessionID: sessionID }
+    this.setLocationId(locationId, locationType); // Store the location ID and type
+    
+    // Navigate to the new location/opname route with appropriate query parameters
+    if (locationType === 'site') {
+      router.navigate(['/location/opname'], { 
+        queryParams: { site_id: locationId },
+        state: { sessionID: sessionID } 
       });
+    } else {
+      router.navigate(['/location/opname'], { 
+        queryParams: { dept_id: locationId },
+        state: { sessionID: sessionID } 
+      });
+    }
   }
 
   processScannedAsset(sessionID: number, assetChanges: AssetChange): Observable<any> {
@@ -233,15 +283,18 @@ export class OpnameSessionService {
     );
   }
 
-  getOpnameOnLocation(siteID: number, deptID: number): Observable<OpnameSession[]> {
+  getOpnameOnLocation(siteID: number | null, deptID: number | null): Observable<OpnameSession[]> {
     // This method will fetch all opname sessions for a specific location.
-    return this.http.get<any>(`${this.opnameApiUrl}/filter/location`, { params: { site_id: siteID, dept_id: deptID } }).pipe(
+    const params = buildHttpParams({ site_id: siteID, dept_id: deptID });
+    
+    return this.http.get<any>(`${this.opnameApiUrl}/filter/location`, { params }).pipe(
       map((response: any) => {
         // The backend returns { message: string, sessions: array }
         const sessions = response.sessions || [];
         return sessions.map((session: any) => ({
           sessionID: session.session_id,
           siteID: siteID,
+          deptID: deptID,
           userID: '',
           status: '',
           startDate: '',
@@ -254,7 +307,7 @@ export class OpnameSessionService {
       }),
       tap((response: OpnameSession[]) => {
         // Log the response for debugging purposes.
-        console.log('[OpnameService] Fetched opname sessions for site:', response);
+        console.log('[OpnameService] Fetched opname sessions for location:', response);
       })
     );
   }

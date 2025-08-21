@@ -547,7 +547,7 @@ AS $$
 		SELECT COUNT(*)
 		INTO _ongoing_session_count
 		FROM "OpnameSession"
-		WHERE (_site_id IS NOT NULL AND site_id = _site_id OR _dept_id IS NOT NULL AND dept_id = _dept_id) 
+		WHERE ((_site_id IS NOT NULL AND site_id = _site_id) OR (_dept_id IS NOT NULL AND dept_id = _dept_id))
 		  AND "status" IN ('Active', 'Submitted', 'Escalated');
 
 		-- If there are no ongoing sessions, proceed to create a new one.
@@ -1068,16 +1068,23 @@ CREATE OR REPLACE FUNCTION public.get_site_by_id(_site_id INT)
 		site_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
-		region_name VARCHAR(100)
+		region_name VARCHAR(100),
+		opname_session_id INT
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT s.id, s.site_name, sg.site_group_name, r.region_name
+		SELECT 
+			s.id, 
+			s.site_name, 
+			sg.site_group_name, 
+			r.region_name,
+			COALESCE(os.id, -1) AS opname_session_id
 		FROM "Site" AS s
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 		INNER JOIN "Region" AS r ON sg.region_id = r.id
+		LEFT JOIN "OpnameSession" AS os ON os.site_id = s.id AND os.status = 'Active'
 		WHERE s.id = _site_id;
 	END;
 $$;
@@ -1089,21 +1096,25 @@ CREATE OR REPLACE FUNCTION public.get_dept_by_id(_dept_id INT)
 		dept_name VARCHAR(100),
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
-		region_name VARCHAR(100)
+		region_name VARCHAR(100),
+		opname_session_id INT
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT d.id AS dept_id,
+		SELECT 
+			d.id AS dept_id,
 			d.dept_name,
 			s.site_name,
 			sg.site_group_name,
-			r.region_name
+			r.region_name,
+			COALESCE(os.id, -1) AS opname_session_id
 		FROM "Department" AS d
 		INNER JOIN "Site" AS s ON LOWER(s.site_name) = 'head office jakarta'
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 		INNER JOIN "Region" AS r ON sg.region_id = r.id
+		LEFT JOIN "OpnameSession" AS os ON os.dept_id = d.id AND os.status = 'Active'
 		WHERE d.id = _dept_id;
 	END;
 $$;

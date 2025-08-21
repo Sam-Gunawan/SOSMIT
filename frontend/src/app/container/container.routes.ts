@@ -26,8 +26,8 @@ export const routes: Routes = [
             { path: '', component: DashboardComponent, canActivate: [authGuard], pathMatch: 'full' },
             { path: 'search', component: SearchPageComponent, canActivate: [authGuard] },
             { path: 'location', component: SitePageComponent, canActivate: [authGuard] },
-            { path: 'site/:id/opname', component: OpnamePageComponent, canActivate: [authGuard]},
-            { path: 'site/:id/report', component: ReportComponent, canActivate: [authGuard]},
+            { path: 'location/opname', component: OpnamePageComponent, canActivate: [authGuard] },
+            { path: 'location/report', component: ReportComponent, canActivate: [authGuard] },
         ]
     },
     { path: 'opname/:session-id/review', component: OpnameReviewPageComponent, canActivate: [authGuard] }

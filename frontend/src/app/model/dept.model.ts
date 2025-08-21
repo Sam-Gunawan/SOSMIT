@@ -5,4 +5,6 @@ export interface Department {
     siteGroupName: string;
     regionName: string;
     opnameSessionID: number;
+    opnameStatus?: string;
+    opnameDate?: string;
 }

@@ -7,6 +7,7 @@ import { AssetCardComponent } from '../asset-card/asset-card.component';
 import { OpnameSession } from '../model/opname-session.model';
 import { Department } from '../model/dept.model';
 import { ApiService } from '../services/api.service';
+import { firstValueFrom } from 'rxjs';
 
   @Component({
     selector: 'app- site-page',
@@ -50,53 +51,65 @@ import { ApiService } from '../services/api.service';
       }
     }
 
-    getLocationInfo(): void {
+    async getLocationInfo(): Promise<void> {
       this.isLoading = true;
-      this.route.queryParamMap.subscribe(params => {
-          // Check whether any params are provided or whether both site_id and dept_id are provided. If invalid, then throw an error
-          // In other words, the params must be exactly one (either site id or dept id provided)
-          if (params.keys.length !== 1) {
-            this.errorMessage = 'Halaman lokasi invalid.';
-            this.showToast = true;
-            setTimeout(() => this.showToast = false, 3000);
-          }
+      
+      try {
+        const params = await firstValueFrom(this.route.queryParamMap);
+        
+        // Check whether any params are provided or whether both site_id and dept_id are provided. If invalid, then throw an error
+        // In other words, the params must be exactly one (either site id or dept id provided)
+        if (!params || params.keys.length !== 1) {
+          this.errorMessage = 'Halaman lokasi invalid.';
+          this.showToast = true;
+          setTimeout(() => this.showToast = false, 3000);
+          this.isLoading = false;
+          return;
+        }
 
-          if (params.keys.indexOf('site_id') !== -1) {
-            const siteID = Number(params.get('site_id'))
-            this.apiService.getSiteByID(siteID).subscribe({
-                next: (site: SiteInfo) => {
-                  this.location = site;
-                  this.isLoading = false;
-                },
-                error: (error) => {
-                  this.isLoading = false;
-                  console.error('[SitePage] Error loading site info:', error.error.error);
-                  this.errorMessage = error.error.error || 'Gagal memuat halaman lokasi. Silakan coba lagi';
-                  this.showToast = true;
-                  setTimeout(() => this.showToast = false, 3000);
-                }
-              }
-            )
-          } else if (params.keys.indexOf('dept_id') !== -1) {
-            const deptID = Number(params.get('dept_id'))
-            this.apiService.getDeptByID(deptID).subscribe({
-                next: (dept: Department) => {
-                  this.location = dept;
-                  this.isLoading = false;
-                  console.log('[SitePage] Department info loaded:', this.location);
-                },
-                error: (error) => {
-                  this.isLoading = false;
-                  console.error('[SitePage] Error loading site info:', error.error.error);
-                  this.errorMessage = error.error.error || 'Gagal memuat halaman lokasi. Silakan coba lagi';
-                  this.showToast = true;
-                  setTimeout(() => this.showToast = false, 3000);
-                }
-              }
-            )
+        if (params.keys.indexOf('site_id') !== -1) {
+          const siteID = Number(params.get('site_id'));
+          
+          // Fetch site information
+          const site = await firstValueFrom(this.apiService.getSiteByID(siteID));
+          if (site) {
+            this.location = site;
+            
+            // Fetch opname status information
+            const opnameStatus = await firstValueFrom(this.apiService.getLatestOpnameStatus(siteID));
+            if (opnameStatus) {
+              this.location.opnameStatus = opnameStatus.status;
+              this.location.opnameDate = opnameStatus.date;
+            }
+          }
+          
+        } else if (params.keys.indexOf('dept_id') !== -1) {
+          const deptID = Number(params.get('dept_id'));
+          
+          // Fetch department information
+          const dept = await firstValueFrom(this.apiService.getDeptByID(deptID));
+          if (dept) {
+            this.location = dept;
+            console.log('[SitePage] Department info loaded:', this.location);
+            
+            // Fetch opname status information
+            const opnameStatus = await firstValueFrom(this.apiService.getLatestOpnameStatus(undefined, deptID));
+            if (opnameStatus) {
+              this.location.opnameStatus = opnameStatus.status;
+              this.location.opnameDate = opnameStatus.date;
+            }
           }
         }
-      )
+        
+        this.isLoading = false;
+        
+      } catch (error: any) {
+        this.isLoading = false;
+        console.error('[SitePage] Error loading location info:', error?.error?.error || error);
+        this.errorMessage = error?.error?.error || 'Gagal memuat halaman lokasi. Silakan coba lagi';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
+      }
     }
 
     startNewOpname(): void {
@@ -117,14 +130,23 @@ import { ApiService } from '../services/api.service';
           // Update the location with the new opname session ID.
           this.location.opnameSessionID = response.opnameSessionID;
 
-          // Store the session ID and site ID in the service
+          // Store the session ID and location ID in the service
           this.opnameSessionService.setSessionId(response.opnameSessionID);
-          this.opnameSessionService.setSiteId(this.location.siteID);
-
-          // Redirect to the opname page using router state
-          this.router.navigate(['/site', this.location.siteID, 'opname'], {
-            state: { sessionID: response.opnameSessionID }
-          });
+          
+          // Navigate to opname page with appropriate query parameters
+          if (this.location.siteID) {
+            this.opnameSessionService.setLocationId(this.location.siteID, 'site');
+            this.router.navigate(['/location/opname'], {
+              queryParams: { site_id: this.location.siteID },
+              state: { sessionID: response.opnameSessionID }
+            });
+          } else if (this.location.deptID) {
+            this.opnameSessionService.setLocationId(this.location.deptID, 'dept');
+            this.router.navigate(['/location/opname'], {
+              queryParams: { dept_id: this.location.deptID },
+              state: { sessionID: response.opnameSessionID }
+            });
+          }
         },
 
         error: (error) => {
@@ -156,14 +178,23 @@ import { ApiService } from '../services/api.service';
         return;
       }
 
+      console.log('[SitePage] Current opname session:', this.opnameSession);
+      console.log('[SitePage] location: ', this.location);
+
       this.opnameSessionService.getOpnameSession(this.location.opnameSessionID).subscribe({
         next: (opnameSession) => {
           this.opnameSession = opnameSession; // Store the current opname session data
           this.opnameLoading = false; // Set loading state to false after fetching session
-          
+
+
           // Only continue if the session is active - MOVED THIS INSIDE THE SUCCESS CALLBACK
           if (this.opnameSession && this.opnameSession.status === 'Active') {
-            this.opnameSessionService.continueOpname(this.location.opnameSessionID, this.location.siteID, this.router);
+            // Determine location type and ID based on what's available
+            if (this.location.siteID) {
+              this.opnameSessionService.continueOpname(this.location.opnameSessionID, this.location.siteID, 'site', this.router);
+            } else if (this.location.deptID) {
+              this.opnameSessionService.continueOpname(this.location.opnameSessionID, this.location.deptID, 'dept', this.router);
+            }
           } else {
             const status = this.opnameSession ? this.opnameSession.status : 'unknown';
             console.error('[SitePage] Opname session is not active:', status);
@@ -186,7 +217,7 @@ import { ApiService } from '../services/api.service';
       // Navigate to the report page for the current site
       const siteID = this.location.siteID;
       if (siteID > 0) {
-        this.router.navigate(['/site', siteID, 'report']);
+        this.router.navigate(['/location/report'], { queryParams: { site_id: siteID } });
       } else {
         console.error('[SitePage] Invalid site ID for report navigation:', siteID);
         this.errorMessage = 'ID site tidak valid untuk navigasi laporan.';
