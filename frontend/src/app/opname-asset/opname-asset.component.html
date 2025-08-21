@@ -578,20 +578,28 @@
                                                 readonly>
                                         </div>
                                         
-                                        <!-- need site list -->
+                                        <!-- Enhanced site/subsite list -->
                                         <div class="form-item">
-                                            <label [for]="'sub-site-name-' + result.pendingAsset.assetTag" class="form-label mb-0">Site</label>
+                                            <label [for]="'location-input-' + result.pendingAsset.assetTag" class="form-label mb-0">Site+</label>
                                             <input type="text" class="form-control" 
-                                                [id]="'sub-site-name-' + result.pendingAsset.assetTag" 
-                                                [(ngModel)]="result.pendingAsset.subSiteName" name="subSiteName"
-                                                (input)="onSubSiteInputChange(i)"
-                                                list="all-sub-sites"
-                                                [class.is-invalid]="(result.pendingAsset.subSiteID === undefined && result.pendingAsset.subSiteName) || !result.pendingAsset.subSiteName">
-                                            <datalist id="all-sub-sites">
-                                                <option *ngFor="let subSite of allSubSites" [value]="subSite.subSiteName">{{ subSite.subSiteName }}</option>
+                                                [id]="'location-input-' + result.pendingAsset.assetTag" 
+                                                [(ngModel)]="result.locationInput" name="locationInput"
+                                                (input)="onLocationChange(i)"
+                                                list="all-locations"
+                                                [class.is-invalid]="!isLocationValid(i)"
+                                                placeholder="Site+">
+                                            <datalist id="all-locations">
+                                                <!-- Include all subsites -->
+                                                <option *ngFor="let subSite of allSubSites" [value]="subSite.subSiteName">
+                                                    {{ subSite.subSiteName }}
+                                                </option>
+                                                <!-- Include all parent sites -->
+                                                <option *ngFor="let site of allSites" [value]="site.siteName">
+                                                    {{ site.siteName }}
+                                                </option>
                                             </datalist>
-                                            <div *ngIf="(result.pendingAsset.subSiteID === undefined && result.pendingAsset.subSiteName) || !result.pendingAsset.subSiteName" class="invalid-feedback">
-                                                Please select a valid site from the list.
+                                            <div *ngIf="!isLocationValid(i)" class="invalid-feedback">
+                                                Please select a valid location from the list.
                                             </div>
                                         </div>
 
@@ -608,7 +616,7 @@
                                             <label [for]="'site-name-' + result.pendingAsset.assetTag" class="form-label mb-0">Owner Site</label>
                                             <input type="text" class="form-control" 
                                                 [id]="'site-name-' + result.pendingAsset.assetTag" 
-                                                [value]="result.pendingAsset.siteName" 
+                                                [value]="result.pendingAsset.siteName.toLowerCase() === 'head office jakarta' ? '' : result.pendingAsset.siteName" 
                                                 readonly>
                                         </div>
 

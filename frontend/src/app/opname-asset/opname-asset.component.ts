@@ -75,13 +75,15 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
     assetProcessed: boolean,
     processingStatus: 'pending' | 'all_good' | 'edited',
     savedChangeReason: string,
-    changeReason: string // Current editing change reason
+    changeReason: string, // Current editing change reason
+    locationInput: string // Placeholder for site/subsite input field
   }> = [];
 
   // Currently selected asset index for form editing
   currentActiveIndex: number = -1;
 
   // Form variables
+  siteInput: string = ''; // This will be a placeholder for 'Site' input field, it will be determined programmatically whether to record it as a subsite or site
   isLiked: boolean = true;
   isDisliked: boolean = false;
   isLost: boolean = false;
@@ -130,10 +132,10 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
 
   constructor(
     private apiService: ApiService,
-  private opnameSessionService: OpnameSessionService,
-  private cdr: ChangeDetectorRef,
-  private dialog: MatDialog,
-  private reportService: ReportService
+    private opnameSessionService: OpnameSessionService,
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog,
+    private reportService: ReportService
   ) {
     // Explicitly initialize search fields to ensure they're empty
     this.assetTagQuery = '';
@@ -368,7 +370,7 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
         this.errorMessage = ''; // Clear previous errors
 
         // Get the existing asset from API - convert Observable to Promise
-        const asset: AssetInfo = await this.apiService.getAssetByAssetTag(savedRecord.assetTag).toPromise();
+        const asset: AssetInfo = await lastValueFrom(this.apiService.getAssetByAssetTag(savedRecord.assetTag));
         const existingAsset = JSON.parse(JSON.stringify(asset)); // Deep copy to preserve original
 
         // Count the pending assets
@@ -386,7 +388,7 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
         let owner: User | null = null;
         if (ownerID) {
           try {
-            owner = await this.apiService.getUserByID(ownerID).toPromise() || null;
+            owner = await lastValueFrom(this.apiService.getUserByID(ownerID)) || null;
           } catch (error) {
             console.error('[OpnameAsset] Error fetching owner by ID:', error);
             // Continue with null owner, will fall back to asset data
@@ -478,9 +480,12 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
           processingStatus: savedRecord.processingStatus,
           savedChangeReason: savedRecord.assetChanges.changeReason || '',
           changeReason: savedRecord.assetChanges.changeReason || '',
-          actionNotes: savedRecord.assetChanges.actionNotes || ''
+          actionNotes: savedRecord.assetChanges.actionNotes || '',
+          locationInput: existingAsset.subSiteName || existingAsset.siteName || '' // Initialize with current subSiteName value, fallback to siteName
         };
-        
+
+        console.log('resultItem:', resultItem);
+
         // Add to search results in order
         this.searchResults.push(resultItem);
 
@@ -716,7 +721,8 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
           assetProcessed: false,
           processingStatus: 'pending' as 'pending' | 'all_good' | 'edited', // Initial processing status
           savedChangeReason: '',
-          changeReason: ''
+          changeReason: '',
+          locationInput: newAsset.subSiteName || newAsset.siteName || '' // Initialize with current subSiteName value, fallback to siteName
         };
 
         // Increment pending assets count in local storage
@@ -944,6 +950,96 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
 
     // Force change detection to update validation state
     this.cdr.detectChanges();
+  }
+
+  // Handle location input change - determines whether input is a site or subsite
+  onLocationChange(index: number): void {
+    const result = this.searchResults[index];
+    const input = result.locationInput?.trim() || '';
+
+    if (!input) {
+      // Clear all location-related fields if input is empty
+      result.pendingAsset.subSiteID = undefined;
+      result.pendingAsset.subSiteName = '';
+      result.pendingAsset.siteID = undefined;
+      result.pendingAsset.siteName = '';
+      result.pendingAsset.siteGroupName = '';
+      result.pendingAsset.regionName = '';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // First check if input matches any subsite
+    const matchedSubSite = this.allSubSites.find(subSite => 
+      subSite.subSiteName.toLowerCase() === input.toLowerCase()
+    );
+
+    if (matchedSubSite) {
+      // Found in subsites - get parent site info
+      const parentSite = this.allSites.find(site => site.siteID === matchedSubSite.siteID);
+      
+      if (parentSite) {
+        result.pendingAsset.subSiteID = matchedSubSite.subSiteID;
+        result.pendingAsset.subSiteName = matchedSubSite.subSiteName;
+        result.pendingAsset.siteID = parentSite.siteID;
+        result.pendingAsset.siteName = parentSite.siteName;
+        result.pendingAsset.siteGroupName = parentSite.siteGroupName;
+        result.pendingAsset.regionName = parentSite.regionName;
+        this.cdr.detectChanges();
+        return;
+      }
+    }
+
+    // If not found in subsites, check if input matches any site
+    const matchedSite = this.allSites.find(site => 
+      site.siteName.toLowerCase() === input.toLowerCase()
+    );
+
+    if (matchedSite) {
+      // Found in sites - treat as parent site (no subsite)
+      result.pendingAsset.subSiteID = undefined;
+      result.pendingAsset.subSiteName = matchedSite.siteName;  // Use site name as location
+      result.pendingAsset.siteID = matchedSite.siteID;
+      result.pendingAsset.siteName = matchedSite.siteName;
+      result.pendingAsset.siteGroupName = matchedSite.siteGroupName;
+      result.pendingAsset.regionName = matchedSite.regionName;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // Invalid location - not found in either list
+    result.pendingAsset.subSiteID = undefined;
+    result.pendingAsset.subSiteName = result.locationInput; // Keep user input for display
+    result.pendingAsset.siteID = undefined;
+    result.pendingAsset.siteName = '';
+    result.pendingAsset.siteGroupName = '';
+    result.pendingAsset.regionName = '';
+    this.cdr.detectChanges();
+  }
+
+  // Getter function to determine if location input is valid
+  isLocationValid(index: number): boolean {
+    const result = this.searchResults[index];
+    if (!result) return false;
+
+    const input = result.locationInput?.trim() || '';
+    
+    // If no input, it's invalid
+    if (!input) return false;
+
+    // Check if input matches any subsite
+    const matchedSubSite = this.allSubSites.find(subSite => 
+      subSite.subSiteName.toLowerCase() === input.toLowerCase()
+    );
+    
+    if (matchedSubSite) return true;
+
+    // Check if input matches any site
+    const matchedSite = this.allSites.find(site => 
+      site.siteName.toLowerCase() === input.toLowerCase()
+    );
+    
+    return !!matchedSite;
   }
 
   // Check if equipment is selected for a specific asset
