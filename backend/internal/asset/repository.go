@@ -4,6 +4,8 @@ package asset
 import (
 	"database/sql"
 	"log"
+
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/utils"
 )
 
 type Asset struct {
@@ -149,15 +151,18 @@ func (repo *Repository) GetAssetBySerialNumber(serialNumber string) (*Asset, err
 	return &asset, nil // Return the found asset
 }
 
-// GetAssetsBySite retrieves all assets for a given site.
-func (repo *Repository) GetAssetsOnSite(siteID int64) ([]*string, error) {
+// GetAssetsOnLocation retrieves all assets for a given location.
+func (repo *Repository) GetAssetsOnLocation(siteID *int, deptID *int) ([]*string, error) {
 	var assets []*string
 
-	query := `SELECT * FROM get_assets_by_site($1)`
+	query := `SELECT * FROM get_assets_by_location($1, $2)`
 
-	rows, err := repo.db.Query(query, siteID)
+	siteIDParam := utils.ParseNullableInt(siteID)
+	deptIDParam := utils.ParseNullableInt(deptID)
+
+	rows, err := repo.db.Query(query, siteIDParam, deptIDParam)
 	if err != nil {
-		log.Printf("❌ Error retrieving assets for site ID %d: %v", siteID, err)
+		log.Printf("❌ Error retrieving assets for site ID %v or department ID %v: %v", siteIDParam, deptIDParam, err)
 		return nil, err // Return the error if query fails
 	}
 

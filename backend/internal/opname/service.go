@@ -18,6 +18,7 @@ import (
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/site"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/upload"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/utils"
 )
 
 type Service struct {
@@ -42,15 +43,15 @@ func NewService(repo *Repository, uploadService *upload.Service, userRepo *user.
 }
 
 // StartNewSession creates a new opname session for a user at a specific site.
-func (service *Service) StartNewSession(userID int, siteID int) (int, error) {
-	// Validate userID and siteID
-	if userID <= 0 || siteID <= 0 {
-		log.Printf("⚠ Invalid userID or siteID: userID=%d, siteID=%d", userID, siteID)
-		return 0, errors.New("invalid userID or siteID")
+func (service *Service) StartNewSession(userID int, siteID *int, deptID *int) (int, error) {
+	// Validate userID
+	if userID <= 0 {
+		log.Printf("⚠ Invalid userID: userID=%d", userID)
+		return 0, errors.New("invalid userID")
 	}
 
 	// Call the repository to create a new session
-	newSessionID, err := service.repo.CreateNewSession(userID, siteID)
+	newSessionID, err := service.repo.CreateNewSession(userID, siteID, deptID)
 	if err != nil {
 		log.Printf("❌ Error creating new opname session: %v", err)
 		return 0, err
@@ -242,7 +243,9 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 			log.Printf("❌ Error getting session: %v", err)
 			return
 		}
-		site, err := service.siteRepo.GetSiteByID(session.SiteID)
+		// !! WILL COME BACK TO APPLY NEW DEPT LOGIC TO EMAIL
+		// For now, will just parse int from nullable site id as to prevent compile error
+		site, err := service.siteRepo.GetSiteByID(int(session.SiteID.Int64))
 		if err != nil || site == nil {
 			log.Printf("❌ Error getting site: %v", err)
 			return
@@ -322,18 +325,23 @@ func (service *Service) FinishOpnameSession(sessionID int, requestingUserID int6
 	return nil
 }
 
-// GetOpnameOnSite retrieves all opname sessions for a specific site.
-func (service *Service) GetOpnameOnSite(siteID int) ([]OpnameFilter, error) {
-	// Validate siteID
-	if siteID <= 0 {
-		log.Printf("⚠ Invalid siteID: %d", siteID)
-		return nil, errors.New("invalid siteID")
+// GetOpnameOnLocation retrieves all opname sessions for a specific location.
+func (service *Service) GetOpnameOnLocation(siteID *int, deptID *int) ([]OpnameFilter, error) {
+	// Ensure either siteID or deptID must be valid, only one of them must be valid.
+	if (siteID == nil || *siteID <= 0) && (deptID == nil || *deptID <= 0) {
+		log.Printf("⚠ Invalid location, ensure either site or dept id is valid. Site: %v, Dept: %v",
+			utils.ParseNullableInt(siteID), utils.ParseNullableInt(deptID))
+		return nil, errors.New("invalid location passed")
+	} else if (siteID != nil && *siteID >= 0) && (deptID != nil && *deptID >= 0) {
+		log.Printf("⚠ Both siteID and deptID are valid, this may lead to unexpected results. Site: %v, Dept: %v",
+			utils.ParseNullableInt(siteID), utils.ParseNullableInt(deptID))
+		return nil, errors.New("both siteID and deptID are requested for one opname session")
 	}
 
-	// Call the repository to get all opname sessions for the site
-	sessions, err := service.repo.GetOpnameOnSite(siteID)
+	// Call the repository to get all opname sessions for the location
+	sessions, err := service.repo.GetOpnameOnLocation(siteID, deptID)
 	if err != nil {
-		log.Printf("❌ Error retrieving opname sessions for site %d: %v", siteID, err)
+		log.Printf("❌ Error retrieving opname sessions for site %d: or dept: %d | err: %v", *siteID, *deptID, err)
 		return nil, err
 	}
 
@@ -395,7 +403,7 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 				return
 			}
 			managerName := cases.Title(language.English).String((reviewer.FirstName + " " + reviewer.LastName))
-			site, err := service.siteRepo.GetSiteByID(session.SiteID)
+			site, err := service.siteRepo.GetSiteByID(int(session.SiteID.Int64))
 			if err != nil || site == nil {
 				log.Printf("❌ Error getting site: %v", err)
 				return
@@ -492,7 +500,7 @@ func (service *Service) ApproveOpnameSession(sessionID int, reviewerID int) erro
 				return
 			}
 			l1Name := cases.Title(language.English).String((l1User.FirstName + " " + l1User.LastName))
-			site, err := service.siteRepo.GetSiteByID(session.SiteID)
+			site, err := service.siteRepo.GetSiteByID(int(session.SiteID.Int64))
 			if err != nil || site == nil {
 				log.Printf("❌ Error getting site: %v", err)
 				return
@@ -607,7 +615,7 @@ func (service *Service) RejectOpnameSession(sessionID int, reviewerID int) error
 		}
 		submitterName := cases.Title(language.English).String((submitter.FirstName + " " + submitter.LastName))
 
-		site, err := service.siteRepo.GetSiteByID(session.SiteID)
+		site, err := service.siteRepo.GetSiteByID(int(session.SiteID.Int64))
 		if err != nil {
 			log.Printf("❌ Error getting site: %v", err)
 			return

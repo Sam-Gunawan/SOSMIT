@@ -1,7 +1,10 @@
 // == Handles all logical operations related to User ==
 package user
 
-import "log"
+import (
+	"errors"
+	"log"
+)
 
 type Service struct {
 	repo *Repository
@@ -69,21 +72,20 @@ func (service *Service) GetUserByID(userID int64) (*User, error) {
 	return user, nil
 }
 
-// GetUserSiteCards retrieves all site cards for a user by their user ID.
-func (service *Service) GetUserSiteCards(userID int64) ([]*UserSiteCard, error) {
-	userSiteCards, err := service.repo.GetUserSiteCards(userID)
+// GetUserOpnameLocation retrieves all the opname locations for a user.
+func (service *Service) GetUserOpnameLocations(userID int, position string, filter OpnameLocationFilter) ([]OpnameLocations, error) {
+	// Validate userID
+	if userID <= 0 {
+		log.Printf("⚠ Invalid userID: %d", userID)
+		return nil, errors.New("invalid userID")
+	}
+
+	// Call the repository to get the user's opname locations
+	locations, err := service.repo.GetUserOpnameLocations(userID, position, filter)
 	if err != nil {
-		// Log the error and return it
-		log.Printf("Error fetching user site cards for user_id %d: %v", userID, err)
+		log.Printf("❌ Error retrieving opname locations for user %d: %v", userID, err)
 		return nil, err
 	}
 
-	if userSiteCards == nil {
-		// If no site cards are found, return an empty slice
-		log.Printf("No site cards found for user_id: %d", userID)
-		return nil, nil // No site cards found
-	}
-
-	log.Printf("Successfully retrieved %d site cards for user_id: %d", len(userSiteCards), userID)
-	return userSiteCards, nil
+	return locations, nil
 }

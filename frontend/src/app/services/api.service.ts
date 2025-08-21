@@ -1,14 +1,15 @@
   import { Injectable } from '@angular/core';
-  import { HttpClient } from '@angular/common/http';
+  import { HttpClient, HttpParams } from '@angular/common/http';
   import { Router } from '@angular/router';
   import { Observable } from 'rxjs';
   import { tap, map } from 'rxjs/operators';
   import { SiteInfo } from '../model/site-info.model';
   import { AssetInfo } from '../model/asset-info.model';
   import { User } from '../model/user.model';
-  import { formatDate, formatRupiah, titleCase } from '../utils';
+  import { formatDate, formatRupiah, titleCase, buildHttpParams } from '../utils';
   import { environment } from '../../environments/environments';
 import { SubSite } from '../model/sub-site.model';
+import { Department } from '../model/dept.model';
 
   @Injectable({
     providedIn: 'root'
@@ -17,6 +18,7 @@ import { SubSite } from '../model/sub-site.model';
     // This service will handle API calls, such as login, fetching data, etc.
     private authApiUrl = `${environment.serverURL}/api/auth`
     private userApiUrl = `${environment.serverURL}/api/user`
+    private deptApiUrl = `${environment.serverURL}/api/department`
     private siteApiUrl = `${environment.serverURL}/api/site`
     private assetApiUrl = `${environment.serverURL}/api/asset`
     private uploadApiUrl = `${environment.serverURL}/api/upload`
@@ -125,19 +127,11 @@ import { SubSite } from '../model/sub-site.model';
         map((response: any) => {
           // Map the response to the desired format.
           return response.sites.map((site: any) => ({
-            siteID: site.SiteID,
-            siteName: site.SiteName,
-            siteGroup: site.SiteGroupName,
-            siteRegion: site.RegionName,
-            siteGaID: site.SiteGaID,
-            siteGaName: titleCase(site.SiteGaName),
-            siteGaEmail: site.SiteGaEmail,
-            // Default opname fields for sites list
-            opnameSessionID: 0,
-            opnameUserID: 0,
-            opnameUserName: '',
-            opnameStatus: '',
-            opnameDate: ''
+            siteID: site.site_id,
+            siteName: site.site_name,
+            siteGroupName: site.site_group_name,
+            regionName: site.region_name,
+            opnameSessionID: site.opname_session_id,
           }));
         }),
         tap((sites: SiteInfo[]) => {
@@ -147,30 +141,53 @@ import { SubSite } from '../model/sub-site.model';
       )
     }
 
-    getUserSiteCards(): Observable<SiteInfo[]> {
-      // This method will fetch the site cards that the user has access to.
-      return this.http.get<SiteInfo[]>(`${this.userApiUrl}/site-cards`).pipe(
+    getUserOpnameLocations(filter: any): Observable<any> {
+      // Convert filter object to HttpParams for query parameters using utility function
+      const params = buildHttpParams(filter);
+  
+      return this.http.get(`${this.userApiUrl}/opname-locations`, { params }).pipe(
         map((response: any) => {
-          return response.site_cards.map((site: any) => ({
-            siteID: site.SiteID,
-            siteName: site.SiteName,
-            siteGroup: site.SiteGroupName,
-            siteRegion: site.RegionName,
-            siteGaID: site.SiteGaID || 0, // Default to 0 if not provided
-            siteGaName: site.SiteGaName || '',
-            siteGaEmail: site.SiteGaEmail || '',
-            opnameSessionID: site.OpnameSessionID,
-            opnameUserID: site.OpnameUserID || 0,
-            opnameUserName: site.OpnameUserName || '',
-            opnameStatus: site.OpnameStatus,
-            opnameDate: formatDate(new Date(site.OpnameDate))
-          }))
-        }), // Extract site cards from the response
-        tap((siteCards: SiteInfo[]) => {
-          // Log the fetched site cards for debugging purposes.
-          console.log('[ApiService] Fetched site cards:', siteCards);
+          // Handle case where locations might be null, undefined, or empty
+          if (!response || !response.locations || !Array.isArray(response.locations)) {
+            console.warn('[OpnameService] No locations found in response:', response);
+            return { locations: [], totalCount: 0 };
+          }
+          
+          const locations = response.locations.map((location: any) => ({
+            siteID: location.site_id,
+            deptID: location.dept_id,
+            deptName: location.dept_name,
+            siteName: location.site_name,
+            siteGroupName: location.site_group_name,
+            regionName: location.region_name,
+            opnameStatus: location.opname_status,
+            lastOpnameDate: location.last_opname_date,
+            lastOpnameBy: location.last_opname_by
+          }));
+  
+          return {
+            locations: locations,
+            totalCount: response.total_count || 0
+          };
         })
       );
+    }
+
+    getDeptByID(deptID: number): Observable<Department> {
+      // This method will fetch a specific department by its ID.
+      return this.http.get<Department>(`${this.deptApiUrl}/${deptID}`).pipe(
+        map((response: any) => {
+          console.log(response)
+          return {
+            deptID: response.dept_id,
+            deptName: response.dept_name,
+            siteName: response.site_name,
+            siteGroupName: response.site_group_name,
+            regionName: response.region_name,
+            opnameSessionID: response.opname_session_id,
+          }
+        })
+      )
     }
 
     getSiteByID(siteID: number): Observable<SiteInfo> {
@@ -181,22 +198,35 @@ import { SubSite } from '../model/sub-site.model';
           return {
             siteID: response.site_id,
             siteName: response.site_name,
-            siteGroup: response.site_group_name,
-            siteRegion: response.region_name,
-            siteGaID: response.site_ga_id,
-            siteGaName: titleCase(response.site_ga_name),
-            siteGaEmail: response.site_ga_email,
-            // Default opname fields for individual site fetch
-            opnameSessionID: 0,
-            opnameUserID: 0,
-            opnameUserName: '',
-            opnameStatus: '',
-            opnameDate: ''
+            siteGroupName: response.site_group_name,
+            regionName: response.region_name,
+            opnameSessionID: response.opname_session_id,
           };
         }),
         tap((siteInfo: SiteInfo) => {
           // Log the fetched site info for debugging purposes.
           console.log('[ApiService] Fetched site info:', siteInfo);
+        })
+      );
+    }
+
+    getLatestOpnameStatus(siteID?: number, deptID?: number): Observable<{status: string, date: string}> {
+      // This method will fetch the latest opname status for a site or department
+      const params = buildHttpParams({ site_id: siteID, dept_id: deptID });
+      
+      return this.http.get<any>(`${this.userApiUrl}/opname-locations`, { params }).pipe(
+        map((response: any) => {
+          // Extract the first location's status info
+          const locations = response?.locations || [];
+          if (locations.length > 0) {
+            const location = locations[0];
+            const dateString = location.last_opname_date ? formatDate(location.last_opname_date) : '';
+            return {
+              status: (location.opname_status || 'Outdated') as string,
+              date: dateString || ''
+            };
+          }
+          return { status: 'Outdated', date: '' };
         })
       );
     }
@@ -295,11 +325,14 @@ import { SubSite } from '../model/sub-site.model';
       );
     }
 
-    getAssetsOnSite(siteID: number): Observable<any> {
-      // This method will fetch all assets on a specific site.
-      return this.http.get<AssetInfo[]>(`${this.siteApiUrl}/${siteID}/assets`).pipe(
+    getAssetsOnLocation(siteID: number | null, deptID: number | null): Observable<any> {
+      // This method will fetch all assets on a specific location.
+      // Use the utility function to build query parameters, excluding null, undefined, empty, and zero values
+      const params = buildHttpParams({ site_id: siteID, dept_id: deptID });
+      
+      return this.http.get<AssetInfo[]>(`${this.siteApiUrl}/assets`, { params }).pipe(
         map((response: any) => {
-          const list = response.assets_on_site || [];
+          const list = response.assets_on_location || [];
           return list.map((asset: any) => ({
             assetTag: asset.asset_tag ?? asset.AssetTag,
             serialNumber: asset.serial_number ?? asset.SerialNumber,

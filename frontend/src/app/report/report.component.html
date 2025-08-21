@@ -3,10 +3,8 @@
         <section class="report-content">
             <div class="report-header">
                 <div class="report-details">
-                    <h5>Opname Report - {{ site.siteName }}</h5>
+                    <h5>Opname Report - {{ site.siteName ? site.siteName : dept.deptName + ' Department' }}</h5>
                     <p class="status-opname">Opname Status: {{ opnameSession.status }}</p>
-                    <!-- TODO: apply css for site GA -->
-                    <p class="site-ga">GA: {{ site.siteGaName }}</p>
                 </div>
 
                 <div class="export-search">
@@ -21,16 +19,30 @@
                             <i class="calendar-icon fas fa-calendar-alt"></i>
                         </div>
                     </div>
-                    <button type="button"
-                                    class="export-report-btn"
-                                    (click)="exportToPDF()"
-                                    [disabled]="!selectedDate"
-                                    [title]="!selectedDate ? 'Select a date first' : 'Export report as PDF'">
-                        <div class="btn-content">
-                            <i class="fa-solid fa-file-arrow-down icon" aria-hidden="true"></i>
-                            <span>Export PDF</span>
-                        </div>
-                    </button>
+                    
+                    <div class="export-buttons">
+                        <button type="button"
+                                class="export-report-btn export-pdf-btn"
+                                (click)="exportToPDF()"
+                                [disabled]="!selectedDate || sessionID === -1"
+                                [title]="(!selectedDate || sessionID === -1) ? 'Select a date first' : 'Export report as PDF'">
+                            <div class="btn-content">
+                                <i class="fa-solid fa-file-pdf icon" aria-hidden="true"></i>
+                                <span>Export PDF</span>
+                            </div>
+                        </button>
+                        
+                        <button type="button"
+                                class="export-report-btn export-csv-btn"
+                                (click)="exportToCSV()"
+                                [disabled]="!selectedDate || sessionID === -1"
+                                [title]="(!selectedDate || sessionID === -1) ? 'Select a date first' : 'Export report as CSV'">
+                            <div class="btn-content">
+                                <i class="fa-solid fa-file-csv icon" aria-hidden="true"></i>
+                                <span>Export CSV</span>
+                            </div>
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -80,7 +92,7 @@
                 </div>
 
                 <div class="my-container" *ngIf="selectedDate">
-                    <app-opname-asset [variant]="cardVariant" [currentView]="currentView" [showLocation]="showLocation" [siteID]="site.siteID" [isInReport]="true" [sessionID]="sessionID"></app-opname-asset>
+                    <app-opname-asset [siteID]="site.siteID" [isInReport]="true" [sessionID]="sessionID"></app-opname-asset>
                 </div>
 
                 <div class="no-date-selected" *ngIf="!selectedDate">
@@ -102,13 +114,10 @@
 </div>
 </main>
 
-<!-- PDF Generation Overlay -->
-<div class="pdf-overlay" *ngIf="isExporting">
-    <div class="pdf-modal" role="alert" aria-live="assertive">
-        <div class="spinner" aria-hidden="true"></div>
-        <div class="text-block">
-            <h6>Generating PDF Report</h6>
-            <p>Please wait while we prepare your file...</p>
-        </div>
-    </div>
-</div>
+<!-- Loading Overlay -->
+<app-loading-overlay 
+    [isVisible]="isExporting"
+    [title]="getLoadingTitle()"
+    [message]="getLoadingMessage()"
+    [spinnerColor]="getLoadingColor()">
+</app-loading-overlay>

@@ -2,13 +2,15 @@ DROP FUNCTION IF EXISTS public.get_credentials(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_all_users();
 DROP FUNCTION IF EXISTS public.get_user_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_user_by_username(VARCHAR);
-DROP FUNCTION IF EXISTS public.get_user_site_cards(INT);
+DROP FUNCTION IF EXISTS public.get_latest_opname_status(INT, INT);
+DROP FUNCTION IF EXISTS public.get_user_opname_locations(INT, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, VARCHAR, TIMESTAMP, TIMESTAMP, VARCHAR, INT, INT);
 DROP FUNCTION IF EXISTS public.get_l1_support_emails();
 DROP FUNCTION IF EXISTS public.get_area_manager_info(INT);
 DROP FUNCTION IF EXISTS public.get_asset_by_tag(VARCHAR);
 DROP FUNCTION IF EXISTS public.get_asset_by_serial_number(VARCHAR);
-DROP FUNCTION IF EXISTS public.get_assets_by_site(INT);
+DROP FUNCTION IF EXISTS public.get_assets_by_location(INT, INT);
 DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT);
+DROP FUNCTION IF EXISTS public.create_new_opname_session(INT, INT, INT);
 DROP FUNCTION IF EXISTS public.get_opname_session_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_user_from_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.finish_opname_session(INT);
@@ -16,6 +18,7 @@ DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.approve_opname_session(INT, INT);
 DROP PROCEDURE IF EXISTS public.reject_opname_session(INT, INT);
 DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(50), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, VARCHAR(255), VARCHAR(100), VARCHAR(100), INT, INT, INT, TEXT, VARCHAR(25));
+DROP FUNCTION IF EXISTS public.get_asset_change(INT, VARCHAR);
 DROP PROCEDURE IF EXISTS public.delete_asset_change(INT, VARCHAR(12));
 DROP PROCEDURE IF EXISTS public.set_action_notes(VARCHAR(12), INT, INT, TEXT);
 DROP PROCEDURE IF EXISTS public.delete_action_notes(VARCHAR(12), INT, INT);
@@ -24,12 +27,16 @@ DROP FUNCTION IF EXISTS public.get_all_photos_by_session_id(INT);
 DROP FUNCTION IF EXISTS public.get_all_sites();
 DROP FUNCTION IF EXISTS public.get_all_sub_sites();
 DROP FUNCTION IF EXISTS public.get_site_by_id(INT);
+DROP FUNCTION IF EXISTS public.get_dept_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_sub_site_by_id(INT);
 DROP FUNCTION IF EXISTS public.get_sub_sites_by_site_id(INT);
 DROP FUNCTION IF EXISTS public.load_opname_progress(INT);
-DROP FUNCTION IF EXISTS public.get_opname_by_site_id(INT);
+DROP FUNCTION IF EXISTS public.get_finished_opnames_by_location_id(INT, INT);
 DROP FUNCTION IF EXISTS public.get_asset_equipments(VARCHAR(50));
+DROP FUNCTION IF EXISTS public.categorize_opname_assets(INT);
 DROP FUNCTION IF EXISTS public.get_opname_stats(INT);
+DROP FUNCTION IF EXISTS public.get_opname_bap_recap(INT);
+DROP FUNCTION IF EXISTS public.get_opname_bap_details(INT);
 
 -- get_credentials retrieves user credentials by username (for login auth)
 -- ! email not implemented yet
@@ -38,16 +45,16 @@ CREATE OR REPLACE FUNCTION public.get_credentials(_username VARCHAR(255))
 		user_id INT,
         username VARCHAR(255),
         "password" VARCHAR(255),
-        "position" VARCHAR(100)
+		"position" VARCHAR(100),
+        ou_code VARCHAR(5)
     )
     LANGUAGE plpgsql
 AS $$
     BEGIN
         RETURN QUERY
-        SELECT u.user_id, u.username, u.password, u.position
+        SELECT u.user_id, u.username, u.password, u.position, u.ou_code
         FROM "User" AS u
-        WHERE LOWER(u.username) = LOWER(_username)
-			AND LOWER(u.username) <> 'vacant'; -- Block users trying to login using 'vacant' username
+        WHERE LOWER(u.username) = LOWER(_username) AND LOWER(u.username) <> 'vacant'; -- Block users trying to login using 'vacant' username
     END;
 $$;
 
@@ -176,77 +183,149 @@ AS $$
 	END;
 $$;
 
--- get_user_site_cards retrieves all the sites a user has access to using their user_id
--- Note: This function assumes that "l1 support" users can see all sites, while others are restricted to their region.
--- It returns site details along with the latest opname session if available.
-CREATE OR REPLACE FUNCTION public.get_user_site_cards(_user_id INT)
+-- get_latest_opname_status retrieves the latest opname session by either its site or department
+CREATE OR REPLACE FUNCTION public.get_latest_opname_status(_site_id INT, _dept_id INT)
+	RETURNS TABLE (
+		session_status VARCHAR(20),
+		session_end_date TIMESTAMP,
+		created_by VARCHAR(255)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT
+			CASE
+				WHEN os.status = 'Active' THEN 'Active'
+				WHEN os.status IN ('Submitted', 'Escalated', 'Verified', 'Rejected')
+					-- TODO: Make the interval dynamic based on user settings.
+					AND COALESCE(os.end_date, os.start_date) > (NOW() - INTERVAL '30 days')
+					THEN os.status
+				ELSE 'Outdated'
+			END AS session_status,
+			os.end_date::TIMESTAMP,
+			(u.first_name || ' ' || u.last_name)::VARCHAR(255) AS created_by
+		FROM "OpnameSession" os
+		LEFT JOIN "User" AS u ON os.user_id = u.user_id
+		WHERE os.site_id = _site_id OR os.dept_id = _dept_id
+		ORDER BY os.start_date DESC
+		LIMIT 1;
+	END;
+$$;
+
+-- get_user_opname_locations retrieves the sites/dept a user has access to using their position and id (from login session)
+-- Pagination and filtering is done here
+-- Note: This functions assumes that "L1 Support" users can see all sites and dept, while others are restriced to their region.
+-- It also assumes that users can only see their own department's sites.
+-- HO mode: shows departments only (for department-level opname)  
+-- Area mode: shows sites only (for site-level opname)
+CREATE OR REPLACE FUNCTION public.get_user_opname_locations(
+	_user_id INT,
+	_position VARCHAR(100),
+	_site_group_name VARCHAR(100),
+	_site_name VARCHAR(100),
+	_sub_site_name VARCHAR(100),
+	_dept_name VARCHAR(100),
+	_created_by VARCHAR(255),
+	_opname_status VARCHAR(20),
+	_from_date TIMESTAMP,
+	_end_date TIMESTAMP,
+	_search_in VARCHAR(10), -- Search in area/HO only
+	_limit INT,
+	_page_number INT
+)
     RETURNS TABLE (
-        site_id INT,
+		site_id INT,
+		dept_id INT,
+		dept_name VARCHAR(100),
         site_name VARCHAR(100),
         site_group_name VARCHAR(100),
         region_name VARCHAR(100),
-        site_ga_id INT,
-        opname_session_id INT,
         opname_status VARCHAR(20),
-        last_opname_date TIMESTAMP WITH TIME ZONE
+        last_opname_date TIMESTAMP,
+		last_opname_by VARCHAR(255),
+		total_count BIGINT
     )
     LANGUAGE plpgsql
 AS $$
 	DECLARE
-		_user_position VARCHAR;
-		_user_region_id INT;
+		v_user_region_id INT;
+		v_user_dept_id INT;
+		v_offset INT := GREATEST(COALESCE(_page_number,1)-1,0) * COALESCE(NULLIF(_limit,0),20);
+		v_search_in VARCHAR(10) := LOWER(COALESCE(_search_in, 'area'));
+		v_user_position VARCHAR(100) := LOWER(COALESCE(_position,''));
 	BEGIN
-		-- Fetch the user's position and region ID into variables first.
-		SELECT
-			LOWER(u.position),
-			r.id
-		INTO
-			_user_position,
-			_user_region_id
+		-- Fetch the user's department and region context
+		SELECT r.id, d.id
+		INTO v_user_region_id, v_user_dept_id
 		FROM "User" AS u
 		LEFT JOIN "Site" AS s ON u.site_id = s.id
 		LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 		LEFT JOIN "Region" AS r ON sg.region_id = r.id
+		LEFT JOIN "Department" AS d ON LOWER(u.department) = LOWER(d.dept_name)
 		WHERE u.user_id = _user_id;
 
-		-- Fetch the site cards based on the user's position and region.
-		-- Show the latest opname session status if available and not outdated.
-		RETURN QUERY
+		IF v_search_in = 'ho' THEN
+			-- HO MODE: Show departments only (site_name = NULL)
+			RETURN QUERY
 			SELECT
-				s.id AS site_id,
-				s.site_name,
-				sg.site_group_name,
-				r.region_name,
-				s.site_ga_id,
-				COALESCE(latest_session.session_id, -1) AS opname_session_id,
-				CASE
-					WHEN latest_session.session_status = 'Active' THEN 'Active'
-					WHEN latest_session.session_status IN ('Submitted', 'Escalated', 'Verified', 'Rejected')
-						-- TODO: Make the interval dynamic based on user settings.
-						AND COALESCE(latest_session.session_end_date, latest_session.session_start_date) > (NOW() - INTERVAL '30 days')
-						THEN latest_session.session_status
-					ELSE 'Outdated'
-				END AS opname_status,
-				COALESCE(latest_session.session_end_date, s.last_opname_date) AS last_opname_date
+				25::INT AS site_id, -- Head office site ID is always 25
+				d.id::INT AS dept_id,
+				d.dept_name::VARCHAR(100),
+				NULL::VARCHAR(100) AS site_name,
+				NULL::VARCHAR(100) AS site_group_name,
+				NULL::VARCHAR(100) AS region_name,
+				COALESCE(lo.session_status, 'Outdated')::VARCHAR(20) AS opname_status,
+				lo.session_end_date::TIMESTAMP AS last_opname_date,
+				lo.created_by::VARCHAR(255) AS last_opname_by,
+				COUNT(*) OVER()::BIGINT AS total_count
+			FROM "Department" AS d
+			LEFT JOIN LATERAL get_latest_opname_status(NULL, d.id) lo ON TRUE
+			WHERE 
+				-- Access control: L1 support sees all, others see only their department
+				(v_user_position = 'l1 support' OR d.id = v_user_dept_id)
+				-- Filters
+				AND (_dept_name IS NULL OR _dept_name = '' OR d.dept_name ILIKE '%'||_dept_name||'%')
+				AND (_created_by IS NULL OR _created_by = '' OR lo.created_by ILIKE '%'||_created_by||'%')
+				AND (_from_date IS NULL OR lo.session_end_date >= _from_date)
+				AND (_end_date IS NULL OR lo.session_end_date <= _end_date)
+				AND (_opname_status IS NULL OR _opname_status = '' OR COALESCE(lo.session_status, 'Outdated') = _opname_status)
+			ORDER BY d.dept_name
+			LIMIT COALESCE(NULLIF(_limit,0), 20) OFFSET v_offset;
+		ELSE
+			-- AREA MODE: Show sites only (dept_name = NULL)  
+			RETURN QUERY
+			SELECT
+				s.id::INT AS site_id,
+				NULL::INT AS dept_id,
+				NULL::VARCHAR(100) AS dept_name,
+				s.site_name::VARCHAR(100),
+				sg.site_group_name::VARCHAR(100),
+				r.region_name::VARCHAR(100),
+				COALESCE(lo.session_status, 'Outdated')::VARCHAR(20) AS opname_status,
+				lo.session_end_date::TIMESTAMP AS last_opname_date,
+				lo.created_by::VARCHAR(255) AS last_opname_by,
+				COUNT(*) OVER()::BIGINT AS total_count
 			FROM "Site" AS s
 			INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 			INNER JOIN "Region" AS r ON sg.region_id = r.id
-			LEFT JOIN (
-				-- Get the latest opname session for each site.
-				SELECT DISTINCT ON (os.site_id)
-					os.site_id,
-					os.id AS session_id,
-					os.status AS session_status,
-					os.end_date AS session_end_date,
-					os.start_date AS session_start_date
-				FROM "OpnameSession" AS os
-				ORDER BY os.site_id, os.start_date DESC
-			) AS latest_session ON s.id = latest_session.site_id
+			LEFT JOIN "SubSite" AS ss ON (_sub_site_name IS NOT NULL AND _sub_site_name <> '') AND ss.site_id = s.id
+			LEFT JOIN LATERAL get_latest_opname_status(s.id, NULL) lo ON TRUE
 			WHERE
-				_user_position = 'l1 support'
-				OR
-				(_user_position IN ('admin staff general affairs', 'area manager') AND r.id = _user_region_id)
-			ORDER BY s.site_name;
+				-- Access control: L1 support sees all, area users see only their region and must be managers
+				(v_user_position = 'l1 support' 
+				 OR (v_user_position IN ('admin staff general affairs', 'area manager') AND r.id = v_user_region_id))
+				-- Filters
+				AND (_site_group_name IS NULL OR _site_group_name = '' OR sg.site_group_name ILIKE '%'||_site_group_name||'%')
+				AND (_site_name IS NULL OR _site_name = '' OR s.site_name ILIKE '%'||_site_name||'%')
+				AND (_sub_site_name IS NULL OR _sub_site_name = '' OR ss.sub_site_name ILIKE '%'||_sub_site_name||'%')
+				AND (_created_by IS NULL OR _created_by = '' OR lo.created_by ILIKE '%'||_created_by||'%')
+				AND (_from_date IS NULL OR lo.session_end_date >= _from_date)
+				AND (_end_date IS NULL OR lo.session_end_date <= _end_date)
+				AND (_opname_status IS NULL OR _opname_status = '' OR COALESCE(lo.session_status, 'Outdated') = _opname_status)
+			ORDER BY s.site_name
+			LIMIT COALESCE(NULLIF(_limit,0), 20) OFFSET v_offset;
+		END IF;
 	END;
 $$;
 
@@ -328,21 +407,22 @@ AS $$
 				a.owner_id,
 				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
 				u.position AS owner_position,
-				u.department AS owner_department,
+				d.dept_name AS owner_department, -- NOTE: 'owner department' is regarded as asset's location in HO, not owner's actual department
 				u.division AS owner_division,
 				u.cost_center_id AS owner_cost_center,
 				a.sub_site_id,
 				ss.sub_site_name AS sub_site_name,
-				s.id AS site_id,
+				a.site_id AS site_id,
 				s.site_name AS site_name,
 				sg.site_group_name AS site_group_name,
 				r.region_name AS region_name
 			FROM "Asset" AS a
 			LEFT JOIN "User" AS u ON a.owner_id = u.user_id
 			LEFT JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
-			LEFT JOIN "Site" AS s ON ss.site_id = s.id
+			LEFT JOIN "Site" AS s ON a.site_id = s.id
 			LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 			LEFT JOIN "Region" AS r ON sg.region_id = r.id
+			LEFT JOIN "Department" AS d ON LOWER(u.department) = LOWER(d.dept_name)
 			WHERE a.asset_tag = _asset_tag;
 	END;
 $$;
@@ -391,76 +471,98 @@ AS $$
 				a.owner_id,
 				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
 				u.position AS owner_position,
-				u.department AS owner_department,
+				d.dept_name AS owner_department, -- NOTE: 'owner department' is regarded as asset's location in HO, not owner's actual department
 				u.division AS owner_division,
 				u.cost_center_id AS owner_cost_center,
 				a.sub_site_id,
 				ss.sub_site_name AS sub_site_name,
-				s.id AS site_id,
+				a.site_id AS site_id,
 				s.site_name AS site_name,
 				sg.site_group_name AS site_group_name,
 				r.region_name AS region_name
 			FROM "Asset" AS a
 			LEFT JOIN "User" AS u ON a.owner_id = u.user_id
 			LEFT JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
-			LEFT JOIN "Site" AS s ON ss.site_id = s.id
+			LEFT JOIN "Site" AS s ON a.site_id = s.id
 			LEFT JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 			LEFT JOIN "Region" AS r ON sg.region_id = r.id
+			LEFT JOIN "Department" AS d ON LOWER(u.department) = LOWER(d.dept_name)
 			WHERE a.serial_number = _serial_number;
 	END;
 $$;
 
--- get_assets_by_site retrieves all assets for a given site (aggregates from all sub-sites)
-CREATE OR REPLACE FUNCTION public.get_assets_by_site(_site_id INT)
+-- get_assets_by_location retrieves all assets for a given location (aggregates from all sub-sites for 'area' assets)
+CREATE OR REPLACE FUNCTION public.get_assets_by_location(_site_id INT DEFAULT NULL, _dept_id INT DEFAULT NULL)
 	RETURNS TABLE (
 		asset_tag VARCHAR(12)
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
-		RETURN QUERY
-			SELECT a.asset_tag
-			FROM "Asset" AS a
-			INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
-			WHERE ss.site_id = _site_id;
+		-- Ensure only either site id or dept id is provided, not both
+		IF (_site_id IS NOT NULL AND _dept_id IS NOT NULL) OR (_site_id IS NULL AND _dept_id IS NULL) THEN
+			RAISE EXCEPTION 'Only one of site_id or dept_id must be provided';
+		END IF;
+
+		IF _site_id IS NOT NULL THEN
+			-- Fetch assets by site (aggregate via sub-sites)
+			RETURN QUERY
+				SELECT a.asset_tag
+				FROM "Asset" AS a
+				INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
+				WHERE ss.site_id = _site_id;
+		ELSE
+			-- Fetch assets by department (match owner's department to Department table)
+			RETURN QUERY
+				SELECT a.asset_tag
+				FROM "Asset" AS a
+				WHERE a.dept_id = _dept_id;
+		END IF;
 	END;
 $$;
 
--- create_new_opname_session creates a new opname session for a site
+-- create_new_opname_session creates a new opname session for a site or department
 CREATE OR REPLACE FUNCTION public.create_new_opname_session(
 	-- The ID of the user creating the session (from JWT).
 	_user_id INT,
-	-- The ID of the site for which the session is being created (from request body).
-	_site_id INT
+	-- The ID of the site for which the session is being created (NULL for department sessions).
+	_site_id INT DEFAULT NULL,
+	-- The ID of the department for which the session is being created (NULL for site sessions).
+	_dept_id INT DEFAULT NULL
 ) RETURNS INT -- Returns the new session ID, or 0 if it fails.
 	LANGUAGE plpgsql
 AS $$
 	DECLARE
-		-- Local variable to count existing ongoing sessions for the site.
+		-- Local variable to count existing ongoing sessions for the site or department.
 		-- Sessions in 'Active', 'Submitted', and 'Escalated' status are considered ongoing.
 		_ongoing_session_count INT;
 		_new_session_id INT := 0; -- Initialize to 0, will be set if a new session is created.
 	BEGIN
-		-- Check if there are any active opname sessions for the site.
-		-- Count how many rows in "OpnameSession" have the same site_id and status 'Active', 'Submitted', or 'Escalated'.
+		-- Validate that exactly one of site_id or dept_id is provided
+		IF (_site_id IS NULL AND _dept_id IS NULL) OR (_site_id IS NOT NULL AND _dept_id IS NOT NULL) THEN
+			RAISE EXCEPTION 'Exactly one of site_id or dept_id must be provided';
+		END IF;
+
+		-- Check if there are any active opname sessions for the site or department.
 		SELECT COUNT(*)
 		INTO _ongoing_session_count
 		FROM "OpnameSession"
-		WHERE site_id = _site_id AND "status" IN ('Active', 'Submitted', 'Escalated');
+		WHERE ((_site_id IS NOT NULL AND site_id = _site_id) OR (_dept_id IS NOT NULL AND dept_id = _dept_id))
+		  AND "status" IN ('Active', 'Submitted', 'Escalated');
 
 		-- If there are no ongoing sessions, proceed to create a new one.
 		IF _ongoing_session_count = 0 THEN
 			-- Insert a new opname session into the OpnameSession table.
-			INSERT INTO "OpnameSession" (user_id, site_id, "status", start_date)
-			VALUES (_user_id, _site_id, 'Active', NOW())
+			INSERT INTO "OpnameSession" (user_id, site_id, dept_id, "status", start_date)
+			VALUES (_user_id, _site_id, _dept_id, 'Active', NOW())
 			-- Get the ID of the newly created session.
 			-- The 'RETURNING' clause allows us to capture the new session ID.
 			RETURNING id INTO _new_session_id;
 
-			RAISE NOTICE 'New opname session created with ID: %', _new_session_id;
+			RAISE NOTICE 'New opname session created with ID: %, site_id: %, dept_id: %', _new_session_id, _site_id, _dept_id;
 		ELSE
 			-- If there is already an active session, do nothing. _new_session_id will remain 0.
-			RAISE NOTICE 'An ongoing opname session already exists for site ID: %, cannot create a new one.', _site_id;
+			RAISE NOTICE 'An ongoing opname session already exists for site_id: %, dept_id: %, cannot create a new one.', _site_id, _dept_id;
 		END IF;
 
 		RETURN _new_session_id;
@@ -478,7 +580,8 @@ CREATE OR REPLACE FUNCTION public.get_opname_session_by_id(_session_id INT)
 		manager_reviewed_at TIMESTAMP WITH TIME ZONE,
 		l1_reviewer_id INT,
 		l1_reviewed_at TIMESTAMP WITH TIME ZONE,
-		site_id INT
+		site_id INT,
+		dept_id INT
 	)
 	LANGUAGE plpgsql
 AS $$
@@ -486,7 +589,7 @@ AS $$
 		RETURN QUERY
 		SELECT os.id, os."start_date", os.end_date, os."status", os.user_id,
 		 	os.manager_reviewer_id, os.manager_reviewed_at, os.l1_reviewer_id, os.l1_reviewed_at,
-			os.site_id
+			os.site_id, os.dept_id
 		FROM "OpnameSession" AS os
 		WHERE os.id = _session_id;
 	END;
@@ -824,8 +927,6 @@ AS $$
 	END;
 $$;
 
--- get_action_notes 
-
 -- set_action_notes updates the action notes for an asset change
 CREATE OR REPLACE PROCEDURE public.set_action_notes(
 	_asset_tag VARCHAR(12),
@@ -931,22 +1032,16 @@ CREATE OR REPLACE FUNCTION public.get_all_sites()
 		site_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
-		region_name VARCHAR(100),
-		site_ga_id INT,
-		site_ga_name VARCHAR(255),
-		site_ga_email VARCHAR(255)
+		region_name VARCHAR(100)
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT s.id, s.site_name, sg.site_group_name, r.region_name, s.site_ga_id,
-			(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS site_ga_name,
-			u.email AS site_ga_email
+		SELECT s.id, s.site_name, sg.site_group_name, r.region_name
 		FROM "Site" AS s
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
-		INNER JOIN "Region" AS r ON sg.region_id = r.id
-		INNER JOIN "User" AS u ON s.site_ga_id = u.user_id;
+		INNER JOIN "Region" AS r ON sg.region_id = r.id;
 	END;
 $$;
 
@@ -974,22 +1069,53 @@ CREATE OR REPLACE FUNCTION public.get_site_by_id(_site_id INT)
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
 		region_name VARCHAR(100),
-		site_ga_id INT,
-		site_ga_name VARCHAR(255),
-		site_ga_email VARCHAR(255)
+		opname_session_id INT
 	)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
 		RETURN QUERY
-		SELECT s.id, s.site_name, sg.site_group_name, r.region_name, s.site_ga_id,
-			(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS site_ga_name,
-			u.email AS site_ga_email
+		SELECT 
+			s.id, 
+			s.site_name, 
+			sg.site_group_name, 
+			r.region_name,
+			COALESCE(os.id, -1) AS opname_session_id
 		FROM "Site" AS s
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 		INNER JOIN "Region" AS r ON sg.region_id = r.id
-		INNER JOIN "User" AS u ON s.site_ga_id = u.user_id
+		LEFT JOIN "OpnameSession" AS os ON os.site_id = s.id AND os.status = 'Active'
 		WHERE s.id = _site_id;
+	END;
+$$;
+
+-- get_dept_by_id retrieves department details by department ID
+CREATE OR REPLACE FUNCTION public.get_dept_by_id(_dept_id INT)
+	RETURNS TABLE (
+		dept_id INT,
+		dept_name VARCHAR(100),
+		site_name VARCHAR(100),
+		site_group_name VARCHAR(100),
+		region_name VARCHAR(100),
+		opname_session_id INT
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT 
+			d.id AS dept_id,
+			d.dept_name,
+			s.site_name,
+			sg.site_group_name,
+			r.region_name,
+			COALESCE(os.id, -1) AS opname_session_id
+		FROM "Department" AS d
+		INNER JOIN "Site" AS s ON LOWER(s.site_name) = 'head office jakarta'
+		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
+		INNER JOIN "Region" AS r ON sg.region_id = r.id
+		LEFT JOIN "OpnameSession" AS os ON os.dept_id = d.id AND os.status = 'Active'
+		WHERE d.id = _dept_id;
 	END;
 $$;
 
@@ -1046,9 +1172,9 @@ AS $$
 	END;
 $$;
 
--- get_opname_by_site_id retrieves all opname sessions for a specific site
+-- get_finished_opnames_by_location_id retrieves all opname sessions for a specific site or department
 -- ! This function is only for report page, it will only return sessions that are not 'Active'
-CREATE OR REPLACE FUNCTION public.get_opname_by_site_id(_site_id INT)
+CREATE OR REPLACE FUNCTION public.get_finished_opnames_by_location_id(_site_id INT DEFAULT NULL, _dept_id INT DEFAULT NULL)
 	RETURNS TABLE (
 		session_id INT,
 		completed_date DATE
@@ -1056,10 +1182,17 @@ CREATE OR REPLACE FUNCTION public.get_opname_by_site_id(_site_id INT)
 	LANGUAGE plpgsql
 AS $$
 	BEGIN
+		-- Validate that exactly one of site_id or dept_id is provided
+		IF (_site_id IS NULL AND _dept_id IS NULL) OR (_site_id IS NOT NULL AND _dept_id IS NOT NULL) THEN
+			RAISE EXCEPTION 'Exactly one of site_id or dept_id must be provided';
+		END IF;
+
 		RETURN QUERY
 		SELECT os.id, DATE(os.end_date) AS completed_date
 		FROM "OpnameSession" AS os
-		WHERE os.site_id = _site_id AND os.status != 'Active';
+		WHERE (_site_id IS NOT NULL AND os.site_id = _site_id OR _dept_id IS NOT NULL AND os.dept_id = _dept_id) 
+		  AND os.status != 'Active'
+		ORDER BY os.end_date DESC;
 	END;
 $$;
 
@@ -1114,15 +1247,25 @@ AS $$
 			
 			UNION
 
-			-- Those not scanned will definitely be 'missing_assets'
+			-- Missing assets: assets not scanned during opname
+			-- For site-based opname: assets in the site's sub-sites OR directly in the parent site (without subsite)
+			-- For department-based opname: assets owned by users in that department that weren't scanned
 			SELECT
 				'missing_assets'::VARCHAR(50) AS category,
 				a.asset_tag,
 				a.product_variety
 			FROM "Asset" AS a
-			INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
-			INNER JOIN "OpnameSession" AS os ON ss.site_id = os.site_id AND os.id = _session_id
-			WHERE NOT EXISTS (
+			INNER JOIN "OpnameSession" AS os ON os.id = _session_id
+			LEFT JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
+			LEFT JOIN "User" AS au ON a.owner_id = au.user_id
+			LEFT JOIN "Department" AS d ON LOWER(au.department) = LOWER(d.dept_name)
+			WHERE 
+				-- For site-based opname: match by site (either through subsite or directly in parent site)
+				(os.site_id IS NOT NULL AND (ss.site_id = os.site_id OR (a.sub_site_id IS NULL AND a.site_id = os.site_id)))
+				OR
+				-- For department-based opname: match by department
+				(os.dept_id IS NOT NULL AND d.id = os.dept_id)
+			AND NOT EXISTS (
 				SELECT 1 FROM "AssetChanges" AS ac2 WHERE ac2.session_id = _session_id AND ac2.asset_tag = a.asset_tag
 			)
 		)

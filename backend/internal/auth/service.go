@@ -33,20 +33,15 @@ func (service *Service) Login(username, password string) (string, error) {
 	if strings.EqualFold(username, "vacant") {
 		return "", errors.New("invalid username or password")
 	}
+
 	// Fetch user credentials from the repository.
 	userCredentials, err := service.userRepo.GetUserCredentials(username)
 	if err != nil {
 		// Database error occurred while fetching user credentials.
 		return "", err
 	}
-	if userCredentials == nil {
-		// No user found with the provided username.
-		return "", errors.New("invalid username or password")
-	}
-
-	// Check if the provided password matches the stored password.
-	if userCredentials.Password != password {
-		// Password does not match.
+	if userCredentials == nil || userCredentials.Password != password {
+		// No user found with the provided username or password doesn't match
 		return "", errors.New("invalid username or password")
 	}
 
@@ -79,6 +74,7 @@ func (service *Service) Login(username, password string) (string, error) {
 		"user_id":  userCredentials.UserID,
 		"username": userCredentials.Username,
 		"position": userCredentials.Position,
+		"ou_code":  userCredentials.OuCode,
 		"exp":      time.Now().Add(time.Hour * 720).Unix(), // Token expires in 720 hours (only for educational purposes, unrelated to SM's policies)
 	}
 

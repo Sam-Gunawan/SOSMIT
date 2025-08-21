@@ -11,13 +11,11 @@ type Repository struct {
 }
 
 type Site struct {
-	SiteID        int
-	SiteName      string
-	SiteGroupName string
-	RegionName    string
-	SiteGaID      string
-	SiteGaName    string
-	SiteGaEmail   string
+	SiteID          int    `json:"site_id"`
+	SiteName        string `json:"site_name"`
+	SiteGroupName   string `json:"site_group_name"`
+	RegionName      string `json:"region_name"`
+	OpnameSessionID int    `json:"opname_session_id"`
 }
 
 type SubSite struct {
@@ -35,7 +33,7 @@ func NewRepository(db *sql.DB) *Repository {
 func (repo *Repository) GetAllSites() ([]*Site, error) {
 	var allSites []*Site
 
-	rows, err := repo.db.Query("SELECT site_id, site_name, site_group_name, region_name, site_ga_id, site_ga_name, site_ga_email FROM get_all_sites()")
+	rows, err := repo.db.Query("SELECT site_id, site_name, site_group_name, region_name FROM get_all_sites()")
 	if err != nil {
 		log.Printf("❌ Error retrieving all sites, error: %v\n", err)
 		return nil, err
@@ -44,7 +42,7 @@ func (repo *Repository) GetAllSites() ([]*Site, error) {
 
 	for rows.Next() {
 		var site Site
-		if err := rows.Scan(&site.SiteID, &site.SiteName, &site.SiteGroupName, &site.RegionName, &site.SiteGaID, &site.SiteGaName, &site.SiteGaEmail); err != nil {
+		if err := rows.Scan(&site.SiteID, &site.SiteName, &site.SiteGroupName, &site.RegionName); err != nil {
 			return nil, err
 		}
 		allSites = append(allSites, &site)
@@ -58,7 +56,7 @@ func (repo *Repository) GetSiteByID(siteID int) (*Site, error) {
 	var site Site
 
 	query := `SELECT * FROM get_site_by_id($1)`
-	err := repo.db.QueryRow(query, siteID).Scan(&site.SiteID, &site.SiteName, &site.SiteGroupName, &site.RegionName, &site.SiteGaID, &site.SiteGaName, &site.SiteGaEmail)
+	err := repo.db.QueryRow(query, siteID).Scan(&site.SiteID, &site.SiteName, &site.SiteGroupName, &site.RegionName, &site.OpnameSessionID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			log.Printf("⚠ No site found with ID: %d\n", siteID)

@@ -1,6 +1,7 @@
 export interface OpnameSession {
     sessionID: number;
     siteID: number;
+    deptID: number;
     userID: number;
     status: 'Outdated' | 'Active' | 'Submitted' | 'Escalated' | 'Verified' | 'Rejected';
     startDate: string;

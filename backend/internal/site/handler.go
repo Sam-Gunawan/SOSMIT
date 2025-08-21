@@ -84,13 +84,11 @@ func (handler *Handler) GetSiteByIDHandler(context *gin.Context) {
 
 	log.Printf("Successfully retrieved site by ID: %v", siteID)
 	context.JSON(http.StatusOK, gin.H{
-		"site_id":         site.SiteID,
-		"site_name":       site.SiteName,
-		"site_group_name": site.SiteGroupName,
-		"region_name":     site.RegionName,
-		"site_ga_id":      site.SiteGaID,
-		"site_ga_name":    site.SiteGaName,
-		"site_ga_email":   site.SiteGaEmail,
+		"site_id":           site.SiteID,
+		"site_name":         site.SiteName,
+		"site_group_name":   site.SiteGroupName,
+		"region_name":       site.RegionName,
+		"opname_session_id": site.OpnameSessionID,
 	})
 }
 
@@ -107,10 +105,7 @@ func (handler *Handler) GetAllSubSitesHandler(context *gin.Context) {
 
 	if subSites == nil {
 		log.Println("No sub-sites found in the system")
-		context.JSON(http.StatusNotFound, gin.H{
-			"message": "no sub-sites found",
-		})
-		return
+		subSites = make([]*SubSite, 0)
 	}
 
 	log.Printf("Successfully retrieved %d sub-sites", len(subSites))
@@ -194,10 +189,7 @@ func (handler *Handler) GetSubSitesBySiteIDHandler(context *gin.Context) {
 
 	if subSites == nil {
 		log.Printf("No sub-sites found for site ID: %d", siteID)
-		context.JSON(http.StatusNotFound, gin.H{
-			"message": "no sub-sites found",
-		})
-		return
+		subSites = make([]*SubSite, 0)
 	}
 
 	log.Printf("Successfully retrieved %d sub-sites for site ID: %d", len(subSites), siteID)

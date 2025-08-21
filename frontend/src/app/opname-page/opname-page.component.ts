@@ -11,6 +11,7 @@ import { OpnameSession } from '../model/opname-session.model';
 import { SiteInfo } from '../model/site-info.model';
 import { DurationReminderComponent } from '../duration-reminder/duration-reminder.component';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { Department } from '../model/dept.model';
 
 @Component({
   selector: 'app-opname-page',
@@ -25,20 +26,29 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
   
   constructor(private apiService: ApiService, private route: ActivatedRoute, private router: Router, private opnameSessionService: OpnameSessionService, public dialog: MatDialog) {}
   
-  cardVariant: 'default' | 'compact' = 'compact';
-  showLocation: boolean = true;
   opnameSession: OpnameSession = {} as OpnameSession;
   site: SiteInfo = {} as SiteInfo;
   sessionID: number = -1; // Default value, will be set later
   siteID: number = -1; // Site ID for the current opname session
-  isLoading: boolean = true; // Loading state for the opname session
-  errorMessage: string = ''; // Error message for the opname session
+  deptID: number = -1; // Dept ID for the current opname session
+  isLoading: boolean = true; 
+  errorMessage: string = ''; 
   showToast: boolean = false;
   private subscription?: Subscription; // Subscription to manage service state
 
   ngOnInit() {
     this.isLoading = true;
-    this.siteID = Number(this.route.snapshot.paramMap.get('id')); // Get site ID from route parameters
+    
+    // Only handle query parameter navigation: /location/opname?site_id=... or dept_id=...
+    const querySiteId = this.route.snapshot.queryParamMap.get('site_id');
+    const queryDeptId = this.route.snapshot.queryParamMap.get('dept_id');
+    
+    if (querySiteId) {
+      this.siteID = Number(querySiteId);
+    } else if (queryDeptId) {
+      this.deptID = Number(queryDeptId);
+    }
+    
     this.initSessionID();
     this.initOpnameSession();
     this.initSiteInfo();
@@ -67,11 +77,12 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     if (serviceSessionId && serviceSessionId > 0) {
       this.sessionID = serviceSessionId;
       
-      // If we have a session ID but no site ID from route, try to get it from localStorage
-      if (this.siteID <= 0) {
-        const siteid = this.opnameSessionService.getSiteId();
-        if (siteid && siteid > 0) {
-          this.siteID = siteid;
+      // Populate missing location (site / dept) from stored session info
+      if (this.siteID <= 0 || this.deptID <= 0) {
+        const location = this.opnameSessionService.getLocationId();
+        if (location.id !== null && location.id > 0) {
+          if (this.siteID <= 0 && location.type === 'site') this.siteID = location.id;
+          if (this.deptID <= 0 && location.type === 'dept') this.deptID = location.id;
         }
       }
       return;
@@ -95,13 +106,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     // If no session ID found, show error
     console.error('[OpnamePage] No session ID found in any source');
     
-    // If we have a site ID, navigate back to that site
-    if (this.siteID > 0) {
-      this.router.navigate(['/site', this.siteID]);
-    } else {
-      // If we don't have a site ID either, navigate to dashboard
-      this.router.navigate(['']);
-    }
+    this.navigateBackToLocation();
     
     this.errorMessage = 'Tidak ditemukan sesi opname. Silakan mulai sesi baru.';
     this.showToast = true;
@@ -113,10 +118,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     this.opnameSessionService.getOpnameSession(this.sessionID).subscribe({
       next: (session) => {
         this.opnameSession = session;
-        this.isLoading = false; // Set loading state to false after fetching session
-        
-        // Update responsive settings based on screen size
-        this.updateResponsiveSettings();
+        this.isLoading = false; // Set loading state to false after fetching session  
       },
       error: (error) => {
         this.isLoading = false; // Set loading state to false on error
@@ -130,23 +132,76 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
 
   private initSiteInfo() {
     this.isLoading = true;
-    this.apiService.getSiteByID(this.siteID).subscribe({
-      next: (site) => {
-        this.site = site;
-        this.isLoading = false;
-      },
-      error: (error) => {
-        this.errorMessage = 'Gagal memuat informasi site. Silakan refresh halaman.';
-        console.error('[OpnamePage] Error fetching site info:', error);
-        this.isLoading = false;
-      },
-    });
+    
+    // Determine if we're dealing with a site or department based on query params
+    const queryDeptId = this.route.snapshot.queryParamMap.get('dept_id');
+    
+    if (queryDeptId) {
+      // Handle department - get department info and treat it as site info for UI consistency
+      this.apiService.getDeptByID(this.deptID).subscribe({
+        next: (dept) => {
+          // Map department info to site info structure for UI compatibility
+          this.site = {
+            siteID: dept.deptID,
+            siteName: dept.deptName,
+            siteGroupName: dept.siteGroupName,
+            regionName: dept.regionName,
+            opnameSessionID: dept.opnameSessionID
+          };
+          this.isLoading = false;
+        },
+        error: (error) => {
+          this.errorMessage = 'Gagal memuat informasi departemen. Silakan refresh halaman.';
+          console.error('[OpnamePage] Error fetching department info:', error);
+          this.isLoading = false;
+        }
+      });
+    } else {
+      // Handle site - use original logic
+      this.apiService.getSiteByID(this.siteID).subscribe({
+        next: (site) => {
+          this.site = site;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          this.errorMessage = 'Gagal memuat informasi site. Silakan refresh halaman.';
+          console.error('[OpnamePage] Error fetching site info:', error);
+          this.isLoading = false;
+        }
+      });
+    }
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize(event: any) {
-    // this.checkScreenSize();
-    this.updateResponsiveSettings();
+  private navigateBackToLocation() {
+    const querySiteId = this.route.snapshot.queryParamMap.get('site_id');
+    const queryDeptId = this.route.snapshot.queryParamMap.get('dept_id');
+    
+    if (querySiteId) {
+      this.router.navigate(['/location'], { queryParams: { site_id: querySiteId } });
+    } else if (queryDeptId) {
+      this.router.navigate(['/location'], { queryParams: { dept_id: queryDeptId } });
+    } else {
+      // If we don't have any location info, navigate to dashboard
+      this.router.navigate(['']);
+    }
+  }
+
+  private navigateToReport() {
+    const querySiteId = this.route.snapshot.queryParamMap.get('site_id');
+    const queryDeptId = this.route.snapshot.queryParamMap.get('dept_id');
+    
+    if (querySiteId) {
+      this.router.navigate(['/location/report'], {
+        queryParams: { site_id: querySiteId, session_id: this.sessionID, from: 'opname_page' }
+      });
+    } else if (queryDeptId) {
+      this.router.navigate(['/location/report'], {
+        queryParams: { dept_id: queryDeptId, session_id: this.sessionID, from: 'opname_page' }
+      });
+    } else {
+      // If we don't have any location info, navigate to dashboard
+      this.router.navigate(['']);
+    }
   }
 
   cancelOpnameSession() {
@@ -164,14 +219,13 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
     
     this.isLoading = true; // Set loading state to true before cancelling
     this.opnameSessionService.cancelOpnameSession(this.sessionID).subscribe({
-      next: (response) => {
+      next: () => {
         this.isLoading = false; // Set loading state to false after cancelling
         
         // Clear the session from the service and localStorage
         this.opnameSessionService.clearSession();
         
-        // Navigate back to the site page
-        this.router.navigate(['/site', this.siteID]);
+        this.navigateBackToLocation();
       },
       error: (error) => {
         this.isLoading = false; // Set loading state to false on error
@@ -237,10 +291,7 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
         // Clear the session from the service and localStorage !!!
         this.opnameSessionService.clearSession();
         
-        // Navigate back to the site page
-        this.router.navigate(['/site', this.siteID, 'report'], {
-          queryParams: { session_id: this.sessionID, from: 'opname_page' }
-        });
+        this.navigateToReport();
       },
       error: (error: any) => {
         this.isLoading = false; // Set loading state to false on error
@@ -250,18 +301,6 @@ export class OpnamePageComponent implements OnInit, OnDestroy {
         console.error('[OpnamePage] Error finishing opname session:', error);
       }
     });
-  }
-
-  private updateResponsiveSettings() {
-    if (window.innerWidth >= 768) {
-      // Large screens: use compact variant with location
-      this.cardVariant = 'compact';
-      this.showLocation = true;
-    } else {
-      // Small screens: use default variant without location
-      this.cardVariant = 'default';
-      this.showLocation = false;
-    }
   }
 
   openModal(modalId: string) {

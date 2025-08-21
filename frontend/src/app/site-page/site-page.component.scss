@@ -38,25 +38,53 @@ p {
     gap: 5px;
 }
 
+.export-csv-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all .18s ease;
+    width: fit-content;
+
+    &:focus-visible {
+        outline: 2px solid #16a085;
+        outline-offset: 2px;
+        border-radius: 5px;
+    }
+}
+
 .export-container {
-    display: flex;
-    flex-direction: row;
+    display: inline-flex;
     align-items: center;
     cursor: pointer;
     border-radius: 5px;
-    border: 1px solid color.adjust(styles.$secondary-background-color, $lightness: -10%);
-    padding: 5px 10px;
+    border: 1px solid #16a085;
+    padding: 6px 12px;
+    background-color: #16a085;
+    gap: 6px;
+    color: white;
+    font-family: styles.$font-family;
+    font-size: 10px;
+    font-weight: 500;
+    transition: background-color .18s ease, border-color .18s ease;
     width: fit-content;
-    background-color: color.adjust(styles.$secondary-background-color, $lightness: -5%);
-    gap: 5px;
+    white-space: nowrap;
 
     i {
+        font-size: 13px;
+        color: white;
+    }
+
+    .export-text {
+        color: white;
         font-size: 10px;
-        color: styles.$primary-text-color;
+        margin: 0;
+        font-weight: 500;
     }
 
     &:hover {
-        background-color: color.adjust(styles.$secondary-background-color, $lightness: -15%);
+        background-color: color.scale(#16a085, $lightness: -10%);
+        border-color: color.scale(#16a085, $lightness: -10%);
     }
 }
 

@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/utils"
 )
 
 type OpnameSession struct {
@@ -18,7 +19,8 @@ type OpnameSession struct {
 	ManagerReviewedAt sql.NullString `json:"manager_reviewed_at"`
 	L1ReviewerID      sql.NullInt64  `json:"l1_reviewer_id"`
 	L1ReviewedAt      sql.NullString `json:"l1_reviewed_at"`
-	SiteID            int            `json:"site_id"`
+	SiteID            sql.NullInt64  `json:"site_id"`
+	DeptID            sql.NullInt64  `json:"dept_id"`
 }
 
 type AssetChange struct {
@@ -65,12 +67,16 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 // CreateNewSession creates a new opname session in the database.
-func (repo *Repository) CreateNewSession(userID int, siteID int) (int, error) {
+func (repo *Repository) CreateNewSession(userID int, siteID *int, deptID *int) (int, error) {
+	var siteIDParam, deptIDParam sql.NullInt64
+	siteIDParam = utils.ParseNullableInt(siteID)
+	deptIDParam = utils.ParseNullableInt(deptID)
+
 	var newSessionID int
 
-	query := `SELECT create_new_opname_session($1, $2)`
+	query := `SELECT create_new_opname_session($1, $2, $3)`
 
-	err := repo.db.QueryRow(query, userID, siteID).Scan(&newSessionID)
+	err := repo.db.QueryRow(query, userID, siteIDParam, deptIDParam).Scan(&newSessionID)
 	if err != nil {
 		log.Printf("❌ Error creating new opname session: %v", err)
 		return 0, err
@@ -96,6 +102,7 @@ func (repo *Repository) GetSessionByID(sessionID int) (*OpnameSession, error) {
 		&session.L1ReviewerID,
 		&session.L1ReviewedAt,
 		&session.SiteID,
+		&session.DeptID,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -298,14 +305,17 @@ type OpnameFilter struct {
 	CompletedDate string `json:"completed_date"` // Format: YYYY-MM-DD
 }
 
-// GetOpnameOnSite retrieves all opname sessions for a specific site.
+// GetOpnameOnLocation retrieves all opname sessions for a specific site.
 // Only non-active sessions are returned.
-func (repo *Repository) GetOpnameOnSite(siteID int) ([]OpnameFilter, error) {
-	query := `SELECT * FROM get_opname_by_site_id($1)`
+func (repo *Repository) GetOpnameOnLocation(siteID *int, deptID *int) ([]OpnameFilter, error) {
+	siteIDParam := utils.ParseNullableInt(siteID)
+	deptIDParam := utils.ParseNullableInt(deptID)
 
-	rows, err := repo.db.Query(query, siteID)
+	query := `SELECT * FROM get_finished_opnames_by_location_id($1, $2)`
+
+	rows, err := repo.db.Query(query, siteIDParam, deptIDParam)
 	if err != nil {
-		log.Printf("❌ Error retrieving opname sessions for site %d: %v", siteID, err)
+		log.Printf("❌ Error retrieving opname sessions for site %d and dept %d: %v", siteIDParam.Int64, deptIDParam.Int64, err)
 		return nil, err // Query failed for some error.
 	}
 

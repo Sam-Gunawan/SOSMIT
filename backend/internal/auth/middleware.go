@@ -70,46 +70,19 @@ func AuthMiddleware() gin.HandlerFunc {
 				return
 			}
 
-			// Extract the user's username from claims
-			username, ok := claims["username"]
-			if !ok {
-				context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"error": "invalid username in token",
-				})
-
-				fmt.Println("Invalid username in token:", username, "\nError:", ok)
+			// Extract and set JWT claims from user's credentials
+			if err := extractAndSetClaims(claims, "username", context); err != nil {
 				return
 			}
-
-			// Set the username in Gin context for the next handler to use.
-			context.Set("username", username)
-
-			// Extract the user's ID from claims
-			userID, ok := claims["user_id"]
-			if !ok {
-				context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"error": "invalid user_id in token",
-				})
-				fmt.Println("Invalid user_id in token:", userID, "\nError:", ok)
+			if err := extractAndSetClaims(claims, "user_id", context); err != nil {
 				return
 			}
-
-			// Set the user_id in Gin context for the next handler to use.
-			context.Set("user_id", int64(userID.(float64)))
-
-			// Extract the user's position from claims
-			position, ok := claims["position"]
-			if !ok {
-				context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
-					"error": "invalid position in token",
-				})
-
-				fmt.Println("Invalid position in token:", position, "\nError:", ok)
+			if err := extractAndSetClaims(claims, "position", context); err != nil {
 				return
 			}
-
-			// Set the position in Gin context for the next handler to use.
-			context.Set("position", position)
+			if err := extractAndSetClaims(claims, "ou_code", context); err != nil {
+				return
+			}
 
 			// Continue to next handler
 			context.Next()
@@ -122,4 +95,35 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 	}
+}
+
+// Helper function to extract and set claims from JWT
+func extractAndSetClaims(claims jwt.MapClaims, key string, context *gin.Context) error {
+	value, ok := claims[key]
+	if !ok {
+		context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+			"error": fmt.Sprintf("invalid %s in token", key),
+		})
+		return fmt.Errorf("missing %s in token claims", key)
+	}
+
+	// Special handling for user_id - convert to int
+	if key == "user_id" {
+		switch v := value.(type) {
+		case float64:
+			context.Set(key, int64(v))
+		case int:
+			context.Set(key, int64(v))
+		default:
+			context.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{
+				"error": fmt.Sprintf("invalid %s type in token", key),
+			})
+			return fmt.Errorf("unexpected %s type: %T", key, value)
+		}
+	} else {
+		// Set the extracted value in the Gin context for the next handler to use.
+		context.Set(key, value)
+	}
+
+	return nil
 }

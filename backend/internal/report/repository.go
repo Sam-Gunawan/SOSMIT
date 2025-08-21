@@ -59,7 +59,8 @@ type SessionMeta struct {
 	ManagerReviewedAt sql.NullString
 	L1ReviewerID      sql.NullInt64
 	L1ReviewedAt      sql.NullString
-	SiteID            int
+	SiteID            sql.NullInt64
+	DeptID            sql.NullInt64
 }
 
 // GetBAPRecap retrieves recap rows (grouped by category & product variety) for a session.
@@ -126,6 +127,7 @@ func (repo *Repository) GetSessionMeta(sessionID int64) (*SessionMeta, error) {
 		&sessionMeta.L1ReviewerID,
 		&sessionMeta.L1ReviewedAt,
 		&sessionMeta.SiteID,
+		&sessionMeta.DeptID,
 	)
 	if err != nil {
 		if err == sql.ErrNoRows {

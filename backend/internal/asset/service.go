@@ -53,13 +53,13 @@ func (service *Service) GetAssetBySerialNumber(serialNumber string) (*Asset, err
 	return asset, nil
 }
 
-// GetAssetBySite retrieves all assets for a given site.
-func (service *Service) GetAssetsOnSite(siteID int64) ([]*Asset, error) {
+// GetAssetsOnLocation retrieves all assets for a given location.
+func (service *Service) GetAssetsOnLocation(siteID *int, deptID *int) ([]*Asset, error) {
 	var assetsOnSite []*Asset
-	assetTags, err := service.repo.GetAssetsOnSite(siteID)
+	assetTags, err := service.repo.GetAssetsOnLocation(siteID, deptID)
 	if err != nil {
 		// Log the error and return it
-		log.Printf("Error fetching assets for site_id %d: %v", siteID, err)
+		log.Printf("Error fetching assets for site_id %d or dept_id %d: %v", siteID, deptID, err)
 		return nil, err
 	}
 

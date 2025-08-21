@@ -187,3 +187,81 @@ p {
     }
   }
 }
+
+// Toggle button styles
+.toggle-section {
+  margin-bottom: 15px;
+  
+  label {
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: block;
+  }
+  
+  .toggle-buttons {
+    display: flex;
+    gap: 0;
+    border: 1px solid styles.$primary-color;
+    border-radius: 8px;
+    overflow: hidden;
+    
+    .toggle-btn {
+      flex: 1;
+      padding: 6px 16px;
+      border: none;
+      background-color: #f8f9fa;
+      color: styles.$primary-text-color;
+      font-size: 10px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background-color: #e9ecef;
+      }
+      
+      &.active {
+        background-color: styles.$primary-color;
+        color: white;
+        font-weight: 600;
+      }
+      
+      &:first-child {
+        border-right: 1px solid #ddd;
+      }
+
+      @media (max-width: 860px) {
+        font-size: 8px;
+        padding: 5px 12px;
+      }
+    }
+
+    .area-btn {
+      border-radius: 6px 0 0 6px;
+    }
+
+    .ho-btn {
+      border-radius: 0 6px 6px 0;
+    }
+  }
+}
+
+// Status for new locations
+.status-new {
+  background-color: #e3f2fd !important;
+  border-color: #1976d2 !important;
+  color: #1976d2;
+}
+
+::ng-deep .mat-mdc-autocomplete-panel {
+  background-color: white !important;
+}
+
+::ng-deep .mat-mdc-option {
+  min-height: 24px !important;
+  background-color: white;
+
+  .mdc-list-item__primary-text {
+    font-size: 9px !important;
+  }
+}

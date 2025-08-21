@@ -12,28 +12,33 @@
         <section class="site-content">
             <div class="site-information">
                 <div class="basic-info">
-                    <h5 class="site-name">{{ sitePage.siteName }}</h5>
-                    <p class="site-location">{{ sitePage.siteGroup }}, {{ sitePage.siteRegion }}</p>
+                    <h5 class="site-name">{{ location.deptName ? location.deptName : location.siteName }}</h5>
+                    <p class="site-location">{{ location.siteGroupName }}, {{ location.regionName }}</p>
                     
-                    <div class="export-container">
-                        <i class="fas fa-download"></i>
-                        <p class="export-text">Export asset data</p>
-                    </div>
+                    <button type="button" 
+                            class="export-csv-btn"
+                            (click)="exportToCSV()"
+                            [title]="'Export asset data as CSV'">
+                        <div class="export-container">
+                            <i class="fas fa-file-csv"></i>
+                            <p class="export-text">Export CSV</p>
+                        </div>
+                    </button>
                 </div>
                 <div class="opname-info">
                     <span 
                         class="site-status"
                         [ngClass]="{
-                            'status-active': sitePage.opnameStatus === 'Active',
-                            'status-submitted': sitePage.opnameStatus === 'Submitted',
-                            'status-escalated': sitePage.opnameStatus === 'Escalated',
-                            'status-verified': sitePage.opnameStatus === 'Verified',
-                            'status-rejected': sitePage.opnameStatus === 'Rejected',
-                            'status-outdated': sitePage.opnameStatus === 'Outdated'
+                            'status-active': location.opnameStatus === 'Active',
+                            'status-submitted': location.opnameStatus === 'Submitted',
+                            'status-escalated': location.opnameStatus === 'Escalated',
+                            'status-verified': location.opnameStatus === 'Verified',
+                            'status-rejected': location.opnameStatus === 'Rejected',
+                            'status-outdated': location.opnameStatus === 'Outdated'
                         }">
-                        {{ sitePage.opnameStatus }}
+                        {{ location.opnameStatus || 'Loading...' }}
                     </span>
-                    <p class="opname-date">Last Opname on {{ sitePage.opnameDate }}</p>
+                    <p class="opname-date">{{ location.opnameDate ? 'Last Opname on ' + location.opnameDate : 'No previous opname' }}</p>
                 </div>
             </div>
 
@@ -41,7 +46,7 @@
                 <hr class="divider">
 
                 <section class="site-asset-list">
-                    <app-asset-card></app-asset-card>
+                    <app-asset-card [siteID]="location.siteID" [deptID]="location.deptID"></app-asset-card>
                 </section>
             </div>
         </section>

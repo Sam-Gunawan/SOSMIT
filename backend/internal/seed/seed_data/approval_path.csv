@@ -1,6 +1,8 @@
-position;sequence;site_id
-Area Manager;1;1
-L1 Support;2;1
-IT Services Manager;3;1
-Finance & Accounting Manager;1;25
-IT Services Manager;2;25
+position;sequence;site_id;from
+Area Manager;1;1;Area
+L1 Support;2;1;Area
+IT Services Manager;3;1;Area
+Area Manager;1;1;HO
+IT Services Manager;2;1;HO
+Finance & Accounting Manager;1;25;HO
+IT Services Manager;2;25;HO

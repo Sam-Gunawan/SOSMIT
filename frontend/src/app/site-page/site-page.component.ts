@@ -1,11 +1,13 @@
-import { Component, input, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ApiService } from '../services/api.service';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SiteInfo } from '../model/site-info.model';
 import { AssetCardComponent } from '../asset-card/asset-card.component';
 import { OpnameSession } from '../model/opname-session.model';
+import { Department } from '../model/dept.model';
+import { ApiService } from '../services/api.service';
+import { firstValueFrom } from 'rxjs';
 
   @Component({
     selector: 'app- site-page',
@@ -13,66 +15,25 @@ import { OpnameSession } from '../model/opname-session.model';
     templateUrl: './site-page.component.html',
     styleUrl: './site-page.component.scss'
   })
-  export class SitePageComponent {
-    sitePage: SiteInfo;
+  export class SitePageComponent implements OnInit{
+    location = {} as any;
     siteList?: SiteInfo[] = []; // Initialize siteList as an empty array
-    isLoading: boolean = true; // Loading state to show a spinner or loading indicator
+    isLoading: boolean = false; // Loading state to show a spinner or loading indicator
     errorMessage: string = '';
     opnameLoading: boolean = false; // Loading state for starting a new opname session
     opnameSession?: OpnameSession; // Optional opname session to hold the current session data
     showToast: boolean = false;
     floatingMenuExpanded: boolean = false; // Track floating menu expanded state
 
-    constructor(private route: ActivatedRoute, private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService) {
-      this.sitePage = {
-        siteID: -1,
-        siteName: '',
-        siteGroup: '',
-        siteRegion: '',
-        siteGaID: -1,
-        siteGaName: '',
-        siteGaEmail: '',
-        opnameSessionID: -1,
-        opnameUserID: -1,
-        opnameUserName: '',
-        opnameStatus: '',
-        opnameDate: ''
-      };
-    }
+    constructor(
+      private route: ActivatedRoute,
+      private router: Router,
+      private opnameSessionService: OpnameSessionService,
+      private apiService: ApiService,
+    ) {}
 
     ngOnInit(): void {
-      this.fetchSitePage(); // Fetch site page data when the component initializes
-    } 
-
-    fetchSitePage(): void {
-      this.isLoading = true; // Set loading state to true before fetching data
-      this.apiService.getUserSiteCards().subscribe({
-        next: (siteCardsList) => {
-          this.siteList = siteCardsList; // Update the siteList with the fetched data
-          console.log('[SitePage] Site cards fetched successfully:', this.siteList);
-          const id = Number(this.route.snapshot.paramMap.get('id'));
-          const fetchedSite = this.siteList?.find((site: SiteInfo) => site.siteID === id);
-          this.isLoading = false; // Set loading state to false after data is fetched
-          if (fetchedSite) {
-            this.sitePage = fetchedSite; // Set the sitePage to the fetched site
-          } else {
-            this.errorMessage = 'Site tidak ditemukan.';
-            this.showToast = true;
-            setTimeout(() => this.showToast = false, 3000);
-            console.error('[SitePage] Site not found for ID:', id);
-            return
-          }
-          console.log('sitePage', this.sitePage);
-        },
-        error: (error) => {
-          // Handle the error appropriately, e.g., show a message to the user
-          console.error('[SitePage] Failed to fetch site cards:', error);
-          this.isLoading = false; // Set loading state to false even if there's an error
-          this.errorMessage = 'Gagal memuat kartu site. Silakan coba lagi nanti.';
-          this.showToast = true;
-          setTimeout(() => this.showToast = false, 3000);
-        }
-      });
+      this.getLocationInfo();
     }
 
     toggleFloatingMenu(): void {
@@ -90,35 +51,106 @@ import { OpnameSession } from '../model/opname-session.model';
       }
     }
 
+    async getLocationInfo(): Promise<void> {
+      this.isLoading = true;
+      
+      try {
+        console.log('test 1');
+        const params = await firstValueFrom(this.route.queryParamMap);
+        console.log('Query params:', params.keys);
+        
+        // Check whether any params are provided or whether both site_id and dept_id are provided. If invalid, then throw an error
+        // In other words, the params must be exactly one (either site id or dept id provided)
+        if (!params || params.keys.length !== 1) {
+          this.errorMessage = 'Halaman lokasi invalid.';
+          this.showToast = true;
+          setTimeout(() => this.showToast = false, 3000);
+          this.isLoading = false;
+          return;
+        }
+
+        if (params.keys.indexOf('site_id') !== -1) {
+          const siteID = Number(params.get('site_id'));
+          
+          // Fetch site information
+          const site = await firstValueFrom(this.apiService.getSiteByID(siteID));
+          if (site) {
+            this.location = site;
+            
+            // Fetch opname status information
+            const opnameStatus = await firstValueFrom(this.apiService.getLatestOpnameStatus(siteID));
+            if (opnameStatus) {
+              this.location.opnameStatus = opnameStatus.status;
+              this.location.opnameDate = opnameStatus.date;
+            }
+          }
+          
+        } else if (params.keys.indexOf('dept_id') !== -1) {
+          const deptID = Number(params.get('dept_id'));
+
+          console.log('test 2, loading: ', this.isLoading)
+          
+          // Fetch department information
+          const dept = await firstValueFrom(this.apiService.getDeptByID(deptID));
+          if (dept) {
+            this.location = dept;
+            console.log('[SitePage] Department info loaded:', this.location);
+            
+            // Fetch opname status information
+            const opnameStatus = await firstValueFrom(this.apiService.getLatestOpnameStatus(undefined, deptID));
+            if (opnameStatus) {
+              this.location.opnameStatus = opnameStatus.status;
+              this.location.opnameDate = opnameStatus.date;
+            }
+          }
+        }
+        
+        this.isLoading = false;
+        
+      } catch (error: any) {
+        this.isLoading = false;
+        console.error('[SitePage] Error loading location info:', error?.error?.error || error);
+        this.errorMessage = error?.error?.error || 'Gagal memuat halaman lokasi. Silakan coba lagi';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
+      }
+    }
+
     startNewOpname(): void {
       // Prevent multiple simultaneous requests
       if (this.opnameLoading) {
-        console.log('[SitePage] Request already in progress, ignoring duplicate click');
         return;
       }
 
       // This method will start a new stock opname session for the current site.
       this.opnameLoading = true; // Set loading state to true before starting the request
       this.errorMessage = ''; // Clear any previous errors
-      
-      console.log('[SitePage] Starting new opname for site ID:', this.sitePage.siteID);
-      
-      this.opnameSessionService.startNewOpname(this.sitePage.siteID).subscribe({
+
+
+      this.opnameSessionService.startNewOpname(this.location.siteID, this.location.deptID).subscribe({
         next: (response) => {
           this.opnameLoading = false; // Set loading state to false after starting opname
-          console.log('[SitePage] New opname session started successfully:', response);
-          
-          // Update the sitePage with the new opname session ID.
-          this.sitePage.opnameSessionID = response.opnameSessionID;
 
-          // Store the session ID and site ID in the service
+          // Update the location with the new opname session ID.
+          this.location.opnameSessionID = response.opnameSessionID;
+
+          // Store the session ID and location ID in the service
           this.opnameSessionService.setSessionId(response.opnameSessionID);
-          this.opnameSessionService.setSiteId(this.sitePage.siteID);
-
-          // Redirect to the opname page using router state
-          this.router.navigate(['/site', this.sitePage.siteID, 'opname'], {
-            state: { sessionID: response.opnameSessionID }
-          });
+          
+          // Navigate to opname page with appropriate query parameters
+          if (this.location.siteID) {
+            this.opnameSessionService.setLocationId(this.location.siteID, 'site');
+            this.router.navigate(['/location/opname'], {
+              queryParams: { site_id: this.location.siteID },
+              state: { sessionID: response.opnameSessionID }
+            });
+          } else if (this.location.deptID) {
+            this.opnameSessionService.setLocationId(this.location.deptID, 'dept');
+            this.router.navigate(['/location/opname'], {
+              queryParams: { dept_id: this.location.deptID },
+              state: { sessionID: response.opnameSessionID }
+            });
+          }
         },
 
         error: (error) => {
@@ -135,14 +167,13 @@ import { OpnameSession } from '../model/opname-session.model';
       // This method will continue an existing stock opname session for the current site.
       // Prevent multiple simultaneous requests
       if (this.opnameLoading) {
-        console.log('[SitePage] Request already in progress, ignoring duplicate click');
         return;
       }
       
       this.opnameLoading = true;
       this.errorMessage = ''; // Clear any previous errors
-      
-      if (this.sitePage.opnameSessionID <= 0) {
+
+      if (this.location.opnameSessionID <= 0) {
         this.opnameLoading = false;
         this.errorMessage = 'Tidak ada sesi opname yang tersedia.';
         console.error('[SitePage] No opname session ID to continue');
@@ -150,16 +181,24 @@ import { OpnameSession } from '../model/opname-session.model';
         setTimeout(() => this.showToast = false, 3000);
         return;
       }
-      
-      this.opnameSessionService.getOpnameSession(this.sitePage.opnameSessionID).subscribe({
+
+      console.log('[SitePage] Current opname session:', this.opnameSession);
+      console.log('[SitePage] location: ', this.location);
+
+      this.opnameSessionService.getOpnameSession(this.location.opnameSessionID).subscribe({
         next: (opnameSession) => {
           this.opnameSession = opnameSession; // Store the current opname session data
           this.opnameLoading = false; // Set loading state to false after fetching session
-          console.log('[SitePage] Current opname session:', this.opnameSession);
-          
+
+
           // Only continue if the session is active - MOVED THIS INSIDE THE SUCCESS CALLBACK
           if (this.opnameSession && this.opnameSession.status === 'Active') {
-            this.opnameSessionService.continueOpname(this.sitePage.opnameSessionID, this.sitePage.siteID, this.router);
+            // Determine location type and ID based on what's available
+            if (this.location.siteID) {
+              this.opnameSessionService.continueOpname(this.location.opnameSessionID, this.location.siteID, 'site', this.router);
+            } else if (this.location.deptID) {
+              this.opnameSessionService.continueOpname(this.location.opnameSessionID, this.location.deptID, 'dept', this.router);
+            }
           } else {
             const status = this.opnameSession ? this.opnameSession.status : 'unknown';
             console.error('[SitePage] Opname session is not active:', status);
@@ -180,14 +219,25 @@ import { OpnameSession } from '../model/opname-session.model';
 
     goToReport(): void {
       // Navigate to the report page for the current site
-      const siteID = this.sitePage.siteID;
+      const siteID = this.location.siteID;
+      const deptID = this.location.deptID;
       if (siteID > 0) {
-        this.router.navigate(['/site', siteID, 'report']);
+        this.router.navigate(['/location/report'], { queryParams: { site_id: siteID } });
+      } else if (deptID > 0) {
+        this.router.navigate(['/location/report'], { queryParams: { dept_id: deptID } });
       } else {
         console.error('[SitePage] Invalid site ID for report navigation:', siteID);
         this.errorMessage = 'ID site tidak valid untuk navigasi laporan.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
       }
+    }
+
+    exportToCSV(): void {
+      // TODO: Implement CSV export for location assets
+      console.log('[SitePage] CSV export not implemented yet for location:', this.location);
+      this.errorMessage = 'Fitur export CSV akan segera hadir.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
     }
   }

@@ -46,6 +46,7 @@ func main() {
 	seedTable(db, "SiteGroup", "internal/seed/seed_data/site_group.csv", seedSiteGroup)
 	seedTable(db, "Site", "internal/seed/seed_data/site.csv", seedSite)
 	seedTable(db, "SubSite", "internal/seed/seed_data/sub_site.csv", seedSubSite)
+	seedTable(db, "Department", "internal/seed/seed_data/department.csv", seedDepartment)
 	seedTable(db, "ApprovalPath", "internal/seed/seed_data/approval_path.csv", seedApprovalPath)
 	seedTable(db, "CostCenter", "internal/seed/seed_data/cost_center.csv", seedCostCenter)
 	seedTable(db, "User", "internal/seed/seed_data/user.csv", seedUser)
@@ -173,6 +174,21 @@ func seedSubSite(db *sql.DB, record []string) error {
 	return nil
 }
 
+// Expected CSV format for department.csv:
+// id [PK], dept_name
+func seedDepartment(db *sql.DB, record []string) error {
+	dept_name := record[1]
+	query := `INSERT INTO "Department" (dept_name) VALUES ($1) ON CONFLICT (id) DO NOTHING`
+
+	_, err := db.Exec(query, dept_name)
+	if err != nil {
+		log.Fatalf("Error inserting record into Department table: %v\n", err)
+		return err
+	}
+
+	return nil
+}
+
 // Expected CSV format for cost_center.csv:
 // cost_center_id [PK], cost_center_name
 func seedCostCenter(db *sql.DB, record []string) error {
@@ -190,14 +206,16 @@ func seedCostCenter(db *sql.DB, record []string) error {
 }
 
 // Expected CSV format for approval_path.csv
-// (position, sequence, site_id [FK]) [PK]
+// (position, sequence, site_id [FK], from) [PK]
 func seedApprovalPath(db *sql.DB, record []string) error {
 	position := record[0]
 	sequence := record[1]
 	site_id := record[2]
+	from := record[3]
 
-	query := `INSERT INTO "ApprovalPath" (position, sequence, site_id) VALUES ($1, $2, $3) ON CONFLICT (site_id, position, sequence) DO NOTHING`
-	_, err := db.Exec(query, position, sequence, site_id)
+	query := `INSERT INTO "ApprovalPath" ("position", "sequence", "site_id", "from") VALUES ($1, $2, $3, $4)
+	ON CONFLICT ("site_id", "position", "sequence", "from") DO NOTHING`
+	_, err := db.Exec(query, position, sequence, site_id, from)
 	if err != nil {
 		log.Fatalf("Error inserting record into ApprovalPath table: %v\n", err)
 		return err
@@ -207,9 +225,9 @@ func seedApprovalPath(db *sql.DB, record []string) error {
 }
 
 // Expected CSV format for user.csv:
-// user_id [PK], username, email, first_name, last_name, position, site_id [FK], cost_center_id [FK]
+// user_id [PK], username, email, first_name, last_name, position, site_id [FK], cost_center_id [FK], ou_code
 // Table format for User:
-// user_id [PK], username, password, email, first_name, last_name, position, site_id [FK], cost_center_id [FK]
+// user_id [PK], username, password, email, first_name, last_name, position, site_id [FK], cost_center_id [FK], ou_code
 func seedUser(db *sql.DB, record []string) error {
 	user_id := record[0]
 	password := "sosmit" // Default password
@@ -222,9 +240,11 @@ func seedUser(db *sql.DB, record []string) error {
 	division := record[7]
 	site_id := record[8]
 	cost_center_id := record[9]
-	query := `INSERT INTO "User" (user_id, username, email, password, first_name, last_name, position, department, division, site_id, cost_center_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) ON CONFLICT (user_id) DO NOTHING`
+	ou_code := record[10]
 
-	_, err := db.Exec(query, user_id, username, email, password, first_name, last_name, position, department, division, site_id, cost_center_id)
+	query := `INSERT INTO "User" (user_id, username, email, password, first_name, last_name, position, department, division, site_id, cost_center_id, ou_code) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) ON CONFLICT (user_id) DO NOTHING`
+
+	_, err := db.Exec(query, user_id, username, email, password, first_name, last_name, position, department, division, site_id, cost_center_id, ou_code)
 	if err != nil {
 		log.Fatalf("Error inserting record into User table: %v\n", err)
 		return err
@@ -236,7 +256,7 @@ func seedUser(db *sql.DB, record []string) error {
 // Expected CSV format for asset.csv:
 // asset_tag [PK], serial_number, status, status_reason, product_category, product_subcategory,
 // product_variety, brand_name, product_name, condition, condition_photo_url, location, room,
-// equipments, total_cost, owner_id [FK], site_id [FK]
+// equipments, total_cost, owner_id [FK], sub_site_id [FK], dept_id [FK], site_id [FK]
 func seedAsset(db *sql.DB, record []string) error {
 	asset_tag := record[0]
 	serial_number := record[1]
@@ -254,7 +274,21 @@ func seedAsset(db *sql.DB, record []string) error {
 	equipments := record[13]
 	total_cost := record[14]
 	owner_id := record[15]
-	sub_site_id := record[16]
+
+	// Convert empty strings to null for nullable fields
+	var sub_site_id, dept_id *string
+	if record[16] == "" {
+		sub_site_id = nil
+	} else {
+		sub_site_id = &record[16]
+	}
+	if record[17] == "" {
+		dept_id = nil
+	} else {
+		dept_id = &record[17]
+	}
+
+	site_id := record[18]
 
 	// Convert empty string to default value for fields with defaults
 	if status_reason == "" {
@@ -265,10 +299,12 @@ func seedAsset(db *sql.DB, record []string) error {
 		condition_photo_url = "-1"
 	}
 
-	query := `INSERT INTO "Asset" (asset_tag, serial_number, status, status_reason, product_category, product_subcategory, product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, total_cost, owner_id, sub_site_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17) ON CONFLICT (asset_tag) DO NOTHING`
+	query := `INSERT INTO "Asset" (asset_tag, serial_number, status, status_reason, product_category, product_subcategory, product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, total_cost, owner_id, sub_site_id, dept_id, site_id)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+	ON CONFLICT (asset_tag) DO NOTHING`
 
 	_, err := db.Exec(query, asset_tag, serial_number, status, status_reason, product_category, product_subcategory,
-		product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, total_cost, owner_id, sub_site_id)
+		product_variety, brand_name, product_name, condition, condition_photo_url, location, room, equipments, total_cost, owner_id, sub_site_id, dept_id, site_id)
 	if err != nil {
 		log.Fatalf("Error inserting record into Asset table: %v\n", err)
 

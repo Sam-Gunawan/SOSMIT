@@ -45,13 +45,19 @@ CREATE TABLE "Site" (
     "site_ga_id" INT NOT NULL
 );
 
--- Sub Site / OU (Most granular level, lowest level)
+-- Sub Site / OU (Most granular level, lowest level @ Area)
 CREATE TABLE "SubSite" (
     "id" SERIAL PRIMARY KEY,
     "sub_site_name" VARCHAR(100) NOT NULL,
 
     -- Foreign key to Site.
     "site_id" INT NOT NULL REFERENCES "Site"("id") ON DELETE CASCADE
+);
+
+-- Department (Most granular level, lowest level @ Head Office)
+CREATE TABLE "Department" (
+    "id" SERIAL PRIMARY KEY,
+    "dept_name" VARCHAR(100) NOT NULL
 );
 
 -- == ENTITY TABLES ==
@@ -64,8 +70,12 @@ CREATE TABLE "ApprovalPath" (
     -- Determines which pair of sequence and position belongs to which site.
     "site_id" INT NOT NULL REFERENCES "Site"("id") ON DELETE CASCADE,
 
-    -- Primary key will be a combination of all 3 (in case multiple approval paths are available at any given site)
-    PRIMARY KEY ("site_id", "position", "sequence"),
+    -- A dummy field (not similar to business logic at PT SM) to determine the type of opname conducted on site.
+    -- Differentiate between opname done by area's GA and IT Asset from HO.
+    "from" VARCHAR(10) NOT NULL,
+
+    -- Primary key will be a combination of all 4 (in case multiple approval paths are available at any given site)
+    PRIMARY KEY ("site_id", "position", "sequence", "from"),
 
     CONSTRAINT ck_positive_seq CHECK ("sequence" > 0)
 );
@@ -85,17 +95,19 @@ CREATE TABLE "User" (
     "first_name" VARCHAR(255) NOT NULL DEFAULT '',
     "last_name" VARCHAR(255) NOT NULL DEFAULT '',
     "position" VARCHAR(100) NOT NULL DEFAULT '',
-    "department" VARCHAR(100) NOT NULL DEFAULT '',
-    "division" VARCHAR(100) NOT NULL DEFAULT '',
+    "department" VARCHAR(100),
+    "division" VARCHAR(100),
 
     -- Foreign key to Site and Cost Center
     "site_id" INT REFERENCES "Site"("id") ON DELETE CASCADE,
-    "cost_center_id" INT REFERENCES "CostCenter"("cost_center_id") ON DELETE CASCADE
+    "cost_center_id" INT REFERENCES "CostCenter"("cost_center_id") ON DELETE CASCADE,
+
+    "ou_code" VARCHAR(5) NOT NULL DEFAULT ''
 );
 
 -- Seed vacant user (no site / cost center). Use a reserved ID (e.g., 1) that other seeds avoid.
-INSERT INTO "User" (user_id, username, email, password, first_name, last_name, position, department, division, site_id, cost_center_id)
-VALUES (1, 'VACANT', '', '', 'VACANT', '', '', '', '', NULL, NULL)
+INSERT INTO "User" (user_id, username, email, password, first_name, last_name, position, department, division, site_id, cost_center_id, ou_code)
+VALUES (1, 'VACANT', '', '', 'VACANT', '', '', '', '', NULL, NULL, '')
 ON CONFLICT (user_id) DO NOTHING;
 
 -- Asset 
@@ -135,8 +147,15 @@ CREATE TABLE "Asset" (
     -- Foreign key to User (owner of the asset).
     "owner_id" INT NOT NULL REFERENCES "User"("user_id"),
 
-    -- Foreign key to Site (where the asset is located).
-    "sub_site_id" INT NOT NULL REFERENCES "SubSite"("id") ON DELETE CASCADE
+    -- Foreign key to SubSite (where the asset is located if it's at area).
+    "sub_site_id" INT REFERENCES "SubSite"("id") ON DELETE CASCADE,
+    
+    -- Foreign key to Department (where the asset is located if it's at HO).
+    "dept_id" INT REFERENCES "Department"("id") ON DELETE CASCADE,
+
+    -- Foreign key to Site (where the parent site of the asset's location is).
+    "site_id" INT NOT NULL REFERENCES "Site"("id") ON DELETE CASCADE
+
 );
 
 -- Asset Equipment Relationship
@@ -165,8 +184,11 @@ CREATE TABLE "OpnameSession" (
     "l1_reviewer_id" INT REFERENCES "User"("user_id") ON DELETE SET NULL,
     "l1_reviewed_at" TIMESTAMP WITH TIME ZONE,
     
-    -- Foreign key to Site (the site where the opname session is performed).
-    "site_id" INT NOT NULL REFERENCES "Site"("id")
+    -- Foreign key to Site (the site where the opname session is performed @Area).
+    "site_id" INT REFERENCES "Site"("id") ON DELETE SET NULL,
+
+    -- Foreign key to Department (the department where the opname session is performed @HO).
+    "dept_id" INT REFERENCES "Department"("id") ON DELETE SET NULL
 );
 
 -- Asset Changes
