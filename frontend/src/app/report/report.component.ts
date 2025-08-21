@@ -13,11 +13,12 @@ import { ViewChild, ElementRef } from '@angular/core';
 import { OpnameStats } from '../model/opname-stats.model';
 import { lastValueFrom } from 'rxjs';
 import { Department } from '../model/dept.model';
+import { LoadingOverlayComponent } from '../shared/loading-overlay/loading-overlay.component';
 
 @Component({
   selector: 'app-report',
   standalone: true,
-  imports: [CommonModule, OpnameAssetComponent, FormsModule],
+  imports: [CommonModule, OpnameAssetComponent, FormsModule, LoadingOverlayComponent],
   templateUrl: './report.component.html',
   styleUrl: './report.component.scss'
 })
@@ -35,6 +36,7 @@ export class ReportComponent {
   showSuccessToast: boolean = false;
   isExporting: boolean = false;
   isLoading: boolean = false;
+  exportingType: 'pdf' | 'csv' | null = null;
 
   // Wrap both sessionID and endDate into an object
   availableOpnameSessions: { sessionID: number, endDate: string }[] = [];
@@ -95,6 +97,7 @@ export class ReportComponent {
   async exportToPDF() {
     if (this.sessionID === -1) { this.errorMessage = 'Select a session first.'; return; }
     this.isExporting = true;
+    this.exportingType = 'pdf';
     try {
       const blob = await lastValueFrom(this.reportService.downloadBAPPdf(this.sessionID));
       const url = window.URL.createObjectURL(blob);
@@ -117,6 +120,7 @@ export class ReportComponent {
       this.errorMessage = 'Failed to download PDF.';
     } finally {
       this.isExporting = false;
+      this.exportingType = null;
       this.cdr.detectChanges();
     }
   }
@@ -124,18 +128,34 @@ export class ReportComponent {
   async exportToCSV() {
     if (this.sessionID === -1) { this.errorMessage = 'Select a session first.'; return; }
     this.isExporting = true;
+    this.exportingType = 'csv';
     try {
       // TODO: Implement CSV export service call
       // const blob = await lastValueFrom(this.reportService.downloadBAPCsv(this.sessionID));
-      console.log('[Report] CSV export not implemented yet for session:', this.sessionID);
+      console.log('[Report] CSV export not implemented yet for session:', this.sessionID, " isExporting: ", this.isExporting);
       this.errorMessage = 'CSV export feature coming soon.';
+
     } catch (err) {
       console.error('[Report] CSV download failed', err);
       this.errorMessage = 'Failed to download CSV.';
     } finally {
       this.isExporting = false;
+      this.exportingType = null;
       this.cdr.detectChanges();
     }
+  }
+
+  // Helper methods for loading overlay
+  getLoadingTitle(): string {
+    return this.exportingType === 'pdf' ? 'Generating PDF Report' : 'Generating CSV Report';
+  }
+
+  getLoadingMessage(): string {
+    return 'Please wait while we prepare your file...';
+  }
+
+  getLoadingColor(): string {
+    return this.exportingType === 'pdf' ? '#007bff' : '#16a085';
   }
 
   initLocationInfo() {
