@@ -1177,9 +1177,7 @@ $$;
 CREATE OR REPLACE FUNCTION public.get_finished_opnames_by_location_id(_site_id INT DEFAULT NULL, _dept_id INT DEFAULT NULL)
 	RETURNS TABLE (
 		session_id INT,
-		completed_date DATE,
-		site_id INT,
-		dept_id INT
+		completed_date DATE
 	)
 	LANGUAGE plpgsql
 AS $$
@@ -1190,7 +1188,7 @@ AS $$
 		END IF;
 
 		RETURN QUERY
-		SELECT os.id, DATE(os.end_date) AS completed_date, os.site_id, os.dept_id
+		SELECT os.id, DATE(os.end_date) AS completed_date
 		FROM "OpnameSession" AS os
 		WHERE (_site_id IS NOT NULL AND os.site_id = _site_id OR _dept_id IS NOT NULL AND os.dept_id = _dept_id) 
 		  AND os.status != 'Active'
@@ -1249,15 +1247,25 @@ AS $$
 			
 			UNION
 
-			-- Those not scanned will definitely be 'missing_assets'
+			-- Missing assets: assets not scanned during opname
+			-- For site-based opname: assets in the site's sub-sites OR directly in the parent site (without subsite)
+			-- For department-based opname: assets owned by users in that department that weren't scanned
 			SELECT
 				'missing_assets'::VARCHAR(50) AS category,
 				a.asset_tag,
 				a.product_variety
 			FROM "Asset" AS a
-			INNER JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
-			INNER JOIN "OpnameSession" AS os ON ss.site_id = os.site_id AND os.id = _session_id
-			WHERE NOT EXISTS (
+			INNER JOIN "OpnameSession" AS os ON os.id = _session_id
+			LEFT JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
+			LEFT JOIN "User" AS au ON a.owner_id = au.user_id
+			LEFT JOIN "Department" AS d ON LOWER(au.department) = LOWER(d.dept_name)
+			WHERE 
+				-- For site-based opname: match by site (either through subsite or directly in parent site)
+				(os.site_id IS NOT NULL AND (ss.site_id = os.site_id OR (a.sub_site_id IS NULL AND a.site_id = os.site_id)))
+				OR
+				-- For department-based opname: match by department
+				(os.dept_id IS NOT NULL AND d.id = os.dept_id)
+			AND NOT EXISTS (
 				SELECT 1 FROM "AssetChanges" AS ac2 WHERE ac2.session_id = _session_id AND ac2.asset_tag = a.asset_tag
 			)
 		)

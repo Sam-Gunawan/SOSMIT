@@ -12,6 +12,7 @@ import { ViewChild, ElementRef } from '@angular/core';
 // import html2pdf from 'html2pdf.js'; // replaced by backend generated PDF
 import { OpnameStats } from '../model/opname-stats.model';
 import { lastValueFrom } from 'rxjs';
+import { Department } from '../model/dept.model';
 
 @Component({
   selector: 'app-report',
@@ -26,6 +27,7 @@ export class ReportComponent {
   siteID: number = -1;
   deptID: number = -1;
   site: SiteInfo = {} as SiteInfo;
+  dept: Department = {} as Department;
   opnameSession: OpnameSession = {} as OpnameSession;
   sessionID: number = -1;
   successMessage: string = '';
@@ -50,26 +52,44 @@ export class ReportComponent {
     private cdr: ChangeDetectorRef,
     private reportService: ReportService,
     private router: Router
-  ) {
-    // Only handle query parameter navigation: /location/report?site_id=... or dept_id=...
-    const querySiteId = this.route.snapshot.queryParamMap.get('site_id');
-    const queryDeptId = this.route.snapshot.queryParamMap.get('dept_id');
-    const querySessionId = this.route.snapshot.queryParamMap.get('session_id');
-    
-    if (querySiteId) {
-      this.siteID = Number(querySiteId);
-      if (querySessionId) {
-        this.sessionID = Number(querySessionId);
+  ) {}
+
+  ngOnInit() {
+    // Handle query parameter initialization in ngOnInit instead of constructor
+    this.initFromQueryParams();
+  }
+
+  private initFromQueryParams() {
+    // Subscribe to query parameter changes to get current values
+    this.route.queryParams.subscribe(params => {
+      const querySiteId = params['site_id'];
+      const queryDeptId = params['dept_id'];
+      const querySessionId = params['session_id'];
+      
+      // Reset values first
+      this.siteID = -1;
+      this.deptID = -1;
+      this.sessionID = -1;
+      
+      if (querySiteId) {
+        this.siteID = Number(querySiteId);
+        if (querySessionId) {
+          this.sessionID = Number(querySessionId);
+        }
+      } else if (queryDeptId) {
+        // Department-based query parameter routing
+        this.deptID = Number(queryDeptId);
+        if (querySessionId) {
+          this.sessionID = Number(querySessionId);
+        }
       }
-    } else if (queryDeptId) {
-      // Department-based query parameter routing
-      this.deptID = Number(queryDeptId);
-      if (querySessionId) {
-        this.sessionID = Number(querySessionId);
-      }
-    }
-    
-    console.log('[Report] Initialized with siteID:', this.siteID, 'deptID:', this.deptID, 'sessionID:', this.sessionID);
+      
+      console.log('[Report] Initialized from query params - siteID:', this.siteID, 'deptID:', this.deptID, 'sessionID:', this.sessionID);
+      
+      // Initialize location info and available opnames after getting query params
+      this.initLocationInfo();
+      this.initAvailableOpnames();
+    });
   }
 
   async exportToPDF() {
@@ -85,7 +105,7 @@ export class ReportComponent {
       const dateStr = today.toLocaleDateString('en-GB').replace(/\//g,'-');
       
       a.href = url;
-      a.download = `BAP_opname_${this.site?.siteName?.replace(/\s+/g,'_') || 'site'}_${dateStr}.pdf`;
+      a.download = `BAP_opname_${this.site?.siteName?.replace(/\s+/g,'_') || this.dept?.deptName?.replace(/\s+/g,'_') || 'location'}_${dateStr}.pdf`;
       document.body.appendChild(a);
       
       a.click();
@@ -101,26 +121,42 @@ export class ReportComponent {
     }
   }
 
-  ngOnInit() {
-    this.initSiteInfo();
-    this.initAvailableOpnames();
+  async exportToCSV() {
+    if (this.sessionID === -1) { this.errorMessage = 'Select a session first.'; return; }
+    this.isExporting = true;
+    try {
+      // TODO: Implement CSV export service call
+      // const blob = await lastValueFrom(this.reportService.downloadBAPCsv(this.sessionID));
+      console.log('[Report] CSV export not implemented yet for session:', this.sessionID);
+      this.errorMessage = 'CSV export feature coming soon.';
+    } catch (err) {
+      console.error('[Report] CSV download failed', err);
+      this.errorMessage = 'Failed to download CSV.';
+    } finally {
+      this.isExporting = false;
+      this.cdr.detectChanges();
+    }
   }
 
-  initSiteInfo() {
+  initLocationInfo() {
     if (this.siteID > 0) {
       this.apiService.getSiteByID(this.siteID).subscribe({
         next: (site) => {
           this.site = site;
-          console.log('[Report] Site info fetched successfully:', this.site);
         },
         error: (error) => {
           console.error('[Report] Error fetching site info:', error);
         }
       });
     } else if (this.deptID > 0) {
-      // For department-based opnames, we might not need site info
-      // or we could fetch department info instead
-      console.log('[Report] Department-based opname, skipping site info fetch');
+      this.apiService.getDeptByID(this.deptID).subscribe({
+        next: (dept) => {
+          this.dept = dept;
+        },
+        error: (error) => {
+          console.error('[Report] Error fetching department info:', error);
+        }
+      });
     }
   }
 
@@ -136,14 +172,31 @@ export class ReportComponent {
         // Generate date options after data is loaded
         this.generateDateOptions();
 
-        // Check for input from URL
-        this.handleInputFromURL();
+        // Auto-select date if sessionID is provided in URL
+        this.autoSelectDateFromSessionID();
+
+        // Update opname display with chosen date (if provided)
+        this.initOpnameStats();
       },
       error: (error) => {
         console.error('[Report] Error fetching available opname sessions:', error);
         this.errorMessage = 'Gagal memuat sesi yang tersedia.';
       }
     });
+  }
+
+  private autoSelectDateFromSessionID() {
+    if (this.sessionID > 0) {
+      // Find the session that matches the sessionID from URL
+      const matchingSession = this.availableOpnameSessions.find(s => s.sessionID === this.sessionID);
+      if (matchingSession) {
+        this.selectedDate = matchingSession.endDate;
+        console.log('[Report] Auto-selected date from sessionID:', this.selectedDate, 'for session:', this.sessionID);
+      } else {
+        console.warn('[Report] No session found for sessionID from URL:', this.sessionID);
+        this.errorMessage = 'Sesi opname tidak ditemukan.';
+      }
+    }
   }
 
   async initOpnameStats() {
@@ -179,7 +232,7 @@ export class ReportComponent {
       value: s.endDate,
       label: new Date(s.endDate).toLocaleDateString('en-US', {
         year: 'numeric',
-        month: '2-digit',
+        month: 'short',
         day: '2-digit'
       })
     }));
@@ -197,46 +250,46 @@ export class ReportComponent {
     // Navigate updating only the session_id param; keep existing others except transient 'from'
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { session_id: newSessionID > -1 ? newSessionID : null, from: undefined },
+      queryParams: { session_id: newSessionID > 0 ? newSessionID : null, from: undefined },
       queryParamsHandling: 'merge'
     });
   }
 
-  private handleInputFromURL() {
-    // Single subscription that drives component state from URL params
-    this.route.queryParams.subscribe(async params => {
-      const selectedSessionID = params['session_id'];
-      const from = params['from'];
+  // private handleInputFromURL() {
+  //   // Single subscription that drives component state from URL params
+  //   this.route.queryParams.subscribe(async params => {
+  //     const selectedSessionID = params['session_id'];
+  //     const from = params['from'];
 
-      if (selectedSessionID) {
-        const newSessionID = Number(selectedSessionID);
-        if (newSessionID !== this.sessionID) {
-          this.sessionID = newSessionID;
-          const session = this.availableOpnameSessions.find(s => s.sessionID === this.sessionID);
-          if (session) {
-            this.selectedDate = session.endDate;
-            console.log('[Report] Synced from URL -> session:', this.sessionID, 'date:', this.selectedDate);
-            await this.initOpnameStats();
-          } else {
-            console.warn('[Report] No session found for ID from URL:', this.sessionID);
-            this.errorMessage = 'Sesi opname tidak ditemukan.';
-          }
-        }
-      } else {
-        // No session specified -> reset
-        this.sessionID = -1;
-        this.selectedDate = '';
-      }
+  //     if (selectedSessionID) {
+  //       const newSessionID = Number(selectedSessionID);
+  //       if (newSessionID !== this.sessionID) {
+  //         this.sessionID = newSessionID;
+  //         const session = this.availableOpnameSessions.find(s => s.sessionID === this.sessionID);
+  //         if (session) {
+  //           this.selectedDate = session.endDate;
+  //           console.log('[Report] Synced from URL -> session:', this.sessionID, 'date:', this.selectedDate);
+  //           await this.initOpnameStats();
+  //         } else {
+  //           console.warn('[Report] No session found for ID from URL:', this.sessionID);
+  //           this.errorMessage = 'Sesi opname tidak ditemukan.';
+  //         }
+  //       }
+  //     } else {
+  //       // No session specified -> reset
+  //       this.sessionID = -1;
+  //       this.selectedDate = '';
+  //     }
 
-      if (from === 'opname_page') {
-        this.successMessage = 'Sesi opname berhasil diselesaikan!';
-        this.showSuccessMessage();
-        // Clean up the transient param after showing message
-        this.router.navigate([], { relativeTo: this.route, queryParams: { from: undefined }, queryParamsHandling: 'merge' });
-      }
-      this.cdr.detectChanges();
-    });
-  }
+  //     if (from === 'opname_page') {
+  //       this.successMessage = 'Sesi opname berhasil diselesaikan!';
+  //       this.showSuccessMessage();
+  //       // Clean up the transient param after showing message
+  //       this.router.navigate([], { relativeTo: this.route, queryParams: { from: undefined }, queryParamsHandling: 'merge' });
+  //     }
+  //     this.cdr.detectChanges();
+  //   });
+  // }
 
   private showSuccessMessage() {
     this.showSuccessToast = true;

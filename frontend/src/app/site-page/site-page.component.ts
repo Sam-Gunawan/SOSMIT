@@ -55,7 +55,9 @@ import { firstValueFrom } from 'rxjs';
       this.isLoading = true;
       
       try {
+        console.log('test 1');
         const params = await firstValueFrom(this.route.queryParamMap);
+        console.log('Query params:', params.keys);
         
         // Check whether any params are provided or whether both site_id and dept_id are provided. If invalid, then throw an error
         // In other words, the params must be exactly one (either site id or dept id provided)
@@ -85,6 +87,8 @@ import { firstValueFrom } from 'rxjs';
           
         } else if (params.keys.indexOf('dept_id') !== -1) {
           const deptID = Number(params.get('dept_id'));
+
+          console.log('test 2, loading: ', this.isLoading)
           
           // Fetch department information
           const dept = await firstValueFrom(this.apiService.getDeptByID(deptID));
@@ -216,13 +220,24 @@ import { firstValueFrom } from 'rxjs';
     goToReport(): void {
       // Navigate to the report page for the current site
       const siteID = this.location.siteID;
+      const deptID = this.location.deptID;
       if (siteID > 0) {
         this.router.navigate(['/location/report'], { queryParams: { site_id: siteID } });
+      } else if (deptID > 0) {
+        this.router.navigate(['/location/report'], { queryParams: { dept_id: deptID } });
       } else {
         console.error('[SitePage] Invalid site ID for report navigation:', siteID);
         this.errorMessage = 'ID site tidak valid untuk navigasi laporan.';
         this.showToast = true;
         setTimeout(() => this.showToast = false, 3000);
       }
+    }
+
+    exportToCSV(): void {
+      // TODO: Implement CSV export for location assets
+      console.log('[SitePage] CSV export not implemented yet for location:', this.location);
+      this.errorMessage = 'Fitur export CSV akan segera hadir.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
     }
   }

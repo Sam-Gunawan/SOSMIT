@@ -199,12 +199,32 @@ func (service *Service) GenerateAndAssembleBAP(sessionID int64) ([]byte, string,
 	if err != nil || sessionMeta == nil {
 		return nil, "", fmt.Errorf("session not found")
 	}
-	type siteMini struct{ Name, Group string }
-	var siteInfo siteMini
-	row := service.repo.db.QueryRow(`SELECT site_name, site_group_name FROM get_site_by_id($1)`, sessionMeta.SiteID)
-	if err := row.Scan(&siteInfo.Name, &siteInfo.Group); err != nil {
-		return nil, "", fmt.Errorf("site fetch failed: %w", err)
+
+	type locationInfo struct{ Name, Group string }
+	var locationData locationInfo
+	var locationName string // For filename
+
+	if sessionMeta.SiteID.Valid {
+		// Site-based opname
+		row := service.repo.db.QueryRow(`SELECT site_name, site_group_name FROM get_site_by_id($1)`, sessionMeta.SiteID.Int64)
+		if err := row.Scan(&locationData.Name, &locationData.Group); err != nil {
+			return nil, "", fmt.Errorf("site fetch failed: %w", err)
+		}
+		locationName = locationData.Name
+	} else if sessionMeta.DeptID.Valid {
+		// Department-based opname - need to get dept info and associated site info
+		row := service.repo.db.QueryRow(`SELECT dept_name, site_name FROM get_dept_by_id($1)`, sessionMeta.DeptID.Int64)
+		var deptName, siteName string
+		if err := row.Scan(&deptName, &siteName); err != nil {
+			return nil, "", fmt.Errorf("department fetch failed: %w", err)
+		}
+		locationData.Name = deptName
+		locationData.Group = siteName // Show "Head Office Jakarta" as the group for departments
+		locationName = deptName
+	} else {
+		return nil, "", fmt.Errorf("session has neither site_id nor dept_id")
 	}
+
 	var submitterFirst, submitterLast string
 	_ = service.repo.db.QueryRow(`SELECT first_name, last_name FROM get_user_by_id($1)`, sessionMeta.UserID).Scan(&submitterFirst, &submitterLast)
 	submitterName := strings.TrimSpace(submitterFirst + " " + submitterLast)
@@ -214,6 +234,11 @@ func (service *Service) GenerateAndAssembleBAP(sessionID int64) ([]byte, string,
 		var firstName, lastName string
 		_ = service.repo.db.QueryRow(`SELECT first_name, last_name FROM get_user_by_id($1)`, sessionMeta.ManagerReviewerID.Int64).Scan(&firstName, &lastName)
 		managerName = strings.TrimSpace(firstName + " " + lastName)
+	}
+	if sessionMeta.L1ReviewerID.Valid {
+		var firstName, lastName string
+		_ = service.repo.db.QueryRow(`SELECT first_name, last_name FROM get_user_by_id($1)`, sessionMeta.L1ReviewerID.Int64).Scan(&firstName, &lastName)
+		l1Name = strings.TrimSpace(firstName + " " + lastName)
 	}
 	if sessionMeta.L1ReviewerID.Valid {
 		var firstName, lastName string
@@ -249,11 +274,11 @@ func (service *Service) GenerateAndAssembleBAP(sessionID int64) ([]byte, string,
 	if submitTime != nil {
 		endTime = *submitTime
 	}
-	pdfBytes, err := service.GenerateBAPPDFHTML(sessionID, signatures, siteInfo.Name, siteInfo.Group, endTime)
+	pdfBytes, err := service.GenerateBAPPDFHTML(sessionID, signatures, locationData.Name, locationData.Group, endTime)
 	if err != nil {
 		return nil, "", err
 	}
-	filename := "BAP_opname_" + sanitizeFileFragment(siteInfo.Name) + "_" + time.Now().Format("02-01-2006") + ".pdf"
+	filename := "BAP_opname_" + sanitizeFileFragment(locationName) + "_" + time.Now().Format("02-01-2006") + ".pdf"
 	return pdfBytes, filename, nil
 }
 
@@ -267,7 +292,7 @@ func sanitizeFileFragment(s string) string {
 		}
 	}
 	if len(out) == 0 {
-		return "site"
+		return "location"
 	}
 	return string(out)
 }

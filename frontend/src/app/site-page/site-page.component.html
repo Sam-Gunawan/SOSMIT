@@ -15,10 +15,15 @@
                     <h5 class="site-name">{{ location.deptName ? location.deptName : location.siteName }}</h5>
                     <p class="site-location">{{ location.siteGroupName }}, {{ location.regionName }}</p>
                     
-                    <div class="export-container">
-                        <i class="fas fa-download"></i>
-                        <p class="export-text">Export asset data</p>
-                    </div>
+                    <button type="button" 
+                            class="export-csv-btn"
+                            (click)="exportToCSV()"
+                            [title]="'Export asset data as CSV'">
+                        <div class="export-container">
+                            <i class="fas fa-file-csv"></i>
+                            <p class="export-text">Export CSV</p>
+                        </div>
+                    </button>
                 </div>
                 <div class="opname-info">
                     <span 
