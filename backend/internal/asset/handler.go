@@ -37,6 +37,7 @@ func serializeAsset(a *Asset) gin.H {
 		"product_name":        a.ProductName,
 		"condition":           a.Condition,
 		"condition_notes":     utils.SerializeNS(a.ConditionNotes),
+		"loss_notes":          utils.SerializeNS(a.LossNotes),
 		"condition_photo_url": utils.SerializeNS(a.ConditionPhotoURL),
 		"location":            utils.SerializeNS(a.Location),
 		"room":                utils.SerializeNS(a.Room),

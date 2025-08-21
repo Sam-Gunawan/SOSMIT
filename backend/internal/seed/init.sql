@@ -126,13 +126,14 @@ CREATE TABLE "Asset" (
     "product_variety" VARCHAR(50) NOT NULL CHECK ("product_variety" IN ('Laptop', 'Desktop', 'Monitor', 'Uninterrupted Power Supply', 'Personal Digital Assistant', 'Printer/Multifunction')),
     "brand_name" VARCHAR(25) NOT NULL,
     "product_name" VARCHAR(50) NOT NULL,
-    "condition" BOOLEAN NOT NULL DEFAULT TRUE, -- TRUE means the asset is in good condition, FALSE means it is not.
+    "condition" INT NOT NULL DEFAULT 1, -- 0: bad, 1: good, 2: lost (physically lost)
     "condition_notes" TEXT DEFAULT '',
+    "loss_notes" TEXT DEFAULT '', -- Notes for lost assets, e.g. "Lost during transport"
     "condition_photo_url" TEXT
     CHECK (
-        ("condition" = TRUE AND ("condition_photo_url" = '' OR "condition_photo_url" IS NOT NULL))
+        ("condition" = 1 AND ("condition_photo_url" = '' OR "condition_photo_url" IS NOT NULL))
         OR
-        ("condition" = FALSE AND "condition_photo_url" != '' AND "condition_photo_url" IS NOT NULL)
+        ("condition" = 0 AND "condition_photo_url" != '' AND "condition_photo_url" IS NOT NULL)
     ) DEFAULT '',
     "location" VARCHAR(255),
     "room" VARCHAR(255),

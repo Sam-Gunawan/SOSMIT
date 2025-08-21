@@ -29,8 +29,9 @@ type AssetChange struct {
 	NewStatus            *string `json:"new_status"`
 	NewStatusReason      *string `json:"new_status_reason"`
 	NewSerialNumber      *string `json:"new_serial_number"`
-	NewCondition         *bool   `json:"new_condition"`
+	NewCondition         *int    `json:"new_condition"`
 	NewConditionNotes    *string `json:"new_condition_notes"`
+	NewLossNotes         *string `json:"new_loss_notes"`
 	NewConditionPhotoURL *string `json:"new_condition_photo_url"`
 	NewLocation          *string `json:"new_location"`
 	NewRoom              *string `json:"new_room"`
@@ -135,7 +136,7 @@ func (repo *Repository) DeleteSession(sessionID int) error {
 func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, error) {
 	var changesJSON []byte // Use []byte to receive raw JSON data.
 
-	query := `SELECT record_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)`
+	query := `SELECT record_asset_change($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)`
 
 	err := repo.db.QueryRow(query,
 		changedAsset.SessionID,
@@ -145,6 +146,7 @@ func (repo *Repository) RecordAssetChange(changedAsset AssetChange) ([]byte, err
 		changedAsset.NewStatusReason,
 		changedAsset.NewCondition,
 		changedAsset.NewConditionNotes,
+		changedAsset.NewLossNotes,
 		changedAsset.NewConditionPhotoURL,
 		changedAsset.NewLocation,
 		changedAsset.NewRoom,

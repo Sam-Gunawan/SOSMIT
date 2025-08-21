@@ -155,8 +155,9 @@ type AssetChangeRequest struct {
 	NewStatus            *string `json:"new_status"`
 	NewStatusReason      *string `json:"new_status_reason"`
 	NewSerialNumber      *string `json:"new_serial_number"`
-	NewCondition         *bool   `json:"new_condition"`
+	NewCondition         *int    `json:"new_condition"`
 	NewConditionNotes    *string `json:"new_condition_notes"`
+	NewLossNotes         *string `json:"new_loss_notes"`
 	NewConditionPhotoURL *string `json:"new_condition_photo_url"`
 	NewLocation          *string `json:"new_location"`
 	NewRoom              *string `json:"new_room"`
@@ -212,6 +213,7 @@ func (handler *Handler) ProcessAssetChangesHandler(context *gin.Context) {
 		NewSerialNumber:      assetChangeRequest.NewSerialNumber,
 		NewCondition:         assetChangeRequest.NewCondition,
 		NewConditionNotes:    assetChangeRequest.NewConditionNotes,
+		NewLossNotes:         assetChangeRequest.NewLossNotes,
 		NewConditionPhotoURL: assetChangeRequest.NewConditionPhotoURL,
 		NewLocation:          assetChangeRequest.NewLocation,
 		NewRoom:              assetChangeRequest.NewRoom,

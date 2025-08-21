@@ -18,8 +18,9 @@ type Asset struct {
 	ProductVariety     string
 	BrandName          string
 	ProductName        string
-	Condition          bool
+	Condition          int // 0 = bad, 1 = good, 2 = lost/missing
 	ConditionNotes     sql.NullString
+	LossNotes          sql.NullString
 	ConditionPhotoURL  sql.NullString
 	Location           sql.NullString
 	Room               sql.NullString
@@ -67,6 +68,7 @@ func (repo *Repository) GetAssetByTag(assetTag string) (*Asset, error) {
 		&asset.ProductName,
 		&asset.Condition,
 		&asset.ConditionNotes,
+		&asset.LossNotes,
 		&asset.ConditionPhotoURL,
 		&asset.Location,
 		&asset.Room,
@@ -118,6 +120,7 @@ func (repo *Repository) GetAssetBySerialNumber(serialNumber string) (*Asset, err
 		&asset.ProductName,
 		&asset.Condition,
 		&asset.ConditionNotes,
+		&asset.LossNotes,
 		&asset.ConditionPhotoURL,
 		&asset.Location,
 		&asset.Room,

@@ -17,7 +17,7 @@ DROP PROCEDURE IF EXISTS public.finish_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.delete_opname_session(INT);
 DROP PROCEDURE IF EXISTS public.approve_opname_session(INT, INT);
 DROP PROCEDURE IF EXISTS public.reject_opname_session(INT, INT);
-DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(50), VARCHAR(20), VARCHAR(20), BOOLEAN, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, VARCHAR(255), VARCHAR(100), VARCHAR(100), INT, INT, INT, TEXT, VARCHAR(25));
+DROP FUNCTION IF EXISTS public.record_asset_change(INT, VARCHAR(12), VARCHAR(50), VARCHAR(20), VARCHAR(20), INT, TEXT, TEXT, TEXT, VARCHAR(255), VARCHAR(255), TEXT, INT, VARCHAR(255), VARCHAR(100), VARCHAR(100), INT, INT, INT, TEXT, VARCHAR(25));
 DROP FUNCTION IF EXISTS public.get_asset_change(INT, VARCHAR);
 DROP PROCEDURE IF EXISTS public.delete_asset_change(INT, VARCHAR(12));
 DROP PROCEDURE IF EXISTS public.set_action_notes(VARCHAR(12), INT, INT, TEXT);
@@ -375,9 +375,10 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_tag(_asset_tag VARCHAR(12))
 		product_variety VARCHAR(50),
 		brand_name VARCHAR(25),
 		product_name VARCHAR(50),
-		condition BOOLEAN,
+		condition INT,
 		condition_notes TEXT,
 		condition_photo_url TEXT,
+		loss_notes TEXT,
 		"location" VARCHAR(255),
 		room VARCHAR(255),
 		equipments TEXT,
@@ -402,7 +403,7 @@ AS $$
 			SELECT a.asset_tag, a.serial_number, a.status, a.status_reason,
 				a.product_category, a.product_subcategory, a.product_variety,
 				a.brand_name, a.product_name, 
-				a.condition, a.condition_notes, a.condition_photo_url::TEXT,
+				a.condition, a.condition_notes, a.condition_photo_url::TEXT, a.loss_notes,
 				a.location, a.room, a.equipments, a.total_cost,
 				a.owner_id,
 				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
@@ -439,9 +440,10 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_serial_number(_serial_number VARC
 		product_variety VARCHAR(50),
 		brand_name VARCHAR(25),
 		product_name VARCHAR(50),
-		condition BOOLEAN,
+		condition INT,
 		condition_notes TEXT,
 		condition_photo_url TEXT,
+		loss_notes TEXT,
 		"location" VARCHAR(255),
 		room VARCHAR(255),
 		equipments TEXT,
@@ -466,7 +468,7 @@ AS $$
 			SELECT a.asset_tag, a.serial_number, a.status, a.status_reason,
 				a.product_category, a.product_subcategory, a.product_variety,
 				a.brand_name, a.product_name, 
-				a.condition, a.condition_notes, a.condition_photo_url::TEXT,
+				a.condition, a.condition_notes, a.condition_photo_url::TEXT, a.loss_notes,
 				a.location, a.room, a.equipments, a.total_cost,
 				a.owner_id,
 				(COALESCE(u.first_name, '') || ' ' || COALESCE(u.last_name, ''))::VARCHAR(510) AS owner_name,
@@ -796,9 +798,10 @@ CREATE OR REPLACE FUNCTION public.record_asset_change(
 	_new_serial_number VARCHAR(50),
 	_new_status VARCHAR(20),
 	_new_status_reason VARCHAR(20),
-	_new_condition BOOLEAN,
+	_new_condition INT,
 	_new_condition_notes TEXT,
 	_new_condition_photo_url TEXT,
+	_new_loss_notes TEXT,
 	_new_location VARCHAR(255),
 	_new_room VARCHAR(255),
 	_new_equipments TEXT,
@@ -852,6 +855,9 @@ AS $$
 		END IF;
 		IF _new_condition_photo_url IS NOT NULL AND _new_condition_photo_url IS DISTINCT FROM _old_data.condition_photo_url THEN
 			_changes := jsonb_set(_changes, '{newConditionPhotoURL}', to_jsonb(_new_condition_photo_url));
+		END IF;
+		IF _new_loss_notes IS NOT NULL AND _new_loss_notes IS DISTINCT FROM _old_data.loss_notes THEN
+			_changes := jsonb_set(_changes, '{newLossNotes}', to_jsonb(_new_loss_notes));
 		END IF;
 		IF _new_location IS NOT NULL AND _new_location IS DISTINCT FROM _old_data.location THEN
 			_changes := jsonb_set(_changes, '{newLocation}', to_jsonb(_new_location));
