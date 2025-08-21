@@ -905,7 +905,7 @@ AS $$
 		IF EXISTS (
 			SELECT 1
 			FROM "OpnameSession"
-			WHERE id = _session_id AND "status" <> 'active'
+			WHERE id = _session_id AND "status" <> 'Active'
 		) THEN
 			RAISE EXCEPTION 'Session ID: % is not active', _session_id;
 		END IF;
