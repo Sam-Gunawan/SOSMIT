@@ -175,7 +175,7 @@
                                     <label [for]="'user-site-' + assetPage?.assetTag" class="form-label mb-0">Site</label>
                                     <input type="text" class="form-control" 
                                         [id]="'user-site-' + assetPage?.assetTag" 
-                                        [value]="assetPage?.subSiteName" 
+                                        [value]="assetPage?.subSiteName ? assetPage?.subSiteName : assetPage?.siteName" 
                                         readonly>
                                 </div>
                                 
