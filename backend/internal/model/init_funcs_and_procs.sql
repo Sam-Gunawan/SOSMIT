@@ -620,6 +620,33 @@ AS $$
 	END;
 $$;
 
+-- get_unscanned_assets retrieves all assets on that location (site/dept) that hasn't been scanned/searched by the user
+CREATE OR REPLACE FUNCTION public.get_unscanned_assets(_session_id INT)
+	RETURNS TABLE (
+		asset_tag VARCHAR(12)
+	)
+	LANGUAGE plpgsql
+AS $$
+	BEGIN
+		RETURN QUERY
+		SELECT a.asset_tag
+		FROM "Asset" AS a
+		INNER JOIN "OpnameSession" AS os ON os.id = _session_id
+		LEFT JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
+		LEFT JOIN "User" AS u ON a.owner_id = u.user_id
+		LEFT JOIN "Department" AS d ON LOWER(u.department) = LOWER(d.dept_name)
+		WHERE 
+			-- For site-based opname: match by site (either through subsite or directly in parent site)
+			(os.site_id IS NOT NULL AND (ss.site_id = os.site_id OR (a.sub_site_id IS NULL AND a.site_id = os.site_id)))
+			OR
+			-- For department-based opname: match by department
+			(os.dept_id IS NOT NULL AND d.id = os.dept_id)
+		AND NOT EXISTS (
+			SELECT 1 FROM "AssetChanges" AS ac2 WHERE ac2.session_id = _session_id AND ac2.asset_tag = a.asset_tag
+		);
+	END;
+$$;
+
 -- finish_opname_session marks an opname session as finished
 CREATE OR REPLACE PROCEDURE public.finish_opname_session(_session_id INT)
 	LANGUAGE plpgsql
@@ -646,8 +673,7 @@ AS $$
 		-- Check if there are any assets that hasn't been processed yet
 		IF EXISTS (
 			SELECT 1
-			FROM "AssetChanges"
-			WHERE session_id = _session_id AND "processing_status" = 'pending'
+			FROM get_unscanned_assets(_session_id)
 		) THEN
 			RAISE EXCEPTION 'There are assets that have not been processed yet for opname session ID: %', _session_id;
 		END IF;
@@ -1253,27 +1279,14 @@ AS $$
 			
 			UNION
 
-			-- Missing assets: assets not scanned during opname
-			-- For site-based opname: assets in the site's sub-sites OR directly in the parent site (without subsite)
-			-- For department-based opname: assets owned by users in that department that weren't scanned
+			-- Missing assets: assets not found during opname, denoted by 'Lost' condition or 2 in value.
 			SELECT
 				'missing_assets'::VARCHAR(50) AS category,
-				a.asset_tag,
+				ac.asset_tag,
 				a.product_variety
-			FROM "Asset" AS a
-			INNER JOIN "OpnameSession" AS os ON os.id = _session_id
-			LEFT JOIN "SubSite" AS ss ON a.sub_site_id = ss.id
-			LEFT JOIN "User" AS au ON a.owner_id = au.user_id
-			LEFT JOIN "Department" AS d ON LOWER(au.department) = LOWER(d.dept_name)
-			WHERE 
-				-- For site-based opname: match by site (either through subsite or directly in parent site)
-				(os.site_id IS NOT NULL AND (ss.site_id = os.site_id OR (a.sub_site_id IS NULL AND a.site_id = os.site_id)))
-				OR
-				-- For department-based opname: match by department
-				(os.dept_id IS NOT NULL AND d.id = os.dept_id)
-			AND NOT EXISTS (
-				SELECT 1 FROM "AssetChanges" AS ac2 WHERE ac2.session_id = _session_id AND ac2.asset_tag = a.asset_tag
-			)
+			FROM "AssetChanges" AS ac
+			LEFT JOIN "Asset" AS a ON ac.asset_tag = a.asset_tag
+			WHERE a.condition = 2 OR ac.changes ->> 'newCondition' = '2'
 		)
 		ORDER BY category, asset_tag;
 	END;

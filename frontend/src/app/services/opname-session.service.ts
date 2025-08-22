@@ -7,6 +7,8 @@ import { OpnameSession } from '../model/opname-session.model';
 import { AssetChange } from '../model/asset-changes.model';
 import { OpnameSessionProgress } from '../model/opname-session-progress.model';
 import { formatDate, buildHttpParams } from '../utils';
+import { AssetInfo } from '../model/asset-info.model';
+import { formatRupiah, titleCase } from '../utils';
 
 @Injectable({ providedIn: 'root' })
 export class OpnameSessionService {
@@ -355,6 +357,50 @@ export class OpnameSessionService {
       tap((response: any) => {
         // Log the response for debugging purposes.
         console.log('[OpnameService] Fetched user from opname session:', response);
+      })
+    );
+  }
+
+  getUnscannedAssets(sessionID: number): Observable<AssetInfo[]> {
+    // This method will retrieve all assets that were not scanned/searched during an opname on that specific location
+    return this.http.get<AssetInfo[]>(`${this.opnameApiUrl}/${sessionID}/unscanned-assets`).pipe(
+      tap((response: any[]) => {
+        // Log the response for debugging purposes.
+        console.log('[OpnameService] Fetched unscanned assets:', response);
+      }),
+      map((assets: any) => {
+        return assets.map((asset: any) => ({
+          assetTag: asset.asset_tag,
+          assetIcon: '',
+          serialNumber: asset.serial_number,
+          assetStatus: asset.status,
+          statusReason: asset.status_reason || '-1',
+          category: asset.product_category,
+          subCategory: asset.product_subcategory,
+          productVariety: asset.product_variety,
+          assetBrand: asset.brand_name,
+          assetName: asset.product_name,
+          condition: asset.condition,
+          conditionNotes: asset.condition_notes,
+          lossNotes: asset.loss_notes,
+          conditionPhotoURL: asset.condition_photo_url || '',
+          location: asset.location,
+          room: asset.room,
+          equipments: asset.equipments || '',
+          totalCost: formatRupiah(asset.total_cost),
+          assetOwner: asset.owner_id,
+          assetOwnerName: titleCase(asset.owner_name) || '',
+          assetOwnerPosition: titleCase(asset.owner_position),
+          assetOwnerDepartment: titleCase(asset.owner_department),
+          assetOwnerDivision: titleCase(asset.owner_division),
+          assetOwnerCostCenter: asset.owner_cost_center,
+          subSiteID: asset.sub_site_id,
+          subSiteName: asset.sub_site_name,
+          siteID: asset.site_id,
+          siteName: asset.site_name,
+          siteGroupName: asset.site_group_name,
+          regionName: asset.region_name
+        }));
       })
     );
   }

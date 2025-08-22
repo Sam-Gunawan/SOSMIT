@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/asset"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
@@ -534,4 +535,29 @@ func (handler *Handler) GetUserFromOpnameSessionHandler(context *gin.Context) {
 		"last_name":  user.LastName,
 		"position":   user.Position,
 	})
+}
+
+// GetUnscannedAssetsHandler retrieves all unscanned assets for a specific opname session.
+func (handler *Handler) GetUnscannedAssetsHandler(context *gin.Context) {
+	// Get the session ID from the URL parameter
+	sessionIDstr := context.Param("session-id")
+	sessionID, err := validateSessionID(sessionIDstr)
+	if err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid session_id, must be a positive integer",
+		})
+		return
+	}
+
+	// Call the service to get unscanned assets
+	unscannedAssets, err := handler.service.GetUnscannedAssets(sessionID)
+	if err != nil {
+		log.Printf("❌ Error retrieving unscanned assets for opname session %d: %v", sessionID, err)
+		context.JSON(http.StatusInternalServerError, gin.H{
+			"error": "failed to retrieve unscanned assets: " + err.Error(),
+		})
+		return
+	}
+
+	context.JSON(http.StatusOK, asset.SerializeMultipleAssets(unscannedAssets))
 }

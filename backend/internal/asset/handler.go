@@ -20,8 +20,8 @@ func NewHandler(service *Service) *Handler {
 	}
 }
 
-// serializeAsset converts an Asset domain object into a JSON-friendly gin.H with proper null flattening.
-func serializeAsset(a *Asset) gin.H {
+// SerializeAsset converts an Asset domain object into a JSON-friendly gin.H with proper null flattening.
+func SerializeAsset(a *Asset) gin.H {
 	if a == nil {
 		return gin.H{}
 	}
@@ -58,14 +58,14 @@ func serializeAsset(a *Asset) gin.H {
 	}
 }
 
-// serializeAssets maps a slice of Asset pointers to a slice of gin.H with flattened nullable values.
-func serializeAssets(list []*Asset) []gin.H {
+// SerializeMultipleAssets maps a slice of Asset pointers to a slice of gin.H with flattened nullable values.
+func SerializeMultipleAssets(list []*Asset) []gin.H {
 	if len(list) == 0 {
 		return []gin.H{}
 	}
 	out := make([]gin.H, 0, len(list))
 	for _, a := range list {
-		out = append(out, serializeAsset(a))
+		out = append(out, SerializeAsset(a))
 	}
 	return out
 }
@@ -91,7 +91,7 @@ func (handler *Handler) GetAssetByTagHandler(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, serializeAsset(asset))
+	context.JSON(http.StatusOK, SerializeAsset(asset))
 }
 
 // GetAssetBySerialNumberHandler retrieves an asset by its serial number.
@@ -115,7 +115,7 @@ func (handler *Handler) GetAssetBySerialNumberHandler(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusOK, serializeAsset(asset))
+	context.JSON(http.StatusOK, SerializeAsset(asset))
 }
 
 // GetAssetsOnLocationHandler retrieves all assets for a given location.
@@ -143,7 +143,7 @@ func (handler *Handler) GetAssetsOnLocationHandler(context *gin.Context) {
 		log.Printf("⚠ No assets found for location - site-id: %v, dept-id: %v", siteID, deptID)
 	}
 
-	context.JSON(http.StatusOK, gin.H{"assets_on_location": serializeAssets(assetsOnLocation)})
+	context.JSON(http.StatusOK, gin.H{"assets_on_location": SerializeMultipleAssets(assetsOnLocation)})
 }
 
 // GetAssetEquipmentsHandler retrieves all equipments for a given product variety.

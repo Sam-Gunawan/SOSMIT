@@ -110,7 +110,8 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
   readonly conditionOptions = [
     { value: '', label: 'All Conditions' },
     { value: 'good', label: 'Good' },
-    { value: 'bad', label: 'Bad' }
+    { value: 'bad', label: 'Bad' },
+    { value: 'lost', label: 'Lost' }
   ];
   
   readonly statusOptions = [
@@ -129,6 +130,13 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
     { value: 'edited', label: 'Diperbarui' },
     { value: 'all_good', label: 'Sesuai' }
   ];
+
+  // Progress tracking properties
+  assetsOnLocationCount: number = 0; // Total assets that should be scanned for this location
+  scannedAssetsCount: number = 0; // Assets that have been scanned/processed
+  unscannedAssets: AssetInfo[] = []; // Assets that haven't been scanned yet
+  isLoadingProgress: boolean = false; // Loading state for progress data
+  isMarkingUnfoundAsLost: boolean = false; // Loading state for marking unfound assets
 
   constructor(
     private apiService: ApiService,
@@ -235,6 +243,7 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
     this.getAllUsers();
     this.getAllSites();
     this.getAllSubSites();
+    this.loadOpnameProgressData(); // Load progress tracking data
     localStorage.setItem('pendingCount', '0'); // Initialize pending assets count to 0
     localStorage.setItem('assetCount', '0'); // Initialize scanned assets count to 0
     this.errorMessage = '';
@@ -348,6 +357,102 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
         this.isLoading = false; // Only set false on error
       }
     });
+  }
+
+  loadOpnameProgressData(): void {
+    if (this.sessionID === -1) return;
+    
+    this.isLoadingProgress = true;
+    
+    // Load both scanned progress and unscanned assets
+    this.opnameSessionService.loadOpnameProgress(this.sessionID).subscribe({
+      next: (progress) => {
+        this.scannedAssetsCount = progress.length;
+        this.updateProgressCounts();
+      },
+      error: (error) => {
+        console.error('[OpnameAsset] Error loading progress data:', error);
+      }
+    });
+
+    // Load unscanned assets
+    this.opnameSessionService.getUnscannedAssets(this.sessionID).subscribe({
+      next: (unscannedAssets) => {
+        this.unscannedAssets = unscannedAssets;
+        this.assetsOnLocationCount = this.scannedAssetsCount + this.unscannedAssets.length;
+        this.updateProgressCounts();
+        this.isLoadingProgress = false;
+      },
+      error: (error) => {
+        console.error('[OpnameAsset] Error loading unscanned assets:', error);
+        this.isLoadingProgress = false;
+      }
+    });
+  }
+
+  async updateProgressCounts(): Promise<void> {
+    // Recalculate progress based on current data
+    const assetsOnLocation = await lastValueFrom(this.apiService.getAssetsOnLocation(this.opnameSession.siteID, this.opnameSession.deptID));
+    this.assetsOnLocationCount = assetsOnLocation.length;
+    this.cdr.detectChanges();
+  }
+
+  get progressPercentage(): number {
+    if (this.assetsOnLocationCount === 0) return 0;
+    return Math.round((this.scannedAssetsCount / this.assetsOnLocationCount) * 100);
+  }
+
+  get canFinishOpname(): boolean {
+    return this.unscannedAssets.length === 0 && this.scannedAssetsCount > 0;
+  }
+
+  get isAllAssetsFound(): boolean {
+    return this.unscannedAssets.length === 0 && this.assetsOnLocationCount > 0;
+  }
+
+  async markUnfoundAssetsAsLost(): Promise<void> {
+    if (this.unscannedAssets.length === 0 || this.isMarkingUnfoundAsLost) return;
+
+    this.isMarkingUnfoundAsLost = true;
+
+    try {
+      // Process each unscanned asset
+      for (const asset of this.unscannedAssets) {
+        const assetChange: AssetChange = {
+          assetTag: asset.assetTag,
+          newStatus: asset.assetStatus,
+          newCondition: 2, // Lost condition
+          newConditionNotes: 'Aset tidak ditemukan',
+          newLossNotes: 'Aset tidak ditemukan selama proses opname',
+          newEquipments: 'Tidak ada perlengkapan',
+          changeReason: 'Aset tidak ditemukan selama opname',
+          processingStatus: 'edited'
+        };
+
+        // Process the asset change
+        await lastValueFrom(this.opnameSessionService.processScannedAsset(this.sessionID, assetChange));
+      }
+
+      // Apply lost filter automatically
+      this.filterCondition = 'lost';
+      this.applyFilters();
+
+      // Refresh progress data
+      this.loadOpnameProgressData();
+
+      // Show success message
+      this.successMessage = `${this.unscannedAssets.length} aset yang tidak ditemukan telah ditandai sebagai hilang.`;
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
+
+    } catch (error) {
+      console.error('[OpnameAsset] Error marking unfound assets as lost:', error);
+      this.errorMessage = 'Gagal menandai aset yang tidak ditemukan. Silakan coba lagi.';
+      this.showToast = true;
+      setTimeout(() => this.showToast = false, 3000);
+    } finally {
+      this.isMarkingUnfoundAsLost = false;
+    }
   }
 
   async populateSessionData(progress: OpnameSessionProgress[]): Promise<void> {
@@ -742,6 +847,10 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
         };
 
         this.opnameSessionService.processScannedAsset(this.sessionID, pendingAssetChange).subscribe({
+          next: () => {
+            // Refresh progress data after successful processing
+            this.loadOpnameProgressData();
+          },
           error: (error) => {
             console.error('[OpnameAsset] Error saving newly scanned asset:', error);
           }
@@ -1453,6 +1562,9 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
         // Decrement pending assets count in local storage
         this.incrementPendingCount(-1);
 
+        // Refresh progress data after successful processing
+        this.loadOpnameProgressData();
+
         this.isSearching = false;
         this.isLoading = false;
       },
@@ -1537,6 +1649,9 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
         this.updateAdaptorInEquipments(index);
         this.updateTableDataSource();
         this.cdr.detectChanges();
+
+        // Refresh progress data after successful processing
+        this.loadOpnameProgressData();
         
         this.isLoading = false;
         this.successMessage = 'Asset ditandai sebagai baik. Tidak ada perubahan.';
@@ -1569,6 +1684,8 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
       next: () => {
         // Successfully removed from session
         this.incrementAssetScanned(-1);
+
+        this.updateProgressCounts();
 
         this.searchResults.splice(index, 1); // Remove the asset from the search results
         this.updateTableDataSource(); // Update the table after removal
