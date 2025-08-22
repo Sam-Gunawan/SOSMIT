@@ -1,5 +1,4 @@
 # Manual Pengguna SOSMIT
-## (Stock Opname Management Information Technology)
 
 ---
 
