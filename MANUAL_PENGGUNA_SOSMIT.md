@@ -52,21 +52,16 @@
 - **Tablet**: iOS 12+ / Android 8+
 - **Mobile**: iOS 12+ / Android 8+
 
-### Koneksi Internet:
-- Minimum: 1 Mbps untuk fungsi dasar
-- Rekomendasi: 5 Mbps untuk performa optimal
-
 ---
 
 ## 3. Login dan Autentikasi
 
 ### 3.1 Cara Login
 
-1. **Akses Aplikasi**: Buka browser dan masukkan URL aplikasi SOSMIT
-2. **Input Kredensial**:
+1. **Input Kredensial**:
    - **Username**: Masukkan username yang telah diberikan oleh administrator
    - **Password**: Masukkan password yang sesuai
-3. **Klik Login**: Tekan tombol "Login" untuk masuk ke sistem
+2. **Klik Login**: Tekan tombol "Login" untuk masuk ke sistem
 
 ### 3.2 Keamanan Akun
 
