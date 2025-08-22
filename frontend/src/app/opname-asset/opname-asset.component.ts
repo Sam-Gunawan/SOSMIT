@@ -249,12 +249,6 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
     this.getAllSites();
     this.getAllSubSites();
     this.errorMessage = '';
-
-    // setTimeout(() => {
-    //   this.isLoading = true;
-    //   this.initOpnameData(); // Delayed initialization to ensure all inputs are set
-    // }, 0) // Use 0 to ensure it runs after the current call stack
-    
   }
 
   ngOnChanges(changes: SimpleChanges): void {
