@@ -63,18 +63,46 @@
                 Tidak ada aset yang cocok dengan filter saat ini.
             </h5>
 
-            <div class="scanned-assets-progress">
-                <p>Scanned Assets Progress:</p>
-                <div class="progress">
-                    <div class="progress-bar" role="progressbar" [style.width.%]="50"></div>
+            <div class="right-corner">
+                <div class="opname-progress-section">
+                    <!-- Asset Progress Indicator -->
+                    <div class="opname-progress-info">
+                        <div class="progress-counter">
+                            <i class="fas fa-tasks"></i>
+                            <span class="progress-text">
+                                {{ scannedAssetsCount }}/{{ assetsOnLocationCount }} assets found
+                            </span>
+                        </div>
+                    </div>
+                    <!-- Unfound Assets Action Button -->
+                    <div class="unfound-assets-action" *ngIf="!isInReport">
+                        <button
+                            class="btn btn-sm unfound-btn"
+                            [ngClass]="{
+                                'btn-warning': unscannedAssets.length > 0,
+                                'btn-success': isAllAssetsFound,
+                                'loading': isMarkingUnfoundAsLost
+                            }"
+                            [disabled]="isMarkingUnfoundAsLost || isLoadingProgress"
+                            (click)="markUnfoundAssetsAsLost()"
+                            *ngIf="unscannedAssets.length > 0">
+                            <i class="fas fa-spinner fa-spin" *ngIf="isMarkingUnfoundAsLost"></i>
+                            <span class="unfound-count-badge">{{ unscannedAssets.length }}</span>
+                            Mark unfound as lost
+                        </button>
+                
+                        <div class="all-found-indicator" *ngIf="isAllAssetsFound">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <span class="text-success">All assets found</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="preview-button">
-                <button class="btn btn-secondary" (click)="showDataPreview()">
-                    <i class="fas fa-eye"></i>
-                    <span>Preview</span>
-                </button>
+                <div class="preview-button">
+                    <button class="btn btn-secondary" (click)="showDataPreview()">
+                        <i class="fas fa-eye"></i>
+                        <span>Preview</span>
+                    </button>
+                </div>
             </div>
         </div>
         

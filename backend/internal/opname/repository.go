@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/asset"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/user"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/utils"
 )
@@ -359,4 +360,42 @@ func (repo *Repository) GetUserFromOpnameSession(sessionID int) (*user.User, err
 	}
 
 	return user, nil
+}
+
+// GetUnscannedAssets retrieves all assets that were not scanned during a specific opname session.
+func (repo *Repository) GetUnscannedAssets(sessionID int) ([]*asset.Asset, error) {
+	query := `SELECT * FROM get_unscanned_assets($1)`
+
+	rows, err := repo.db.Query(query, sessionID)
+	if err != nil {
+		log.Printf("❌ Error retrieving unscanned assets for opname session ID %d: %v", sessionID, err)
+		return nil, err
+	}
+	defer rows.Close()
+
+	var assets []*asset.Asset
+	var assetRepo = asset.NewRepository(repo.db)
+	for rows.Next() {
+		var unscannedAsset *asset.Asset
+		var assetTag string
+		if err := rows.Scan(&assetTag); err != nil {
+			log.Printf("❌ Error scanning row for unscanned asset: %v", err)
+			return nil, err
+		}
+
+		unscannedAsset, err = assetRepo.GetAssetByTag(assetTag)
+		if err != nil {
+			log.Printf("❌ Error retrieving asset by tag %s: %v", assetTag, err)
+			return nil, err
+		}
+		assets = append(assets, unscannedAsset)
+	}
+
+	if err := rows.Err(); err != nil {
+		log.Printf("❌ Error iterating over rows for unscanned assets: %v", err)
+		return nil, err
+	}
+
+	log.Printf("✅ Retrieved %d unscanned assets for opname session ID %d", len(assets), sessionID)
+	return assets, nil
 }

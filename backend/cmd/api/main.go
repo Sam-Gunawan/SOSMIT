@@ -187,6 +187,9 @@ func main() {
 			// GET /api/opname/filter/location
 			opnameRoutes.GET("/filter/location", opnameHandler.GetOpnameOnLocationHandler)
 
+			// GET /api/opname/:session-id/unscanned-assets
+			opnameRoutes.GET("/:session-id/unscanned-assets", opnameHandler.GetUnscannedAssetsHandler)
+
 			// POST /api/opname/start
 			opnameRoutes.POST("/start", opnameHandler.StartNewSessionHandler)
 

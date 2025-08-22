@@ -13,6 +13,7 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
+	"github.com/Sam-Gunawan/SOSMIT/backend/internal/asset"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/email"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/report"
 	"github.com/Sam-Gunawan/SOSMIT/backend/internal/site"
@@ -692,4 +693,23 @@ func (service *Service) GetUserFromOpnameSession(sessionID int) (*user.User, err
 
 	log.Printf("✅ User retrieved successfully for opname session %d", sessionID)
 	return user, nil
+}
+
+// GetUnscannedAssets retrieves all unscanned assets for a specific opname session.
+func (service *Service) GetUnscannedAssets(sessionID int) ([]*asset.Asset, error) {
+	// Validate sessionID
+	if sessionID <= 0 {
+		log.Printf("⚠ Invalid sessionID: %d", sessionID)
+		return nil, errors.New("invalid sessionID")
+	}
+
+	// Call the repository to get unscanned assets
+	unscannedAssets, err := service.repo.GetUnscannedAssets(sessionID)
+	if err != nil {
+		log.Printf("❌ Error retrieving unscanned assets for opname session %d: %v", sessionID, err)
+		return nil, err
+	}
+
+	log.Printf("✅ Unscanned assets retrieved successfully for opname session %d", sessionID)
+	return unscannedAssets, nil
 }
