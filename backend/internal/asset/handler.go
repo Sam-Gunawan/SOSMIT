@@ -52,6 +52,7 @@ func SerializeAsset(a *Asset) gin.H {
 		"sub_site_id":         utils.SerializeNI(a.SubSiteID),
 		"sub_site_name":       utils.SerializeNS(a.SubSiteName),
 		"site_id":             utils.SerializeNI(a.SiteID),
+		"dept_id":             utils.SerializeNI(a.DeptID),
 		"site_name":           utils.SerializeNS(a.SiteName),
 		"site_group_name":     utils.SerializeNS(a.SiteGroupName),
 		"region_name":         utils.SerializeNS(a.RegionName),

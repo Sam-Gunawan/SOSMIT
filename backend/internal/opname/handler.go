@@ -114,7 +114,8 @@ func (handler *Handler) GetSessionByIDHandler(context *gin.Context) {
 		"manager_reviewed_at": utils.SerializeNS(session.ManagerReviewedAt),
 		"l1_reviewer_id":      utils.SerializeNI(session.L1ReviewerID),
 		"l1_reviewed_at":      utils.SerializeNS(session.L1ReviewedAt),
-		"site_id":             session.SiteID,
+		"site_id":             utils.SerializeNI(session.SiteID),
+		"dept_id":             utils.SerializeNI(session.DeptID),
 	})
 }
 

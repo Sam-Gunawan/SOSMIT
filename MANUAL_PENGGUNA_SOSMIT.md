@@ -8,8 +8,8 @@
 1. [Pengenalan Aplikasi](#1-pengenalan-aplikasi)
 2. [Persyaratan Sistem](#2-persyaratan-sistem)
 3. [Login dan Autentikasi](#3-login-dan-autentikasi)
-4. [Dashboard Utama](#4-dashboard-utama)
-5. [Pusat Notifikasi](#5-pusat-notifikasi)
+4. [Navigasi Situs](#4-navigasi-situs)
+5. [Dashboard](#5-dashboard)
 6. [Manajemen Lokasi](#6-manajemen-lokasi)
 7. [Proses Stock Opname](#7-proses-stock-opname)
 8. [Review dan Persetujuan](#8-review-dan-persetujuan)
@@ -78,12 +78,12 @@
 
 ---
 
-### 4. Header
+### 4. Navigasi Situs
 
 - **Dashboard**: Halaman utama
-- **Search**: Pencarian aset dan lokasi
-- **Notification**: Pusat notifikasi dan pesan sistem
-- **Profile**: Logout dan pengaturan akun
+- **Search**: Pencarian aset dan lokasi (tidak dilanjutkan)
+- **Notification**: Pusat notifikasi dan pesan sistem (dibatalkan)
+- **Profile**: Logout dan pengaturan akun (dibatalkan)
 
 ---
 
@@ -125,7 +125,6 @@ Dashboard menampilkan nama pengguna dan akses cepat ke lokasi kerja:
 
 **👤 Filter berdasarkan User**:
 - **Created By**: Pencarian berdasarkan nama user yang membuat sesi
-- **Username**: Cari berdasarkan username sistem
 
 **📅 Filter berdasarkan Tanggal**:
 - **Date Range**: Pilih rentang tanggal dengan date picker
@@ -149,8 +148,16 @@ Dashboard menampilkan nama pengguna dan akses cepat ke lokasi kerja:
 
 ### 6.1 Struktur Hierarki
 
+2 Mode:
+- **Area**
 ```
-Region → Site Group → Site → Department → Sub-Site
+Region → Site Group → Site → Sub-Site
+
+```
+- **Head Office**
+```
+Region → Site Group → Head Office (Site) → Department
+
 ```
 
 ### 6.2 Halaman Site

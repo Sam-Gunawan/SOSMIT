@@ -53,7 +53,7 @@
     <div class="filter-section" *ngIf="searchResults.length > 0">
         <div class="table-header">  
             <h5 *ngIf="dataSource.filteredData.length || (searchResults.length && !hasActiveFilters)">
-                Assets Found ({{ dataSource.filteredData.length || searchResults.length }})
+                Assets Searched ({{ dataSource.filteredData.length || searchResults.length }})
                 <span *ngIf="hasActiveFilters" class="filter-indicator">
                     - Filtered from {{ searchResults.length }}
                 </span>
@@ -70,7 +70,7 @@
                         <div class="progress-counter">
                             <i class="fas fa-tasks"></i>
                             <span class="progress-text">
-                                {{ scannedAssetsCount }}/{{ assetsOnLocationCount }} assets found
+                                {{ scannedAssetsOnLocationCount }}/{{ assetsOnLocationCount }} assets found on location
                             </span>
                         </div>
                     </div>
@@ -79,15 +79,15 @@
                         <button
                             class="btn btn-sm unfound-btn"
                             [ngClass]="{
-                                'btn-warning': unscannedAssets.length > 0,
+                                'btn-warning': unscannedAssetsCount > 0,
                                 'btn-success': isAllAssetsFound,
                                 'loading': isMarkingUnfoundAsLost
                             }"
-                            [disabled]="isMarkingUnfoundAsLost || isLoadingProgress"
+                            [disabled]="isMarkingUnfoundAsLost || isLoadingAssetCount"
                             (click)="markUnfoundAssetsAsLost()"
-                            *ngIf="unscannedAssets.length > 0">
+                            *ngIf="unscannedAssetsCount > 0">
                             <i class="fas fa-spinner fa-spin" *ngIf="isMarkingUnfoundAsLost"></i>
-                            <span class="unfound-count-badge">{{ unscannedAssets.length }}</span>
+                            <span class="unfound-count-badge">{{ unscannedAssetsCount }}</span>
                             Mark unfound as lost
                         </button>
                 
