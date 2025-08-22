@@ -9,12 +9,13 @@
 2. [Persyaratan Sistem](#2-persyaratan-sistem)
 3. [Login dan Autentikasi](#3-login-dan-autentikasi)
 4. [Dashboard Utama](#4-dashboard-utama)
-5. [Manajemen Lokasi](#5-manajemen-lokasi)
-6. [Proses Stock Opname](#6-proses-stock-opname)
-7. [Review dan Persetujuan](#7-review-dan-persetujuan)
-8. [Laporan dan Dokumentasi](#8-laporan-dan-dokumentasi)
-9. [Fitur Pencarian](#9-fitur-pencarian)
-10. [Troubleshooting](#10-troubleshooting)
+5. [Pusat Notifikasi](#5-pusat-notifikasi)
+6. [Manajemen Lokasi](#6-manajemen-lokasi)
+7. [Proses Stock Opname](#7-proses-stock-opname)
+8. [Review dan Persetujuan](#8-review-dan-persetujuan)
+9. [Laporan dan Dokumentasi](#9-laporan-dan-dokumentasi)
+10. [Fitur Pencarian](#10-fitur-pencarian)
+11. [Troubleshooting](#11-troubleshooting)
 
 ---
 
@@ -82,42 +83,82 @@
 
 ---
 
-## 4. Dashboard Utama
+### 4. Header
 
-### 4.1 Komponen Dashboard
+- **Dashboard**: Halaman utama
+- **Search**: Pencarian aset dan lokasi
+- **Notification**: Pusat notifikasi dan pesan sistem
+- **Profile**: Logout dan pengaturan akun
 
-Dashboard menampilkan informasi profil pengguna dan akses cepat ke lokasi kerja:
+---
+
+## 5. Dashboard
+
+### 5.1 Komponen Dashboard
+
+Dashboard menampilkan nama pengguna dan akses cepat ke lokasi kerja:
 
 #### **Panel Profil**
-- **Foto Profil**: Avatar pengguna (jika tersedia)
 - **Nama Lengkap**: Nama depan dan belakang
-- **Jabatan**: Posisi dalam perusahaan
-- **Departemen & Divisi**: Unit kerja
-- **Lokasi Kerja**: Site assignment dan wilayah
+
+### **Panel Search**
+- **Opname Location Search**: memungkinkan pengguna untuk dengan cepat menemukan dan mengakses lokasi untuk melakukan stock opname:
+
+**🔍 Cara Menggunakan**:
+1. **Input Search**: Ketik nama site, region, site group, department, nama user, atau tanggal
+2. **Auto-complete**: Sistem akan menampilkan saran lokasi yang sesuai
+3. **Select Location**: Pilih lokasi dari dropdown hasil pencarian
+4. **Quick Access**: Klik hasil untuk langsung ke halaman site tersebut
+
+**📍 Jenis Pencarian**:
+- **Site Name**: Cari berdasarkan nama lokasi spesifik
+- **Site Group**: Cari berdasarkan kelompok site
+- **Region**: Cari berdasarkan wilayah geografis
+- **Department**: Cari department dalam site tertentu
+- **User Name**: Cari berdasarkan nama pengguna yang membuat sesi opname
+- **Start Date**: Cari berdasarkan tanggal mulai opname (format: DD/MM/YYYY)
+- **End Date**: Cari berdasarkan tanggal selesai opname (format: DD/MM/YYYY)
+
+**🎯 Filter Opname Status**:
+- **Show All**: Tampilkan semua lokasi
+- **Active**: Sedang berlangsung (sesi opname aktif)
+- **Submitted**: Sudah diserahkan menunggu review dari Area Manager
+- **Escalated**: Disetujui Area Manager, menunggu verifikasi L1 Support
+- **Verified**: Sudah diverifikasi dan selesai (approved oleh L1 Support)
+- **Rejected**: Ditolak dan perlu perbaikan (ditolak oleh Area Manager atau L1 Support)
+- **Outdated**: Lokasi yang perlu opname baru (opname sudah kadaluarsa)
+
+**👤 Filter berdasarkan User**:
+- **Created By**: Pencarian berdasarkan nama user yang membuat sesi
+- **Username**: Cari berdasarkan username sistem
+
+**📅 Filter berdasarkan Tanggal**:
+- **Date Range**: Pilih rentang tanggal dengan date picker
+- **Start Date**: Filter sesi yang dimulai pada tanggal tertentu
+- **End Date**: Filter sesi yang selesai pada tanggal tertentu
+
+**🔍 Contoh Pencarian Lanjutan**:
+- `Jakarta + John Doe`: Site Jakarta dengan opname oleh John Doe
+- `01/01/2024 - 31/01/2024`: Semua opname dalam rentang Januari 2024
+- `Active + IT Department`: Department IT dengan status opname aktif
+- `Surabaya + Completed + 15/12/2024`: Site Surabaya yang selesai pada 15 Desember 2024
 
 #### **Panel Lokasi**
 - **Site Card**: Menampilkan lokasi kerja dengan status opname
 - **Quick Access**: Tombol akses langsung ke halaman lokasi
 - **Status Indicator**: Visual status opname terkini
 
-### 4.2 Navigasi Utama
-
-- **🏠 Dashboard**: Halaman utama
-- **🔍 Search**: Pencarian aset dan lokasi
-- **📍 Location**: Manajemen lokasi dan opname
-- **👤 Profile**: Logout dan pengaturan akun
-
 ---
 
-## 5. Manajemen Lokasi
+## 6. Manajemen Lokasi
 
-### 5.1 Struktur Hierarki
+### 6.1 Struktur Hierarki
 
 ```
 Region → Site Group → Site → Department → Sub-Site
 ```
 
-### 5.2 Halaman Site
+### 6.2 Halaman Site
 
 #### **Informasi Site**
 - **Nama Site**: Identifikasi lokasi
@@ -133,89 +174,79 @@ Region → Site Group → Site → Department → Sub-Site
 - ✅ **Verified**: Sudah diverifikasi dan selesai
 - ❌ **Rejected**: Ditolak dan perlu perbaikan
 
-### 5.3 Aksi pada Site
+### 6.3 Aksi pada Site
 
 #### **Tombol Start Opname**
 - Memulai sesi opname baru
 - Otomatis membuat session ID
 - Redirect ke halaman opname
 
+#### **Tombol Continue Opname **
+- Melanjutkan sesi opname yang belum selesai
+
 #### **Tombol View Report**
 - Melihat laporan opname terakhir
 - Mengunduh dokumen BAP (Berita Acara Pemeriksaan)
 - Tersedia untuk sesi yang sudah selesai
 
-### 5.4 Auto-Refresh Status
-
-Halaman site secara otomatis memperbarui status setiap:
-- **30 detik** secara periodic
-- **Saat window focus** kembali ke tab
-- **Manual refresh** dengan pull-to-refresh gesture
-
 ---
 
-## 6. Proses Stock Opname
+## 7. Proses Stock Opname
 
-### 6.1 Memulai Sesi Opname
+### 7.1 Memulai Sesi Opname
 
 1. **Navigasi ke Site**: Pilih site yang akan di-opname
 2. **Klik "Start Opname"**: Mulai sesi baru
 3. **Dialog Reminder**: Baca pengingat durasi opname
 4. **Konfirmasi**: Lanjutkan ke halaman opname
 
-### 6.2 Interface Opname
+### 7.2 Interface Opname
 
 #### **Header Informasi**
 - **Site Name**: Nama lokasi yang sedang di-opname
-- **Session ID**: ID unik untuk sesi ini
-- **Progress Bar**: Indikator kemajuan
+- **Start Date**: Tanggal sesi opname dibuat
+- **Progress Bar**: Indikator opname sudah berjalan berapa lama
 
 #### **Komponen Utama**
 - **Asset Scanner**: Scan barcode/QR code aset
 - **Asset List**: Daftar aset yang sudah dipindai
 - **Action Buttons**: Tombol finish dan cancel
 
-### 6.3 Scanning Aset
+### 7.3 Scanning Aset
 
 #### **Metode Input**:
 1. **Barcode Scanner**: Gunakan kamera untuk scan
 2. **Manual Input**: Ketik asset tag secara manual
-3. **Search & Select**: Cari dari database aset
 
 #### **Data Aset yang Ditampilkan**:
-- **Asset Tag & Serial Number**
-- **Nama & Kategori Aset**
-- **Lokasi & Owner**
-- **Status & Kondisi**
-- **Foto Kondisi** (jika tersedia)
+- **Asset Tag & Nama & Serial Number**
+- **User & Cost Center**
+- **Kondisi & Status**
+- **Process & Action**
 
-### 6.4 Pengeditan Data Aset
+### 7.4 Pengeditan Data Aset
 
 #### **Field yang Dapat Diedit**:
+- ✏️ **Serial Number**: Perubahan serial number
 - ✏️ **Kondisi**: Baik / Rusak / Hilang
 - ✏️ **Catatan Kondisi**: Deskripsi detail
 - ✏️ **Catatan Kehilangan**: Jika aset hilang
 - ✏️ **Lokasi**: Pemindahan lokasi
-- ✏️ **Owner**: Perubahan kepemilikan
-- ✏️ **Sub-Site**: Perubahan sub-lokasi
+- ✏️ **User**: Perubahan kepemilikan
 
 #### **Upload Foto**:
-- Foto kondisi aset (opsional)
+- Foto kondisi aset (jika rusak)
 - Format: JPEG, PNG
 - Ukuran maksimal: 5MB
 
-### 6.5 Validasi Sebelum Finish
+### 7.5 Validasi Sebelum Finish
 
 #### **Kondisi Wajib**:
 - ✅ Minimal 1 aset ter-scan
 - ✅ Semua aset sudah di-review
 - ✅ Tidak ada pending items
 
-#### **Pesan Error**:
-- "Tidak ada asset yang dipindai"
-- "Masih ada asset yang belum diproses"
-
-### 6.6 Menyelesaikan Opname
+### 7.6 Menyelesaikan Opname
 
 1. **Klik "Finish Opname"**
 2. **Konfirmasi dalam Modal**
@@ -225,7 +256,7 @@ Halaman site secara otomatis memperbarui status setiap:
    - Update status menjadi "Submitted"
    - Redirect ke halaman report
 
-### 6.7 Pembatalan Opname
+### 7.7 Pembatalan Opname
 
 1. **Klik "Cancel Opname"**
 2. **Konfirmasi pembatalan**
@@ -236,9 +267,9 @@ Halaman site secara otomatis memperbarui status setiap:
 
 ---
 
-## 7. Review dan Persetujuan
+## 8. Review dan Persetujuan
 
-### 7.1 Workflow Persetujuan
+### 8.1 Workflow Persetujuan
 
 ```
 Submitted → Area Manager Review → Escalated → L1 Support Review → Verified
@@ -246,7 +277,7 @@ Submitted → Area Manager Review → Escalated → L1 Support Review → Verifi
           Rejected ←──────────────────────────────────────── Rejected
 ```
 
-### 7.2 Halaman Review
+### 8.2 Halaman Review
 
 #### **Informasi Sesi**:
 - **Submitter**: Nama pengguna yang submit
@@ -259,7 +290,7 @@ Submitted → Area Manager Review → Escalated → L1 Support Review → Verifi
 - **L1 Reviewer**: Nama L1 support (jika ada)
 - **Review Dates**: Tanggal review masing-masing
 
-### 7.3 Aksi Review (untuk Reviewer)
+### 8.3 Aksi Review (untuk Reviewer)
 
 #### **Tombol yang Tersedia**:
 - 🟢 **Approve**: Setujui opname
@@ -282,7 +313,7 @@ Submitted → Area Manager Review → Escalated → L1 Support Review → Verifi
 - Email notifikasi ke submitter
 - Opname harus diulang dari awal
 
-### 7.4 Email Notifications
+### 8.4 Email Notifications
 
 #### **Template Email yang Dikirim**:
 
@@ -303,55 +334,49 @@ Submitted → Area Manager Review → Escalated → L1 Support Review → Verifi
 
 ---
 
-## 8. Laporan dan Dokumentasi
+## 9. Laporan dan Dokumentasi
 
-### 8.1 Halaman Report
+### 9.1 Halaman Report
 
 #### **Header Report**:
-- **Site Information**: Nama, group, region
-- **Session Details**: ID, status, tanggal
-- **Export Options**: CSV download
+- **Site Information**: Nama site
+- **Session Details**: Status opname
+- **Date Picker**: Pemilihan tanggal opname
+- **Export Options**: PDF atau CSV
 
 #### **Filter dan Pencarian**:
-- 🔍 **Search Bar**: Cari berdasarkan asset tag/nama
-- 📋 **Category Filter**: Filter berdasarkan kategori
-- 📍 **Location Filter**: Filter berdasarkan lokasi
-- 👤 **Owner Filter**: Filter berdasarkan pemilik
+- **Search Bar**: Cari berdasarkan asset tag/nama/serial number/user/cost center
+- **Condition Filter**: Filter berdasarkan kondisi
+- **Status Filter**: Filter berdasarkan status
+- **Process Filter**: Filter berdasarkan process
 
-### 8.2 Asset Cards
+### 9.2 Asset Cards
 
 #### **Informasi pada Card**:
-- **Asset Tag & Icon**: Identifikasi visual
 - **Asset Name**: Nama aset
+- **Asset Tag**: Identifikasi aset
 - **Serial Number**: Nomor seri
-- **Category**: Kategori aset
+- **Status**: Status aset
+- **Total Cost**
+- **Kelengkapan**: Kelengkapan dari aset
 - **Condition**: Status kondisi dengan indikator warna
+- **User Info**: Nama pemilik, posisi, dan cost center
+- **User Organization**: Divisi dan department
 - **Location**: Lokasi dan ruangan
-- **Owner**: Nama pemilik
-- **Photos**: Foto kondisi (jika ada)
 
 #### **Color Coding Kondisi**:
-- 🟢 **Hijau**: Kondisi Baik
-- 🟡 **Kuning**: Kondisi Rusak
-- 🔴 **Merah**: Aset Hilang
+- **Hijau**: Kondisi Baik
+- **Merah**: Kondisi Rusak
+- **Hitam**: Aset Hilang
 
-### 8.3 CSV Export
+### 9.3 CSV Export
 
 #### **Fitur Export**:
 - **Tombol "Download CSV"**: Export semua data
 - **Comprehensive Data**: Semua field aset disertakan
 - **Proper Escaping**: Data di-escape untuk Excel compatibility
 
-#### **Kolom dalam CSV**:
-```
-Asset Tag, Asset Name, Serial Number, Category, Sub Category, 
-Product Variety, Brand, Status, Condition, Condition Notes, 
-Loss Notes, Location, Room, Equipment, Total Cost, Owner Name, 
-Owner Position, Owner Department, Owner Division, Owner Cost Center, 
-Sub Site Name, Site Name, Site Group, Region, Change Reason
-```
-
-### 8.4 BAP (Berita Acara Pemeriksaan)
+### 9.4 BAP (Berita Acara Pemeriksaan)
 
 #### **Komponen BAP PDF**:
 - **Header**: Logo perusahaan dan judul
@@ -370,9 +395,9 @@ Sub Site Name, Site Name, Site Group, Region, Change Reason
 
 ---
 
-## 9. Fitur Pencarian
+## 10. Fitur Pencarian
 
-### 9.1 Halaman Search
+### 10.1 Halaman Search
 
 #### **Search Options**:
 - 🔍 **Global Search**: Cari di seluruh database
@@ -380,13 +405,7 @@ Sub Site Name, Site Name, Site Group, Region, Change Reason
 - 📍 **Filter by Location**: Filter berdasarkan site/region
 - 👤 **Filter by Owner**: Filter berdasarkan pemilik
 
-#### **Search Results**:
-- **Asset Cards**: Tampilan kartu dengan informasi lengkap
-- **Location Cards**: Informasi site dan department
-- **Pagination**: Navigasi halaman hasil
-- **Sort Options**: Pengurutan berdasarkan berbagai kriteria
-
-### 9.2 Advanced Filtering
+### 10.2 Advanced Filtering
 
 #### **Category Filters**:
 - Desktop Computer
@@ -399,17 +418,14 @@ Sub Site Name, Site Name, Site Group, Region, Change Reason
 - Region → Site Group → Site → Department
 
 #### **Owner Department**:
-- IT Department
-- Finance Department
-- HR Department
-- Operations Department
-- Dan lainnya...
+- IT Services Department
+- Finance & Accounting Department
 
 ---
 
-## 10. Troubleshooting
+## 11. Troubleshooting
 
-### 10.1 Masalah Umum
+### 11.1 Masalah Umum
 
 #### **Problem**: Halaman tidak load
 **Solusi**:
@@ -432,14 +448,14 @@ Sub Site Name, Site Name, Site Group, Region, Change Reason
 - ✅ Periksa permission kamera browser
 - ✅ Coba gunakan browser lain
 
-#### **Problem**: CSV tidak ter-download
+#### **Problem**: File tidak ter-download
 **Solusi**:
 - ✅ Periksa browser popup blocker
 - ✅ Periksa folder download
 - ✅ Coba browser lain
 - ✅ Disable ad-blocker sementara
 
-### 10.2 Error Messages
+### 11.2 Error Messages
 
 #### **"Tidak ditemukan sesi opname"**
 - Sesi expired atau tidak valid
@@ -453,7 +469,7 @@ Sub Site Name, Site Name, Site Group, Region, Change Reason
 - Masalah koneksi atau server
 - Refresh halaman atau coba lagi nanti
 
-### 10.3 Performance Tips
+### 11.3 Performance Tips
 
 #### **Untuk Performa Optimal**:
 - 🚀 Gunakan Chrome atau Edge
@@ -466,7 +482,7 @@ Sub Site Name, Site Name, Site Group, Region, Change Reason
 - 📱 Pastikan battery tidak low
 - 📱 Gunakan WiFi jika available
 
-### 10.4 Dukungan Teknis
+### 11.4 Dukungan Teknis
 
 #### **Hubungi Administrator jika**:
 - Login tidak bisa akses
