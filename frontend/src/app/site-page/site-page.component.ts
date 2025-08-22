@@ -8,7 +8,7 @@ import { OpnameSession } from '../model/opname-session.model';
 import { Department } from '../model/dept.model';
 import { ApiService } from '../services/api.service';
 import { AssetInfo } from '../model/asset-info.model';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 
   @Component({
     selector: 'app- site-page',
@@ -54,6 +54,25 @@ import { firstValueFrom } from 'rxjs';
       }
     }
 
+    private resolveOpnameInfo(): void {
+      if (this.location.opnameSessionID > 0) {
+        this.opnameSessionService.getOpnameSession(this.location.opnameSessionID).subscribe({
+          next: (opnameSession) => {
+            this.location.opnameStatus = opnameSession.status;
+            this.location.opnameDate = opnameSession.endDate;
+          },
+          error: (error) => {
+            console.error('[SitePage] Error loading opname session info:', error);
+            this.location.opnameStatus = 'Outdated';
+            this.location.opnameDate = null;
+          }
+        });
+      } else {
+        this.location.opnameStatus = 'Outdated';
+        this.location.opnameDate = null;
+      }
+    }
+
     async getLocationInfo(): Promise<void> {
       this.isLoading = true;
       
@@ -79,35 +98,31 @@ import { firstValueFrom } from 'rxjs';
           const site = await firstValueFrom(this.apiService.getSiteByID(siteID));
           if (site) {
             this.location = site;
-            
-            // Fetch opname status information
-            const opnameStatus = await firstValueFrom(this.apiService.getLatestOpnameStatus(siteID));
-            if (opnameStatus) {
-              this.location.opnameStatus = opnameStatus.status;
-              this.location.opnameDate = opnameStatus.date;
-            }
+            this.resolveOpnameInfo();
+          }
+        } else if (params.keys.indexOf('dept_id') !== -1) {
+          const deptID = Number(params.get('dept_id'));
+
+          // Fetch department information
+          const dept = await firstValueFrom(this.apiService.getDeptByID(deptID));
+          if (dept) {
+            this.location = dept;
+            this.resolveOpnameInfo();
           }
           
         } else if (params.keys.indexOf('dept_id') !== -1) {
           const deptID = Number(params.get('dept_id'));
-
-          console.log('test 2, loading: ', this.isLoading)
           
           // Fetch department information
           const dept = await firstValueFrom(this.apiService.getDeptByID(deptID));
           if (dept) {
             this.location = dept;
-            console.log('[SitePage] Department info loaded:', this.location);
-            
-            // Fetch opname status information
-            const opnameStatus = await firstValueFrom(this.apiService.getLatestOpnameStatus(undefined, deptID));
-            if (opnameStatus) {
-              this.location.opnameStatus = opnameStatus.status;
-              this.location.opnameDate = opnameStatus.date;
-            }
+            const opnameSession = await firstValueFrom(this.opnameSessionService.getOpnameSession(this.location.opnameSessionID));
+            this.location.opnameStatus = opnameSession.status;
+            this.location.opnameDate = opnameSession.endDate;
           }
         }
-        
+  
         this.isLoading = false;
         
       } catch (error: any) {

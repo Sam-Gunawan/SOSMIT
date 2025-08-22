@@ -233,22 +233,16 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
 
   ngOnInit(): void {
     this.isLoading = true;
-
     this.initOpnameData();
-
-    if (this.isInReport) {
-      // In report mode, we only need to load progress
-      this.loadOpnameProgress(this.sessionID);
-      return;
-    } else {
-      localStorage.setItem('pendingCount', '0'); // Initialize pending assets count to 0
-      localStorage.setItem('assetCount', '0'); // Initialize scanned assets count to 0
-    }
-    
-    this.getAllUsers();
-    this.getAllSites();
-    this.getAllSubSites();
+    localStorage.setItem('pendingCount', '0'); // Initialize pending assets count to 0
+    localStorage.setItem('assetCount', '0'); // Initialize scanned assets count to 0
     this.errorMessage = '';
+    
+    if (!this.isInReport) {
+      this.getAllUsers();
+      this.getAllSites();
+      this.getAllSubSites();
+    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {

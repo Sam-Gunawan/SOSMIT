@@ -29,7 +29,7 @@ type Department struct {
 // GetDeptByID retrieves department details by its ID
 func (repo *Repository) GetDeptByID(deptID int64) (*Department, error) {
 	var dept Department
-	query := `SELECT dept_id, dept_name, site_name, site_group_name, region_name, opname_session_id FROM get_dept_by_id($1)`
+	query := `SELECT dept_id, dept_name, site_name, site_group_name, region_name, latest_opname_session_id FROM get_dept_by_id($1)`
 	err := repo.db.QueryRow(query, deptID).Scan(
 		&dept.DepartmentID,
 		&dept.DepartmentName,

@@ -210,27 +210,6 @@ import { Department } from '../model/dept.model';
       );
     }
 
-    getLatestOpnameStatus(siteID?: number, deptID?: number): Observable<{status: string, date: string}> {
-      // This method will fetch the latest opname status for a site or department
-      const params = buildHttpParams({ site_id: siteID, dept_id: deptID });
-      
-      return this.http.get<any>(`${this.userApiUrl}/opname-locations`, { params }).pipe(
-        map((response: any) => {
-          // Extract the first location's status info
-          const locations = response?.locations || [];
-          if (locations.length > 0) {
-            const location = locations[0];
-            const dateString = location.last_opname_date ? formatDate(location.last_opname_date) : '';
-            return {
-              status: (location.opname_status || 'Outdated') as string,
-              date: dateString || ''
-            };
-          }
-          return { status: 'Outdated', date: '' };
-        })
-      );
-    }
-
     getAllSubSites(): Observable<SubSite[]> {
       // This method will fetch all sub-sites from the database.
       return this.http.get<SubSite[]>(`${this.siteApiUrl}/all-sub-sites`).pipe(

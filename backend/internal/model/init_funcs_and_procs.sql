@@ -1103,7 +1103,7 @@ CREATE OR REPLACE FUNCTION public.get_site_by_id(_site_id INT)
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
 		region_name VARCHAR(100),
-		opname_session_id INT
+		latest_opname_session_id INT
 	)
 	LANGUAGE plpgsql
 AS $$
@@ -1114,11 +1114,11 @@ AS $$
 			s.site_name, 
 			sg.site_group_name, 
 			r.region_name,
-			COALESCE(os.id, -1) AS opname_session_id
+			COALESCE(os.id, -1) AS latest_opname_session_id
 		FROM "Site" AS s
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 		INNER JOIN "Region" AS r ON sg.region_id = r.id
-		LEFT JOIN "OpnameSession" AS os ON os.site_id = s.id AND os.status = 'Active'
+		LEFT JOIN "OpnameSession" AS os ON os.site_id = s.id
 		WHERE s.id = _site_id;
 	END;
 $$;
@@ -1131,7 +1131,7 @@ CREATE OR REPLACE FUNCTION public.get_dept_by_id(_dept_id INT)
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
 		region_name VARCHAR(100),
-		opname_session_id INT
+		latest_opname_session_id INT
 	)
 	LANGUAGE plpgsql
 AS $$
@@ -1148,7 +1148,7 @@ AS $$
 		INNER JOIN "Site" AS s ON LOWER(s.site_name) = 'head office jakarta'
 		INNER JOIN "SiteGroup" AS sg ON s.site_group_id = sg.id
 		INNER JOIN "Region" AS r ON sg.region_id = r.id
-		LEFT JOIN "OpnameSession" AS os ON os.dept_id = d.id AND os.status = 'Active'
+		LEFT JOIN "OpnameSession" AS os ON os.dept_id = d.id
 		WHERE d.id = _dept_id;
 	END;
 $$;
@@ -1288,7 +1288,10 @@ AS $$
 				a.product_variety
 			FROM "AssetChanges" AS ac
 			LEFT JOIN "Asset" AS a ON ac.asset_tag = a.asset_tag
-			WHERE a.condition = 2 OR ac.changes ->> 'newCondition' = '2'
+			WHERE 
+				(a.condition = 2 OR ac.changes ->> 'newCondition' = '2')
+				AND
+				(a.status <> 'Down') -- Exclude 'Down' status to avoid double counting broken assets
 		)
 		ORDER BY category, asset_tag;
 	END;
