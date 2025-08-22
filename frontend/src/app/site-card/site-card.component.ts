@@ -2,6 +2,7 @@ import { Component, input, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { SiteInfo } from '../model/site-info.model';
+import { SubSite } from '../model/sub-site.model';
 import { User } from '../model/user.model';
 import { ApiService } from '../services/api.service';
 import { Router } from '@angular/router';
@@ -25,10 +26,21 @@ import { map, startWith } from 'rxjs/operators';
 export class SiteCardComponent {
   opnameLocations: any[] = []; // Single source of truth from backend
   allUsers: User[] = []; // List of all users for filtering
+  allSites: SiteInfo[] = []; // List of all sites for filtering
+  allSiteGroups: { siteGroupName: string; regionName: string }[] = []; // List of all site groups for filtering
+  allSubSites: SubSite[] = []; // List of all sub sites for filtering
   
-  // FormControl for autocomplete
+  // FormControls for autocomplete
   createdByControl = new FormControl('');
+  siteNameControl = new FormControl('');
+  siteGroupControl = new FormControl('');
+  subSiteControl = new FormControl('');
+  
+  // Filtered observables for autocomplete
   filteredUsers!: Observable<User[]>;
+  filteredSites!: Observable<SiteInfo[]>;
+  filteredSiteGroups!: Observable<{ siteGroupName: string; regionName: string }[]>;
+  filteredSubSites!: Observable<SubSite[]>;
   
   isLoading: boolean = false;
   errorMessage: string = '';
@@ -62,6 +74,7 @@ export class SiteCardComponent {
     console.log('[SiteCard] ngOnInit called - ready to search opname locations');
     // No automatic search - user must click search to get results
 
+    // Load users for autocomplete
     this.apiService.getAllUsers().subscribe({
       next: (users) => {
         this.allUsers = users;
@@ -75,9 +88,57 @@ export class SiteCardComponent {
         console.error('[SiteCard] Error fetching users:', error);
       }
     });
+
+    // Load sites for autocomplete
+    this.apiService.getAllSites().subscribe({
+      next: (sites) => {
+        this.allSites = sites;
+        this.filteredSites = this.siteNameControl.valueChanges.pipe(
+          startWith(''),
+          map(value => this._filterSites(value || ''))
+        );
+
+        // Extract unique site groups from sites data
+        const uniqueGroups = sites
+          .filter(site => site.siteGroupName) // Filter out null/undefined
+          .reduce((acc: { siteGroupName: string; regionName: string }[], site) => {
+            const existing = acc.find(g => g.siteGroupName === site.siteGroupName);
+            if (!existing) {
+              acc.push({
+                siteGroupName: site.siteGroupName,
+                regionName: site.regionName
+              });
+            }
+            return acc;
+          }, []);
+        
+        this.allSiteGroups = uniqueGroups;
+        this.filteredSiteGroups = this.siteGroupControl.valueChanges.pipe(
+          startWith(''),
+          map(value => this._filterSiteGroups(value || ''))
+        );
+      },
+      error: (error) => {
+        console.error('[SiteCard] Error fetching sites:', error);
+      }
+    });
+
+    // Load sub sites separately using the API
+    this.apiService.getAllSubSites().subscribe({
+      next: (subSites) => {
+        this.allSubSites = subSites;
+        this.filteredSubSites = this.subSiteControl.valueChanges.pipe(
+          startWith(''),
+          map(value => this._filterSubSites(value || ''))
+        );
+      },
+      error: (error) => {
+        console.error('[SiteCard] Error fetching sub sites:', error);
+      }
+    });
   }
 
-  // Filter function for autocomplete
+  // Filter functions for autocomplete
   private _filterUsers(value: string | User | null): User[] {
     if (!value) return this.allUsers;
 
@@ -91,12 +152,62 @@ export class SiteCardComponent {
     );
   }
 
-  // Display function for autocomplete
+  private _filterSites(value: string | any | null): SiteInfo[] {
+    if (!value) return this.allSites;
+
+    const filterValue = typeof value === 'string' 
+      ? value.toLowerCase() 
+      : (value.siteName || '').toLowerCase();
+    
+    return this.allSites.filter(site => 
+      (site.siteName || '').toLowerCase().includes(filterValue) ||
+      (site.siteGroupName || '').toLowerCase().includes(filterValue)
+    );
+  }
+
+  private _filterSiteGroups(value: string | any | null): { siteGroupName: string; regionName: string }[] {
+    if (!value) return this.allSiteGroups;
+
+    const filterValue = typeof value === 'string' 
+      ? value.toLowerCase() 
+      : (value.siteGroupName || '').toLowerCase();
+    
+    return this.allSiteGroups.filter(group => 
+      (group.siteGroupName || '').toLowerCase().includes(filterValue) ||
+      (group.regionName || '').toLowerCase().includes(filterValue)
+    );
+  }
+
+  private _filterSubSites(value: string | any | null): SubSite[] {
+    if (!value) return this.allSubSites;
+
+    const filterValue = typeof value === 'string' 
+      ? value.toLowerCase() 
+      : (value.subSiteName || '').toLowerCase();
+    
+    return this.allSubSites.filter(subSite => 
+      (subSite.subSiteName || '').toLowerCase().includes(filterValue)
+    );
+  }
+
+  // Display functions for autocomplete
   displayFn(user: User): string {
     return user ? user.firstName + ' ' + user.lastName : '';
   }
 
-  // Get the selected user's full name for search
+  displaySiteName(site: any): string {
+    return site ? site.siteName : '';
+  }
+
+  displaySiteGroup(group: { siteGroupName: string; regionName: string } | null): string {
+    return group ? group.siteGroupName : '';
+  }
+
+  displaySubSite(subSite: SubSite | null): string {
+    return subSite ? subSite.subSiteName : '';
+  }
+
+  // Get the selected values for search
   private getCreatedByValue(): string {
     const selectedUser = this.createdByControl.value;
     if (typeof selectedUser === 'string') {
@@ -104,6 +215,36 @@ export class SiteCardComponent {
     } else if (selectedUser && typeof selectedUser === 'object') {
       const user = selectedUser as User;
       return user.firstName + ' ' + user.lastName;
+    }
+    return '';
+  }
+
+  private getSiteNameValue(): string {
+    const selectedSite = this.siteNameControl.value;
+    if (typeof selectedSite === 'string') {
+      return selectedSite;
+    } else if (selectedSite && typeof selectedSite === 'object') {
+      return (selectedSite as any).siteName || '';
+    }
+    return '';
+  }
+
+  private getSiteGroupValue(): string {
+    const selectedGroup = this.siteGroupControl.value;
+    if (typeof selectedGroup === 'string') {
+      return selectedGroup;
+    } else if (selectedGroup && typeof selectedGroup === 'object') {
+      return (selectedGroup as any).siteGroupName || '';
+    }
+    return '';
+  }
+
+  private getSubSiteValue(): string {
+    const selectedSubSite = this.subSiteControl.value;
+    if (typeof selectedSubSite === 'string') {
+      return selectedSubSite;
+    } else if (selectedSubSite && typeof selectedSubSite === 'object') {
+      return (selectedSubSite as any).subSiteName || '';
     }
     return '';
   }
@@ -127,9 +268,9 @@ export class SiteCardComponent {
 
     // Build filter object for backend API
     const filter = {
-      site_group_name: this.searchCriteria.siteGroupName || null,
-      site_name: this.searchCriteria.siteName || null,
-      sub_site_name: this.searchCriteria.subSiteName || null,
+      site_group_name: this.getSiteGroupValue() || null,
+      site_name: this.getSiteNameValue() || null,
+      sub_site_name: this.getSubSiteValue() || null,
       dept_name: this.searchCriteria.deptName || null,
       created_by: this.getCreatedByValue() || null,
       opname_status: this.searchCriteria.opnameStatus || null,
@@ -199,8 +340,11 @@ export class SiteCardComponent {
       pageNum: 1
     };
     
-    // Reset the autocomplete FormControl
+    // Reset all autocomplete FormControls
     this.createdByControl.setValue('');
+    this.siteNameControl.setValue('');
+    this.siteGroupControl.setValue('');
+    this.subSiteControl.setValue('');
     
     this.opnameLocations = [];
     this.hasSearched = false;
