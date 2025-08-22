@@ -1,5 +1,4 @@
 # Manual Pengguna SOSMIT
-## (Stock Opname Management Information Technology)
 
 ---
 
@@ -8,7 +7,7 @@
 1. [Pengenalan Aplikasi](#1-pengenalan-aplikasi)
 2. [Persyaratan Sistem](#2-persyaratan-sistem)
 3. [Login dan Autentikasi](#3-login-dan-autentikasi)
-4. [Navigasi Situs](#4-navigasi-situs-(header))
+4. [Navigasi Situs](#4-navigasi-situs)
 5. [Dashboard](#5-dashboard)
 6. [Manajemen Lokasi](#6-manajemen-lokasi)
 7. [Proses Stock Opname](#7-proses-stock-opname)
@@ -78,7 +77,7 @@
 
 ---
 
-### 4. Navigasi Situs (Header)
+### 4. Navigasi Situs
 
 - **Dashboard**: Halaman utama
 - **Search**: Pencarian aset dan lokasi (tidak dilanjutkan)

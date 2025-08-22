@@ -33,25 +33,39 @@
             
             <div class="form-grid">
                 <!-- Site Name (for Area mode) -->
-                <div class="form-item" *ngIf="searchCriteria.searchIn === 'area'">
+                <div class="form-item" *ngIf="searchCriteria.searchIn === 'area'" matAutocompleteOrigin #siteOrigin="matAutocompleteOrigin">
                     <label>Site Name</label>
                     <input 
                         type="text" 
                         class="form-control" 
-                        [(ngModel)]="searchCriteria.siteName"
-                        name="siteName"
-                        placeholder="Site name">
+                        [formControl]="siteNameControl"
+                        placeholder="Search site name"
+                        [matAutocomplete]="siteAuto">
+                    <mat-autocomplete #siteAuto="matAutocomplete" [displayWith]="displaySiteName">
+                        @for (site of filteredSites | async; track site.siteName) {
+                            <mat-option [value]="site">
+                                {{ site.siteName }}
+                            </mat-option>
+                        }
+                    </mat-autocomplete>
                 </div>
 
                 <!-- Site Group (for Area mode) -->
-                <div class="form-item" *ngIf="searchCriteria.searchIn === 'area'">
+                <div class="form-item" *ngIf="searchCriteria.searchIn === 'area'" matAutocompleteOrigin #groupOrigin="matAutocompleteOrigin">
                     <label>Site Group</label>
                     <input 
                         type="text" 
                         class="form-control" 
-                        [(ngModel)]="searchCriteria.siteGroupName"
-                        name="siteGroupName"
-                        placeholder="Site group">
+                        [formControl]="siteGroupControl"
+                        placeholder="Search site group"
+                        [matAutocomplete]="groupAuto">
+                    <mat-autocomplete #groupAuto="matAutocomplete" [displayWith]="displaySiteGroup">
+                        @for (group of filteredSiteGroups | async; track group.siteGroupName) {
+                            <mat-option [value]="group">
+                                {{ group.siteGroupName }}
+                            </mat-option>
+                        }
+                    </mat-autocomplete>
                 </div>
 
                 <!-- Department Name (for HO mode) -->
@@ -66,14 +80,21 @@
                 </div>
 
                 <!-- Sub Site Name (for Area mode) -->
-                <div class="form-item" *ngIf="searchCriteria.searchIn === 'area'">
+                <div class="form-item" *ngIf="searchCriteria.searchIn === 'area'" matAutocompleteOrigin #subSiteOrigin="matAutocompleteOrigin">
                     <label>Sub Site</label>
                     <input 
                         type="text" 
                         class="form-control"
-                        [(ngModel)]="searchCriteria.subSiteName"
-                        name="subSiteName"
-                        placeholder="Sub site name">
+                        [formControl]="subSiteControl"
+                        placeholder="Search sub site name"
+                        [matAutocomplete]="subSiteAuto">
+                    <mat-autocomplete #subSiteAuto="matAutocomplete" [displayWith]="displaySubSite">
+                        @for (subSite of filteredSubSites | async; track subSite.subSiteName) {
+                            <mat-option [value]="subSite">
+                                {{ subSite.subSiteName }}
+                            </mat-option>
+                        }
+                    </mat-autocomplete>
                 </div>
 
                 <div class="form-item" matAutocompleteOrigin #origin="matAutocompleteOrigin">
