@@ -63,6 +63,12 @@ p {
     color: white;
     border: 1px solid color.adjust(#dc3545, $lightness: -10%);
   }
+
+  &.condition-lost {
+    background-color: #000000;
+    color: white;
+    border: 1px solid color.adjust(#000000, $lightness: -10%);
+  }
 }
 
 // Asset list layout
