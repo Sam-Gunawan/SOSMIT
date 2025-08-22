@@ -419,10 +419,16 @@ p {
           opacity: 0.4;
           cursor: not-allowed;
         }
+
+        &:not(:disabled) {
+          background-color: #6c757d;
+          border: 1px solid #6c757d;
+          color: white;
+        }
         
         &:not(:disabled):hover {
-          background-color: #6c757d;
-          border-color: #6c757d;
+          background-color: #4e5458;
+          border-color: #4e5458;
           color: white;
         }
         

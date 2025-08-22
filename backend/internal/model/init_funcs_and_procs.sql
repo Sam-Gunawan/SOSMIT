@@ -392,6 +392,7 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_tag(_asset_tag VARCHAR(12))
 		sub_site_id INT,
 		sub_site_name VARCHAR(100),
 		site_id INT,
+		dept_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
 		region_name VARCHAR(100)
@@ -413,7 +414,7 @@ AS $$
 				u.cost_center_id AS owner_cost_center,
 				a.sub_site_id,
 				ss.sub_site_name AS sub_site_name,
-				a.site_id AS site_id,
+				a.site_id AS site_id, a.dept_id AS dept_id,
 				s.site_name AS site_name,
 				sg.site_group_name AS site_group_name,
 				r.region_name AS region_name
@@ -457,6 +458,7 @@ CREATE OR REPLACE FUNCTION public.get_asset_by_serial_number(_serial_number VARC
 		sub_site_id INT,
 		sub_site_name VARCHAR(100),
 		site_id INT,
+		dept_id INT,
 		site_name VARCHAR(100),
 		site_group_name VARCHAR(100),
 		region_name VARCHAR(100)
@@ -478,7 +480,7 @@ AS $$
 				u.cost_center_id AS owner_cost_center,
 				a.sub_site_id,
 				ss.sub_site_name AS sub_site_name,
-				a.site_id AS site_id,
+				a.site_id AS site_id, a.dept_id AS dept_id,
 				s.site_name AS site_name,
 				sg.site_group_name AS site_group_name,
 				r.region_name AS region_name

@@ -35,6 +35,7 @@ type Asset struct {
 	SubSiteID          sql.NullInt64
 	SubSiteName        sql.NullString
 	SiteID             sql.NullInt64
+	DeptID             sql.NullInt64
 	SiteName           sql.NullString
 	SiteGroupName      sql.NullString
 	RegionName         sql.NullString
@@ -83,6 +84,7 @@ func (repo *Repository) GetAssetByTag(assetTag string) (*Asset, error) {
 		&asset.SubSiteID,
 		&asset.SubSiteName,
 		&asset.SiteID,
+		&asset.DeptID,
 		&asset.SiteName,
 		&asset.SiteGroupName,
 		&asset.RegionName,
@@ -135,6 +137,7 @@ func (repo *Repository) GetAssetBySerialNumber(serialNumber string) (*Asset, err
 		&asset.SubSiteID,
 		&asset.SubSiteName,
 		&asset.SiteID,
+		&asset.DeptID,
 		&asset.SiteName,
 		&asset.SiteGroupName,
 		&asset.RegionName,

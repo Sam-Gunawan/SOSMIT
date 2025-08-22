@@ -314,6 +314,7 @@ import { Department } from '../model/dept.model';
             subSiteID: response.sub_site_id,
             subSiteName: response.sub_site_name,
             siteID: response.site_id,
+            deptID: response.dept_id,
             siteName: response.site_name,
             siteGroupName: response.site_group_name,
             regionName: response.region_name
@@ -361,6 +362,7 @@ import { Department } from '../model/dept.model';
             subSiteID: asset.sub_site_id ?? asset.SubSiteID ?? null,
             subSiteName: (asset.sub_site_name ?? asset.SubSiteName) || '',
             siteID: asset.site_id ?? asset.SiteID ?? null,
+            deptID: asset.dept_id ?? asset.DeptID ?? null,
             siteName: (asset.site_name ?? asset.SiteName) || '',
             siteGroupName: (asset.site_group_name ?? asset.SiteGroupName) || '',
             regionName: (asset.region_name ?? asset.RegionName) || ''
@@ -406,6 +408,7 @@ import { Department } from '../model/dept.model';
             subSiteID: response.sub_site_id,
             subSiteName: response.sub_site_name,
             siteID: response.site_id,
+            deptID: response.dept_id,
             siteName: response.site_name,
             siteGroupName: response.site_group_name,
             regionName: response.region_name,
