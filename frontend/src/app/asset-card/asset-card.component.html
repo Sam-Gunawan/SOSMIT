@@ -157,10 +157,11 @@
                 <span 
                     class="asset-condition"
                     [ngClass]="{
-                        'condition-good': assetCard.condition === true,
-                        'condition-bad': assetCard.condition === false
+                        'condition-bad': assetCard.condition === 0,
+                        'condition-good': assetCard.condition === 1,
+                        'condition-lost': assetCard.condition === 2
                     }">
-                    {{ assetCard.condition ? 'Good' : 'Bad' }}
+                    {{ getConditionValue(assetCard.condition) }}
                 </span>
             </div>
         </div>

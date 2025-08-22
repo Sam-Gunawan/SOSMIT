@@ -23,8 +23,8 @@ export interface PreviewTableData {
   costCenter: number;
   totalCost: string;
   status: string;
-  condition: boolean | null;
-  conditionNotes: string;
+  condition: number | null;
+  notes: string;
   processingStatus: 'pending' | 'all_good' | 'edited';
   changeReason: string;
 }
@@ -55,7 +55,7 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
     return this.filterTarget === 'updated' ? this.updatedDataSource : this.originalDataSource; 
   }
   
-  displayedColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'equipments', 'siteGroupName', 'subSiteName', 'ownerDepartment', 'siteName', 'room', 'userName', 'position', 'division', 'department', 'costCenter', 'totalCost', 'status', 'condition', 'conditionNotes', 'processingStatus', 'changeReason'];
+  displayedColumns: string[] = ['assetTag', 'assetName', 'serialNumber', 'equipments', 'siteGroupName', 'subSiteName', 'ownerDepartment', 'siteName', 'room', 'userName', 'position', 'division', 'department', 'costCenter', 'totalCost', 'status', 'condition', 'notes', 'processingStatus', 'changeReason'];
 
   // Filter properties
   filterText: string = '';
@@ -125,9 +125,9 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
       equipments: asset.equipments,
       // regionName: asset.regionName,
       siteGroupName: asset.siteGroupName,
-      subSiteName: asset.subSiteName,
+      subSiteName: asset.subSiteName ? asset.subSiteName : asset.siteName,
       ownerDepartment: asset.assetOwnerDepartment,
-      siteName: asset.siteName,
+      siteName: asset.siteName.toLowerCase() === 'head office jakarta' ? '' : asset.siteName,
       room: asset.room,
       userName: asset.assetOwnerName,
       position: asset.assetOwnerPosition,
@@ -137,7 +137,7 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
       totalCost: asset.totalCost,
       status: asset.assetStatus,
       condition: asset.condition,
-      conditionNotes: asset.conditionNotes,
+      notes: asset.condition === 0 ? asset.conditionNotes : (asset.condition === 1 ? "" : asset.lossNotes),
       processingStatus: this.getProcessingStatus(asset, 'original'),
       changeReason: '' // Original data has no change reason
     }));
@@ -150,9 +150,9 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
       equipments: asset.equipments,
       // regionName: asset.regionName,
       siteGroupName: asset.siteGroupName,
-      subSiteName: asset.subSiteName,
+      subSiteName: asset.subSiteName ? asset.subSiteName : asset.siteName,
       ownerDepartment: asset.assetOwnerDepartment,
-      siteName: asset.siteName,
+      siteName: asset.siteName.toLowerCase() === 'head office jakarta' ? '' : asset.siteName,
       room: asset.room,
       userName: asset.assetOwnerName,
       position: asset.assetOwnerPosition,
@@ -162,7 +162,7 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
       totalCost: asset.totalCost,
       status: asset.assetStatus,
       condition: asset.condition,
-      conditionNotes: asset.conditionNotes,
+      notes: asset.condition === 0 ? asset.conditionNotes : (asset.condition === 1 ? "" : asset.lossNotes),
       processingStatus: this.getProcessingStatus(asset, 'updated'),
       changeReason: this.getChangeReason(asset)
     }));
@@ -194,12 +194,12 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
     }
 
     // Fallback logic: if no explicit status, determine based on data comparison
-    const originalAsset = this.originalAssets.find(orig => orig.assetTag === asset.assetTag);
-    if (originalAsset) {
-      // Check if there are any changes between original and updated
-      const hasChanges = this.hasAssetChanges(originalAsset, asset);
-      return hasChanges ? 'edited' : 'all_good';
-    }
+    // const originalAsset = this.originalAssets.find(orig => orig.assetTag === asset.assetTag);
+    // if (originalAsset) {
+    //   // Check if there are any changes between original and updated
+    //   const hasChanges = this.hasAssetChanges(originalAsset, asset);
+    //   return hasChanges ? 'edited' : 'all_good';
+    // }
 
     // Default to pending if we can't determine the status
     return 'pending';
@@ -226,24 +226,24 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
   }
 
   // Helper method to check if there are changes between two assets
-  private hasAssetChanges(original: AssetInfo, updated: AssetInfo): boolean {
-    return original.assetStatus !== updated.assetStatus ||
-           original.serialNumber !== updated.serialNumber ||
-           original.statusReason !== updated.statusReason ||
-           original.condition !== updated.condition ||
-           original.conditionNotes !== updated.conditionNotes ||
-           original.conditionPhotoURL !== updated.conditionPhotoURL ||
-           original.location !== updated.location ||
-           original.room !== updated.room ||
-           this.normalizeEquipments(original.equipments) !== this.normalizeEquipments(updated.equipments) ||
-           original.assetOwner !== updated.assetOwner ||
-           original.assetOwnerPosition !== updated.assetOwnerPosition ||
-           original.assetOwnerCostCenter !== updated.assetOwnerCostCenter ||
-           original.assetOwnerDepartment !== updated.assetOwnerDepartment ||
-           original.assetOwnerDivision !== updated.assetOwnerDivision ||
-           original.siteID !== updated.siteID ||
-           original.subSiteID !== updated.subSiteID;
-  }
+  // private hasAssetChanges(original: AssetInfo, updated: AssetInfo): boolean {
+  //   return original.assetStatus !== updated.assetStatus ||
+  //          original.serialNumber !== updated.serialNumber ||
+  //          original.statusReason !== updated.statusReason ||
+  //          original.condition !== updated.condition ||
+  //          original.conditionNotes !== updated.conditionNotes ||
+  //          original.conditionPhotoURL !== updated.conditionPhotoURL ||
+  //          original.location !== updated.location ||
+  //          original.room !== updated.room ||
+  //          this.normalizeEquipments(original.equipments) !== this.normalizeEquipments(updated.equipments) ||
+  //          original.assetOwner !== updated.assetOwner ||
+  //          original.assetOwnerPosition !== updated.assetOwnerPosition ||
+  //          original.assetOwnerCostCenter !== updated.assetOwnerCostCenter ||
+  //          original.assetOwnerDepartment !== updated.assetOwnerDepartment ||
+  //          original.assetOwnerDivision !== updated.assetOwnerDivision ||
+  //          original.siteID !== updated.siteID ||
+  //          original.subSiteID !== updated.subSiteID;
+  // }
 
   // Method to check if a specific field has changed between original and updated data
   isFieldChanged(assetTag: string, fieldName: keyof PreviewTableData, currentElement: PreviewTableData): boolean {
@@ -298,9 +298,7 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
     }
   }
 
-  /**
-   * Creates filter criteria object - optimized to avoid repeated object creation
-   */
+  // Creates filter criteria object - optimized to avoid repeated object creation
   private createFilterCriteria() {
     return {
       text: this.filterText.toLowerCase(),
@@ -310,9 +308,7 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
     };
   }
 
-  /**
-   * Applies filters to a specific data source using optimized filtering
-   */
+  // Applies filters to a specific data source using optimized filtering
   private applyFiltersToDataSource(dataSource: MatTableDataSource<PreviewTableData>, criteria: any): void {
     if (!dataSource) return;
     
@@ -329,7 +325,7 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
       
       // Condition filter - optimized boolean check
       if (criteria.condition) {
-        const conditionValue = data.condition === true ? 'good' : 'bad';
+        const conditionValue = data.condition === 0 ? 'bad' : (data.condition === 1 ? 'good' : 'lost');
         if (conditionValue !== criteria.condition) {
           return false;
         }
@@ -352,10 +348,8 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
     dataSource.filter = JSON.stringify(criteria);
   }
 
-  /**
-   * Matches one data source to show only assets that correspond to filtered data in another source
-   * Optimized for performance with Set-based lookups
-   */
+  // Matches one data source to show only assets that correspond to filtered data in another source
+  // Optimized for performance with Set-based lookups
   private matchDataSourceToFiltered(targetDataSource: MatTableDataSource<PreviewTableData>, sourceDataSource: MatTableDataSource<PreviewTableData>): void {
     if (!targetDataSource || !sourceDataSource) return;
     
@@ -371,9 +365,7 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
     targetDataSource.filter = 'match-filtered-data';
   }
 
-  /**
-   * Clears all filters from both data sources
-   */
+  // Clears all filters from both data sources   
   private clearAllFilters(): void {
     if (this.originalDataSource) {
       this.originalDataSource.filter = '';
@@ -383,17 +375,14 @@ export class OpnamePreviewComponent implements OnInit, OnChanges {
     }
   }
 
-  /**
-   * Handles filter target change (switch between original and updated data filtering)
-   */
+  
+  // Handles filter target change (switch between original and updated data filtering)
   onFilterTargetChange(): void {
     // Re-apply filters with new target
     this.applyFilters();
   }
 
-  /**
-   * Sets the filter target and automatically shows filter form if not visible
-   */
+  // Sets the filter target and automatically shows filter form if not visible
   setFilterTarget(target: 'original' | 'updated'): void {
     this.filterTarget = target;
     

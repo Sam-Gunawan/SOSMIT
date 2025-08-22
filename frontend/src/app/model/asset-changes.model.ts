@@ -3,9 +3,10 @@ export interface AssetChange {
     newSerialNumber?: string;
     newStatus: string;
     newStatusReason?: string;
-    newCondition?: boolean;
+    newCondition?: number; // 0 = bad, 1 = good, 2 = lost/missing
     newConditionNotes?: string;
     newConditionPhotoURL?: string;
+    newLossNotes?: string;
     newLocation?: string;
     newRoom?: string;
     newEquipments?: string;

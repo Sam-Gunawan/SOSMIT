@@ -296,20 +296,21 @@
                                     <td mat-cell *matCellDef="let element"
                                         [ngClass]="{'cell-changed': isFieldChanged(element.assetTag, 'condition', element)}">
                                         <span class="condition-badge" [ngClass]="{
-                                            'condition-good': element.condition === true,
-                                            'condition-bad': element.condition === false
+                                            'condition-bad': element.condition === 0,
+                                            'condition-good': element.condition === 1,
+                                            'condition-lost': element.condition === 2
                                         }">
-                                        {{ element.condition === true ? 'Good' : 'Bad' }}
+                                        {{ element.condition === 0 ? 'Bad' : element.condition === 1 ? 'Good' : 'Lost' }}
                                         </span>
                                     </td>
                                 </ng-container>
 
                                 <!-- Condition Notes Column -->
-                                <ng-container matColumnDef="conditionNotes">
+                                <ng-container matColumnDef="notes">
                                     <th mat-header-cell *matHeaderCellDef>Notes</th>
-                                    <td mat-cell *matCellDef="let element" class="notes-cell" [title]="element.conditionNotes"
-                                        [ngClass]="{'cell-changed': isFieldChanged(element.assetTag, 'conditionNotes', element)}">
-                                        {{ element.conditionNotes }}
+                                    <td mat-cell *matCellDef="let element" class="notes-cell" [title]="element.notes"
+                                        [ngClass]="{'cell-changed': isFieldChanged(element.assetTag, 'notes', element)}">
+                                        {{ element.notes }}
                                     </td>
                                 </ng-container>
 
@@ -532,20 +533,21 @@
                                     <td mat-cell *matCellDef="let element"
                                         [ngClass]="{'cell-changed': isFieldChanged(element.assetTag, 'condition', element)}">
                                         <span class="condition-badge" [ngClass]="{
-                                            'condition-good': element.condition === true,
-                                            'condition-bad': element.condition === false
+                                            'condition-bad': element.condition === 0,
+                                            'condition-good': element.condition === 1,
+                                            'condition-lost': element.condition === 2
                                         }">
-                                        {{ element.condition === true ? 'Good' : 'Bad' }}
+                                        {{ element.condition === 0 ? 'Bad' : element.condition === 1 ? 'Good' : 'Lost' }}
                                         </span>
                                     </td>
                                 </ng-container>
 
-                                <!-- Condition Notes Column -->
-                                <ng-container matColumnDef="conditionNotes">
+                                <!-- Notes Column -->
+                                <ng-container matColumnDef="notes">
                                     <th mat-header-cell *matHeaderCellDef>Notes</th>
-                                    <td mat-cell *matCellDef="let element" class="notes-cell" [title]="element.conditionNotes"
-                                        [ngClass]="{'cell-changed': isFieldChanged(element.assetTag, 'conditionNotes', element)}">
-                                        {{ element.conditionNotes }}
+                                    <td mat-cell *matCellDef="let element" class="notes-cell" [title]="element.notes"
+                                        [ngClass]="{'cell-changed': isFieldChanged(element.assetTag, 'notes', element)}">
+                                        {{ element.notes }}
                                     </td>
                                 </ng-container>
 

@@ -128,8 +128,8 @@ export class AssetCardComponent {
       
       // Handle different field types
       if (fieldName === 'condition') {
-        // Special handling for condition field (boolean)
-        return criteria === 'Good' ? asset.condition === true : asset.condition === false;
+        // Special handling for condition field (numbers)
+        return criteria === 'Bad' ? asset.condition === 0 : (criteria === 'Good' ? asset.condition === 1 : asset.condition === 2);
       } else if (typeof fieldValue === 'string') {
         // String fields - partial match
         return fieldValue.toLowerCase().includes(lowerCriteria);
@@ -137,6 +137,10 @@ export class AssetCardComponent {
       
       return false;
     });
+  }
+
+  getConditionValue(condition: number) {
+    return condition === 0 ? 'Bad' : (condition === 1 ? 'Good' : 'Lost')
   }
 
   performAdvancedSearch(): void {

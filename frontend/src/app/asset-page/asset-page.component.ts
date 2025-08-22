@@ -19,9 +19,6 @@ export class AssetPageComponent implements OnInit {
 
   @Input() isPending: boolean = false; // Flag to check if the user can edit assets in this opname session
   @Input() assetPage? : AssetInfo & { availableEquipments: string[] }; // Asset data with available equipments
-  
-  screenSize: 'large' | 'small' = 'large';
-  isMobile: boolean = false;
 
   assetTag = input.required<string>();
   sessionID: number = -1; // Default value, will be set later
@@ -31,17 +28,14 @@ export class AssetPageComponent implements OnInit {
   successMessage: string = '';
   showToast: boolean = false;
 
-  // Selected status reason (for radio buttons)
-  selectedStatusReason: 'Loss' | 'Obsolete' = 'Obsolete';
-
-  // File to upload for condition photo
-  conditionPhoto?: File;
-
-  constructor(private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {}
+  isLiked = false;
+  isDisliked = false;
+  isLost = false;
   
+  constructor(private apiService: ApiService, private router: Router, private opnameSessionService: OpnameSessionService, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {}
+
   ngOnInit(): void {
     this.isLoading = true;
-    this.checkScreenSize();
     
     // Only fetch data if NOT in pending mode (report mode)
     // In pending mode, data is passed via [assetPage] input
@@ -61,32 +55,22 @@ export class AssetPageComponent implements OnInit {
     this.siteID = Number(this.route.snapshot.paramMap.get('id')); // Get site ID from route parameters
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize(event: any) {
-    this.checkScreenSize();
-  }
-
-  private checkScreenSize() {
-    this.isMobile = window.innerWidth < 768; // Define mobile breakpoint
-    
-    if (this.isMobile) {
-      this.screenSize = 'small';
-    } else {
-      this.screenSize = 'large';
-    }
-  }
-  
-  isLiked = false;
-  isDisliked = false;
-
   setLike() {
     this.isLiked = true;
     this.isDisliked = false;
+    this.isLost = false;
   }
 
   setDislike() {
     this.isLiked = false;
     this.isDisliked = true;
+    this.isLost = false;
+  }
+
+  setLost() {
+    this.isLiked = false;
+    this.isDisliked = false;
+    this.isLost = true;
   }
 
   fetchAssetPage(): void {
@@ -95,10 +79,12 @@ export class AssetPageComponent implements OnInit {
       next: (asset) => {
         this.assetPage = asset; // Update the assetPage with the fetched data
         this.isLoading = false; // Set loading state to false after data is fetched
-        if (this.assetPage?.condition) {
-          this.setLike();
-        } else {
+        if (this.assetPage?.condition === 0) {
           this.setDislike();
+        } else if (this.assetPage?.condition === 1) {
+          this.setLike();
+        } else if (this.assetPage?.condition === 2) {
+          this.setLost();
         }
 
         this.getAvailableEquipments();

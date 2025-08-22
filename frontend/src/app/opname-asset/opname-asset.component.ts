@@ -28,7 +28,7 @@ export interface AssetTableData {
   serialNumber: string;
   ownerName: string;
   costCenter: number;
-  condition: boolean | null;
+  condition: number | null; // 0 = bad, 1 = good, 2 = lost/missing
   status: string;
   processingStatus: 'pending' | 'all_good' | 'edited';
   isProcessed: boolean;
@@ -263,10 +263,10 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
     const result = this.searchResults[index];
     
     // Set UI state based on current pendingAsset condition
-    this.isLiked = result.pendingAsset.condition === true;
-    this.isDisliked = result.pendingAsset.condition === false;
-    this.isLost = result.pendingAsset.condition === false;
-    
+    this.isDisliked = result.pendingAsset.condition === 0;
+    this.isLiked = result.pendingAsset.condition === 1;
+    this.isLost = result.pendingAsset.condition === 2;
+
     this.cdr.detectChanges();
   }
   
@@ -453,6 +453,7 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
           condition: savedRecord.assetChanges.newCondition ?? asset.condition,
           conditionNotes: savedRecord.assetChanges.newConditionNotes ?? asset.conditionNotes,
           conditionPhotoURL: savedRecord.assetChanges.newConditionPhotoURL ?? asset.conditionPhotoURL,
+          lossNotes: savedRecord.assetChanges.newLossNotes ?? asset.lossNotes,
           location: savedRecord.assetChanges.newLocation ?? asset.location,
           room: savedRecord.assetChanges.newRoom ?? asset.room,
           equipments: savedRecord.processingStatus === 'pending' ? '' : savedRecord.assetChanges.newEquipments ?? asset.equipments, // If pending, keep equipments empty
@@ -599,7 +600,7 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
       // Condition filter
       let conditionMatch = true;
       if (filters.condition) {
-        const conditionValue = data.condition === true ? 'good' : 'bad';
+        const conditionValue = data.condition === 1 ? 'good' : (data.condition === 0 ? 'bad' : 'lost');
         conditionMatch = conditionValue === filters.condition;
       }
       
@@ -824,7 +825,13 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
       this.isLiked = true;
       this.isDisliked = false;
       this.isLost = false;
-      result.pendingAsset.condition = true;
+      result.pendingAsset.condition = 1;
+      
+      // Clear condition notes
+      result.pendingAsset.conditionNotes = '';
+      result.pendingAsset.conditionPhotoURL = '';
+      result.pendingAsset.lossNotes = '';
+
       this.cdr.detectChanges();
     }
   }
@@ -835,7 +842,11 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
       this.isLiked = false;
       this.isDisliked = true;
       this.isLost = false;
-      result.pendingAsset.condition = false;
+      result.pendingAsset.condition = 0;
+
+      // Clear loss notes
+      result.pendingAsset.lossNotes = '';
+
       this.cdr.detectChanges();
     }
   }
@@ -846,7 +857,12 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
       this.isLiked = false;
       this.isDisliked = false;
       this.isLost = true;
-      result.pendingAsset.condition = false;
+      result.pendingAsset.condition = 2;
+
+      // Clear condition notes
+      result.pendingAsset.conditionNotes = '';
+      result.pendingAsset.conditionPhotoURL = '';
+
       this.cdr.detectChanges();
     }
   }
@@ -1242,6 +1258,7 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
            pending.condition !== existing.condition ||
            pending.conditionNotes !== existing.conditionNotes ||
            pending.conditionPhotoURL !== existing.conditionPhotoURL ||
+           pending.lossNotes !== existing.lossNotes ||
            pending.location !== existing.location ||
            pending.room !== existing.room ||
            this.hasEquipmentChanges(result) || // Use normalized equipment comparison
@@ -1378,6 +1395,9 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
     if (pending.conditionPhotoURL !== existing.conditionPhotoURL) {
       assetChanges.newConditionPhotoURL = pending.conditionPhotoURL;
     }
+    if (pending.lossNotes !== existing.lossNotes) {
+      assetChanges.newLossNotes = pending.lossNotes;
+    }
     if (pending.location !== existing.location) {
       assetChanges.newLocation = pending.location;
     }
@@ -1470,13 +1490,14 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
       newCondition: existing.condition,
       newConditionNotes: existing.conditionNotes,
       newConditionPhotoURL: existing.conditionPhotoURL,
+      newLossNotes: existing.lossNotes,
       newLocation: existing.location,
       newRoom: existing.room,
       newEquipments: existing.equipments,
       newOwnerID: existing.assetOwner,
       newOwnerPosition: existing.assetOwnerPosition,
-  // Cost center normalized via shared util
-  newOwnerCostCenter: normalizeCostCenter(existing.assetOwnerCostCenter) as any,
+      // Cost center normalized via shared util
+      newOwnerCostCenter: normalizeCostCenter(existing.assetOwnerCostCenter) as any,
       newOwnerDepartment: existing.assetOwnerDepartment,
       newOwnerDivision: existing.assetOwnerDivision,
       newOwnerSiteID: existing.siteID,
@@ -1567,9 +1588,6 @@ export class OpnameAssetComponent implements OnChanges, AfterViewInit {
       }
     });
   }
-
-  // TODO: implement set action notes with modal from angular material
-
 
   // Helper method to create asset page data with available equipments
   createAssetPageData(result: any): AssetInfo & { availableEquipments: string[] } {

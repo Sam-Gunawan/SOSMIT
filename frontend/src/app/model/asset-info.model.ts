@@ -9,8 +9,9 @@ export interface AssetInfo {
     productVariety: string;
     assetBrand: string;
     assetName: string;
-    condition: boolean;
+    condition: number; // 0 = bad, 1 = good, 2 = lost/missing
     conditionNotes: string;
+    lossNotes: string;
     conditionPhotoURL: string;
     location: string;
     room: string;
