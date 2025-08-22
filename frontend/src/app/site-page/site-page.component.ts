@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OpnameSessionService } from '../services/opname-session.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -7,6 +7,7 @@ import { AssetCardComponent } from '../asset-card/asset-card.component';
 import { OpnameSession } from '../model/opname-session.model';
 import { Department } from '../model/dept.model';
 import { ApiService } from '../services/api.service';
+import { AssetInfo } from '../model/asset-info.model';
 import { firstValueFrom } from 'rxjs';
 
   @Component({
@@ -16,6 +17,8 @@ import { firstValueFrom } from 'rxjs';
     styleUrl: './site-page.component.scss'
   })
   export class SitePageComponent implements OnInit{
+    @ViewChild(AssetCardComponent) assetCardComponent!: AssetCardComponent;
+    
     location = {} as any;
     siteList?: SiteInfo[] = []; // Initialize siteList as an empty array
     isLoading: boolean = false; // Loading state to show a spinner or loading indicator
@@ -234,10 +237,123 @@ import { firstValueFrom } from 'rxjs';
     }
 
     exportToCSV(): void {
-      // TODO: Implement CSV export for location assets
-      console.log('[SitePage] CSV export not implemented yet for location:', this.location);
-      this.errorMessage = 'Fitur export CSV akan segera hadir.';
-      this.showToast = true;
-      setTimeout(() => this.showToast = false, 3000);
+      if (!this.assetCardComponent || !this.assetCardComponent.assetsOnLocation || this.assetCardComponent.assetsOnLocation.length === 0) {
+        this.errorMessage = 'Tidak ada data aset untuk diekspor.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
+        return;
+      }
+
+      try {
+        const assets = this.assetCardComponent.assetsOnLocation;
+        const csvContent = this.convertToCSV(assets);
+        const locationName = this.location.deptName || this.location.siteName || 'Unknown';
+        const fileName = `Asset_Data_${locationName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+        
+        this.downloadCSV(csvContent, fileName);
+        
+        console.log('[SitePage] CSV export completed for:', locationName);
+      } catch (error) {
+        console.error('[SitePage] Error during CSV export:', error);
+        this.errorMessage = 'Gagal mengekspor data ke CSV. Silakan coba lagi.';
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
+      }
+    }
+
+    private convertToCSV(assets: AssetInfo[]): string {
+      const headers = [
+        'Asset Tag',
+        'Serial Number', 
+        'Asset Name',
+        'Asset Status',
+        'Category',
+        'Sub Category',
+        'Product Variety',
+        'Brand',
+        'Condition',
+        'Condition Notes',
+        'Loss Notes',
+        'Location',
+        'Room',
+        'Equipments',
+        'Total Cost',
+        'Owner Name',
+        'Owner Position',
+        'Owner Department',
+        'Owner Division',
+        'Owner Cost Center',
+        'Sub Site Name',
+        'Site Name',
+        'Site Group',
+        'Region'
+      ];
+
+      const csvRows = [headers.join(',')];
+
+      assets.forEach(asset => {
+        const conditionText = asset.condition === 0 ? 'Bad' : (asset.condition === 1 ? 'Good' : 'Lost');
+        
+        const row = [
+          this.escapeCSV(asset.assetTag),
+          this.escapeCSV(asset.serialNumber),
+          this.escapeCSV(asset.assetName),
+          this.escapeCSV(asset.assetStatus),
+          this.escapeCSV(asset.category),
+          this.escapeCSV(asset.subCategory),
+          this.escapeCSV(asset.productVariety),
+          this.escapeCSV(asset.assetBrand),
+          this.escapeCSV(conditionText),
+          this.escapeCSV(asset.conditionNotes),
+          this.escapeCSV(asset.lossNotes),
+          this.escapeCSV(asset.location),
+          this.escapeCSV(asset.room),
+          this.escapeCSV(asset.equipments),
+          this.escapeCSV(asset.totalCost),
+          this.escapeCSV(asset.assetOwnerName),
+          this.escapeCSV(asset.assetOwnerPosition),
+          this.escapeCSV(asset.assetOwnerDepartment),
+          this.escapeCSV(asset.assetOwnerDivision),
+          this.escapeCSV(asset.assetOwnerCostCenter?.toString() || ''),
+          this.escapeCSV(asset.subSiteName),
+          this.escapeCSV(asset.siteName),
+          this.escapeCSV(asset.siteGroupName),
+          this.escapeCSV(asset.regionName)
+        ];
+        
+        csvRows.push(row.join(','));
+      });
+
+      return csvRows.join('\n');
+    }
+
+    private escapeCSV(value: string | undefined | null): string {
+      if (!value) return '';
+      
+      // Convert to string and handle special characters
+      const stringValue = String(value);
+      
+      // If value contains comma, newline, or quotes, wrap in quotes and escape internal quotes
+      if (stringValue.includes(',') || stringValue.includes('\n') || stringValue.includes('"')) {
+        return `"${stringValue.replace(/"/g, '""')}"`;
+      }
+      
+      return stringValue;
+    }
+
+    private downloadCSV(csvContent: string, fileName: string): void {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', fileName);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
     }
   }

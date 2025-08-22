@@ -138,6 +138,9 @@
                                     <span class="dislike-btn" [class.active]="isDisliked" *ngIf="!assetPage?.condition">
                                         Bad
                                     </span>
+                                    <span class="lost-btn" [class.active]="isLost" *ngIf="!assetPage?.condition">
+                                        Lost
+                                    </span>
                                 </div>
         
                                 <div *ngIf="isDisliked">
