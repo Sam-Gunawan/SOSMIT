@@ -50,15 +50,31 @@ p {
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  gap: 10px;
+  gap: 5px;
 
   .btn {
     font-size: 12px;
   }
 }
 
+.opname-progress {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+
+  @media (max-width: 768px) {
+    margin-top: 5px;
+  }
+}
+
+.progress-text {
+  flex-grow: 1;
+  white-space: nowrap;
+}
+
 .divider {
-  margin-top: 15px;
+  flex-grow: 0;
 }
 
 .confirmation-text {
